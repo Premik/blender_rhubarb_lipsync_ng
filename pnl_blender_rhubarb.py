@@ -119,5 +119,6 @@ def register():
 
 
 def unregister():
+    del bpy.types.Object.mouth_shapes
     bpy.utils.unregister_class(MouthShapesProperty)
     bpy.utils.unregister_class(RhubarbLipsyncPanel)
