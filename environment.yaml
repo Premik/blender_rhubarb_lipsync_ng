@@ -1,0 +1,10 @@
+name: rhubarb
+channels:
+  - defaults
+  - kitsune.one
+dependencies:  
+  - python>=3.10.8
+  - pytest>=7.2.0
+  - python-blender=3.2
+  - pip:
+    - -e src
