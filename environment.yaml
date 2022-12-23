@@ -2,9 +2,11 @@ name: rhubarb
 channels:
   - defaults
   - kitsune.one
-dependencies:  
+  - conda-forge
+dependencies:    
   - python>=3.10.8
   - pytest>=7.2.0
+  - mypy
   - python-blender=3.2
   - pip:
-    - -e src
+    - -e .

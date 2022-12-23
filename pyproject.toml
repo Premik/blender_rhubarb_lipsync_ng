@@ -1,0 +1,9 @@
+[project]
+name = "Rhubarb Lipsync"
+
+[tool.pytest.ini_options]
+addopts = [
+    "--import-mode=importlib",
+]
+
+# https://docs.pytest.org/en/7.1.x/explanation/goodpractices.html

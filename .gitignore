@@ -6,3 +6,4 @@ copyfiles.bat
 bin/
 bin
 dist/
+*.egg*
