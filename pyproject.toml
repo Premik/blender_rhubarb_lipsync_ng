@@ -1,5 +1,9 @@
 [project]
-name = "Rhubarb Lipsync"
+name = "rhubarb_lipsync"
+version = "4.0.0"
+
+[tool.setuptools]
+packages = ["rhubarb_lipsync"]
 
 [tool.pytest.ini_options]
 addopts = [

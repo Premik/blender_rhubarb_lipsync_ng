@@ -1,5 +1,5 @@
 import unittest
-from rhubarb.process_sound_file import RhubarbCommandWrapper
+from  rhubarb_lipsync.rhubarb.process_sound_file import RhubarbCommandWrapper
 
 class RhubarbCommandWrapperTest(unittest.TestCase):
     
