@@ -26,3 +26,15 @@ zsh
 conda activate $env_name
 mamba env update -f environment.yaml
 ```
+
+### Win
+Install: https://mamba.readthedocs.io/en/latest/installation.html#windows
+set MAMBA_ROOT_PREFIX=r:\mm
+
+micromamba shell init -s cmd.exe -p R:\mambaPrefix
+micromamba shell hook --shell=cmd.exe
+micromamba env list
+micromamba create -f environment.yaml
+micromamba activate rhubarb
+
+r:\mambaPrefix\Scripts\activate

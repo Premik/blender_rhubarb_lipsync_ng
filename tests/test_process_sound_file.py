@@ -9,6 +9,9 @@ class RhubarbCommandWrapperTest(unittest.TestCase):
         assert errors
         assert "doesn't exists" in errors
 
+    def testVersion(self):
+       print(__file__)
+
 
         
         #self.assertEqual(len(s.fullyMatchingParts()), 2)

@@ -1,17 +1,32 @@
 [project]
 name = "rhubarb_lipsync"
 version = "4.0.0"
-license = "MIT"
+license = { file = "LISENSE" }
 
 
-[tool.rhubarb_lipsync]
-platforms=["Linux", "macOS", "Windows"]
 
 [tool.rhubarb_lipsync.download]
-base_url = "https://github.com/DanielSWolf/rhubarb-lip-sync/releases"
+base_url = "https://github.com/DanielSWolf/rhubarb-lip-sync/releases/download"            
 base_name = "Rhubarb-Lip-Sync"
 version="1.13.0"
 
+
+[[tool.rhubarb_lipsync.platforms]]
+name="Linux"
+download_sha256="bd260905e88d0bdadbd4d7b452cae3b78a880fe27d10d51586772f84aac69f71"
+executable_name="rhubarb"
+
+
+[[tool.rhubarb_lipsync.platforms]]
+name="macOS"
+download_sha256="2d25c0ad89c0435d864a0f9ddb9d44757def8bf354b86be28eb3b5e7e9d78f62"
+executable_name="rhubarb"
+
+
+[[tool.rhubarb_lipsync.platforms]]
+name="Windows"
+download_sha256="189ac55dae253dba3994d4075b8375b615f255759c105c7ed21bd88ad7728386"
+executable_name="rhubarb.exe"
 
 [tool.setuptools]
 packages = ["rhubarb_lipsync"]
