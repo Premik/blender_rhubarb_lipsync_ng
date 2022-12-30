@@ -5,8 +5,9 @@ import urllib.request
 import shutil
 import hashlib
 import zipfile
-import os
-
+import platform
+import filecmp
+import re
 
 def sha256(filename: Path) -> str:
     """ https://www.quickprogrammingtips.com/python/how-to-calculate-sha256-hash-of-a-file-in-python.html """
@@ -26,6 +27,16 @@ def download(url: str, dest_path: Path):
 
 
 class RhubarbBinary:
+    """ 
+    Represents the rhubarb executable file and its resources. For a single platform (Linux/Win/macOs). 
+    Handles downloading/unzipping the rhubarb-lipsync release from github. Creates the /bin folder for the current platforms.
+    Configuration is inside the pyproject.toml
+    """
+
+    include_file_list=[
+        "^[^/]+/[^/]+$", #All file in the root folder
+        "/res/"]
+    include_file_list_rx=[re.compile(pat, re.IGNORECASE) for pat in include_file_list ]
 
     def __init__(self, cfg: dict, platform_cfg: dict):
         assert cfg and cfg["download"] and cfg["platforms"]
@@ -66,6 +77,12 @@ class RhubarbBinary:
         return f"{self.base_name}-{self.version}-{self.platform_cfg['name']}"
 
     @cached_property
+    def system_names(self) -> list[str]:
+        """ Mapping of the platfrom names (platform.system()) used for this config"""
+        return self.platform_cfg['system_names']
+    
+
+    @cached_property
     def zip_file_name(self) -> str:
         # Rhubarb-Lip-Sync-1.13.0-Linux.zip
         return f"{self.file_name}.zip"
@@ -91,41 +108,27 @@ class RhubarbBinary:
     def unziped_dir(self) -> Path:
         # Zip contains a subfolder named same as the zip, unzip directy to the download folder
         return self.download_dir / self.file_name
-
+    
     @cached_property
-    def executable_path(self) -> Path:
+    def executable_path_unzipped(self) -> Path:
+        """Executable file path inside the project download folder"""
         return self.unziped_dir / self.executable_name
 
     @cached_property
-    def expected_exe_sha256(self) -> Path:
-        return self.platform_cfg["executable_sha256"]
+    def bin_dir(self) -> Path:
+        return self.project_dir / "bin"
 
-    def rm_unzipped(self):
-        """This will delete the whole where the zip was unzipped."""
-        if not Path.exists(self.unziped_dir):
-            return
-        print(f"Deleting {self.unziped_dir}")
-        shutil.rmtree(self.unziped_dir)
-
-    def unzip(self):
-        self.rm_unzipped()
-
-        print(f"Unzipping the binaries for the {self.platform_cfg['name']} platform into {self.download_dir} ")
-        with zipfile.ZipFile(self.download_file, 'r') as zip:
-            zip.extractall(self.download_dir)
-
+    @cached_property
+    def executable_path(self) -> Path:
+        """Executable file path inside the bin folder. This is the one to be shipped with plugin"""
+        return self.bin_dir / self.executable_name
+        
     def ensure_download(self, force=False) -> bool:
         if self.download_file.exists() and not force:
             return False
         self.download_dir.mkdir(parents=True, exist_ok=True)
         print(f"Downloading {self.download_url} to \n {self.download_dir}")
         download(self.download_url, self.download_file)
-        return True
-
-    def ensure_unzipped(self, force=False) -> bool:
-        if self.executable_path.exists() and not force:
-            return False
-        self.unzip()
         return True
 
     def verify_download_checksum(self):
@@ -138,19 +141,72 @@ class RhubarbBinary:
             {self.expected_download_sha256}.
             Delete the .zip file to force re-download. Or update the expected checksum in the pyproject.toml """)
 
-    def __repr__(self) -> str:
-        return f"{self.zip_file_name}"
+    def ensure_unzipped(self, force=False) -> bool:
+        if self.executable_path_unzipped.exists() and not force:
+            return False
+        self.unzip()
+        return True
 
+    def rm_unzipped(self):
+        """This will delete the whole platform-folder where the zip was unzipped."""
+        if not Path.exists(self.unziped_dir):
+            return
+        print(f"Deleting {self.unziped_dir}")
+        shutil.rmtree(self.unziped_dir)
+
+    def unzip(self):
+        self.rm_unzipped()        
+        print(f"Unzipping the binaries for the {self.platform_cfg['name']} platform into {self.download_dir} ")
+        with zipfile.ZipFile(self.download_file, 'r') as zip:
+                        
+            # Only files matching any of the file_list patterns
+            fl=[fn for fn in zip.filelist if any((rx.search(fn.filename) for rx in RhubarbBinary.include_file_list_rx))]
+            zip.extractall(self.download_dir, fl)
+
+    def rm_bin(self):
+        """This will delete the whole project's bin folder"""
+        if not Path.exists(self.bin_dir):
+            return
+        print(f"Deleting {self.bin_dir}")
+        shutil.rmtree(self.bin_dir)
+    
+    def is_deployed_to_bin(self) -> bool:
+        """Whether is this RhubarbBinary platform currently deployed to the bin folder"""
+        if not self.executable_path.exists():
+            return False # The bin/rhubar file don't even exists
+        return filecmp.cmp(self.executable_path, self.executable_path_unzipped)
+
+    def deploy_to_bin(self):
+        self.rm_bin()        
+        print(f"Deploying {self.platform_cfg['name']} binary to {self.bin_dir} ")
+        shutil.copytree(self.unziped_dir, self.bin_dir)
+
+    def matches_platform(self, platfrom:str)->bool:
+        """Whether this RhubarbBinary matches the provided system platfrom name (Windows, Linux..)  """
+        return platfrom in self.system_names
+    
     @staticmethod
-    def download_and_deploy_all():
+    def download_all_and_deploy(deploy_platform=platform.system()):
+        
+        platform_matched_count=0
         for b in RhubarbBinary.all_platforms(rhubarb_cfg):
             b.ensure_download()
             b.verify_download_checksum()
             b.ensure_unzipped()
-            assert b.executable_path.exists()
-
+            assert b.executable_path_unzipped.exists()
+            
+            if b.matches_platform(deploy_platform):
+                if not b.is_deployed_to_bin():
+                    b.deploy_to_bin()
+                assert b.executable_path.exists()
+                platform_matched_count+=1
+        if deploy_platform is not None:
+            if platform_matched_count != 1:
+                raise ValueError(f"""Failed to deploy the binary for the requested `{deploy_platform}` platform. 
+                Either the platform is not supported or the `system_names` mapping in the `pyproject.toml` needs to be extended. """)
+        
 
 if __name__ == '__main__':
-    RhubarbBinary.download_and_deploy_all()
+    RhubarbBinary.download_all_and_deploy()
 
     print("Done")
