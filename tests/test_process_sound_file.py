@@ -6,15 +6,16 @@ import platform
 import sys
 import inspect
 from time import sleep
+#import tests.test_data
+import test_data
 
-
-def wait_unitl_finished(r:RhubarbCommandWrapper):
+def wait_until_finished(r:RhubarbCommandWrapper):
     assert r.was_started
     for i in range(0,100):
         if r.has_finished:
             return        
         sleep(0.1)
-        r.handle_process_output()
+        r.read_process_stderr_line()
     assert False, "Seems the process in hanging up"
 
 class MockProcess:
@@ -36,6 +37,7 @@ class MockProcess:
         
 
     
+
 
 class RhubarbCommandWrapperMockTest(unittest.TestCase):
 
@@ -75,18 +77,18 @@ class RhubarbCommandWrapperTest(unittest.TestCase):
 
     def testVersion(self):
         rcw=RhubarbCommandWrapper(self.executable_path)
-        self.assertEquals(rcw.get_version(), "1.13.0")
-        self.assertEquals(rcw.get_version(), "1.13.0")
+        self.assertEqual(rcw.get_version(), "1.13.0")
+        self.assertEqual(rcw.get_version(), "1.13.0")
         
         
         #self.assertEqual(len(s.fullyMatchingParts()), 2)
 
-class RhubarbParserTest(unittest.TestCase):
+class RhubarbParseVersionTest(unittest.TestCase):
         
     def testVersion(self):
         self.assertFalse(RhubarbParser.parse_version_info(""))
         self.assertFalse(RhubarbParser.parse_version_info("invalid"))
-        self.assertEquals(RhubarbParser.parse_version_info("\nRhubarb Lip Sync version 01.2.3 \n"), "01.2.3")
+        self.assertEqual(RhubarbParser.parse_version_info("\nRhubarb Lip Sync version 01.2.3 \n"), "01.2.3")
 
 
 
