@@ -7,7 +7,7 @@ assert test_data_path.is_dir()
 
 
 snd_cs_female_o_a = {
-    "snd_file_path": test_data_path / "snd_cs_female_o_a_path.ogg"
+    "snd_file_path": test_data_path / "cs_female_o_a.ogg"
 }
 
 snd_en_male_watchingtv = {
