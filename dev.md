@@ -38,3 +38,11 @@ micromamba create -f environment.yaml
 micromamba activate rhubarb
 
 r:\mambaPrefix\Scripts\activate
+
+vscode - preferences for pylance
+
+```json
+ "python.analysis.diagnosticSeverityOverrides": {
+        "reportOptionalMemberAccess": "none",
+    }
+```

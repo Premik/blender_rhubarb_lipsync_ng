@@ -34,8 +34,8 @@ class RhubarbBinary:
     """
 
     include_file_list=[
-        "^[^/]+/[^/]+$", #All file in the root folder
-        "/res/"]
+        r"^[^/]+/[^/]+$", #All file in the root folder
+        r"/res/"]
     include_file_list_rx=[re.compile(pat, re.IGNORECASE) for pat in include_file_list ]
 
     def __init__(self, cfg: dict, platform_cfg: dict):
@@ -43,9 +43,7 @@ class RhubarbBinary:
         self.cfg = cfg
         self.platform_cfg: dict = platform_cfg
 
-    # @staticmethod
-    # def executable_default_basename():
-    #    return "rhubarb.exe" if platform.system() == "Windows" else "rhubarb"
+    
 
     @staticmethod
     def all_platforms(cfg: dict) -> list['RhubarbBinary']:
