@@ -43,10 +43,12 @@ class RhubarbCommandWrapperTest(unittest.TestCase):
         self.assertEqual(self.wrapper.get_version(), "1.13.0")
 
     def testLipsync_cs(self):
-        p = test_data.snd_cs_female_o_a["snd_file_path"]
+        p = test_data.snd_en_male_electricity.snd_file_path
         self.wrapper.lipsync_start(p)
         wait_until_finished(self.wrapper)
-        print(RhubarbParser.parse_lipsync_json(self.wrapper.stdout))
+        cues_json=RhubarbParser.parse_lipsync_json(self.wrapper.stdout)
+        cs= RhubarbParser.lipsync_json2MouthCues(cues_json)
+        print(cs)
         
 
         
@@ -72,7 +74,7 @@ class RhubarbParserTest(unittest.TestCase):
 if __name__ == '__main__':
     #unittest.main(RhubarbParserTest())
     #unittest.main(RhubarbCommandWrapperTest())
-    unittest.main(RhubarbCommandWrapperTest())
-    #unittest.main()
+    #unittest.main(RhubarbCommandWrapperTest())
+    unittest.main()
 
     
