@@ -39,7 +39,9 @@ micromamba activate rhubarb
 
 r:\mambaPrefix\Scripts\activate
 
-vscode - preferences for pylance
+## Vs Code
+
+### Pylance
 
 ```json
  "python.analysis.diagnosticSeverityOverrides": {
