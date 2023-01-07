@@ -3,11 +3,16 @@ channels:
   - defaults
   - kitsune.one
   - conda-forge
-dependencies:    
+dependencies:
   - python=3.10
+  - pip
   - pytest>=7.2.0
   - mypy
-  - python-blender=3.2
+#  - python-blender=3.2
   - tomli
+  - requests
+  - debugpy
+  - flask
   - pip:
     - -e .
+    - bpy>=3.2 # Only since 3.4

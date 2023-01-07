@@ -8,7 +8,19 @@ class ExamplePanel(bpy.types.Panel):
     bl_region_type = 'UI'
     
     def draw(self, context):
-        self.layout.label(text='Hello there')
+        self.layout.label(text='Hello there3')
+        self.layout.operator("object.testop", text="Test op")
+
+
+
+class TestOpOperator(bpy.types.Operator):
+    bl_idname = "object.testop"
+    bl_label = "TestOp"
+
+    def execute(self, context):
+        print(f"{'RUN '*10}")
+        return {'FINISHED'}
+
 
 if __name__ == '__main__':
     bpy.utils.register_class(ExamplePanel)

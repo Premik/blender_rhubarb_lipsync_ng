@@ -1,3 +1,4 @@
+import bpy
 
 bl_info = {
     'name': 'Rhubarb Lipsync',
@@ -13,4 +14,17 @@ bl_info = {
 }
 
 
-# https://wiki.blender.org/wiki/Reference/Release_Notes/2.80/Python_API/Addons#Registration
+
+#import rhubarb_lipsync.blender.auto_load
+#rhubarb_lipsync.blender.auto_load.init(__file__)
+
+#def register():
+    #rhubarb_lipsync.blender.auto_load.register()
+ 
+#def unregister():
+    #rhubarb_lipsync.blender.auto_load.unregister()
+
+from rhubarb_lipsync.blender.testing_panel import ExamplePanel, TestOpOperator
+
+
+bpy.utils.register_classes_factory([ExamplePanel, TestOpOperator])

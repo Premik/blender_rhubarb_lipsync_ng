@@ -44,7 +44,19 @@ r:\mambaPrefix\Scripts\activate
 ### Pylance
 
 ```json
- "python.analysis.diagnosticSeverityOverrides": {
+    "python.analysis.diagnosticSeverityOverrides": {
         "reportOptionalMemberAccess": "none",
     }
 ```
+
+### Fake bpy modules
+```json
+    "python.autoComplete.extraPaths": [
+        "/data/src/Blender/fake_bpy_modules_3.3-20221006"
+    ],
+    "python.analysis.extraPaths": [
+        "/data/src/Blender/fake_bpy_modules_3.3-20221006"
+    ],
+```
+
+Debug: https://github.com/JacquesLucke/blender_vscode
