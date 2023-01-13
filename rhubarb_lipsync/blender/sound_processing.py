@@ -1,4 +1,5 @@
 from io import TextIOWrapper
+import logging
 import bpy
 
 log = logging.getLogger(__name__)

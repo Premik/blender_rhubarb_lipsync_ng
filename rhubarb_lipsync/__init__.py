@@ -15,16 +15,24 @@ bl_info = {
 
 
 
-#import rhubarb_lipsync.blender.auto_load
-#rhubarb_lipsync.blender.auto_load.init(__file__)
+import rhubarb_lipsync.blender.auto_load
+rhubarb_lipsync.blender.auto_load.init(__file__)
 
-#def register():
-    #rhubarb_lipsync.blender.auto_load.register()
+def register():
+    rhubarb_lipsync.blender.auto_load.register()
  
-#def unregister():
-    #rhubarb_lipsync.blender.auto_load.unregister()
+def unregister():
+    rhubarb_lipsync.blender.auto_load.unregister()
 
-from rhubarb_lipsync.blender.testing_panel import ExamplePanel, TestOpOperator
+#from rhubarb_lipsync.blender.testing_panel import ExamplePanel, TestOpOperator
+#from rhubarb_lipsync.blender.properties import LipsyncProperties
 
+#register2, unregister = bpy.utils.register_classes_factory([LipsyncProperties, ExamplePanel, TestOpOperator])
 
-bpy.utils.register_classes_factory([ExamplePanel, TestOpOperator])
+#from bpy.props import FloatProperty, StringProperty, BoolProperty, PointerProperty
+#def register():
+#    register2()
+#    bpy.types.Object.rhubarb_lipsync=PointerProperty(type=LipsyncProperties)    
+ 
+
+ 

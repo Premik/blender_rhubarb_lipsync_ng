@@ -27,9 +27,9 @@ class RhubarbAddonPreferences(AddonPreferences):
         layout.prop(self, "executable_path")
         layout.prop(self, "recognizer")
 
-def register():
-    bpy.utils.register_class(RhubarbAddonPreferences)
+# def register():
+#     bpy.utils.register_class(RhubarbAddonPreferences)
 
 
-def unregister():
-    bpy.utils.unregister_class(RhubarbAddonPreferences)
+# def unregister():
+#     bpy.utils.unregister_class(RhubarbAddonPreferences)

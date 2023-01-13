@@ -60,3 +60,29 @@ r:\mambaPrefix\Scripts\activate
 ```
 
 Debug: https://github.com/JacquesLucke/blender_vscode
+
+
+
+## Blender
+
+### 
+Registration: Menu, Panel, Header, UIList, Operator
+`UPPER_CASE_{SEPARATOR}_mixed_case` The separator for each identifier is listed below:
+* Header -> _HT_
+* Menu -> _MT_
+* Operator -> _OT_
+* Panel -> _PT_
+* UIList -> _UL_
+
+Valid Examples:
+* `class OBJECT_OT_fancy_tool (and bl_idname = "object.fancy_tool")`
+* `class MyFancyTool (and bl_idname = "MYADDON_MT_MyFancyTool")`
+* `class SOME_HEADER_HT_my_header`
+* `class PANEL123_PT_myPanel (lower case is preferred but mixed case is supported).`
+
+https://wiki.blender.org/wiki/Reference/Release_Notes/2.80/Python_API/Addons#Registration
+
+bpy.ops.sound.open(filepath='/tmp/work/1.ogg')
+
+Uilist:
+https://blender.stackexchange.com/questions/30444/create-an-interface-which-is-similar-to-the-material-list-box/30446#30446

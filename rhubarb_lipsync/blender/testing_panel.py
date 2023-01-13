@@ -1,4 +1,7 @@
 import bpy
+from bpy.props import FloatProperty, StringProperty, BoolProperty, PointerProperty
+from rhubarb_lipsync.blender.properties import  LipsyncProperties
+import pathlib
 
 class ExamplePanel(bpy.types.Panel):
     
@@ -8,19 +11,24 @@ class ExamplePanel(bpy.types.Panel):
     bl_region_type = 'UI'
     
     def draw(self, context):
-        self.layout.label(text='Hello there3')
-        self.layout.operator("object.testop", text="Test op")
-
-
+        self.layout.label(text='Hello there6')
+        self.layout.operator(TestOpOperator.bl_idname, text="Test op")
+        
 
 class TestOpOperator(bpy.types.Operator):
     bl_idname = "object.testop"
     bl_label = "TestOp"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    
+    #sound : PointerProperty(type=bpy.types.Sound)
+    #pp : PointerProperty(type=LipsyncProperties)
+    direction: StringProperty(name="String Value2")
 
     def execute(self, context):
         print(f"{'RUN '*10}")
+        import rhubarb_lipsync.blender.auto_load        
+        p = pathlib.Path(__file__).parent
+        rhubarb_lipsync.blender.auto_load.init(str(p))
+
         return {'FINISHED'}
-
-
-if __name__ == '__main__':
-    bpy.utils.register_class(ExamplePanel)

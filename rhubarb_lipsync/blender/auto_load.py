@@ -25,7 +25,7 @@ ordered_classes = None
 def init(root=__file__):    
     global modules
     global ordered_classes
-    print(f"{'!'*100}\n  {Path(root).parent}")
+    #print(f"{'!'*100}\n  {Path(root).parent}")
 
     modules = get_all_submodules(Path(root).parent)
     ordered_classes = get_ordered_classes_to_register(modules)
@@ -59,7 +59,7 @@ def get_all_submodules(directory):
 
 def iter_submodules(path, package_name):    
     for name in sorted(iter_submodule_names(path)):
-        print(f"Importing: {name}@{package_name}")
+        #print(f"Importing: {name}@{package_name}")
         yield importlib.import_module("." + name, package_name)
 
 def iter_submodule_names(path, root=""):

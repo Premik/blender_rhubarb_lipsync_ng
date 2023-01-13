@@ -157,13 +157,13 @@ class RhubarbLipsyncOperator(bpy.types.Operator):
 
 
 
-def register():
-    bpy.utils.register_class(RhubarbLipsyncOperator)
+#def register():
+#    bpy.utils.register_class(RhubarbLipsyncOperator)
 
 
-def unregister():
-    bpy.utils.unregister_class(RhubarbLipsyncOperator)
+#def unregister():
+#    bpy.utils.unregister_class(RhubarbLipsyncOperator)
 
-if __name__ == "__main__":
-    register()
+#if __name__ == "__main__":
+#    register()
 

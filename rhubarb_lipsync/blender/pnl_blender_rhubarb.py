@@ -111,14 +111,14 @@ class MouthShapesProperty(bpy.types.PropertyGroup):
 
     start_frame : bpy.props.IntProperty(name="start_frame")
 
-def register():
-    bpy.utils.register_class(MouthShapesProperty)
-    bpy.utils.register_class(RhubarbLipsyncPanel)
+#def register():
+#    bpy.utils.register_class(MouthShapesProperty)
+#    bpy.utils.register_class(RhubarbLipsyncPanel)
 
-    bpy.types.Object.mouth_shapes = bpy.props.PointerProperty(type=MouthShapesProperty)
+#    bpy.types.Object.mouth_shapes = bpy.props.PointerProperty(type=MouthShapesProperty)
 
 
-def unregister():
-    del bpy.types.Object.mouth_shapes
-    bpy.utils.unregister_class(MouthShapesProperty)
-    bpy.utils.unregister_class(RhubarbLipsyncPanel)
+# def unregister():
+#     del bpy.types.Object.mouth_shapes
+#     bpy.utils.unregister_class(MouthShapesProperty)
+#     bpy.utils.unregister_class(RhubarbLipsyncPanel)
