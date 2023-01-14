@@ -49,13 +49,25 @@ r:\mambaPrefix\Scripts\activate
     }
 ```
 
-### Fake bpy modules
+### bpy modules
+
+Fake bpy modules (seems more complete)
 ```json
     "python.autoComplete.extraPaths": [
         "/data/src/Blender/fake_bpy_modules_3.3-20221006"
     ],
     "python.analysis.extraPaths": [
         "/data/src/Blender/fake_bpy_modules_3.3-20221006"
+    ],
+```
+
+Official bpy from pip:
+```json
+"python.autoComplete.extraPaths": [
+        "/home/premik/.conda/envs/rhubarb/lib/python3.10/site-packages/bpy/3.4/scripts/modules/"
+    ],
+    "python.analysis.extraPaths": [
+        "/home/premik/.conda/envs/rhubarb/lib/python3.10/site-packages/bpy/3.4/scripts/modules/"
     ],
 ```
 
@@ -66,6 +78,7 @@ Debug: https://github.com/JacquesLucke/blender_vscode
 ## Blender
 
 ### 
+For operator bl_idname, the same naming conventions as in 2.7x remain
 Registration: Menu, Panel, Header, UIList, Operator
 `UPPER_CASE_{SEPARATOR}_mixed_case` The separator for each identifier is listed below:
 * Header -> _HT_
@@ -86,3 +99,5 @@ bpy.ops.sound.open(filepath='/tmp/work/1.ogg')
 
 Uilist:
 https://blender.stackexchange.com/questions/30444/create-an-interface-which-is-similar-to-the-material-list-box/30446#30446
+
+https://blender.stackexchange.com/questions/717/is-it-possible-to-print-to-the-report-window-in-the-info-view
