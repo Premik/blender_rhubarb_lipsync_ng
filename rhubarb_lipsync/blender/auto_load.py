@@ -1,6 +1,7 @@
 ## https://devtalk.blender.org/t/batch-registering-multiple-classes-in-blender-2-8/3253/8
 
 import os
+from types import ModuleType
 import bpy
 import sys
 import typing
@@ -8,7 +9,7 @@ import inspect
 import pkgutil
 import importlib
 from pathlib import Path
-
+from typing import Iterator
 
 
 __all__ = (
@@ -19,10 +20,10 @@ __all__ = (
 
 blender_version = bpy.app.version
 
-modules = None
+modules:list[ModuleType] = []
 ordered_classes = None
 
-def init(root=__file__):    
+def init(root:str=__file__):    
     global modules
     global ordered_classes
     #print(f"{'!'*100}\n  {Path(root).parent}")
@@ -54,15 +55,15 @@ def unregister():
 # Import modules
 #################################################
 
-def get_all_submodules(directory):
+def get_all_submodules(directory:Path)->list[ModuleType]:
     return list(iter_submodules(directory, directory.name))
 
-def iter_submodules(path, package_name):    
+def iter_submodules(path:Path, package_name:str)->Iterator[ModuleType]:
     for name in sorted(iter_submodule_names(path)):
         #print(f"Importing: {name}@{package_name}")
         yield importlib.import_module("." + name, package_name)
 
-def iter_submodule_names(path, root=""):
+def iter_submodule_names(path:Path, root="")->Iterator[str]:
     #print(f"{'!'*100}\n  {path}")
     #for m in pkgutil.iter_modules(): print(m)
     for _, module_name, is_package in pkgutil.iter_modules([str(path)]):

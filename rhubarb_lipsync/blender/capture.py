@@ -1,12 +1,19 @@
 from io import TextIOWrapper
 import logging
 import bpy
-from bpy.types import Context,Sound
-from typing import Optional, List, Dict
+from bpy.types import Context,Sound,SoundSequence
+from typing import Optional, List, Dict, cast
 from rhubarb_lipsync.blender.properties import CaptureProperties
 import pathlib
 
 log = logging.getLogger(__name__)
+
+def context_selection_validation(ctx:Context)->str:
+    if not ctx.object:
+        return "No active object selected"
+    if not CaptureProperties.from_context(ctx):
+        return "'rhubarb_lipsync' not found on the active object"
+    return ""
 
 class CaptureMouthCuesPanel(bpy.types.Panel):
     
@@ -19,25 +26,12 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
     #bl_description = "Tool tip"
     #bl_context = "object"
 
-    @property
-    def props(self)->CaptureProperties:
-        return self.ctx.active_object.rhubarb_lipsync
+   
 
     def draw_error(self, msg:str):
         box = self.layout.box()
         box.label(text=msg, icon="ERROR")
-
-    def validate_selection(self)->bool:
-        assert self.ctx
-        if not self.ctx.active_object:
-            self.draw_error("Select an object")
-            return False
-        if not 'rhubarb_lipsync' in self.ctx.active_object:
-            self.draw_error("Plugin not properly registered")
-            self.draw_error("'rhubarb_lipsync' not found on the active object")
-            return False
-        return True
-
+    
     def draw_sound_details(self, sound:Sound)->bool:
         layout=self.layout        
         layout.prop(sound, "filepath", text="")
@@ -55,9 +49,11 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
         line.label(text="Sample rate")
         line.label(text=f"{sound.samplerate} Hz")
         line = box.split()
+        line.label(text="Channels")
+        line.label(text=str(sound.channels))
+        line = box.split()
         
-        line.label(text="File extension")
-        
+        line.label(text="File extension")        
         line.label(text=path.suffix)
         if path.suffix.lower() not in ['.oggx', '.wav']:
             self.draw_error("Only wav or ogg supported")
@@ -68,15 +64,21 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
     def draw(self, context:Context):
         try:            
             self.ctx=context
-            if not self.validate_selection():
-                return
             layout = self.layout            
-            #layout.prop(self.props, "sound")            
-            layout.template_ID(self.props, "sound", open="sound.open")
-            if self.props.sound is None:
+            layout.operator(PlaceSoundOnStrip.bl_idname)
+            selection_error=context_selection_validation(context)
+            if selection_error:
+                self.draw_error(selection_error)
+                return
+            
+            #layout.prop(self.props, "sound")
+            props=CaptureProperties.from_context(self.ctx)
+            assert props
+            layout.template_ID(props, "sound", open="sound.open")
+            if props.sound is None:
                 self.draw_error("Select a sound file")
                 return
-            if not self.draw_sound_details(self.props.sound):
+            if not self.draw_sound_details(props.sound):
                 return
             
             layout.operator(ProcessSoundFile.bl_idname)
@@ -85,8 +87,41 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
             self.draw_error(str(e))
             raise            
         finally:
-            self.ctx=None
-        
+            self.ctx=None # type: ignore
+
+
+#bpy.ops.sequencer.sound_strip_add(
+# filepath="/tmp/work/1.flac", directory="/tmp/work/", 
+# files=[{"name":"1.flac", "name":"1.flac"}], 
+# frame_start=23, channel=1, 
+# overlap_shuffle_override=True)
+
+#C.active_sequence_strip
+# bpy.data.scenes['Scene'].sequence_editor.sequences_all["en_male_electricity.ogg"]
+
+class PlaceSoundOnStrip(bpy.types.Operator):
+    bl_idname = "rhubarb.place_sound_on_strip"
+    bl_label = "Place on strip"
+    bl_description = "Place the sound on a sound strip."
+    bl_options = {'UNDO', 'INTERNAL'}
+
+    @classmethod
+    def disabled_reason(cls, context:Context)->str:
+        selection_error=context_selection_validation(context)
+        if selection_error: return selection_error
+        props=CaptureProperties.from_context(context)
+        if not props.sound: return "No sound selected"
+        if props.find_strip_of_sound(context):
+            return f"Already placed on a strip"
+        return ""
+
+    @classmethod
+    def poll(cls, context:Context)->bool:
+        m = cls.disabled_reason(context)
+        if not m: return True
+        # Following is not a class method per doc. But seems to work like it
+        cls.poll_message_set(m) # type: ignore
+        return False
 
 class ProcessSoundFile(bpy.types.Operator):
     bl_idname = "rhubarb.process_sound_file"

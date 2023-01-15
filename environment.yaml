@@ -1,18 +1,20 @@
 name: rhubarb
 channels:
   - defaults
-  - kitsune.one
+  - kitsune.one # For belnder as module
   - conda-forge
 dependencies:
   - python=3.10
   - pip
   - pytest>=7.2.0
   - mypy
-#  - python-blender=3.2
+#  - python-blender=3.2 - #Blender as module ()
   - tomli
   - requests
   - debugpy
   - flask
   - pip:
     - -e .
-    - bpy>=3.2 # Only since 3.4
+#    - bpy>=3.2 # Official module, only since 3.4
+    #- fake-bpy-module-3.3
+    - fake-bpy-module-latest
