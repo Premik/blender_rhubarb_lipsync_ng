@@ -13,6 +13,7 @@ dependencies:
   - requests
   - debugpy
   - flask
+  - numpy
   - pip:
     - -e .
 #    - bpy>=3.2 # Official module, only since 3.4
