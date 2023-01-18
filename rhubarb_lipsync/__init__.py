@@ -1,4 +1,3 @@
-
 bl_info = {
     'name': 'Rhubarb Lipsync',
     'author': 'Addon by Andrew Charlton, Rewrite by Premysl S. includes Rhubarb Lip Sync by Daniel S. Wolf',
@@ -17,26 +16,27 @@ import bpy
 from bpy.props import PointerProperty
 from rhubarb_lipsync.blender.properties import CaptureProperties
 import rhubarb_lipsync.blender.auto_load
+
 rhubarb_lipsync.blender.auto_load.init(__file__)
+
 
 def register():
     rhubarb_lipsync.blender.auto_load.register()
-    bpy.types.Object.rhubarb_lipsync=PointerProperty(type=CaptureProperties)    
- 
+    bpy.types.Object.rhubarb_lipsync = PointerProperty(type=CaptureProperties)
+
+
 def unregister():
     rhubarb_lipsync.blender.auto_load.unregister()
- 
+
+
 bpy.utils.register_classes_factory
 
-#from rhubarb_lipsync.blender.testing_panel import ExamplePanel, TestOpOperator
-#from rhubarb_lipsync.blender.properties import LipsyncProperties
+# from rhubarb_lipsync.blender.testing_panel import ExamplePanel, TestOpOperator
+# from rhubarb_lipsync.blender.properties import LipsyncProperties
 
-#register2, unregister = bpy.utils.register_classes_factory([LipsyncProperties, ExamplePanel, TestOpOperator])
+# register2, unregister = bpy.utils.register_classes_factory([LipsyncProperties, ExamplePanel, TestOpOperator])
 
-#from bpy.props import FloatProperty, StringProperty, BoolProperty, PointerProperty
-#def register():
+# from bpy.props import FloatProperty, StringProperty, BoolProperty, PointerProperty
+# def register():
 #    register2()
-#    bpy.types.Object.rhubarb_lipsync=PointerProperty(type=LipsyncProperties)    
- 
-
- 
+#    bpy.types.Object.rhubarb_lipsync=PointerProperty(type=LipsyncProperties)

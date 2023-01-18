@@ -2,6 +2,7 @@ import sys
 
 # https://devtalk.blender.org/t/plugin-hot-reload-by-cleaning-sys-modules/20040/4
 
+
 def cleanse_modules(prefix=__name__):
     """search for your plugin modules in blender python sys.modules and remove them"""
 
@@ -9,11 +10,13 @@ def cleanse_modules(prefix=__name__):
         if module_name.startswith(prefix):
             del sys.modules[module_name]
 
-import importlib  
+
+import importlib
+
 m = importlib.import_module("rhubarb_lipsync")
 m.unregister()
 importlib.reload(m)
 m.register()
 
 print('rhubarb_lipsync' in locals())
-print("*"*100)
+print("*" * 100)
