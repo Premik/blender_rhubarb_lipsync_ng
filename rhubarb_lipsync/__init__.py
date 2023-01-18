@@ -27,9 +27,10 @@ def register():
 
 def unregister():
     rhubarb_lipsync.blender.auto_load.unregister()
+    del bpy.types.Object.rhubarb_lipsync
 
 
-bpy.utils.register_classes_factory
+# bpy.utils.register_classes_factory
 
 # from rhubarb_lipsync.blender.testing_panel import ExamplePanel, TestOpOperator
 # from rhubarb_lipsync.blender.properties import LipsyncProperties
