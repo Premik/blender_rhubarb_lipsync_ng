@@ -1,28 +1,36 @@
 import pathlib
 import bpy
-from bpy.props import FloatProperty, StringProperty, BoolProperty, PointerProperty
+from bpy.props import FloatProperty, StringProperty, BoolProperty, PointerProperty, EnumProperty
 from bpy.types import Object, PropertyGroup, Context, SoundSequence, Sound, AddonPreferences
 from typing import Optional, cast
 from rhubarb_lipsync.rhubarb.rhubarb_command_handling import RhubarbCommandWrapper, RhubarbParser
 import pathlib
 
 
+def addons_path() -> pathlib.Path:
+    return pathlib.Path(bpy.utils.user_resource('SCRIPTS', path="addons"))
+
+
+def default_executable_path() -> pathlib.Path:
+    exe = RhubarbCommandWrapper.executable_default_filename()
+    return addons_path() / 'rhubarb_lipsync' / 'bin' / exe
+
+
 class RhubarbAddonPreferences(AddonPreferences):
     bl_idname = 'rhubarb_lipsync'
 
-    @staticmethod
-    def addons_path() -> pathlib.Path:
-        return pathlib.Path(bpy.utils.user_resource('SCRIPTS', path="addons"))
+    rhubarb_executable_version: str = ""
 
     @staticmethod
-    def default_executable_path() -> pathlib.Path:
-        exe = RhubarbCommandWrapper.executable_default_filename()
-        return RhubarbAddonPreferences.addons_path() / RhubarbAddonPreferences.bl_idname / exe
+    def from_context(ctx: Context) -> 'RhubarbAddonPreferences':
+        addon = ctx.preferences.addons[RhubarbAddonPreferences.bl_idname]
+        assert addon, f"The addon {RhubarbAddonPreferences.bl_idname} not found in the context."
+        return cast(RhubarbAddonPreferences, addon.preferences)
 
     executable_path_string: StringProperty(  # type: ignore
         name="Rhubarb lipsync executable",
         subtype='FILE_PATH',
-        default=default_executable_path(),
+        default=str(default_executable_path()),
     )
 
     @property
@@ -39,6 +47,22 @@ class RhubarbAddonPreferences(AddonPreferences):
         ],
         default="pocketSphinx",
     )
+
+    info_panel_expanded: BoolProperty(default=True)  # type: ignore
+
+    def new_command_handler(self):
+        return RhubarbCommandWrapper(self.executable_path, self.recognizer)
+
+    def draw(self, context):
+        layout = self.layout
+        layout.prop(self, "executable_path_string")
+        row = layout.row().split(factor=0.243)
+        row.label(text="Rhubarb executable version:")
+        if RhubarbAddonPreferences.rhubarb_executable_version:
+            row.label(text=RhubarbAddonPreferences.rhubarb_executable_version)
+        else:
+            row.operator('rhubarb.get_executable_version')
+        layout.prop(self, "recognizer")
 
 
 class CaptureProperties(PropertyGroup):

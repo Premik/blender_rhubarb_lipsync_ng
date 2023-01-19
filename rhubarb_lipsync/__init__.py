@@ -1,6 +1,6 @@
 bl_info = {
     'name': 'Rhubarb Lipsync',
-    'author': 'Addon by Andrew Charlton, Rewrite by Premysl S. includes Rhubarb Lip Sync by Daniel S. Wolf',
+    'author': 'Addon rewritten by Premysl S. base on the original version by Andrew Charlton. Includes Rhubarb Lip Sync by Daniel S. Wolf',
     'version': (4, 0, 0),
     'blender': (3, 40, 0),
     'location': 'Properties > Armature',

@@ -5,9 +5,10 @@ from bpy.types import Context, Sound, SoundSequence
 
 from typing import Optional, List, Dict, cast
 from bpy.props import FloatProperty, StringProperty, BoolProperty, PointerProperty, IntProperty
-from rhubarb_lipsync.blender.properties import CaptureProperties
+from rhubarb_lipsync.blender.properties import CaptureProperties, RhubarbAddonPreferences
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 import rhubarb_lipsync.blender.sound_operators as sound_operators
+import rhubarb_lipsync.blender.rhubarb_operators as rhubarb_operators
 import pathlib
 
 log = logging.getLogger(__name__)
@@ -51,7 +52,10 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
         return True
 
     def draw_info(self, sound: Sound):
-
+        props = CaptureProperties.from_context(self.ctx)
+        prefs = RhubarbAddonPreferences.from_context(self.ctx)
+        if not ui_utils.draw_expandable_header(prefs, "info_panel_expanded", "Additional info", self.layout):
+            return
         box = self.layout.box()
         # line = layout.split()
         line = box.split()
@@ -62,9 +66,19 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
         line.label(text=str(sound.channels))
         line = box.split()
 
-        props = CaptureProperties.from_context(self.ctx)
         line.label(text="File extension")
         line.label(text=props.sound_file_extension)
+
+        line = box.split()
+        line.label(text="Rhubarb version")
+        if RhubarbAddonPreferences.rhubarb_executable_version:
+            line.label(text=RhubarbAddonPreferences.rhubarb_executable_version)
+        else:
+            line.operator(rhubarb_operators.GetRhubarbExecutableVersion.bl_idname)
+
+        line = box.split()
+        line.label(text="FPS")
+        line.label(text=f"{self.ctx.scene.render.fps}")
 
     def draw(self, context: Context):
         try:
@@ -89,7 +103,7 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
                 self.draw_info(props.sound)
                 return
             self.draw_info(props.sound)
-            layout.operator(sound_operators.ProcessSoundFile.bl_idname)
+            layout.operator(rhubarb_operators.ProcessSoundFile.bl_idname)
 
         except Exception as e:
             self.draw_error("Unexpected error.")
