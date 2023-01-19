@@ -3,9 +3,6 @@ from pathlib import Path
 import unittest
 from rhubarb_lipsync.rhubarb.rhubarb_command_handling import RhubarbCommandWrapper, RhubarbParser
 
-import platform
-import sys
-import inspect
 from time import sleep
 
 # import tests.test_data
@@ -28,17 +25,13 @@ class RhubarbCommandWrapperTest(unittest.TestCase):
     def setUp(self):
         self.wrapper = RhubarbCommandWrapper(self.executable_path)
 
-    @staticmethod
-    def executable_default_basename() -> str:
-        return "rhubarb.exe" if platform.system() == "Windows" else "rhubarb"
-
     @cached_property
     def project_dir(self) -> Path:
         return Path(__file__).parents[1]
 
     @cached_property
     def executable_path(self) -> Path:
-        return self.project_dir / "bin" / RhubarbCommandWrapperTest.executable_default_basename()
+        return self.project_dir / "bin" / RhubarbCommandWrapper.executable_default_filename()
 
     def testVersion(self):
         self.assertEqual(self.wrapper.get_version(), "1.13.0")

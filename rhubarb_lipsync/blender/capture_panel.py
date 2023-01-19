@@ -28,18 +28,31 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
         box = self.layout.box()
         box.label(text=msg, icon="ERROR")
 
-    def draw_sound_details(self, sound: Sound) -> bool:
+    def draw_sound_setup(self, sound: Sound) -> bool:
         layout = self.layout
         layout.prop(sound, "filepath", text="")  # type: ignore
         if sound.packed_file:
-            self.draw_error("Rhubarb requires a file on disk.")
-            # self.draw_error("Please unpack the sound")
+            self.draw_error("Rhubarb requires the file on disk.")
+            self.draw_error("Please unpack the sound.")
+            unpackop = layout.operator("sound.unpack", icon='PACKAGE', text=f"Unpack '{sound.name}'")
+            unpackop.id = sound.name_full  # type: ignore
+            unpackop.method = 'USE_ORIGINAL'  # type: ignore
             return False
         path = pathlib.Path(sound.filepath)
         if not path.exists:
             self.draw_error("Sound file doesn't exist.")
             return False
-        box = layout.box()
+
+        props = CaptureProperties.from_context(self.ctx)
+        if not props.is_sound_format_supported():
+            self.draw_error("Only wav or ogg supported.")
+            return False
+
+        return True
+
+    def draw_info(self, sound: Sound):
+
+        box = self.layout.box()
         # line = layout.split()
         line = box.split()
         line.label(text="Sample rate")
@@ -49,13 +62,9 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
         line.label(text=str(sound.channels))
         line = box.split()
 
+        props = CaptureProperties.from_context(self.ctx)
         line.label(text="File extension")
-        line.label(text=path.suffix)
-        if path.suffix.lower() not in [".ogg", ".wav"]:
-            self.draw_error("Only wav or ogg supported.")
-            return False
-
-        return True
+        line.label(text=props.sound_file_extension)
 
     def draw(self, context: Context):
         try:
@@ -76,9 +85,10 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
             if props.sound is None:
                 self.draw_error("Select a sound file.")
                 return
-            if not self.draw_sound_details(props.sound):
+            if not self.draw_sound_setup(props.sound):
+                self.draw_info(props.sound)
                 return
-
+            self.draw_info(props.sound)
             layout.operator(sound_operators.ProcessSoundFile.bl_idname)
 
         except Exception as e:

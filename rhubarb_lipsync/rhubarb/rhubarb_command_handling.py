@@ -6,7 +6,9 @@ import re
 import logging
 import pathlib
 import json
+import platform
 from collections import defaultdict
+
 
 from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue
 
@@ -87,6 +89,10 @@ class RhubarbCommandWrapper:
         self.last_exit_code: Optional[int] = None
         self.extra_args = extra_args
 
+    @staticmethod
+    def executable_default_filename() -> str:
+        return "rhubarb.exe" if platform.system() == "Windows" else "rhubarb"
+
     def errors(self) -> Optional[str]:
         if not self.executable_path:
             return "Configure the Rhubarb lipsync executable file path in the addon preferences. "
@@ -101,7 +107,18 @@ class RhubarbCommandWrapper:
 
     def build_lipsync_args(self, input_file: str, dialog_file: Optional[str] = None):
         dialog = ["--dialogFile", dialog_file] if dialog_file else []
-        return [self.executable_path, "-f", "json", "--machineReadable", "--extendedShapes", "GHX", "-r", self.recognizer, *dialog, input_file]
+        return [
+            self.executable_path,
+            "-f",
+            "json",
+            "--machineReadable",
+            "--extendedShapes",
+            "GHX",
+            "-r",
+            self.recognizer,
+            *dialog,
+            input_file,
+        ]
 
     def build_version_args(self):
         return [self.executable_path, "--version"]

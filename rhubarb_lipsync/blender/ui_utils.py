@@ -1,6 +1,6 @@
 import bpy
-from bpy.types import Context, Window, Area
-from typing import Iterator
+from bpy.types import Context, Window, Area, UILayout
+from typing import Any, Iterator
 from rhubarb_lipsync.blender.properties import CaptureProperties
 
 
@@ -37,3 +37,21 @@ def context_selection_validation(ctx: Context) -> str:
 
 def assert_op_ret(ret: set[str]):
     assert 'FINISHED' in ret, f"Operation execution failed with {ret} code"
+
+
+def draw_expandable_header(props: Any, property_name: str, label: str, layout: UILayout) -> bool:
+    """Draws a checkbox which looks like collapsable sub-panel's header.
+    Expanded/collapsed state is driven by the provided property.
+    Returns the exapnded status. Inspired by GameRigtTool plugin"""
+    assert props and property_name
+    expanded = getattr(props, property_name)
+    if expanded:
+        icon = "TRIA_DOWN"
+    else:
+        icon = "TRIA_RIGHT"
+
+    row = layout.row(align=True)
+    row.alignment = "LEFT"
+    row.prop(props, property_name, text=label, emboss=False, icon=icon)
+
+    return expanded
