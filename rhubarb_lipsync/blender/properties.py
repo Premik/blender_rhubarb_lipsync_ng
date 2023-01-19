@@ -22,14 +22,16 @@ class CaptureProperties(PropertyGroup):
             return None  # type: ignore
         return p
 
-    def find_strips_of_sound(self, context: Context) -> list[SoundSequence]:
+    def find_strips_of_sound(self, context: Context, limit=0) -> list[SoundSequence]:
         '''Finds a sound strip which is using the selected sounds.'''
         exact_match: list[SoundSequence] = []
         name_match: list[SoundSequence] = []
         if not self.sound:
             return []
 
-        for sq in context.scene.sequence_editor.sequences_all:
+        for i, sq in enumerate(context.scene.sequence_editor.sequences_all):
+            if limit > 0 and i > limit:
+                break  # Limit reached, break the search (for performance reasons)
             if not hasattr(sq, "sound"):
                 continue  # Not a sound strip
             ssq = cast(SoundSequence, sq)
