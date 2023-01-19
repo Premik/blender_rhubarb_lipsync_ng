@@ -7,7 +7,7 @@ from typing import Optional, List, Dict, cast
 from bpy.props import FloatProperty, StringProperty, BoolProperty, PointerProperty, IntProperty
 from rhubarb_lipsync.blender.properties import CaptureProperties
 import rhubarb_lipsync.blender.ui_utils as ui_utils
-import rhubarb_lipsync.blender.sound_strip_operators as sound_strip_operators
+import rhubarb_lipsync.blender.sound_operators as sound_operators
 import pathlib
 
 log = logging.getLogger(__name__)
@@ -61,8 +61,8 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
         try:
             self.ctx = context
             layout = self.layout
-            layout.operator(sound_strip_operators.CreateSoundStripWithSound.bl_idname)
-            layout.operator(sound_strip_operators.RemoveSoundStripWithSound.bl_idname)
+            layout.operator(sound_operators.CreateSoundStripWithSound.bl_idname)
+            layout.operator(sound_operators.RemoveSoundStripWithSound.bl_idname)
             layout.operator('sequencer.sound_strip_add')
             selection_error = ui_utils.context_selection_validation(context)
             if selection_error:
@@ -79,7 +79,7 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
             if not self.draw_sound_details(props.sound):
                 return
 
-            layout.operator(ProcessSoundFile.bl_idname)
+            layout.operator(sound_operators.ProcessSoundFile.bl_idname)
 
         except Exception as e:
             self.draw_error("Unexpected error.")
@@ -87,13 +87,3 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
             raise
         finally:
             self.ctx = None  # type: ignore
-
-
-class ProcessSoundFile(bpy.types.Operator):
-    bl_idname = "rhubarb.process_sound_file"
-    bl_label = "Capture mouth cues"
-    bl_description = "Process the selected sound file using the rhubarb executable"
-
-    @classmethod
-    def poll(cls, context):
-        return True

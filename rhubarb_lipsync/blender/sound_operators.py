@@ -152,3 +152,13 @@ class RemoveSoundStripWithSound(bpy.types.Operator):
         se = context.scene.sequence_editor
         se.sequences.remove(strips[0])
         return {'FINISHED'}
+
+
+class ProcessSoundFile(bpy.types.Operator):
+    bl_idname = "rhubarb.process_sound_file"
+    bl_label = "Capture mouth cues"
+    bl_description = "Process the selected sound file using the rhubarb executable"
+
+    @classmethod
+    def poll(cls, context):
+        return True
