@@ -4,12 +4,11 @@ import os
 from types import ModuleType
 import bpy
 import sys
-import typing
 import inspect
 import pkgutil
 import importlib
 from pathlib import Path
-from typing import Iterator
+from typing import Iterator, Generator, get_type_hints
 
 
 __all__ = (
@@ -21,7 +20,7 @@ __all__ = (
 blender_version = bpy.app.version
 
 modules: list[ModuleType] = []
-ordered_classes = None
+ordered_classes: list = []
 
 
 def init(root: str = __file__):
@@ -106,7 +105,7 @@ def iter_my_register_deps(cls, my_classes, my_classes_by_idname):
 
 
 def iter_my_deps_from_annotations(cls, my_classes):
-    for value in typing.get_type_hints(cls, {}, {}).values():
+    for value in get_type_hints(cls, {}, {}).values():
         dependency = get_dependency_from_annotation(value)
         if dependency is not None:
             if dependency in my_classes:
@@ -124,7 +123,7 @@ def get_dependency_from_annotation(value):
     return None
 
 
-def iter_my_deps_from_parent_id(cls, my_classes_by_idname):
+def iter_my_deps_from_parent_id(cls, my_classes_by_idname) -> Generator:
     if bpy.types.Panel in cls.__bases__:
         parent_idname = getattr(cls, "bl_parent_id", None)
         if parent_idname is not None:
@@ -133,7 +132,7 @@ def iter_my_deps_from_parent_id(cls, my_classes_by_idname):
                 yield parent_cls
 
 
-def iter_my_classes(modules):
+def iter_my_classes(modules) -> Generator:
     base_types = get_register_base_types()
     for cls in get_classes_in_modules(modules):
         if any(base in base_types for base in cls.__bases__):
@@ -141,7 +140,7 @@ def iter_my_classes(modules):
                 yield cls
 
 
-def get_classes_in_modules(modules):
+def get_classes_in_modules(modules) -> set:
     classes = set()
     for module in modules:
         for cls in iter_classes_in_module(module):
@@ -149,13 +148,13 @@ def get_classes_in_modules(modules):
     return classes
 
 
-def iter_classes_in_module(module):
+def iter_classes_in_module(module) -> Generator:
     for value in module.__dict__.values():
         if inspect.isclass(value):
             yield value
 
 
-def get_register_base_types():
+def get_register_base_types() -> set:
     return set(
         getattr(bpy.types, name)
         for name in [
@@ -180,7 +179,7 @@ def get_register_base_types():
 #################################################
 
 
-def toposort(deps_dict):
+def toposort(deps_dict: dict) -> list:
     sorted_list = []
     sorted_values = set()
     while len(deps_dict) > 0:

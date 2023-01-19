@@ -30,7 +30,7 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
 
     def draw_sound_details(self, sound: Sound) -> bool:
         layout = self.layout
-        layout.prop(sound, "filepath", text="")
+        layout.prop(sound, "filepath", text="")  # type: ignore
         if sound.packed_file:
             self.draw_error("Rhubarb requires a file on disk.")
             # self.draw_error("Please unpack the sound")
@@ -72,7 +72,7 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
             # layout.prop(self.props, "sound")
             props = CaptureProperties.from_context(self.ctx)
             assert props
-            layout.template_ID(props, "sound", open="sound.open")
+            layout.template_ID(props, "sound", open="sound.open")  # type: ignore
             if props.sound is None:
                 self.draw_error("Select a sound file.")
                 return

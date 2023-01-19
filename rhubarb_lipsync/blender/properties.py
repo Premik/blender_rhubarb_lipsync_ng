@@ -6,8 +6,8 @@ from typing import Optional, cast
 
 class CaptureProperties(PropertyGroup):
 
-    sound: PointerProperty(type=bpy.types.Sound, name="Sound")
-    start_frame: FloatProperty(name="Start frame", default=0)
+    sound: PointerProperty(type=bpy.types.Sound, name="Sound")  # type: ignore
+    start_frame: FloatProperty(name="Start frame", default=0)  # type: ignore
 
     @staticmethod
     def from_context(ctx: Context) -> 'CaptureProperties':

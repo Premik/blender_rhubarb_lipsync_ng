@@ -1,7 +1,7 @@
 from functools import cached_property
 from pathlib import Path
 import unittest
-from rhubarb_lipsync.rhubarb.process_sound_file import RhubarbCommandWrapper, RhubarbParser
+from rhubarb_lipsync.rhubarb.rhubarb_command_handling import RhubarbCommandWrapper, RhubarbParser
 
 import platform
 import sys

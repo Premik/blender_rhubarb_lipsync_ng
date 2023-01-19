@@ -17,6 +17,6 @@ dependencies:
   - black
   - pip:
     - -e .
-#    - bpy>=3.2 # Official module, only since 3.4
+    #- bpy>=3.2 # Official module, only since 3.4
     #- fake-bpy-module-3.3
     - fake-bpy-module-latest

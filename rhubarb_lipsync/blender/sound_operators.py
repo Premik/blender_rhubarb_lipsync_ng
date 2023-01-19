@@ -42,9 +42,9 @@ class CreateSoundStripWithSound(bpy.types.Operator):
     bl_description = __doc__
     bl_options = {'UNDO', 'REGISTER'}
 
-    start_frame: IntProperty(name="Start Frame", default=1)
-    channel: IntProperty(name="Channel", default=1)
-    show_waveform: BoolProperty(name="Show Waveform", default=True)
+    start_frame: IntProperty(name="Start Frame", default=1)  # type: ignore
+    channel: IntProperty(name="Channel", default=1)  # type: ignore
+    show_waveform: BoolProperty(name="Show Waveform", default=True)  # type: ignore
 
     @classmethod
     def disabled_reason(cls, context: Context, limit=0) -> str:
@@ -67,6 +67,7 @@ class CreateSoundStripWithSound(bpy.types.Operator):
         return False
 
     def execute(self, context: Context) -> set[str]:
+
         error = self.disabled_reason(context)  # Run validation again, without the limit this time
         if error:
             self.report({"ERROR"}, error)
