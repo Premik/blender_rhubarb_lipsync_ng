@@ -24,6 +24,7 @@ ordered_classes: list = []
 
 
 def init(root: str = __file__):
+    # print(root)
     global modules
     global ordered_classes
     # print(f"{'!'*100}\n  {Path(root).parent}")
@@ -34,12 +35,14 @@ def init(root: str = __file__):
 
 def register():
     for cls in ordered_classes:
+        # print(f"Registering class {cls}")
         bpy.utils.register_class(cls)
 
     for module in modules:
         if module.__name__ == __name__:
             continue
         if hasattr(module, "register"):
+            # print(f"Registering {module}")
             module.register()
 
 

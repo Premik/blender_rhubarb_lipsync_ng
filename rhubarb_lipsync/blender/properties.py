@@ -8,7 +8,8 @@ import pathlib
 
 
 def addons_path() -> pathlib.Path:
-    return pathlib.Path(bpy.utils.user_resource('SCRIPTS', path="addons"))
+    ap = bpy.utils.user_resource('SCRIPTS', path="addons")
+    return pathlib.Path(ap)
 
 
 def default_executable_path() -> pathlib.Path:
@@ -107,18 +108,37 @@ class CaptureProperties(PropertyGroup):
         return exact_match + name_match  # Exact matches first
 
     @property
+    def sound_file_path(self) -> pathlib.Path:
+        s: Sound = self.sound
+        if not s or not s.filepath or s.packed_file:
+            return None  # type: ignore
+        return pathlib.Path(self.sound.filepath)
+
+    @property
     def sound_file_extension(self) -> str:
-        if not self.sound:
+        p = self.sound_file_path
+        if not p:
             return ""
-        path = pathlib.Path(self.sound.filepath)
-        if not path:
-            return ""
-        sfx = path.suffix.lower()
+        sfx = p.suffix.lower()
         if not sfx:
             return ""
         if not sfx.startswith("."):
             return sfx
         return sfx[1:]  # Drop the trailing dot
+
+    @property
+    def sound_file_basename(self) -> str:
+        p = self.sound_file_path
+        if not p:
+            return ""
+        return p.stem
+
+    @property
+    def sound_file_folder(self) -> str:
+        p = self.sound_file_path
+        if not p:
+            return ""
+        return str(p.parent)
 
     def is_sound_format_supported(self) -> bool:
         return self.sound_file_extension in ["ogg", "wav"]

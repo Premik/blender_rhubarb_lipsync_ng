@@ -47,6 +47,13 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
         props = CaptureProperties.from_context(self.ctx)
         if not props.is_sound_format_supported():
             self.draw_error("Only wav or ogg supported.")
+            row = layout.row(align=True)
+            # row.label(text="Convert to")
+            blid = sound_operators.ConvertSoundFromat.bl_idname
+            # row.operator(blid, text="ogg").codec = 'ogg'
+            # row.operator(blid, text="wav").codec = 'wav'
+            op = row.operator(blid)
+
             return False
 
         return True
@@ -84,9 +91,8 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
         try:
             self.ctx = context
             layout = self.layout
-            layout.operator(sound_operators.CreateSoundStripWithSound.bl_idname)
-            layout.operator(sound_operators.RemoveSoundStripWithSound.bl_idname)
-            layout.operator('sequencer.sound_strip_add')
+            layout.operator(sound_operators.CreateSoundStripWithSound.bl_idname, icon='SPEAKER')
+            layout.operator(sound_operators.RemoveSoundStripWithSound.bl_idname, icon='MUTE_IPO_OFF')
             selection_error = ui_utils.context_selection_validation(context)
             if selection_error:
                 self.draw_error(selection_error)

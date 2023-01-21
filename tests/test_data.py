@@ -1,5 +1,7 @@
 from functools import cached_property
 from pathlib import Path
+from bpy.types import Context, Sound, SoundSequence
+from typing import cast
 
 test_data_path = Path(__file__).parent / "data"
 
@@ -21,6 +23,11 @@ class SampleData:
     @cached_property
     def expected_json_path(self):
         return self.test_data_path / f"{self.name}-expected.json"
+
+    def to_sound(self, ctx: Context) -> Sound:
+        se = ctx.scene.sequence_editor
+        sq = se.sequences.new_sound(self.name, str(self.snd_file_path), 1, 1)
+        return cast(SoundSequence, sq).sound
 
 
 snd_cs_female_o_a = SampleData("cs_female_o_a")

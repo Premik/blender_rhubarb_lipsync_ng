@@ -17,6 +17,8 @@ from bpy.props import PointerProperty
 from rhubarb_lipsync.blender.properties import CaptureProperties
 import rhubarb_lipsync.blender.auto_load
 
+
+# print(f"FILE:  {__file__}")
 rhubarb_lipsync.blender.auto_load.init(__file__)
 
 
