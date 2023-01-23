@@ -24,7 +24,13 @@ class PropertiesTest(unittest.TestCase):
         props = self.props
         props.sound = test_data.snd_en_male_watchingtv.to_sound(bpy.context)
 
-        self.assertEqual(props.sound_file_extension, 'ext')
+        self.assertEqual(props.sound_file_extension, 'ogg')
+        self.assertEqual(props.sound_file_basename, 'en_male_watchingtv')
+        self.assertIn('data', props.sound_file_folder)
+        self.assertTrue(props.is_sound_format_supported())
+
+        newName = self.props.get_sound_name_new_extension("wav")
+        self.assertEqual(newName, 'en_male_watchingtv.wav')
 
 
 if __name__ == '__main__':

@@ -142,3 +142,9 @@ class CaptureProperties(PropertyGroup):
 
     def is_sound_format_supported(self) -> bool:
         return self.sound_file_extension in ["ogg", "wav"]
+
+    def get_sound_name_new_extension(self, new_ext: str) -> str:
+        p = self.sound_file_basename
+        assert p, "Can't change extension while sound file is not set"
+        assert new_ext is not None
+        return f"{p}.{new_ext.lower()}"
