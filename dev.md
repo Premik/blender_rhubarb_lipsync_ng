@@ -24,7 +24,8 @@ zsh
 
 ```sh
 conda activate $env_name
-mamba env update -f environment.yaml
+mamba env update -f environment.yaml --prune
+
 ```
 
 ### Win

@@ -8,7 +8,7 @@ dependencies:
   - pip
   - pytest>=7.2.0
   - mypy
-#  - python-blender=3.2 - #Blender as module ()
+  - python-blender>=3.2 - #Blender as module ()
   - tomli
   - requests
   - debugpy
@@ -17,6 +17,6 @@ dependencies:
   - black
   - pip:
     - -e .
-    #- bpy>=3.2 # Official module, only since 3.4
+    #- bpy>=3.2 # Official blender-as-module, only since 3.4 (no Audaspace)
     #- fake-bpy-module-3.3
-    - fake-bpy-module-latest
+    #- fake-bpy-module-latest
