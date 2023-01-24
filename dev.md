@@ -103,8 +103,11 @@ bpy.ops.sound.open(filepath='/tmp/work/1.ogg')
 
 Uilist:
 https://blender.stackexchange.com/questions/30444/create-an-interface-which-is-similar-to-the-material-list-box/30446#30446
-
+https://blender.stackexchange.com/questions/8699/what-ui-would-work-for-choosing-from-a-long-long-list
 https://blender.stackexchange.com/questions/717/is-it-possible-to-print-to-the-report-window-in-the-info-view
+
+Icons:
+https://wilkinson.graphics/blender-icons/
 
 Best practice:
 https://docs.blender.org/api/current/info_best_practice.html

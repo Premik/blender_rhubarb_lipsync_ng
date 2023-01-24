@@ -25,28 +25,23 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
     # bl_description = "Tool tip"
     # bl_context = "object"
 
-    def draw_error(self, msg: str):
-        box = self.layout.box()
-        box.label(text=msg, icon="ERROR")
-
     def draw_sound_setup(self, sound: Sound) -> bool:
         layout = self.layout
         layout.prop(sound, "filepath", text="")  # type: ignore
         if sound.packed_file:
-            self.draw_error("Rhubarb requires the file on disk.")
-            self.draw_error("Please unpack the sound.")
+            ui_utils.draw_error(self.layout, "Rhubarb requires the file on disk.\n Please unpack the sound.")
             unpackop = layout.operator("sound.unpack", icon='PACKAGE', text=f"Unpack '{sound.name}'")
             unpackop.id = sound.name_full  # type: ignore
             unpackop.method = 'USE_ORIGINAL'  # type: ignore
             return False
         path = pathlib.Path(sound.filepath)
         if not path.exists:
-            self.draw_error("Sound file doesn't exist.")
+            ui_utils.draw_error(self.layout, "Sound file doesn't exist.")
             return False
 
         props = CaptureProperties.from_context(self.ctx)
         if not props.is_sound_format_supported():
-            self.draw_error("Only wav or ogg supported.")
+            ui_utils.draw_error(self.layout, "Only wav or ogg supported.")
             row = layout.row(align=True)
             row.label(text="Convert to")
             blid = sound_operators.ConvertSoundFromat.bl_idname
@@ -101,7 +96,7 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
             layout.operator(sound_operators.RemoveSoundStripWithSound.bl_idname, icon='MUTE_IPO_OFF')
             selection_error = ui_utils.context_selection_validation(context)
             if selection_error:
-                self.draw_error(selection_error)
+                ui_utils.draw_error(self.layout, selection_error)
                 return
 
             # layout.prop(self.props, "sound")
@@ -109,7 +104,7 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
             assert props
             layout.template_ID(props, "sound", open="sound.open")  # type: ignore
             if props.sound is None:
-                self.draw_error("Select a sound file.")
+                ui_utils.draw_error(self.layout, "Select a sound file.")
                 return
             if not self.draw_sound_setup(props.sound):
                 self.draw_info(props.sound)
@@ -118,8 +113,7 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
             layout.operator(rhubarb_operators.ProcessSoundFile.bl_idname)
 
         except Exception as e:
-            self.draw_error("Unexpected error.")
-            self.draw_error(str(e))
+            ui_utils.draw_error(self.layout, f"Unexpected error. \n {e}")
             raise
         finally:
             self.ctx = None  # type: ignore

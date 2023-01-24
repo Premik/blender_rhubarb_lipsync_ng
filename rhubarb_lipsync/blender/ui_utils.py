@@ -55,3 +55,25 @@ def draw_expandable_header(props: Any, property_name: str, label: str, layout: U
     row.prop(props, property_name, text=label, emboss=False, icon=icon)
 
     return expanded
+
+
+def draw_prop_with_label(props: Any, property_name: str, label, layout: UILayout):
+    col = layout.column()
+    split = col.split(factor=0.229)
+    split.alignment = 'LEFT'
+    split.label(text=label)
+    split.prop(props, property_name, text="")
+
+
+def draw_error(layout, msg: str):
+    box = layout.box()
+    lines = msg.splitlines()
+    if not lines:
+        lines = [""]
+    if len(lines) == 1:  # Single line
+        box.label(text=msg, icon="ERROR")
+        return
+    # Multiline
+    box.label(text="", icon="ERROR")
+    for l in lines:
+        box.label(text=l)

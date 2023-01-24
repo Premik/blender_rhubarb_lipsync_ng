@@ -185,7 +185,7 @@ class ConvertSoundFromat(bpy.types.Operator):
         'SURROUND_71': (str(aud.CHANNELS_SURROUND71), 'SURROUND_71', ""),
     }
 
-    rate: IntProperty(name="Rate", description="Samplerate of the audio in Hz")  # type: ignore
+    rate: IntProperty(name="Rate", description="Sample-rate of the audio in Hz", min=4000, max=64000)  # type: ignore
     channels: EnumProperty(name="Channels", items=channels_configs.values(), default=str(aud.CHANNELS_MONO))  # type: ignore
     format: EnumProperty(  # type: ignore
         name="Format",
@@ -200,7 +200,7 @@ class ConvertSoundFromat(bpy.types.Operator):
         ],
         default=str(aud.FORMAT_U8),
     )
-    bitrate: IntProperty(name="Bitrate", description="", default=128 * 1024)  # type: ignore
+    bitrate: IntProperty(name="Bitrate", description="", default=128 * 1024, min=16 * 1024, max=256 * 1024)  # type: ignore
 
     write_configs = {
         "ogg": (aud.CONTAINER_OGG, aud.CODEC_VORBIS),
@@ -216,16 +216,8 @@ class ConvertSoundFromat(bpy.types.Operator):
 
     @property
     def target_path_full(self) -> pathlib.Path:
-        return pathlib.Path(self.target_folder) / pathlib.Path(self.target_filename)
-
-    # filename (string) – The path to write to.
-    # rate (int) – The sample rate to write with.
-    # channels (int) – The number of channels to write with.
-    # format (int) – The sample format to write with.
-    # container (int) – The container format for the file.
-    # codec (int) – The codec to use in the file.
-    # bitrate (int) – The bitrate to write with.
-    # buffersize (int) – The size of the writing buffer.
+        folder = pathlib.Path(bpy.path.abspath(self.target_folder))
+        return folder / pathlib.Path(self.target_filename)
 
     @staticmethod
     def init_props_from_sound(op_props, context: Context) -> None:
@@ -273,15 +265,34 @@ class ConvertSoundFromat(bpy.types.Operator):
         cls.poll_message_set(m)  # type: ignore
         return False
 
+    def draw(self, context: Context):
+
+        layout = self.layout
+        layout.prop(self, "codec")
+        ui_utils.draw_prop_with_label(self, "rate", "Rate", layout)
+        layout.prop(self, "channels")
+        layout.prop(self, "format")
+        ui_utils.draw_prop_with_label(self, "bitrate", "Bitrate", layout)
+        layout.separator()
+
+        layout.prop(self, "target_folder")
+        layout.prop(self, "target_filename")
+        if self.target_path_full and self.target_path_full.exists():
+            ui_utils.draw_error(self.layout, f"The file exists and will be overwritten:\n{self.target_path_full}")
+            # ui_utils.draw_error(self.layout, f"exists and will be overwritten.")
+
     def invoke(self, context: Context, event) -> set[int] | set[str]:
         # Open dialog
         wm = context.window_manager
         return wm.invoke_props_dialog(self)
 
     def execute(self, context: Context) -> set[str]:
+
         props = CaptureProperties.from_context(context)
         sound: Sound = props.sound
-        asound = aud.Sound(sound.filepath)
+        src_path = pathlib.Path(bpy.path.abspath(sound.filepath))
+        bpy.context.window.cursor_set("WAIT")
+        asound = aud.Sound(str(src_path))
         args = {
             "filename": str(self.target_path_full),
             "rate": self.rate,
@@ -293,6 +304,10 @@ class ConvertSoundFromat(bpy.types.Operator):
             "buffersize": 64 * 1024,
         }
         log.info(f"Saving {self.target_path_full}. \n{args}")
-        asound.write(**args)
+        try:
+            bpy.context.window.cursor_set("WAIT")
+            asound.write(**args)
+        finally:
+            bpy.context.window.cursor_set("DEFAULT")
 
         return {'FINISHED'}
