@@ -48,11 +48,16 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
         if not props.is_sound_format_supported():
             self.draw_error("Only wav or ogg supported.")
             row = layout.row(align=True)
-            # row.label(text="Convert to")
+            row.label(text="Convert to")
             blid = sound_operators.ConvertSoundFromat.bl_idname
-            # row.operator(blid, text="ogg").codec = 'ogg'
-            # row.operator(blid, text="wav").codec = 'wav'
-            op = row.operator(blid)
+
+            op = row.operator(blid, text="ogg")
+            op.codec = 'ogg'
+            sound_operators.ConvertSoundFromat.init_props_from_sound(op, self.ctx)
+
+            op = row.operator(blid, text="wav")
+            op.codec = 'wav'
+            sound_operators.ConvertSoundFromat.init_props_from_sound(op, self.ctx)
 
             return False
 
@@ -78,9 +83,10 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
 
         line = box.split()
         line.label(text="Rhubarb version")
-        if RhubarbAddonPreferences.rhubarb_executable_version:
-            line.label(text=RhubarbAddonPreferences.rhubarb_executable_version)
-        else:
+        ver = rhubarb_operators.GetRhubarbExecutableVersion.get_cached_value(self.ctx)
+        if ver:  # Cached value, just show
+            line.label(text=ver)
+        else:  # Not cached, offer button
             line.operator(rhubarb_operators.GetRhubarbExecutableVersion.bl_idname)
 
         line = box.split()

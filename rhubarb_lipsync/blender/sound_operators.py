@@ -5,7 +5,7 @@ from bpy.types import Context, Sound, SoundSequence
 
 from typing import Optional, List, Dict, cast
 from bpy.props import FloatProperty, StringProperty, BoolProperty, PointerProperty, IntProperty, EnumProperty
-from rhubarb_lipsync.blender.properties import CaptureProperties
+from rhubarb_lipsync.blender.properties import CaptureProperties, RhubarbAddonPreferences
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 import pathlib
 import aud
@@ -162,6 +162,7 @@ class ConvertSoundFromat(bpy.types.Operator):
 
     bl_idname = "rhubarb.sound_convert"
     bl_label = "Convert"
+    bl_description = __doc__
 
     codec: EnumProperty(  # type: ignore
         name="Codec",
@@ -172,12 +173,50 @@ class ConvertSoundFromat(bpy.types.Operator):
         default="ogg",
     )
 
+    channels_configs = {
+        'INVALID': (str(aud.CHANNELS_INVALID), 'INVALID', ""),
+        'MONO': (str(aud.CHANNELS_MONO), 'MONO', ""),
+        'STEREO': (str(aud.CHANNELS_STEREO), 'STEREO', ""),
+        'STEREO_LFE': (str(aud.CHANNELS_STEREO_LFE), 'STEREO_LFE', ""),
+        'CHANNELS_4': (str(aud.CHANNELS_SURROUND4), 'CHANNELS_4', ""),
+        'CHANNELS_5': (str(aud.CHANNELS_SURROUND5), 'CHANNELS_5', ""),
+        'SURROUND_51': (str(aud.CHANNELS_SURROUND51), 'SURROUND_51', ""),
+        'SURROUND_61': (str(aud.CHANNELS_SURROUND61), 'SURROUND_61', ""),
+        'SURROUND_71': (str(aud.CHANNELS_SURROUND71), 'SURROUND_71', ""),
+    }
+
     rate: IntProperty(name="Rate", description="Samplerate of the audio in Hz")  # type: ignore
+    channels: EnumProperty(name="Channels", items=channels_configs.values(), default=str(aud.CHANNELS_MONO))  # type: ignore
+    format: EnumProperty(  # type: ignore
+        name="Format",
+        items=[
+            (str(aud.FORMAT_INVALID), 'INVALID', ""),
+            (str(aud.FORMAT_U8), 'FORMAT_U8', ""),
+            (str(aud.FORMAT_S16), 'FORMAT_S16', ""),
+            (str(aud.FORMAT_S24), 'FORMAT_S24', ""),
+            (str(aud.FORMAT_S32), 'FORMAT_S32', ""),
+            (str(aud.FORMAT_FLOAT32), 'FORMAT_FLOAT32', ""),
+            (str(aud.FORMAT_FLOAT64), 'FORMAT_FLOAT64', ""),
+        ],
+        default=str(aud.FORMAT_U8),
+    )
+    bitrate: IntProperty(name="Bitrate", description="", default=128 * 1024)  # type: ignore
 
     write_configs = {
-        "ogg": (aud.CODEC_VORBIS, aud.CONTAINER_OGG),
-        "wav": (aud.CODEC_PCM, aud.CONTAINER_WAV),
+        "ogg": (aud.CONTAINER_OGG, aud.CODEC_VORBIS),
+        "wav": (aud.CONTAINER_WAV, aud.CODEC_PCM),
     }
+
+    @property
+    def write_config(self) -> tuple[int, int, int]:
+        return ConvertSoundFromat.write_configs.get(self.codec, None)  # type: ignore
+
+    target_folder: StringProperty(name="Target folder", subtype='FILE_PATH')  # type: ignore
+    target_filename: StringProperty(name="Target name")  # type: ignore
+
+    @property
+    def target_path_full(self) -> pathlib.Path:
+        return pathlib.Path(self.target_folder) / pathlib.Path(self.target_filename)
 
     # filename (string) – The path to write to.
     # rate (int) – The sample rate to write with.
@@ -189,10 +228,26 @@ class ConvertSoundFromat(bpy.types.Operator):
     # buffersize (int) – The size of the writing buffer.
 
     @staticmethod
-    def init_props_from_sound(props, sound: Sound) -> None:
+    def init_props_from_sound(op_props, context: Context) -> None:
+
+        prefs = RhubarbAddonPreferences.from_context(context)
+        props = CaptureProperties.from_context(bpy.context)
         """Init the self's props from layout.prop call."""
-        this = cast(ConvertSoundFromat, props)  #  The props arg contains the same set of properties as self)
+        this = cast(ConvertSoundFromat, op_props)  #  The op_props arg contains the same set of properties as self)
+        sound: Sound = props.sound
         this.rate = sound.samplerate
+        # Map sound's channel enum (string) to aud constant (int).
+        ch_cfg = ConvertSoundFromat.channels_configs
+        ch = ch_cfg.get(sound.channels, ch_cfg['INVALID'])
+        this.channels = ch[0]  # Enum id = aud constant
+
+        # this.channels = sound.channels
+
+        if prefs.default_converted_output_folder:
+            this.target_folder = prefs.default_converted_output_folder
+        else:
+            this.target_folder = props.sound_file_folder
+        this.target_filename = props.get_sound_name_with_new_extension(this.codec)
 
     @classmethod
     def description(csl, context: Context, self: 'ConvertSoundFromat') -> str:
@@ -227,6 +282,17 @@ class ConvertSoundFromat(bpy.types.Operator):
         props = CaptureProperties.from_context(context)
         sound: Sound = props.sound
         asound = aud.Sound(sound.filepath)
-        # asound.write
+        args = {
+            "filename": str(self.target_path_full),
+            "rate": self.rate,
+            "channels": int(self.channels),
+            "format": int(self.format),
+            "container": self.write_config[0],
+            "codec": self.write_config[1],
+            "bitrate": self.bitrate,
+            "buffersize": 64 * 1024,
+        }
+        log.info(f"Saving {self.target_path_full}. \n{args}")
+        asound.write(**args)
 
         return {'FINISHED'}

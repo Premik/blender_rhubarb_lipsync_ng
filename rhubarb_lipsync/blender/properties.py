@@ -20,8 +20,6 @@ def default_executable_path() -> pathlib.Path:
 class RhubarbAddonPreferences(AddonPreferences):
     bl_idname = 'rhubarb_lipsync'
 
-    rhubarb_executable_version: str = ""
-
     @staticmethod
     def from_context(ctx: Context) -> 'RhubarbAddonPreferences':
         addon = ctx.preferences.addons[RhubarbAddonPreferences.bl_idname]
@@ -51,19 +49,33 @@ class RhubarbAddonPreferences(AddonPreferences):
 
     info_panel_expanded: BoolProperty(default=True)  # type: ignore
 
+    default_converted_output_folder: StringProperty(  # type: ignore
+        name="Default output for converted files",
+        description="Where to put the new wav/ogg files resulted from the conversion from an unsupported formats. Leave blank to use the source file's folder.",
+        subtype='FILE_PATH',
+        default="",
+    )
+
     def new_command_handler(self):
         return RhubarbCommandWrapper(self.executable_path, self.recognizer)
 
-    def draw(self, context):
+    def draw(self, context: Context):
         layout = self.layout
         layout.prop(self, "executable_path_string")
         row = layout.row().split(factor=0.243)
         row.label(text="Rhubarb executable version:")
-        if RhubarbAddonPreferences.rhubarb_executable_version:
-            row.label(text=RhubarbAddonPreferences.rhubarb_executable_version)
-        else:
-            row.operator('rhubarb.get_executable_version')
+
+        # Hack to avoid circumvent circular imports
+        import rhubarb_lipsync.blender.rhubarb_operators as rhubarb_operators
+
+        ver = rhubarb_operators.GetRhubarbExecutableVersion.get_cached_value(context)
+        if ver:  # Cached value, just show
+            row.label(text=ver)
+        else:  # Not cached, offer button
+            row.operator(rhubarb_operators.GetRhubarbExecutableVersion.bl_idname)
+
         layout.prop(self, "recognizer")
+        layout.prop(self, 'default_converted_output_folder')
 
 
 class CaptureProperties(PropertyGroup):
@@ -143,7 +155,7 @@ class CaptureProperties(PropertyGroup):
     def is_sound_format_supported(self) -> bool:
         return self.sound_file_extension in ["ogg", "wav"]
 
-    def get_sound_name_new_extension(self, new_ext: str) -> str:
+    def get_sound_name_with_new_extension(self, new_ext: str) -> str:
         p = self.sound_file_basename
         assert p, "Can't change extension while sound file is not set"
         assert new_ext is not None

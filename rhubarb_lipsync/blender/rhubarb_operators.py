@@ -27,6 +27,19 @@ class GetRhubarbExecutableVersion(bpy.types.Operator):
     bl_label = "Check rhubarb version"
     bl_description = __doc__
 
+    executable_version = ""
+    executable_last_path = ""
+
+    @classmethod
+    def get_cached_value(cls, context: Context) -> str:
+        prefs = RhubarbAddonPreferences.from_context(context)
+        if not cls.executable_version:
+            return ""  # Has not been called yet
+        if prefs.executable_path_string != GetRhubarbExecutableVersion.executable_last_path:
+            return ""  # Executable path changed, requires new execution
+        # Return cached version
+        return cls.executable_version
+
     @classmethod
     def disabled_reason(cls, context: Context, limit=0) -> str:
         prefs = RhubarbAddonPreferences.from_context(context)
@@ -48,5 +61,7 @@ class GetRhubarbExecutableVersion(bpy.types.Operator):
     def execute(self, context: Context) -> set[str]:
         prefs = RhubarbAddonPreferences.from_context(context)
         cmd = prefs.new_command_handler()
-        RhubarbAddonPreferences.rhubarb_executable_version = cmd.get_version()
+        GetRhubarbExecutableVersion.executable_version = cmd.get_version()
+        # Cache to alow re-run on config changes
+        GetRhubarbExecutableVersion.executable_last_path = str(cmd.executable_path)
         return {'FINISHED'}

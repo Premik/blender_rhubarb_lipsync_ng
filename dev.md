@@ -7,6 +7,9 @@ source /opt/mambaforge/etc/profile.d/conda.sh
 ```
 
 
+## License
+`# SPDX-License-Identifier: MIT`
+
 ### Create
 #mamba env create  -f environment.yaml
 
@@ -102,3 +105,6 @@ Uilist:
 https://blender.stackexchange.com/questions/30444/create-an-interface-which-is-similar-to-the-material-list-box/30446#30446
 
 https://blender.stackexchange.com/questions/717/is-it-possible-to-print-to-the-report-window-in-the-info-view
+
+Best practice:
+https://docs.blender.org/api/current/info_best_practice.html
