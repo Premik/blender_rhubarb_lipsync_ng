@@ -9,10 +9,13 @@ import rhubarb_lipsync.blender.auto_load
 from rhubarb_lipsync.blender.properties import CaptureProperties
 
 
+def setUpModule():
+    rhubarb_lipsync.register()  # Simulate blender register call
+
+
 class PropertiesTest(unittest.TestCase):
     def setUp(self):
 
-        rhubarb_lipsync.register()  # Simulate blender register call
         # There is the default cube already..
         # bpy.ops.mesh.primitive_cube_add()
         # obj = bpy.context.object
@@ -29,7 +32,7 @@ class PropertiesTest(unittest.TestCase):
         self.assertIn('data', props.sound_file_folder)
         self.assertTrue(props.is_sound_format_supported())
 
-        newName = self.props.get_sound_name_new_extension("wav")
+        newName = self.props.get_sound_name_with_new_extension("wav")
         self.assertEqual(newName, 'en_male_watchingtv.wav')
 
 

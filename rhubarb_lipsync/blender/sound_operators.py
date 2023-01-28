@@ -26,14 +26,44 @@ poll_search_limit = 50
 # bpy.data.scenes['Scene'].sequence_editor.sequences_all["en_male_electricity.ogg"]
 
 
-def sound_common_validation(context: Context) -> str:
-    selection_error = ui_utils.context_selection_validation(context)
+def sound_common_validation(context: Context, required_unpack=True) -> str:
+    selection_error = CaptureProperties.context_selection_validation(context)
     if selection_error:
         return selection_error
     props = CaptureProperties.from_context(context)
     if not props.sound:
         return "No sound selected"
+    props = CaptureProperties.from_context(context)
+    sound: Sound = props.sound
+    if required_unpack and sound.packed_file:
+        return "Please unpack the sound first."
     return ""
+
+
+def find_strips_of_sound(context: Context, limit=0) -> list[SoundSequence]:
+    '''Finds a sound strip which is using the selected sounds.'''
+    exact_match: list[SoundSequence] = []
+    name_match: list[SoundSequence] = []
+    props = CaptureProperties.from_context(context)
+    sound: Sound = props.sound
+    if not sound:
+        return []
+
+    for i, sq in enumerate(context.scene.sequence_editor.sequences_all):
+        if limit > 0 and i > limit:
+            break  # Limit reached, break the search (for performance reasons)
+        if not hasattr(sq, "sound"):
+            continue  # Not a sound strip
+        ssq = cast(SoundSequence, sq)
+        foundSnd = ssq.sound
+        if foundSnd is None:
+            continue  # An empty strip
+        if sound == foundSnd:
+            name_match += [ssq]
+            continue
+        if sound.filepath == foundSnd.filepath:
+            name_match += [ssq]
+    return exact_match + name_match  # Exact matches first
 
 
 class CreateSoundStripWithSound(bpy.types.Operator):
@@ -50,11 +80,11 @@ class CreateSoundStripWithSound(bpy.types.Operator):
 
     @classmethod
     def disabled_reason(cls, context: Context, limit=0) -> str:
-        error_common = sound_common_validation(context)
+        error_common = sound_common_validation(context, False)
         if error_common:
             return error_common
         props = CaptureProperties.from_context(context)
-        strip = props.find_strips_of_sound(context, limit)
+        strip = find_strips_of_sound(context, limit)
         if strip:
             return f"Already placed on a strip on the channel {strip[0].channel} at frame {strip[0].frame_start}."
         return ""
@@ -93,7 +123,7 @@ class CreateSoundStripWithSound(bpy.types.Operator):
 
         # The above op always create a new sound, even when there is the same one already imported.
         # Find the newly created strip and change its sound back to the selected one
-        strips = props.find_strips_of_sound(context)
+        strips = find_strips_of_sound(context)
         assert strips, f"Was not able to locate the newly placed sound strip with the '{sound.filepath}'."
         if len(strips) > 1:
             self.report({"ERROR"}, f"There is more than one sound strips using the sound with '{sound.filepath}'.")
@@ -121,11 +151,11 @@ class RemoveSoundStripWithSound(bpy.types.Operator):
 
     @classmethod
     def disabled_reason(cls, context: Context, limit=0) -> str:
-        error_common = sound_common_validation(context)
+        error_common = sound_common_validation(context, False)
         if error_common:
             return error_common
         props = CaptureProperties.from_context(context)
-        strip = props.find_strips_of_sound(context, limit)
+        strip = find_strips_of_sound(context, limit)
         if not strip:
             return f"No strip using the current sound found."
         return ""
@@ -146,7 +176,7 @@ class RemoveSoundStripWithSound(bpy.types.Operator):
             return {'CANCELLED'}
         props = CaptureProperties.from_context(context)
         sound: Sound = props.sound
-        strips = props.find_strips_of_sound(context)
+        strips = find_strips_of_sound(context)
         assert strips
         if len(strips) > 1:
             m = f"There is more than one sound strips using the sound with '{sound.filepath}'. Don't know which one to remove."
@@ -154,6 +184,43 @@ class RemoveSoundStripWithSound(bpy.types.Operator):
             return {'CANCELLED'}
         se = context.scene.sequence_editor
         se.sequences.remove(strips[0])
+        return {'FINISHED'}
+
+
+class ToggleRelativePath(bpy.types.Operator):
+    """Conver the sound path to absolute/relative"""
+
+    bl_idname = "rhubarb.toggle_relative_path"
+    bl_label = "Relative/Absolute"
+
+    relative: BoolProperty(name="relative", description="Whether to convert to relative or absolute path")  # type: ignore
+
+    @classmethod
+    def description(csl, context: Context, self: 'ToggleRelativePath') -> str:
+        return f"Convert to {'relative' if self.relative else 'absolute' } path"
+
+    @classmethod
+    def poll(cls, context: Context) -> bool:
+        m = sound_common_validation(context)
+        if not m:
+            return True
+        # Following is not a class method per doc. But seems to work like it
+        cls.poll_message_set(m)  # type: ignore
+        return False
+
+    def get_converted(self, sound: Sound) -> str:
+        if self.relative:
+            return ui_utils.to_relative_path(sound.filepath)
+        else:
+            return ui_utils.to_abs_path(sound.filepath)
+
+    def execute(self, context: Context) -> set[str]:
+        props = CaptureProperties.from_context(context)
+        sound: Sound = props.sound
+        old = sound.filepath
+        sound.filepath = self.get_converted(sound)
+        if old == sound.filepath:  # Unchanged
+            return {'CANCELLED'}
         return {'FINISHED'}
 
 
@@ -303,11 +370,18 @@ class ConvertSoundFromat(bpy.types.Operator):
             "bitrate": self.bitrate,
             "buffersize": 64 * 1024,
         }
-        log.info(f"Saving {self.target_path_full}. \n{args}")
+        m = f"Saving {self.target_path_full}. \n{args}"
+        log.info(m)
+        self.report({'INFO'}, m)
         try:
             bpy.context.window.cursor_set("WAIT")
             asound.write(**args)
         finally:
             bpy.context.window.cursor_set("DEFAULT")
+        # Open the newly created ogg/wav file
+        ret = bpy.ops.sound.open(filepath=str(self.target_path_full))
+        if not 'FINISHED' in ret:
+            self.report({'ERROR'}, f"Failed to open the new file {self.target_path_full}")
+            return {'FINISHED'}
 
         return {'FINISHED'}

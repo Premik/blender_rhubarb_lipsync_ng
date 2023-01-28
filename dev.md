@@ -111,3 +111,22 @@ https://wilkinson.graphics/blender-icons/
 
 Best practice:
 https://docs.blender.org/api/current/info_best_practice.html
+
+
+## Todo
+
+* Add [speaker](https://docs.blender.org/manual/en/latest/render/output/audio/speaker.html) as an alternative to Sequencer audio clip
+* Set start frame?
+
+
+
+```
+if not bpy.data.is_saved:
+            self.relative = False
+if self.relative:
+            try:  # can't always find the relative path (between drive letters on windows)
+                image.filepath = bpy.path.relpath(image.filepath)
+            except ValueError:
+                pass
+
+```            

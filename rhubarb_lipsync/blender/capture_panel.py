@@ -28,6 +28,11 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
     def draw_sound_setup(self, sound: Sound) -> bool:
         layout = self.layout
         layout.prop(sound, "filepath", text="")  # type: ignore
+        row = layout.row(align=True)
+        blid = sound_operators.ToggleRelativePath.bl_idname
+        op = row.operator(blid, text="Relative").relative = True
+        op = row.operator(blid, text="Absolute").relative = False
+
         if sound.packed_file:
             ui_utils.draw_error(self.layout, "Rhubarb requires the file on disk.\n Please unpack the sound.")
             unpackop = layout.operator("sound.unpack", icon='PACKAGE', text=f"Unpack '{sound.name}'")
@@ -94,7 +99,7 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
             layout = self.layout
             layout.operator(sound_operators.CreateSoundStripWithSound.bl_idname, icon='SPEAKER')
             layout.operator(sound_operators.RemoveSoundStripWithSound.bl_idname, icon='MUTE_IPO_OFF')
-            selection_error = ui_utils.context_selection_validation(context)
+            selection_error = CaptureProperties.context_selection_validation(context)
             if selection_error:
                 ui_utils.draw_error(self.layout, selection_error)
                 return

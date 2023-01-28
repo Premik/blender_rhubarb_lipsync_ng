@@ -96,28 +96,14 @@ class CaptureProperties(PropertyGroup):
             return None  # type: ignore
         return p
 
-    def find_strips_of_sound(self, context: Context, limit=0) -> list[SoundSequence]:
-        '''Finds a sound strip which is using the selected sounds.'''
-        exact_match: list[SoundSequence] = []
-        name_match: list[SoundSequence] = []
-        if not self.sound:
-            return []
-
-        for i, sq in enumerate(context.scene.sequence_editor.sequences_all):
-            if limit > 0 and i > limit:
-                break  # Limit reached, break the search (for performance reasons)
-            if not hasattr(sq, "sound"):
-                continue  # Not a sound strip
-            ssq = cast(SoundSequence, sq)
-            foundSnd = ssq.sound
-            if foundSnd is None:
-                continue  # An empty strip
-            if self.sound == foundSnd:
-                name_match += [ssq]
-                continue
-            if self.sound.filepath == foundSnd.filepath:
-                name_match += [ssq]
-        return exact_match + name_match  # Exact matches first
+    @staticmethod
+    def context_selection_validation(ctx: Context) -> str:
+        """Validates there is an active object with the rhubarb properties in the blender context"""
+        if not ctx.object:
+            return "No active object selected"
+        if not CaptureProperties.from_context(ctx):
+            return "'rhubarb_lipsync' not found on the active object"
+        return ""
 
     @property
     def sound_file_path(self) -> pathlib.Path:

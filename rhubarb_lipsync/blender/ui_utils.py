@@ -1,7 +1,6 @@
 import bpy
-from bpy.types import Context, Window, Area, UILayout
+from bpy.types import Context, Window, Area, UILayout, SoundSequence, Sound
 from typing import Any, Iterator
-from rhubarb_lipsync.blender.properties import CaptureProperties
 
 
 def find_areas_by_type(context: Context, area_type: str) -> Iterator[tuple[Window, Area]]:
@@ -25,14 +24,6 @@ def get_sequencer_context(context: Context) -> dict:
         "area": area,
         "scene": context.scene,
     }
-
-
-def context_selection_validation(ctx: Context) -> str:
-    if not ctx.object:
-        return "No active object selected"
-    if not CaptureProperties.from_context(ctx):
-        return "'rhubarb_lipsync' not found on the active object"
-    return ""
 
 
 def assert_op_ret(ret: set[str]):
@@ -77,3 +68,18 @@ def draw_error(layout, msg: str):
     box.label(text="", icon="ERROR")
     for l in lines:
         box.label(text=l)
+
+
+def to_relative_path(blender_path: str) -> str:
+    if not blender_path:
+        return ""
+    try:  # Can fail on windows
+        return bpy.path.relpath(blender_path)
+    except ValueError:
+        return blender_path  # Keep unchanged
+
+
+def to_abs_path(blender_path: str) -> str:
+    if not blender_path:
+        return ""
+    return bpy.path.abspath(blender_path)
