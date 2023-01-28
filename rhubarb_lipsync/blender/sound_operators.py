@@ -42,8 +42,7 @@ def sound_common_validation(context: Context, required_unpack=True) -> str:
 
 def find_strips_of_sound(context: Context, limit=0) -> list[SoundSequence]:
     '''Finds a sound strip which is using the selected sounds.'''
-    exact_match: list[SoundSequence] = []
-    name_match: list[SoundSequence] = []
+    ret: list[SoundSequence] = []
     props = CaptureProperties.from_context(context)
     sound: Sound = props.sound
     if not sound:
@@ -59,11 +58,17 @@ def find_strips_of_sound(context: Context, limit=0) -> list[SoundSequence]:
         if foundSnd is None:
             continue  # An empty strip
         if sound == foundSnd:
-            name_match += [ssq]
+            ret.insert(0, ssq)  # At the top, priority
             continue
-        if sound.filepath == foundSnd.filepath:
-            name_match += [ssq]
-    return exact_match + name_match  # Exact matches first
+        if bpy.path.abspath(sound.filepath) == bpy.path.abspath(foundSnd.filepath):
+            ret.append(ssq)  # Match by name, append to end
+    return ret
+
+
+def find_sounds_by_path(sound_path: str) -> list[Sound]:
+    sound_path = bpy.path.abspath(sound_path)
+    unpacked_sounds = [s for s in bpy.data.sounds if s.filepath and not s.packed_file]
+    return [s for s in unpacked_sounds if bpy.path.abspath(s.filepath) == sound_path]
 
 
 class CreateSoundStripWithSound(bpy.types.Operator):
@@ -219,8 +224,8 @@ class ToggleRelativePath(bpy.types.Operator):
         sound: Sound = props.sound
         old = sound.filepath
         sound.filepath = self.get_converted(sound)
-        if old == sound.filepath:  # Unchanged
-            return {'CANCELLED'}
+        if old == sound.filepath:
+            self.report({'INFO'}, f"Unchanged")
         return {'FINISHED'}
 
 
@@ -305,7 +310,7 @@ class ConvertSoundFromat(bpy.types.Operator):
         if prefs.default_converted_output_folder:
             this.target_folder = prefs.default_converted_output_folder
         else:
-            this.target_folder = props.sound_file_folder
+            this.target_folder = bpy.path.abspath(props.sound_file_folder)
         this.target_filename = props.get_sound_name_with_new_extension(this.codec)
 
     @classmethod
@@ -313,19 +318,8 @@ class ConvertSoundFromat(bpy.types.Operator):
         return f"Convert the selected sound to {self.codec}"
 
     @classmethod
-    def disabled_reason(cls, context: Context, limit=0) -> str:
-        error_common = sound_common_validation(context)
-        if error_common:
-            return error_common
-        props = CaptureProperties.from_context(context)
-        sound: Sound = props.sound
-        if sound.packed_file:
-            return "Please unpack the sound first."
-        return ""
-
-    @classmethod
     def poll(cls, context: Context) -> bool:
-        m = cls.disabled_reason(context)
+        m = sound_common_validation(context)
         if not m:
             return True
         # Following is not a class method per doc. But seems to work like it
@@ -370,9 +364,9 @@ class ConvertSoundFromat(bpy.types.Operator):
             "bitrate": self.bitrate,
             "buffersize": 64 * 1024,
         }
-        m = f"Saving {self.target_path_full}. \n{args}"
-        log.info(m)
-        self.report({'INFO'}, m)
+
+        log.info(f"Saving {self.target_path_full}. \n{args}")
+        self.report({'INFO'}, f"Saving {self.target_path_full}")
         try:
             bpy.context.window.cursor_set("WAIT")
             asound.write(**args)
@@ -381,7 +375,11 @@ class ConvertSoundFromat(bpy.types.Operator):
         # Open the newly created ogg/wav file
         ret = bpy.ops.sound.open(filepath=str(self.target_path_full))
         if not 'FINISHED' in ret:
-            self.report({'ERROR'}, f"Failed to open the new file {self.target_path_full}")
+            self.report({'WARNING'}, f"Failed to import and open the new file {self.target_path_full}")
             return {'FINISHED'}
-
+        new_sounds = find_sounds_by_path(str(self.target_path_full))
+        if not new_sounds:
+            self.report({'WARNING'}, f"Failed to select the new file. The {self.target_path_full} not found in the sound datablocks")
+            return {'FINISHED'}
+        props.sound = new_sounds[0]
         return {'FINISHED'}

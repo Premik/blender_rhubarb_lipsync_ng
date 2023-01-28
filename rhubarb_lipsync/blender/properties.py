@@ -48,6 +48,7 @@ class RhubarbAddonPreferences(AddonPreferences):
     )
 
     info_panel_expanded: BoolProperty(default=True)  # type: ignore
+    sound_source_panel_expanded: BoolProperty(default=True)  # type: ignore
 
     default_converted_output_folder: StringProperty(  # type: ignore
         name="Default output for converted files",

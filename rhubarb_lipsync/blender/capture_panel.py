@@ -25,13 +25,26 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
     # bl_description = "Tool tip"
     # bl_context = "object"
 
-    def draw_sound_setup(self, sound: Sound) -> bool:
+    def draw_sound_setup(self, sound: Sound) -> str:
+        props = CaptureProperties.from_context(self.ctx)
+        prefs = RhubarbAddonPreferences.from_context(self.ctx)
+        if not ui_utils.draw_expandable_header(prefs, "sound_source_panel_expanded", "Input sound setup", self.layout):
+            return False
+
         layout = self.layout
+        layout.template_ID(props, "sound", open="sound.open")  # type: ignore
+        if props.sound is None:
+            ui_utils.draw_error(self.layout, "Select a sound file.")
+            return False
         layout.prop(sound, "filepath", text="")  # type: ignore
         row = layout.row(align=True)
         blid = sound_operators.ToggleRelativePath.bl_idname
         op = row.operator(blid, text="Relative").relative = True
         op = row.operator(blid, text="Absolute").relative = False
+
+        row = layout.row(align=True)
+        row.operator(sound_operators.CreateSoundStripWithSound.bl_idname, icon='SPEAKER')
+        row.operator(sound_operators.RemoveSoundStripWithSound.bl_idname, icon='MUTE_IPO_OFF')
 
         if sound.packed_file:
             ui_utils.draw_error(self.layout, "Rhubarb requires the file on disk.\n Please unpack the sound.")
@@ -44,7 +57,6 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
             ui_utils.draw_error(self.layout, "Sound file doesn't exist.")
             return False
 
-        props = CaptureProperties.from_context(self.ctx)
         if not props.is_sound_format_supported():
             ui_utils.draw_error(self.layout, "Only wav or ogg supported.")
             row = layout.row(align=True)
@@ -52,11 +64,11 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
             blid = sound_operators.ConvertSoundFromat.bl_idname
 
             op = row.operator(blid, text="ogg")
-            op.codec = 'ogg'
+            op.codec = 'ogg'  # type: ignore
             sound_operators.ConvertSoundFromat.init_props_from_sound(op, self.ctx)
 
             op = row.operator(blid, text="wav")
-            op.codec = 'wav'
+            op.codec = 'wav'  # type: ignore
             sound_operators.ConvertSoundFromat.init_props_from_sound(op, self.ctx)
 
             return False
@@ -97,8 +109,6 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
         try:
             self.ctx = context
             layout = self.layout
-            layout.operator(sound_operators.CreateSoundStripWithSound.bl_idname, icon='SPEAKER')
-            layout.operator(sound_operators.RemoveSoundStripWithSound.bl_idname, icon='MUTE_IPO_OFF')
             selection_error = CaptureProperties.context_selection_validation(context)
             if selection_error:
                 ui_utils.draw_error(self.layout, selection_error)
@@ -107,10 +117,6 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
             # layout.prop(self.props, "sound")
             props = CaptureProperties.from_context(self.ctx)
             assert props
-            layout.template_ID(props, "sound", open="sound.open")  # type: ignore
-            if props.sound is None:
-                ui_utils.draw_error(self.layout, "Select a sound file.")
-                return
             if not self.draw_sound_setup(props.sound):
                 self.draw_info(props.sound)
                 return
