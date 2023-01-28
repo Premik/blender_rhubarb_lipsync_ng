@@ -25,15 +25,17 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
     # bl_description = "Tool tip"
     # bl_context = "object"
 
-    def draw_sound_setup(self, sound: Sound) -> str:
+    def draw_sound_setup(self, sound: Sound) -> bool:
         props = CaptureProperties.from_context(self.ctx)
         prefs = RhubarbAddonPreferences.from_context(self.ctx)
-        if not ui_utils.draw_expandable_header(prefs, "sound_source_panel_expanded", "Input sound setup", self.layout):
-            return False
+        path = pathlib.Path(sound.filepath)
+        errors = sound is None or sound.packed_file or not path.exists or not props.is_sound_format_supported()
+        if not ui_utils.draw_expandable_header(prefs, "sound_source_panel_expanded", "Input sound setup", self.layout, errors):
+            return not errors
 
         layout = self.layout
         layout.template_ID(props, "sound", open="sound.open")  # type: ignore
-        if props.sound is None:
+        if sound is None:
             ui_utils.draw_error(self.layout, "Select a sound file.")
             return False
         layout.prop(sound, "filepath", text="")  # type: ignore
@@ -52,7 +54,7 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
             unpackop.id = sound.name_full  # type: ignore
             unpackop.method = 'USE_ORIGINAL'  # type: ignore
             return False
-        path = pathlib.Path(sound.filepath)
+
         if not path.exists:
             ui_utils.draw_error(self.layout, "Sound file doesn't exist.")
             return False

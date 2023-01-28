@@ -30,7 +30,7 @@ def assert_op_ret(ret: set[str]):
     assert 'FINISHED' in ret, f"Operation execution failed with {ret} code"
 
 
-def draw_expandable_header(props: Any, property_name: str, label: str, layout: UILayout) -> bool:
+def draw_expandable_header(props: Any, property_name: str, label: str, layout: UILayout, errors=False) -> bool:
     """Draws a checkbox which looks like collapsable sub-panel's header.
     Expanded/collapsed state is driven by the provided property.
     Returns the exapnded status. Inspired by GameRigtTool plugin"""
@@ -40,6 +40,8 @@ def draw_expandable_header(props: Any, property_name: str, label: str, layout: U
         icon = "TRIA_DOWN"
     else:
         icon = "TRIA_RIGHT"
+        if errors:
+            icon = "ERROR"
 
     row = layout.row(align=True)
     row.alignment = "LEFT"
