@@ -2,6 +2,7 @@ import pathlib
 import tomli
 
 # https://realpython.com/python-toml/
+# Helper module to load custom config directly from the pyproject.toml file
 
 
 def load_project_cfg() -> dict:

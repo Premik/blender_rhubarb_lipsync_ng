@@ -1,7 +1,9 @@
+from functools import cached_property
 import pathlib
 import bpy
 from bpy.props import FloatProperty, StringProperty, BoolProperty, PointerProperty, EnumProperty
 from bpy.types import Object, PropertyGroup, Context, SoundSequence, Sound, AddonPreferences
+import bpy.utils.previews
 from typing import Optional, cast
 from rhubarb_lipsync.rhubarb.rhubarb_command_handling import RhubarbCommandWrapper, RhubarbParser
 import pathlib
@@ -15,6 +17,33 @@ def addons_path() -> pathlib.Path:
 def default_executable_path() -> pathlib.Path:
     exe = RhubarbCommandWrapper.executable_default_filename()
     return addons_path() / 'rhubarb_lipsync' / 'bin' / exe
+
+
+def resources_path() -> pathlib.Path:
+    return addons_path() / 'rhubarb_lipsync' / 'resources'
+
+
+class IconsManager:
+
+    _previews: bpy.utils.previews.ImagePreviewCollection = None
+    _loaded: set[str] = set()
+
+    @staticmethod
+    def unregister():
+        if IconsManager._previews:
+            bpy.utils.previews.remove(IconsManager._previews)
+            IconsManager._previews = None
+
+    @staticmethod
+    def get(key: str):
+
+        if IconsManager._previews is None:
+            IconsManager._previews = bpy.utils.previews.new()
+        prew = IconsManager._previews
+        if not key in IconsManager._loaded:
+            IconsManager._loaded.add(key)
+            prew.load(key, str(resources_path() / f"{key}.png"), 'IMAGE')
+        return prew[key].icon_id
 
 
 class RhubarbAddonPreferences(AddonPreferences):

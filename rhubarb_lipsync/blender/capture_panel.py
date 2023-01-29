@@ -5,7 +5,7 @@ from bpy.types import Context, Sound, SoundSequence
 
 from typing import Optional, List, Dict, cast
 from bpy.props import FloatProperty, StringProperty, BoolProperty, PointerProperty, IntProperty
-from rhubarb_lipsync.blender.properties import CaptureProperties, RhubarbAddonPreferences
+from rhubarb_lipsync.blender.properties import CaptureProperties, RhubarbAddonPreferences, IconsManager
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 import rhubarb_lipsync.blender.sound_operators as sound_operators
 import rhubarb_lipsync.blender.rhubarb_operators as rhubarb_operators
@@ -25,11 +25,17 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
     # bl_description = "Tool tip"
     # bl_context = "object"
 
-    def draw_sound_setup(self, sound: Sound) -> bool:
+    def draw_sound_setup(self) -> bool:
         props = CaptureProperties.from_context(self.ctx)
         prefs = RhubarbAddonPreferences.from_context(self.ctx)
-        path = pathlib.Path(sound.filepath)
-        errors = sound is None or sound.packed_file or not path.exists or not props.is_sound_format_supported()
+        sound: Sound = props.sound
+
+        # Redundant validations to allow collapsing this sub-panel while still indicating any errors
+        if sound is None:
+            errors = True
+        else:
+            path = pathlib.Path(sound.filepath)
+            errors = sound.packed_file or not path.exists or not props.is_sound_format_supported()
         if not ui_utils.draw_expandable_header(prefs, "sound_source_panel_expanded", "Input sound setup", self.layout, errors):
             return not errors
 
@@ -77,24 +83,26 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
 
         return True
 
-    def draw_info(self, sound: Sound):
+    def draw_info(self):
         props = CaptureProperties.from_context(self.ctx)
         prefs = RhubarbAddonPreferences.from_context(self.ctx)
+        sound: Sound = props.sound
         if not ui_utils.draw_expandable_header(prefs, "info_panel_expanded", "Additional info", self.layout):
             return
         box = self.layout.box()
         # line = layout.split()
-        line = box.split()
-        line.label(text="Sample rate")
-        line.label(text=f"{sound.samplerate} Hz")
-        line = box.split()
-        line.label(text="Channels")
-        line.label(text=str(sound.channels))
-        line = box.split()
+        if sound:
+            line = box.split()
+            line.label(text="Sample rate")
+            line.label(text=f"{sound.samplerate} Hz")
+            line = box.split()
+            line.label(text="Channels")
+            line.label(text=str(sound.channels))
 
-        line.label(text="File extension")
-        line.label(text=props.sound_file_extension)
-
+            line = box.split()
+            line.label(text="File extension")
+            line.label(text=props.sound_file_extension)
+            box.separator()
         line = box.split()
         line.label(text="Rhubarb version")
         ver = rhubarb_operators.GetRhubarbExecutableVersion.get_cached_value(self.ctx)
@@ -117,13 +125,12 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
                 return
 
             # layout.prop(self.props, "sound")
-            props = CaptureProperties.from_context(self.ctx)
-            assert props
-            if not self.draw_sound_setup(props.sound):
-                self.draw_info(props.sound)
+            if not self.draw_sound_setup():
+                self.draw_info()
                 return
-            self.draw_info(props.sound)
-            layout.operator(rhubarb_operators.ProcessSoundFile.bl_idname)
+            self.draw_info()
+            # layout.operator(rhubarb_operators.ProcessSoundFile.bl_idname, icon="MONKEY")
+            layout.operator(rhubarb_operators.ProcessSoundFile.bl_idname, icon_value=IconsManager.get('rhubarb64x64'))
 
         except Exception as e:
             ui_utils.draw_error(self.layout, f"Unexpected error. \n {e}")

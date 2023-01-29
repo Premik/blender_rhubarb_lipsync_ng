@@ -5,6 +5,7 @@ import re
 
 
 class PackagePlugin:
+    """Package (zip) project for the distribution"""
 
     bl_info_version_pattern = r'''['"]version["']\s*:\s*\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*\)'''
     bl_info_version_rx = re.compile(f"(.*)({bl_info_version_pattern})(.*)", re.DOTALL)
@@ -47,3 +48,4 @@ class PackagePlugin:
 if __name__ == '__main__':
     pp = PackagePlugin(project_cfg)
     pp.update_bl_info_version()
+    # TODO Create zip archives

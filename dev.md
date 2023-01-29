@@ -117,8 +117,9 @@ https://docs.blender.org/api/current/info_best_practice.html
 
 * Add [speaker](https://docs.blender.org/manual/en/latest/render/output/audio/speaker.html) as an alternative to Sequencer audio clip
 * Set start frame?
-
-
+* Addd audio-sccrubbling checkbox
+* Rename capture_panel to something better? (sound setup?)
+* Extended cues check-box
 
 ```
 if not bpy.data.is_saved:

@@ -14,7 +14,7 @@ bl_info = {
 
 import bpy
 from bpy.props import PointerProperty
-from rhubarb_lipsync.blender.properties import CaptureProperties
+from rhubarb_lipsync.blender.properties import CaptureProperties, IconsManager
 import rhubarb_lipsync.blender.auto_load
 
 
@@ -30,6 +30,7 @@ def register():
 def unregister():
     rhubarb_lipsync.blender.auto_load.unregister()
     del bpy.types.Object.rhubarb_lipsync
+    IconsManager.unregister()
 
 
 # bpy.utils.register_classes_factory
