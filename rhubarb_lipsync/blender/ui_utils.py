@@ -1,6 +1,6 @@
 import bpy
 from bpy.types import Context, Window, Area, UILayout, SoundSequence, Sound
-from typing import Any, Iterator
+from typing import Any, Callable, Iterator, Type
 
 
 def find_areas_by_type(context: Context, area_type: str) -> Iterator[tuple[Window, Area]]:
@@ -85,3 +85,16 @@ def to_abs_path(blender_path: str) -> str:
     if not blender_path:
         return ""
     return bpy.path.abspath(blender_path)
+
+
+def validation_poll(cls: Type, context: Context, disabled_reason: Callable[[Context], str] = None) -> bool:
+    assert cls
+    if not disabled_reason:  # Locate the 'disabled_reason' as the validation fn if no one is provided
+        assert hasattr(cls, 'disabled_reason'), f"No validation function provided and the {cls} has no 'disabled_reason' class method"
+        disabled_reason = cls.disabled_reason
+    ret = disabled_reason(context)
+    if not ret:  # No validation errors
+        return True
+    # Following is not a class method per doc. But seems to work like it
+    cls.poll_message_set(ret)  # type: ignore
+    return False

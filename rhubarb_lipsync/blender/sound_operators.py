@@ -16,15 +16,6 @@ log = logging.getLogger(__name__)
 # Limit the strip-search on the poll methods. When limit is reach the op would be enabled but fail on execution instead
 poll_search_limit = 50
 
-# bpy.ops.sequencer.sound_strip_add(
-# filepath="/tmp/work/1.flac", directory="/tmp/work/",
-# files=[{"name":"1.flac", "name":"1.flac"}],
-# frame_start=23, channel=1,
-# overlap_shuffle_override=True)
-
-# C.active_sequence_strip
-# bpy.data.scenes['Scene'].sequence_editor.sequences_all["en_male_electricity.ogg"]
-
 
 def find_strips_of_sound(context: Context, limit=0) -> list[SoundSequence]:
     '''Finds a sound strip which is using the selected sounds.'''
@@ -70,7 +61,7 @@ class CreateSoundStripWithSound(bpy.types.Operator):
     show_waveform: BoolProperty(name="Show Waveform", default=True)  # type: ignore
 
     @classmethod
-    def disabled_reason(cls, context: Context, limit=0) -> str:
+    def disabled_reason(cls, context: Context, limit=poll_search_limit) -> str:
         error_common = CaptureProperties.sound_validation(context, False)
         if error_common:
             return error_common
@@ -82,16 +73,11 @@ class CreateSoundStripWithSound(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context: Context) -> bool:
-        m = cls.disabled_reason(context, poll_search_limit)  # Search limit, for perf. reasons
-        if not m:
-            return True
-        # Following is not a class method per doc. But seems to work like it
-        cls.poll_message_set(m)  # type: ignore
-        return False
+        return ui_utils.validation_poll(cls, context)
 
     def execute(self, context: Context) -> set[str]:
 
-        error = self.disabled_reason(context)  # Run validation again, without the limit this time
+        error = CreateSoundStripWithSound.disabled_reason(context, 0)  # Run validation again, without the limit this time
         if error:
             self.report({"ERROR"}, error)
             return {'CANCELLED'}
@@ -152,12 +138,7 @@ class RemoveSoundStripWithSound(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context: Context) -> bool:
-        m = cls.disabled_reason(context, poll_search_limit)
-        if not m:
-            return True
-        # Following is not a class method per doc. But seems to work like it
-        cls.poll_message_set(m)  # type: ignore
-        return False
+        return ui_utils.validation_poll(cls, context)
 
     def execute(self, context: Context) -> set[str]:
         error = self.disabled_reason(context)  # Run validation again, without the limit this time
@@ -191,12 +172,7 @@ class ToggleRelativePath(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context: Context) -> bool:
-        m = CaptureProperties.sound_validation(context)
-        if not m:
-            return True
-        # Following is not a class method per doc. But seems to work like it
-        cls.poll_message_set(m)  # type: ignore
-        return False
+        return ui_utils.validation_poll(cls, context, CaptureProperties.sound_validation)
 
     def get_converted(self, sound: Sound) -> str:
         if self.relative:
@@ -304,12 +280,7 @@ class ConvertSoundFromat(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context: Context) -> bool:
-        m = CaptureProperties.sound_validation(context)
-        if not m:
-            return True
-        # Following is not a class method per doc. But seems to work like it
-        cls.poll_message_set(m)  # type: ignore
-        return False
+        return ui_utils.validation_poll(cls, context, CaptureProperties.sound_validation)
 
     def draw(self, context: Context):
 

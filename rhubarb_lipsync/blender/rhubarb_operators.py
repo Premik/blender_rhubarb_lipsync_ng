@@ -31,12 +31,7 @@ class ProcessSoundFile(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        m = cls.disabled_reason(context)
-        if not m:
-            return True
-        # Following is not a class method per doc. But seems to work like it
-        cls.poll_message_set(m)  # type: ignore
-        return False
+        return ui_utils.validation_poll(cls, context)
 
 
 class GetRhubarbExecutableVersion(bpy.types.Operator):
@@ -60,7 +55,7 @@ class GetRhubarbExecutableVersion(bpy.types.Operator):
         return cls.executable_version
 
     @classmethod
-    def disabled_reason(cls, context: Context, limit=0) -> str:
+    def disabled_reason(cls, context: Context) -> str:
         prefs = RhubarbAddonPreferences.from_context(context)
         cmd = prefs.new_command_handler()
         cmd_error = cmd.errors()
@@ -70,12 +65,7 @@ class GetRhubarbExecutableVersion(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        m = cls.disabled_reason(context)
-        if not m:
-            return True
-        # Following is not a class method per doc. But seems to work like it
-        cls.poll_message_set(m)  # type: ignore
-        return False
+        return ui_utils.validation_poll(cls, context)
 
     def execute(self, context: Context) -> set[str]:
         prefs = RhubarbAddonPreferences.from_context(context)
