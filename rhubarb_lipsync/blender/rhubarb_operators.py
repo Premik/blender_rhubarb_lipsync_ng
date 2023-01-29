@@ -5,19 +5,38 @@ from bpy.types import Context, Sound, SoundSequence
 
 from typing import Optional, List, Dict, cast
 from bpy.props import FloatProperty, StringProperty, BoolProperty, PointerProperty, IntProperty
-from rhubarb_lipsync.blender.properties import RhubarbAddonPreferences
+from rhubarb_lipsync.blender.properties import RhubarbAddonPreferences, CaptureProperties
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 import pathlib
 
 
 class ProcessSoundFile(bpy.types.Operator):
+    """Process the selected sound file using the rhubarb executable"""
+
     bl_idname = "rhubarb.process_sound_file"
-    bl_label = "Capture mouth cues"
-    bl_description = "Process the selected sound file using the rhubarb executable"
+    bl_label = "Run Rhubarb"
+    bl_description = __doc__
+
+    @classmethod
+    def disabled_reason(cls, context: Context) -> str:
+        error_common = CaptureProperties.sound_validation(context, False)
+        if error_common:
+            return error_common
+        prefs = RhubarbAddonPreferences.from_context(context)
+        cmd = prefs.new_command_handler()
+        cmd_error = cmd.errors()
+        if cmd_error:
+            return cmd_error
+        return ""
 
     @classmethod
     def poll(cls, context):
-        return True
+        m = cls.disabled_reason(context)
+        if not m:
+            return True
+        # Following is not a class method per doc. But seems to work like it
+        cls.poll_message_set(m)  # type: ignore
+        return False
 
 
 class GetRhubarbExecutableVersion(bpy.types.Operator):

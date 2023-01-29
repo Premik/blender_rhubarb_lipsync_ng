@@ -135,6 +135,18 @@ class CaptureProperties(PropertyGroup):
             return "'rhubarb_lipsync' not found on the active object"
         return ""
 
+    def sound_validation(context: Context, required_unpack=True) -> str:
+        selection_error = CaptureProperties.context_selection_validation(context)
+        if selection_error:
+            return selection_error
+        props = CaptureProperties.from_context(context)
+        if not props.sound:
+            return "No sound selected"
+        sound: Sound = props.sound
+        if required_unpack and sound.packed_file:
+            return "Please unpack the sound first."
+        return ""
+
     @property
     def sound_file_path(self) -> pathlib.Path:
         s: Sound = self.sound

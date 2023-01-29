@@ -26,20 +26,6 @@ poll_search_limit = 50
 # bpy.data.scenes['Scene'].sequence_editor.sequences_all["en_male_electricity.ogg"]
 
 
-def sound_common_validation(context: Context, required_unpack=True) -> str:
-    selection_error = CaptureProperties.context_selection_validation(context)
-    if selection_error:
-        return selection_error
-    props = CaptureProperties.from_context(context)
-    if not props.sound:
-        return "No sound selected"
-    props = CaptureProperties.from_context(context)
-    sound: Sound = props.sound
-    if required_unpack and sound.packed_file:
-        return "Please unpack the sound first."
-    return ""
-
-
 def find_strips_of_sound(context: Context, limit=0) -> list[SoundSequence]:
     '''Finds a sound strip which is using the selected sounds.'''
     ret: list[SoundSequence] = []
@@ -85,7 +71,7 @@ class CreateSoundStripWithSound(bpy.types.Operator):
 
     @classmethod
     def disabled_reason(cls, context: Context, limit=0) -> str:
-        error_common = sound_common_validation(context, False)
+        error_common = CaptureProperties.sound_validation(context, False)
         if error_common:
             return error_common
         props = CaptureProperties.from_context(context)
@@ -156,10 +142,9 @@ class RemoveSoundStripWithSound(bpy.types.Operator):
 
     @classmethod
     def disabled_reason(cls, context: Context, limit=0) -> str:
-        error_common = sound_common_validation(context, False)
+        error_common = CaptureProperties.sound_validation(context, False)
         if error_common:
             return error_common
-        props = CaptureProperties.from_context(context)
         strip = find_strips_of_sound(context, limit)
         if not strip:
             return f"No strip using the current sound found."
@@ -206,7 +191,7 @@ class ToggleRelativePath(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context: Context) -> bool:
-        m = sound_common_validation(context)
+        m = CaptureProperties.sound_validation(context)
         if not m:
             return True
         # Following is not a class method per doc. But seems to work like it
@@ -319,7 +304,7 @@ class ConvertSoundFromat(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context: Context) -> bool:
-        m = sound_common_validation(context)
+        m = CaptureProperties.sound_validation(context)
         if not m:
             return True
         # Following is not a class method per doc. But seems to work like it

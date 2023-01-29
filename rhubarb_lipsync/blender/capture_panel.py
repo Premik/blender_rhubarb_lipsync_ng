@@ -17,7 +17,7 @@ log = logging.getLogger(__name__)
 class CaptureMouthCuesPanel(bpy.types.Panel):
 
     bl_idname = "RLPS_PT_capture_panel"
-    bl_label = "RLPS: Mouth cues capture"
+    bl_label = "RLPS: Sound setup and cues capture"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_category = "RLSP"
