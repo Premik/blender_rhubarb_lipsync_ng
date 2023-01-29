@@ -70,24 +70,30 @@ class RhubarbAddonPreferences(AddonPreferences):
     recognizer: EnumProperty(  # type: ignore
         name="Recognizer",
         items=[
-            ("pocketSphinx", "pocketSphinx", "PocketSphinx is an open-source speech recognition library that generally gives good results for English."),
-            ("phonetic", "phonetic", "This recognizer is language-independent. Use it if your recordings are not in English."),
+            ("pocketSphinx", "pocketSphinx", "PocketSphinx is an open-source speech recognition library that generally gives good results for English"),
+            ("phonetic", "phonetic", "This recognizer is language-independent. Use it if your recordings are not in English"),
         ],
         default="pocketSphinx",
+    )
+
+    use_extended_shapes: BoolProperty(  # type: ignore
+        name="Use extended shapes",
+        description="Use three additional mouth shapes G,H,X on top of the six basic",
+        default=True,
+    )
+
+    default_converted_output_folder: StringProperty(  # type: ignore
+        name="Default output for converted files",
+        description="Where to put the new wav/ogg files resulted from the conversion from an unsupported formats. Leave blank to use the source file's folder",
+        subtype='FILE_PATH',
+        default="",
     )
 
     info_panel_expanded: BoolProperty(default=True)  # type: ignore
     sound_source_panel_expanded: BoolProperty(default=True)  # type: ignore
 
-    default_converted_output_folder: StringProperty(  # type: ignore
-        name="Default output for converted files",
-        description="Where to put the new wav/ogg files resulted from the conversion from an unsupported formats. Leave blank to use the source file's folder.",
-        subtype='FILE_PATH',
-        default="",
-    )
-
     def new_command_handler(self):
-        return RhubarbCommandWrapper(self.executable_path, self.recognizer)
+        return RhubarbCommandWrapper(self.executable_path, self.recognizer, self.use_extended_shapes)
 
     def draw(self, context: Context):
         layout = self.layout
@@ -105,6 +111,7 @@ class RhubarbAddonPreferences(AddonPreferences):
             row.operator(rhubarb_operators.GetRhubarbExecutableVersion.bl_idname)
 
         layout.prop(self, "recognizer")
+        layout.prop(self, "use_extended_shapes")
         layout.prop(self, 'default_converted_output_folder')
 
 
@@ -112,6 +119,11 @@ class CaptureProperties(PropertyGroup):
 
     sound: PointerProperty(type=bpy.types.Sound, name="Sound")  # type: ignore
     start_frame: FloatProperty(name="Start frame", default=0)  # type: ignore
+    dialog_file: StringProperty(  # type: ignore
+        name="Dialog file",
+        description="Additional plain-text file with transcription of the sound file to improve accuracy. Works for english only",
+        subtype='FILE_PATH',
+    )
 
     @staticmethod
     def from_context(ctx: Context) -> 'CaptureProperties':

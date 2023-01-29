@@ -80,9 +80,10 @@ class RhubarbParser:
 class RhubarbCommandWrapper:
     """Wraps low level operations related to the lipsync executable."""
 
-    def __init__(self, executable_path: pathlib.Path, recognizer="pocketSphinx", extra_args=[]):
+    def __init__(self, executable_path: pathlib.Path, recognizer="pocketSphinx", extended=True, extra_args=[]):
         self.executable_path = executable_path
         self.recognizer = recognizer
+        self.use_extended = extended
         self.process: Optional[Popen] = None
         self.stdout = ""
         self.stderr = ""
@@ -107,12 +108,13 @@ class RhubarbCommandWrapper:
 
     def build_lipsync_args(self, input_file: str, dialog_file: Optional[str] = None):
         dialog = ["--dialogFile", dialog_file] if dialog_file else []
+        extended = ["--extendedShapes"] if self.use_extended else []
         return [
             self.executable_path,
             "-f",
             "json",
             "--machineReadable",
-            "--extendedShapes",
+            *extended,
             "GHX",
             "-r",
             self.recognizer,
