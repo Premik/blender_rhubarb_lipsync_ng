@@ -122,12 +122,8 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
             selection_error = CaptureProperties.context_selection_validation(context)
             if selection_error:
                 ui_utils.draw_error(self.layout, selection_error)
-                return
-
-            # layout.prop(self.props, "sound")
-            if not self.draw_sound_setup():
-                self.draw_info()
-                return
+            else:
+                self.draw_sound_setup()
             self.draw_info()
             # layout.operator(rhubarb_operators.ProcessSoundFile.bl_idname, icon="MONKEY")
             layout.operator(rhubarb_operators.ProcessSoundFile.bl_idname, icon_value=IconsManager.get('rhubarb64x64'))

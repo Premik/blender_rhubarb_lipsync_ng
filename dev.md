@@ -120,6 +120,7 @@ https://docs.blender.org/api/current/info_best_practice.html
 * Addd audio-sccrubbling checkbox
 * Rename capture_panel to something better? (sound setup?)
 * Extended cues check-box
+* Rel/Abd path - make them prefix-small icons in from of the sound directory selector?
 
 ```
 if not bpy.data.is_saved:

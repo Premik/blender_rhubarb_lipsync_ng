@@ -147,7 +147,7 @@ class CaptureProperties(PropertyGroup):
             return "'rhubarb_lipsync' not found on the active object"
         return ""
 
-    def sound_validation(context: Context, required_unpack=True) -> str:
+    def sound_selection_validation(context: Context, required_unpack=True) -> str:
         selection_error = CaptureProperties.context_selection_validation(context)
         if selection_error:
             return selection_error

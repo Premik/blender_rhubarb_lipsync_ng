@@ -62,7 +62,7 @@ class CreateSoundStripWithSound(bpy.types.Operator):
 
     @classmethod
     def disabled_reason(cls, context: Context, limit=poll_search_limit) -> str:
-        error_common = CaptureProperties.sound_validation(context, False)
+        error_common = CaptureProperties.sound_selection_validation(context, False)
         if error_common:
             return error_common
         props = CaptureProperties.from_context(context)
@@ -128,7 +128,7 @@ class RemoveSoundStripWithSound(bpy.types.Operator):
 
     @classmethod
     def disabled_reason(cls, context: Context, limit=0) -> str:
-        error_common = CaptureProperties.sound_validation(context, False)
+        error_common = CaptureProperties.sound_selection_validation(context, False)
         if error_common:
             return error_common
         strip = find_strips_of_sound(context, limit)
@@ -172,7 +172,7 @@ class ToggleRelativePath(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context: Context) -> bool:
-        return ui_utils.validation_poll(cls, context, CaptureProperties.sound_validation)
+        return ui_utils.validation_poll(cls, context, CaptureProperties.sound_selection_validation)
 
     def get_converted(self, sound: Sound) -> str:
         if self.relative:
@@ -280,7 +280,7 @@ class ConvertSoundFromat(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context: Context) -> bool:
-        return ui_utils.validation_poll(cls, context, CaptureProperties.sound_validation)
+        return ui_utils.validation_poll(cls, context, CaptureProperties.sound_selection_validation)
 
     def draw(self, context: Context):
 

@@ -28,14 +28,22 @@ class ProcessSoundFile(bpy.types.Operator):
 
     @classmethod
     def disabled_reason(cls, context: Context) -> str:
-        error_common = CaptureProperties.sound_validation(context, False)
+
+        error_common = CaptureProperties.sound_selection_validation(context)
         if error_common:
             return error_common
+        props = CaptureProperties.from_context(context)
+        sound: Sound = props.sound
+        if not sound.filepath or not pathlib.Path(sound.filepath).exists():
+            return "Sound file doesn't exist."
+
+        if not props.is_sound_format_supported():
+            return "Unsupported file format"
         return rhubarcli_validation(context)
 
     @classmethod
     def poll(cls, context):
-        return ui_utils.validation_poll(cls, context, rhubarcli_validation)
+        return ui_utils.validation_poll(cls, context)
 
     def draw(self, context: Context) -> None:
         prefs = RhubarbAddonPreferences.from_context(context)
@@ -53,7 +61,6 @@ class ProcessSoundFile(bpy.types.Operator):
     def execute(self, context: Context) -> set[str]:
         prefs = RhubarbAddonPreferences.from_context(context)
         props = CaptureProperties.from_context(context)
-        sound: Sound = props.sound
         self.cmd = prefs.new_command_handler()
         # self.cmd.lipsync_start(ui_utils.to_abs_path(sound.filepath), props.dialog_file)
 
