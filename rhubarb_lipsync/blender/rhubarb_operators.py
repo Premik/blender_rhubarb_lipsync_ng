@@ -81,6 +81,7 @@ class ProcessSoundFile(bpy.types.Operator):
         wm.progress_update(self.test)
         if self.test > 100:
             self.finished(context)
+            self.report({'INFO'}, f"Done")
             return {'FINISHED'}
         return {'PASS_THROUGH'}
 
@@ -88,9 +89,11 @@ class ProcessSoundFile(bpy.types.Operator):
         wm = context.window_manager
         if self.cmd.has_finished:
             self.finished(context)
+            self.report({'INFO'}, f"Done")
             return {'FINISHED'}
 
         if event.type in {'ESC'}:
+            self.report({'INFO'}, f"Cancelled")
             self.finished(context)
             return {'CANCELLED'}
 
@@ -98,7 +101,7 @@ class ProcessSoundFile(bpy.types.Operator):
         if progress is not None:
             wm.progress_update(progress)
             # self.report({'INFO'}, f"{progress}%")
-        return {'RUNNING_MODAL', 'PASS_THROUGH'}
+        return {'PASS_THROUGH'}
 
     def finished(self, context: Context):
         wm = context.window_manager

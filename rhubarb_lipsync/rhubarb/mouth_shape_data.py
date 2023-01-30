@@ -1,5 +1,6 @@
 from functools import cache
 from typing import Optional, List, Dict
+import math
 
 
 class MouthShapeDescription:
@@ -34,6 +35,13 @@ class MouthCue:
     @staticmethod
     def of_json(cue_json: Dict) -> 'MouthCue':
         return MouthCue(cue_json["value"], cue_json["start"], cue_json["end"])
+
+    def __eq__(self, other):
+        if not isinstance(other, MouthCue):
+            return NotImplemented  # https://stackoverflow.com/questions/1227121/compare-object-instances-for-equality-by-their-attributes
+        c = lambda a, b: math.isclose(a, b, abs_tol=0.001)
+        o: MouthCue = other
+        return self.key == o.key and c(self.start, o.start) and c(self.end, o.end)
 
     def __repr__(self) -> str:
         return f"'{self.key}' {self.start:0.2f}-{self.end:0.2f}"

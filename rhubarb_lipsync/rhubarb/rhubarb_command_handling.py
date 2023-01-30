@@ -8,9 +8,11 @@ import pathlib
 import json
 import platform
 from collections import defaultdict
-
-
+from threading import Thread, Event
+from queue import SimpleQueue, Empty
+from time import sleep
 from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue
+import traceback
 
 log = logging.getLogger(__name__)
 
@@ -80,6 +82,8 @@ class RhubarbParser:
 class RhubarbCommandWrapper:
     """Wraps low level operations related to the lipsync executable."""
 
+    thread_wait_timeout = 5
+
     def __init__(self, executable_path: pathlib.Path, recognizer="pocketSphinx", extended=True, extra_args=[]):
         self.executable_path = executable_path
         self.recognizer = recognizer
@@ -89,6 +93,9 @@ class RhubarbCommandWrapper:
         self.stderr = ""
         self.last_exit_code: Optional[int] = None
         self.extra_args = extra_args
+        self.thread: Optional[Thread] = None
+        self.queue: SimpleQueue[tuple[str, Any]] = SimpleQueue()
+        self.stop_event = Event()
 
     @staticmethod
     def executable_default_filename() -> str:
@@ -106,11 +113,11 @@ class RhubarbCommandWrapper:
         os.chmod(self.executable_path, 0o744)
         return None
 
-    def build_lipsync_args(self, input_file: str, dialog_file: Optional[str] = None):
+    def build_lipsync_args(self, input_file: str, dialog_file: Optional[str] = None) -> list[str]:
         dialog = ["--dialogFile", dialog_file] if dialog_file else []
         extended = ["--extendedShapes"] if self.use_extended else []
         return [
-            self.executable_path,
+            str(self.executable_path),
             "-f",
             "json",
             "--machineReadable",
@@ -122,10 +129,10 @@ class RhubarbCommandWrapper:
             input_file,
         ]
 
-    def build_version_args(self):
-        return [self.executable_path, "--version"]
+    def build_version_args(self) -> list[str]:
+        return [str(self.executable_path), "--version"]
 
-    def open_process(self, cmd_args: List[str]):
+    def open_process(self, cmd_args: List[str]) -> None:
         assert not self.was_started
         assert not self.errors(), self.errors()
         self.stdout = ""
@@ -134,8 +141,25 @@ class RhubarbCommandWrapper:
         # universal_newlines forces text mode
         self.process = Popen(self.extra_args + cmd_args, stdout=PIPE, stderr=PIPE, universal_newlines=True)
 
+    def join_thread(self) -> None:
+        if not self.thread:
+            return
+
+        log.debug(f"Joining thread {self.thread}")
+        try:
+            self.thread.join(RhubarbCommandWrapper.thread_wait_timeout)
+            if self.thread.is_alive():
+                log.error(f"Failed to join the thread after waiting for {RhubarbCommandWrapper.thread_wait_timeout} seconds.")
+        except:
+            log.error(f"Failed to join the thread")
+            traceback.print_exc()
+        finally:
+            self.queue = SimpleQueue()
+            self.thread = None
+
     def close_process(self):
         if self.was_started:
+            log.debug(f"Terminating the process {self.process}")
             self.process.terminate()
         self.process = None
 
@@ -164,8 +188,14 @@ class RhubarbCommandWrapper:
         self.open_process(args)
 
     def lipsync_check_progress(self) -> int | None:
-        """Reads the stderr of the lipsync command where the progress and status in being reported"""
+        """Reads the stderr of the lipsync command where the progress and status in being reported.
+        Note this call blocks  when there is status update available on stderr.
+        The rhubarb binary provides the status update few times per seconds typically.
+        """
         assert self.was_started
+        if self.has_finished:
+            self.close_process()
+            return 100
         self.stderr = ""
         self.read_process_stderr_line()
         if not self.stderr:
@@ -182,6 +212,49 @@ class RhubarbCommandWrapper:
             return None
         v = by_type["progress"]["value"]
         return int(v * 100)
+
+    def _async_check(self) -> None:
+        """Runs on a separate threads, pushing progress message via Q"""
+
+        while True:
+            try:
+                if self.has_finished:
+                    break
+                if self.stop_event.is_set():
+                    break  # Cancelled
+                progress = self.lipsync_check_progress()
+
+                if progress is None:
+                    sleep(0.1)
+                else:
+                    self.queue.put(("PROGRESS", progress))
+
+            except Exception as e:
+                log.error(f"Unexpected error while checking the progress status {e}")
+                traceback.print_exc()
+                self.queue.put(("EXCEPTION", e))
+                raise
+
+    def lipsync_check_progress_async(self) -> int | None:
+        if not self.thread:
+            log.debug("Creating status-check thread")
+            self.stop_event.clear()
+            self.thread = Thread(target=self._async_check, name="StatusCheck", daemon=True)
+            self.thread.start()
+
+        try:
+            (msg, obj) = self.queue.get_nowait()
+            if msg == 'PROGRESS':
+                return int(obj)
+            if msg == 'EXCEPTION':
+                raise obj  # Propagate exception from the thread
+            assert False, f"Received unknown message {msg}"
+        except Empty as e:
+            return None
+
+    def cancel(self):
+        self.stop_event.set()
+        self.join_thread()
 
     @property
     def was_started(self) -> bool:
@@ -229,8 +302,7 @@ class RhubarbCommandWrapper:
 
         try:
             # Rhubarb binary is reporting progress on the stderr. Read next line.
-            # This would eventually block. But as rhubarb is reporting the progress every few seconds
-            # the GUI freezing should be reasonable
+            # This would eventually block.
             n = next(self.process.stderr)  # type: ignore
             self.stderr += n
         except StopIteration:
