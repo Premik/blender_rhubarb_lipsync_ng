@@ -132,3 +132,24 @@ if self.relative:
                 pass
 
 ```            
+
+
+
+
+## Baking
+
+My current thoughts about the baking is there should eventually be multiple options how to "bake" the captured mouth `Cues`:
+
+1) To a new `Action`. Pretty much what is in the current version. Mapping setup requires creating an `Action` for each `Cue type`. And the result is a new `Action`. With each mouth-shape of the caputred `Cues` baked to key-frames.
+2) To `NLA tracks`. The mouth-shape `Actions` and/or `Shapekey Actions` are put into two `NLA tracks` as `NLA strips` in a zig/zag pattern. With proper `strip` settings they'd get blended automatically by `NLA`. So Mapping setup requires creating `Actions` and/or `Shape-key Actions` (or both).
+3) "Jump to frame" - more like a preview. Clicking on the captured `Cue` from the list would jump to the frame of  that Cue. This is inspired by the `Faceit` plugin. Where Every 10 frames there is different mouth shape (and optionally shape-key) keyframed directly on the timeline.
+
+I also realized it doesn't make sense mark the Mouth-shape Actions as Assets. Like it is currently required in the PR. They can be makred as assets but it should't be required.
+
+So from the use-case perspective, it makes more sense to split the whole process into two stages (two panels):
+1 - **Sound setup and capture**: Select the sound input, run the binary. Captured cues are put into an `UIList` but not "baked" yet.
+2 - **Cues mapping setup and baking**: For each `Cue type` an `Action` or/and `Shapekey Action` or frame number is provided (=the Mapping setup). Then baking is ran. While the baking can be run repeatidly without re-runing the capture.
+
+So these thought led me to start working on this plugin more. But it took me more time than I anticipated and it ended up in a rewrite.
+
+Currently I have the first part "Setup and Capture" is pretty much done on [my branch](https://github.com/Premik/blender-rhubarb-lipsync/tree/rework). But the mapping setup and baking the cues is still WIP.

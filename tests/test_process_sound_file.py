@@ -54,36 +54,46 @@ class RhubarbCommandWrapperTest(unittest.TestCase):
     def executable_path(self) -> Path:
         return self.project_dir / "bin" / RhubarbCommandWrapper.executable_default_filename()
 
-    def compare_cues(self, a_cues: list[MouthCue], b_cues: list[MouthCue]):
+    @cached_property
+    def data(self) -> test_data.SampleData:
+        return test_data.snd_en_male_electricity
+
+    def compare_cues(self, a_cues: list[MouthCue], b_cues: list[MouthCue]) -> None:
         self.assertEqual(len(a_cues), len(b_cues), f"Lengths don't match \n{a_cues}\n{b_cues}")
         for i, (a, b) in enumerate(zip(a_cues, b_cues)):
             self.assertEqual(a, b, f"Cues at position {i} don't match:\n{a}\n{b} ")
+
+    def compare_cues_json(self, a_json: list[dict], b_json: list[dict]) -> None:
+        a = RhubarbParser.lipsync_json2MouthCues(a_json)
+        b = RhubarbParser.lipsync_json2MouthCues(b_json)
+        self.compare_cues(a, b)
+
+    def compare_cues_testdata(self, expected: test_data.SampleData, wrapper: RhubarbCommandWrapper) -> None:
+        cues_json = RhubarbParser.parse_lipsync_json(wrapper.stdout)
+        self.compare_cues_json(expected.expected_json, cues_json)
+
+    def compare_testdata_with_current(self) -> None:
+        self.compare_cues_testdata(self.data, self.wrapper)
 
     def testVersion(self):
         self.assertEqual(self.wrapper.get_version(), "1.13.0")
         self.assertEqual(self.wrapper.get_version(), "1.13.0")
 
     def testLipsync(self):
-        data = test_data.snd_en_male_electricity
-        self.wrapper.lipsync_start(data.snd_file_path)
+        self.wrapper.lipsync_start(self.data.snd_file_path)
         wait_until_finished(self.wrapper)
-
-        cues_json = RhubarbParser.parse_lipsync_json(self.wrapper.stdout)
-        cs = RhubarbParser.lipsync_json2MouthCues(cues_json)
-        print(cs)
-        cs_expected = RhubarbParser.lipsync_json2MouthCues(data.expected_json)
-        self.compare_cues(cs_expected, cs)
+        self.compare_testdata_with_current()
 
     def testLipsync_async(self):
-        data = test_data.snd_en_male_electricity
-        self.wrapper.lipsync_start(data.snd_file_path)
+        self.wrapper.lipsync_start(self.data.snd_file_path)
         wait_until_finished_async(self.wrapper)
+        self.compare_testdata_with_current()
 
     def testLipsync_cancel(self):
-        data = test_data.snd_en_male_electricity
-        self.wrapper.lipsync_start(data.snd_file_path)
+        self.wrapper.lipsync_start(self.data.snd_file_path)
         wait_until_finished_async(self.wrapper, 4)
         assert not self.wrapper.has_finished
+        self.compare_testdata_with_current()
 
         # self.assertEqual(len(s.fullyMatchingParts()), 2)
 

@@ -112,7 +112,7 @@ class ProcessSoundFile(bpy.types.Operator):
 
 
 class GetRhubarbExecutableVersion(bpy.types.Operator):
-    """Run the rhubarb executable and collect the version info. Result is stored in the addon's preferences."""
+    """Run the rhubarb executable and collect the version info."""
 
     bl_idname = "rhubarb.get_executable_version"
     bl_label = "Check rhubarb version"
