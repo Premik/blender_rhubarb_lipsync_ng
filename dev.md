@@ -121,6 +121,7 @@ https://docs.blender.org/api/current/info_best_practice.html
 * Rename capture_panel to something better? (sound setup?)
 * Extended cues check-box
 * Rel/Abd path - make them prefix-small icons in from of the sound directory selector?
+* Add debug-log flag to addon prefs, set log level on all loggers
 
 ```
 if not bpy.data.is_saved:

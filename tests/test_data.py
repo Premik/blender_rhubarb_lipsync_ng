@@ -2,6 +2,8 @@ from functools import cached_property
 from pathlib import Path
 from bpy.types import Context, Sound, SoundSequence
 from typing import cast
+from rhubarb_lipsync.rhubarb.rhubarb_command_handling import RhubarbCommandWrapper, RhubarbParser
+from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue
 import json
 
 test_data_path = Path(__file__).parent / "data"
@@ -29,6 +31,10 @@ class SampleData:
     def expected_json(self) -> list[dict]:
         with open(self.expected_json_path) as f:
             return json.load(f)
+
+    @cached_property
+    def expected_cues(self) -> list[MouthCue]:
+        return RhubarbParser.lipsync_json2MouthCues(self.expected_json)
 
     def to_sound(self, ctx: Context) -> Sound:
         se = ctx.scene.sequence_editor

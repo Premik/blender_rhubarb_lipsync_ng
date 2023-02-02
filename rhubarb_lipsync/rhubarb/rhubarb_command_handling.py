@@ -138,8 +138,19 @@ class RhubarbCommandWrapper:
         self.stdout = ""
         self.stderr = ""
         self.last_exit_code = None
+        log.info(f"Starting process\n{cmd_args}")
         # universal_newlines forces text mode
         self.process = Popen(self.extra_args + cmd_args, stdout=PIPE, stderr=PIPE, universal_newlines=True)
+
+    def close_process(self):
+        if self.was_started:
+            log.debug(f"Terminating the process {self.process}")
+            self.process.terminate()
+            self.process.wait(RhubarbCommandWrapper.thread_wait_timeout)
+            log.debug(f"Process terminated")
+            # Consume any reminding output, this would also close the process io streams
+            self.process.communicate(timeout=1)
+        self.process = None
 
     def join_thread(self) -> None:
         if not self.thread:
@@ -156,12 +167,6 @@ class RhubarbCommandWrapper:
         finally:
             self.queue = SimpleQueue()
             self.thread = None
-
-    def close_process(self):
-        if self.was_started:
-            log.debug(f"Terminating the process {self.process}")
-            self.process.terminate()
-        self.process = None
 
     def get_version(self) -> str:
         """Execute `lipsync --version` to get the current version of the binary. Synchroinous call."""
@@ -184,7 +189,6 @@ class RhubarbCommandWrapper:
         """Start the main lipsync command. Process runs in background"""
         self.close_process()
         args = self.build_lipsync_args(input_file, dialog_file)
-        log.info(f"Starting lipsync:\n{args}")
         self.open_process(args)
 
     def lipsync_check_progress(self) -> int | None:
@@ -215,7 +219,7 @@ class RhubarbCommandWrapper:
 
     def _async_check(self) -> None:
         """Runs on a separate threads, pushing progress message via Q"""
-
+        log.debug("Entered progress check thread")
         while True:
             try:
                 if self.has_finished:
@@ -234,8 +238,13 @@ class RhubarbCommandWrapper:
                 traceback.print_exc()
                 self.queue.put(("EXCEPTION", e))
                 raise
+        log.debug("Progress check thread exit")
 
     def lipsync_check_progress_async(self) -> int | None:
+        if self.has_finished:  # Finished, do some auto-cleanup
+            self.join_thread()
+            self.close_process()
+            return 100
         if not self.thread:
             log.debug("Creating status-check thread")
             self.stop_event.clear()
@@ -253,6 +262,7 @@ class RhubarbCommandWrapper:
             return None
 
     def cancel(self):
+        log.info("Received cancel request")
         self.stop_event.set()
         self.join_thread()
 
@@ -270,6 +280,16 @@ class RhubarbCommandWrapper:
         # if not self.was_started:
         #    return False
         return self.last_exit_code is not None
+
+    def get_lipsync_output_json(self) -> list[dict]:
+        """Json - parsed output of the lipsync capture process"""
+        assert self.has_finished, "Output is not available since the process has not finisehd"
+        return RhubarbParser.parse_lipsync_json(self.stdout)
+
+    def get_lipsync_output_cues(self) -> list[MouthCue]:
+        """Json - parsed output of the lipsync capture process"""
+        json = self.get_lipsync_output_json()
+        return RhubarbParser.lipsync_json2MouthCues(json)
 
     def collect_output_sync(self, ignore_timeout_error=True, timeout=1):
         """

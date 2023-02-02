@@ -1,13 +1,19 @@
 from functools import cached_property
 from pathlib import Path
 import unittest
+import rhubarb_lipsync.rhubarb.rhubarb_command_handling as rhubarb_command_handling
 from rhubarb_lipsync.rhubarb.rhubarb_command_handling import RhubarbCommandWrapper, RhubarbParser
 from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue
-
+import logging
 from time import sleep
 
 # import tests.test_data
 import test_data
+
+
+def enableDebug():
+    logging.basicConfig()
+    rhubarb_command_handling.log.setLevel(logging.DEBUG)
 
 
 def wait_until_finished(r: RhubarbCommandWrapper):
@@ -16,8 +22,9 @@ def wait_until_finished(r: RhubarbCommandWrapper):
         if r.has_finished:
             return
         sleep(0.1)
+        p = r.lipsync_check_progress()
 
-        print(f"{r.lipsync_check_progress()}%")
+        # print(f"{p}%")
         # print(r.stderr)
         # print(r.stdout)
     assert False, "Seems the process in hanging up"
@@ -34,9 +41,10 @@ def wait_until_finished_async(r: RhubarbCommandWrapper, cancel_after=0):
         p = r.lipsync_check_progress_async()
         if p is not None:
             loops += 1
-            print(f"{p}%")
+            # print(f"{p}%")
             if cancel_after > 0 and loops > cancel_after:
                 r.cancel()
+                return
         # print(r.stderr)
         # print(r.stdout)
     assert False, "Seems the process in hanging up"
@@ -44,6 +52,7 @@ def wait_until_finished_async(r: RhubarbCommandWrapper, cancel_after=0):
 
 class RhubarbCommandWrapperTest(unittest.TestCase):
     def setUp(self):
+        enableDebug()
         self.wrapper = RhubarbCommandWrapper(self.executable_path)
 
     @cached_property
@@ -63,14 +72,8 @@ class RhubarbCommandWrapperTest(unittest.TestCase):
         for i, (a, b) in enumerate(zip(a_cues, b_cues)):
             self.assertEqual(a, b, f"Cues at position {i} don't match:\n{a}\n{b} ")
 
-    def compare_cues_json(self, a_json: list[dict], b_json: list[dict]) -> None:
-        a = RhubarbParser.lipsync_json2MouthCues(a_json)
-        b = RhubarbParser.lipsync_json2MouthCues(b_json)
-        self.compare_cues(a, b)
-
     def compare_cues_testdata(self, expected: test_data.SampleData, wrapper: RhubarbCommandWrapper) -> None:
-        cues_json = RhubarbParser.parse_lipsync_json(wrapper.stdout)
-        self.compare_cues_json(expected.expected_json, cues_json)
+        self.compare_cues(expected.expected_cues, wrapper.get_lipsync_output_cues())
 
     def compare_testdata_with_current(self) -> None:
         self.compare_cues_testdata(self.data, self.wrapper)
@@ -79,26 +82,30 @@ class RhubarbCommandWrapperTest(unittest.TestCase):
         self.assertEqual(self.wrapper.get_version(), "1.13.0")
         self.assertEqual(self.wrapper.get_version(), "1.13.0")
 
-    def testLipsync(self):
-        self.wrapper.lipsync_start(self.data.snd_file_path)
+    def testLipsync_sync(self) -> None:
+        self.wrapper.lipsync_start(str(self.data.snd_file_path))
         wait_until_finished(self.wrapper)
         self.compare_testdata_with_current()
 
     def testLipsync_async(self):
-        self.wrapper.lipsync_start(self.data.snd_file_path)
+        self.wrapper.lipsync_start(str(self.data.snd_file_path))
         wait_until_finished_async(self.wrapper)
         self.compare_testdata_with_current()
 
     def testLipsync_cancel(self):
-        self.wrapper.lipsync_start(self.data.snd_file_path)
+        self.wrapper.lipsync_start(str(self.data.snd_file_path))
         wait_until_finished_async(self.wrapper, 4)
         assert not self.wrapper.has_finished
-        self.compare_testdata_with_current()
+        self.wrapper.close_process()
+        assert not self.wrapper.stdout, f"No cues expected since the process was canceled. But got\n'{self.wrapper.stdout}' "
 
         # self.assertEqual(len(s.fullyMatchingParts()), 2)
 
 
 class RhubarbParserTest(unittest.TestCase):
+    def setUp(self):
+        enableDebug()
+
     def testVersion(self):
         self.assertFalse(RhubarbParser.parse_version_info(""))
         self.assertFalse(RhubarbParser.parse_version_info("invalid"))
@@ -114,6 +121,5 @@ class RhubarbParserTest(unittest.TestCase):
 
 if __name__ == '__main__':
     # unittest.main(RhubarbParserTest())
-    # unittest.main(RhubarbCommandWrapperTest())
     # unittest.main(RhubarbCommandWrapperTest())
     unittest.main()
