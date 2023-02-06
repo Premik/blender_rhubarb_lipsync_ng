@@ -106,6 +106,8 @@ https://blender.stackexchange.com/questions/30444/create-an-interface-which-is-s
 https://blender.stackexchange.com/questions/8699/what-ui-would-work-for-choosing-from-a-long-long-list
 https://blender.stackexchange.com/questions/717/is-it-possible-to-print-to-the-report-window-in-the-info-view
 
+https://blender.stackexchange.com/questions/44356/fighting-split-col-and-aligning-row-content
+
 Icons:
 https://wilkinson.graphics/blender-icons/
 
@@ -122,20 +124,9 @@ https://docs.blender.org/api/current/info_best_practice.html
 * Extended cues check-box
 * Rel/Abd path - make them prefix-small icons in from of the sound directory selector?
 * Add debug-log flag to addon prefs, set log level on all loggers
-
-```
-if not bpy.data.is_saved:
-            self.relative = False
-if self.relative:
-            try:  # can't always find the relative path (between drive letters on windows)
-                image.filepath = bpy.path.relpath(image.filepath)
-            except ValueError:
-                pass
-
-```            
-
-
-
+* Create github build-job, running unit tests/integration tests?
+* place-on-strip op - add redo support, asking for channel and frame
+* Set the panel tab name in the preferences
 
 ## Baking
 

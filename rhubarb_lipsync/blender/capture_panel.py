@@ -44,15 +44,18 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
         if sound is None:
             ui_utils.draw_error(self.layout, "Select a sound file.")
             return False
-        layout.prop(sound, "filepath", text="")  # type: ignore
         row = layout.row(align=True)
+        row.prop(sound, "filepath", text="")  # type: ignore
+
         blid = sound_operators.ToggleRelativePath.bl_idname
-        op = row.operator(blid, text="Relative").relative = True
-        op = row.operator(blid, text="Absolute").relative = False
+
+        op = row.operator(blid, text="", icon="DOT").relative = True
+        op = row.operator(blid, text="", icon="ITALIC").relative = False
 
         row = layout.row(align=True)
         row.operator(sound_operators.CreateSoundStripWithSound.bl_idname, icon='SPEAKER')
         row.operator(sound_operators.RemoveSoundStripWithSound.bl_idname, icon='MUTE_IPO_OFF')
+        layout.prop(self.ctx.scene, 'use_audio_scrub')
 
         if sound.packed_file:
             ui_utils.draw_error(self.layout, "Rhubarb requires the file on disk.\n Please unpack the sound.")
@@ -65,8 +68,17 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
             ui_utils.draw_error(self.layout, "Sound file doesn't exist.")
             return False
 
+        convert = False
+
+        if sound.samplerate < 16 * 1000:
+            ui_utils.draw_error(self.layout, "Only samplerate >16k supported")
+            convert = True
+
         if not props.is_sound_format_supported():
             ui_utils.draw_error(self.layout, "Only wav or ogg supported.")
+            convert = True
+
+        if convert or prefs.always_show_conver:
             row = layout.row(align=True)
             row.label(text="Convert to")
             blid = sound_operators.ConvertSoundFromat.bl_idname
@@ -89,7 +101,7 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
         sound: Sound = props.sound
         if not ui_utils.draw_expandable_header(prefs, "info_panel_expanded", "Additional info", self.layout):
             return
-        box = self.layout.box()
+        box = self.layout.box().column(align=True)
         # line = layout.split()
         if sound:
             line = box.split()
@@ -117,8 +129,47 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
 
     def draw(self, context: Context):
         try:
+
             self.ctx = context
             layout = self.layout
+            # layout.use_property_split = True
+            # layout.use_property_decorate = False  # No animation.
+
+            a = layout
+            # a = a.split()
+
+            c = a.column()
+
+            # c = a
+
+            row = c.row()
+
+            split = row.split(factor=0.3)
+            c = split.column()
+
+            c.label(text="Layers")
+            # split = split.split()
+            c = split.column()
+            c.label(text=f"bbb")
+
+            c = a.column()
+            row = c.row()
+            split = row.split(factor=0.3)
+            c = split.column()
+            c.label(text="Layers")
+            split = split.split()
+            c = split.column()
+            c.alert = True
+            c.label(text="aabbbaaaa")
+
+            a = layout.box()
+
+            a.label(text="aaaaaa")
+            a.label(text="bbbb")
+            a.label(text="cc")
+            a.label(text="dd")
+            a.label(text="ee")
+
             selection_error = CaptureProperties.context_selection_validation(context)
             if selection_error:
                 ui_utils.draw_error(self.layout, selection_error)

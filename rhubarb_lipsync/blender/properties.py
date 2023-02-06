@@ -2,11 +2,12 @@ from functools import cached_property
 import pathlib
 import bpy
 from bpy.props import FloatProperty, StringProperty, BoolProperty, PointerProperty, EnumProperty
-from bpy.types import Object, PropertyGroup, Context, SoundSequence, Sound, AddonPreferences
+from bpy.types import PropertyGroup, Context, UILayout, Sound, AddonPreferences
 import bpy.utils.previews
 from typing import Optional, cast
 from rhubarb_lipsync.rhubarb.rhubarb_command_handling import RhubarbCommandWrapper, RhubarbParser
 import pathlib
+import logging
 
 
 def addons_path() -> pathlib.Path:
@@ -33,6 +34,7 @@ class IconsManager:
         if IconsManager._previews:
             bpy.utils.previews.remove(IconsManager._previews)
             IconsManager._previews = None
+            IconsManager._loaded = set()
 
     @staticmethod
     def get(key: str):
@@ -83,10 +85,29 @@ class RhubarbAddonPreferences(AddonPreferences):
     )
 
     default_converted_output_folder: StringProperty(  # type: ignore
-        name="Default output for converted files",
+        name="Converted files output",
         description="Where to put the new wav/ogg files resulted from the conversion from an unsupported formats. Leave blank to use the source file's folder",
         subtype='FILE_PATH',
         default="",
+    )
+
+    always_show_conver: BoolProperty(  # type: ignore
+        name="Always show the convert buttons",
+        description="Always show the convert buttons in the panel. Even when the conversion is likely not needed.",
+        default=False,
+    )
+
+    log_level: EnumProperty(  # type: ignore
+        name="Log Level",
+        items=[
+            (str(logging.FATAL), 'FATAL', ""),
+            (str(logging.ERROR), 'ERROR', ""),
+            (str(logging.WARNING), 'WARNING', ""),
+            (str(logging.INFO), 'INFO', ""),
+            (str(logging.DEBUG), 'DEBUG', ""),
+            (str(logging.NOTSET), 'DEFAULT', ""),
+        ],
+        default=str(str(logging.INFO)),
     )
 
     info_panel_expanded: BoolProperty(default=True)  # type: ignore
@@ -95,24 +116,40 @@ class RhubarbAddonPreferences(AddonPreferences):
     def new_command_handler(self):
         return RhubarbCommandWrapper(self.executable_path, self.recognizer, self.use_extended_shapes)
 
-    def draw(self, context: Context):
-        layout = self.layout
+    def draw(self, context: Context) -> None:
+        layout: UILayout = self.layout
+
         layout.prop(self, "executable_path_string")
         row = layout.row().split(factor=0.243)
+        # split = layout.row(heading="Label")
         row.label(text="Rhubarb executable version:")
 
         # Hack to avoid circumvent circular imports
         import rhubarb_lipsync.blender.rhubarb_operators as rhubarb_operators
 
         ver = rhubarb_operators.GetRhubarbExecutableVersion.get_cached_value(context)
+
         if ver:  # Cached value, just show
             row.label(text=ver)
         else:  # Not cached, offer button
             row.operator(rhubarb_operators.GetRhubarbExecutableVersion.bl_idname)
 
+        # row = layout.row()
+        # row.prop(self, "recognizer")
+        # split = layout.row().split(factor=0.5)
         layout.prop(self, "recognizer")
+
         layout.prop(self, "use_extended_shapes")
+        layout.separator()
         layout.prop(self, 'default_converted_output_folder')
+        layout.prop(self, 'always_show_conver')
+
+        from rhubarb_lipsync.blender.misc_operators import SetLogLevel
+
+        row = layout.row(align=True)
+        row.label(text=f"Log level f{SetLogLevel.level2name(SetLogLevel.current_level())}")
+        row.operator(SetLogLevel.bl_idname, text="Set to INFO").level = str(logging.INFO)
+        row.operator(SetLogLevel.bl_idname, text="Set to DEBUG").level = str(logging.DEBUG)
 
 
 class CaptureProperties(PropertyGroup):
@@ -129,8 +166,8 @@ class CaptureProperties(PropertyGroup):
     def from_context(ctx: Context) -> 'CaptureProperties':
         if not ctx.object:
             return None  # type: ignore
-        # Seems to data-block properties are lazily created
-        # and doesn't exists until accessed for the first time
+        # Seems the data-block properties are lazily created
+        # and doesn't exist until accessed for the first time
         # if not 'rhubarb_lipsync' in self.ctx.active_object:
         try:
             p = ctx.object.rhubarb_lipsync  # type: ignore
@@ -193,6 +230,7 @@ class CaptureProperties(PropertyGroup):
         return str(p.parent)
 
     def is_sound_format_supported(self) -> bool:
+
         return self.sound_file_extension in ["ogg", "wav"]
 
     def get_sound_name_with_new_extension(self, new_ext: str) -> str:

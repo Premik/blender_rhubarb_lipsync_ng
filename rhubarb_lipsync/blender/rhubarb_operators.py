@@ -28,14 +28,19 @@ class ProcessSoundFile(bpy.types.Operator):
 
     @classmethod
     def disabled_reason(cls, context: Context) -> str:
-
+        props = CaptureProperties.from_context(context)
+        sound: Sound = props.sound
+        # Use properties (binded to object) to check if already running.
+        # This allows concurent running of the op provided each instance is linked to a different object
+        if hasattr(props, 'running_process_sound_op'):
+            if props.running_process_sound_op is not None:
+                return "Already running"
         error_common = CaptureProperties.sound_selection_validation(context)
         if error_common:
             return error_common
-        props = CaptureProperties.from_context(context)
-        sound: Sound = props.sound
+
         if not sound.filepath or not pathlib.Path(sound.filepath).exists():
-            return "Sound file doesn't exist."
+            return "Sound file doesn't exist. Try absolute the path instead"
 
         if not props.is_sound_format_supported():
             return "Unsupported file format"
@@ -61,54 +66,60 @@ class ProcessSoundFile(bpy.types.Operator):
     def execute(self, context: Context) -> set[str]:
         prefs = RhubarbAddonPreferences.from_context(context)
         props = CaptureProperties.from_context(context)
+        sound: Sound = props.sound
         self.cmd = prefs.new_command_handler()
-        # self.cmd.lipsync_start(ui_utils.to_abs_path(sound.filepath), props.dialog_file)
+        self.cmd.lipsync_start(ui_utils.to_abs_path(sound.filepath), props.dialog_file)
+        self.report({'INFO'}, f"Started")
 
         wm = context.window_manager
         wm.modal_handler_add(self)
         self.timer = wm.event_timer_add(0.1, window=context.window)
         # https://blender.stackexchange.com/questions/1050/blender-ui-multithreading-progressbar
         wm.progress_begin(0, 100)
-        self.test = 0
+        props.running_process_sound_op = self
         return {'RUNNING_MODAL'}
 
     def modal(self, context: Context, event) -> set[str]:
         wm = context.window_manager
-        self.test += 1
-        from time import sleep
+        try:
+            if self.cmd.has_finished:
+                self.report({'INFO'}, f"Done")
 
-        sleep(0.01)
-        wm.progress_update(self.test)
-        if self.test > 100:
+                self.finished(context)
+                return {'FINISHED'}
+
+            if event.type in {'ESC'}:
+                self.report({'INFO'}, f"Cancel")
+                self.cmd.cancel()
+                self.finished(context)
+                return {'CANCELLED'}
+
+            try:
+                progress = self.cmd.lipsync_check_progress_async()
+            except RuntimeError as e:
+                self.report({'ERROR'}, str(e))
+                self.cmd.cancel()
+                self.finished(context)
+                return {'CANCELLED'}
+        finally:
             self.finished(context)
-            self.report({'INFO'}, f"Done")
-            return {'FINISHED'}
-        return {'PASS_THROUGH'}
 
-    def modal2(self, context: Context, event) -> set[str]:
-        wm = context.window_manager
-        if self.cmd.has_finished:
-            self.finished(context)
-            self.report({'INFO'}, f"Done")
-            return {'FINISHED'}
-
-        if event.type in {'ESC'}:
-            self.report({'INFO'}, f"Cancelled")
-            self.finished(context)
-            return {'CANCELLED'}
-
-        progress = self.cmd.lipsync_check_progress()
         if progress is not None:
             wm.progress_update(progress)
             # self.report({'INFO'}, f"{progress}%")
         return {'PASS_THROUGH'}
 
     def finished(self, context: Context):
+        props = CaptureProperties.from_context(context)
+        props.running_process_sound_op = None
         wm = context.window_manager
         wm.event_timer_remove(self.timer)
         if self.cmd:
+            if self.cmd.stdout:
+                print(self.cmd.get_lipsync_output_cues())
             self.cmd.close_process()
-        self.cmd = None
+            self.cmd.join_thread()
+            self.cmd = None
 
 
 class GetRhubarbExecutableVersion(bpy.types.Operator):

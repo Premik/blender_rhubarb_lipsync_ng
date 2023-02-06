@@ -147,9 +147,9 @@ class RhubarbCommandWrapper:
             log.debug(f"Terminating the process {self.process}")
             self.process.terminate()
             self.process.wait(RhubarbCommandWrapper.thread_wait_timeout)
-            log.debug(f"Process terminated")
             # Consume any reminding output, this would also close the process io streams
-            self.process.communicate(timeout=1)
+            self.process.communicate(timeout=5)
+            log.debug(f"Process terminated")
         self.process = None
 
     def join_thread(self) -> None:
@@ -265,6 +265,7 @@ class RhubarbCommandWrapper:
         log.info("Received cancel request")
         self.stop_event.set()
         self.join_thread()
+        self.close_process()
 
     @property
     def was_started(self) -> bool:

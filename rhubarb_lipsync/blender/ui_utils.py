@@ -33,18 +33,22 @@ def assert_op_ret(ret: set[str]):
 def draw_expandable_header(props: Any, property_name: str, label: str, layout: UILayout, errors=False) -> bool:
     """Draws a checkbox which looks like collapsable sub-panel's header.
     Expanded/collapsed state is driven by the provided property.
-    Returns the exapnded status. Inspired by GameRigtTool plugin"""
+    Returns the expanded status. Inspired by GameRigtTool plugin"""
     assert props and property_name
-    expanded = getattr(props, property_name)
-    if expanded:
-        icon = "TRIA_DOWN"
-    else:
-        icon = "TRIA_RIGHT"
-        if errors:
-            icon = "ERROR"
-
     row = layout.row(align=True)
     row.alignment = "LEFT"
+
+    expanded = getattr(props, property_name)
+    if expanded:
+        # icon = 'TRIA_DOWN'
+        icon = 'DISCLOSURE_TRI_DOWN'
+    else:
+        # icon = 'TRIA_RIGHT'
+        icon = 'DISCLOSURE_TRI_RIGHT'
+        if errors:
+            row.alert = True
+            icon = "ERROR"
+
     row.prop(props, property_name, text=label, emboss=False, icon=icon)
 
     return expanded
@@ -60,16 +64,18 @@ def draw_prop_with_label(props: Any, property_name: str, label, layout: UILayout
 
 def draw_error(layout, msg: str):
     box = layout.box()
+    box.alert = True
     lines = msg.splitlines()
     if not lines:
         lines = [""]
     if len(lines) == 1:  # Single line
+
         box.label(text=msg, icon="ERROR")
         return
     # Multiline
     box.label(text="", icon="ERROR")
     for l in lines:
-        box.label(text=l)
+        box.label(text=l, icon="BLANK1")
 
 
 def to_relative_path(blender_path: str) -> str:
