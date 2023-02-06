@@ -14,8 +14,16 @@ bl_info = {
 
 import bpy
 from bpy.props import PointerProperty
-from rhubarb_lipsync.blender.properties import CaptureProperties, IconsManager
+from rhubarb_lipsync.blender.properties import CaptureProperties, IconsManager, RhubarbAddonPreferences
+from rhubarb_lipsync.rhubarb.log_manager import logManager
 import rhubarb_lipsync.blender.auto_load
+
+
+def init_loggers():
+    logManager.init(rhubarb_lipsync.blender.auto_load.modules)
+    prefs = RhubarbAddonPreferences.from_context(bpy.context)
+    if hasattr(prefs, 'log_level') and prefs.log_level != 0:  # 0 default level
+        logManager.set_level(prefs.log_level)
 
 
 # print(f"FILE:  {__file__}")
@@ -25,6 +33,7 @@ rhubarb_lipsync.blender.auto_load.init(__file__)
 def register():
     rhubarb_lipsync.blender.auto_load.register()
     bpy.types.Object.rhubarb_lipsync = PointerProperty(type=CaptureProperties)
+    init_loggers()
 
 
 def unregister():

@@ -1,13 +1,12 @@
 from functools import cached_property
 import pathlib
 import bpy
-from bpy.props import FloatProperty, StringProperty, BoolProperty, PointerProperty, EnumProperty
+from bpy.props import FloatProperty, StringProperty, BoolProperty, PointerProperty, EnumProperty, IntProperty
 from bpy.types import PropertyGroup, Context, UILayout, Sound, AddonPreferences
 import bpy.utils.previews
 from typing import Optional, cast
 from rhubarb_lipsync.rhubarb.rhubarb_command_handling import RhubarbCommandWrapper, RhubarbParser
 import pathlib
-import logging
 
 
 def addons_path() -> pathlib.Path:
@@ -97,19 +96,7 @@ class RhubarbAddonPreferences(AddonPreferences):
         default=False,
     )
 
-    log_level: EnumProperty(  # type: ignore
-        name="Log Level",
-        items=[
-            (str(logging.FATAL), 'FATAL', ""),
-            (str(logging.ERROR), 'ERROR', ""),
-            (str(logging.WARNING), 'WARNING', ""),
-            (str(logging.INFO), 'INFO', ""),
-            (str(logging.DEBUG), 'DEBUG', ""),
-            (str(logging.NOTSET), 'DEFAULT', ""),
-        ],
-        default=str(str(logging.INFO)),
-    )
-
+    log_level: IntProperty(default=0)  # type: ignore
     info_panel_expanded: BoolProperty(default=True)  # type: ignore
     sound_source_panel_expanded: BoolProperty(default=True)  # type: ignore
 
@@ -145,11 +132,11 @@ class RhubarbAddonPreferences(AddonPreferences):
         layout.prop(self, 'always_show_conver')
 
         from rhubarb_lipsync.blender.misc_operators import SetLogLevel
+        from rhubarb_lipsync.rhubarb.log_manager import logManager
 
-        row = layout.row(align=True)
-        row.label(text=f"Log level f{SetLogLevel.level2name(SetLogLevel.current_level())}")
-        row.operator(SetLogLevel.bl_idname, text="Set to INFO").level = str(logging.INFO)
-        row.operator(SetLogLevel.bl_idname, text="Set to DEBUG").level = str(logging.DEBUG)
+        row = layout.row().split(factor=0.243)
+        row.label(text=f"Log level ({logManager.current_level_name})")
+        row.operator_menu_enum(SetLogLevel.bl_idname, 'level')
 
 
 class CaptureProperties(PropertyGroup):
