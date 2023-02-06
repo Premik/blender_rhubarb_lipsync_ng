@@ -118,13 +118,9 @@ https://docs.blender.org/api/current/info_best_practice.html
 ## Todo
 
 * Add [speaker](https://docs.blender.org/manual/en/latest/render/output/audio/speaker.html) as an alternative to Sequencer audio clip
-* Set start frame?
-* Addd audio-sccrubbling checkbox
 * Rename capture_panel to something better? (sound setup?)
-* Extended cues check-box
-* Rel/Abd path - make them prefix-small icons in from of the sound directory selector?
-* Add debug-log flag to addon prefs, set log level on all loggers
 * Create github build-job, running unit tests/integration tests?
+* Set start frame?
 * place-on-strip op - add redo support, asking for channel and frame
 * Set the panel tab name in the preferences
 

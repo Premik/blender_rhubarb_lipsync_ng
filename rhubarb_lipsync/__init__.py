@@ -21,7 +21,7 @@ import rhubarb_lipsync.blender.auto_load
 
 def init_loggers():
     logManager.init(rhubarb_lipsync.blender.auto_load.modules)
-    prefs = RhubarbAddonPreferences.from_context(bpy.context)
+    prefs = RhubarbAddonPreferences.from_context(bpy.context, False)
     if hasattr(prefs, 'log_level') and prefs.log_level != 0:  # 0 default level
         logManager.set_level(prefs.log_level)
 

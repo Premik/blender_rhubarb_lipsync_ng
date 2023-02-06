@@ -95,13 +95,14 @@ class RhubarbCommandWrapper:
         self.extra_args = extra_args
         self.thread: Optional[Thread] = None
         self.queue: SimpleQueue[tuple[str, Any]] = SimpleQueue()
+        self.last_progress = 0
         self.stop_event = Event()
 
     @staticmethod
     def executable_default_filename() -> str:
         return "rhubarb.exe" if platform.system() == "Windows" else "rhubarb"
 
-    def errors(self) -> Optional[str]:
+    def config_errors(self) -> Optional[str]:
         if not self.executable_path:
             return "Configure the Rhubarb lipsync executable file path in the addon preferences. "
 
@@ -134,7 +135,7 @@ class RhubarbCommandWrapper:
 
     def open_process(self, cmd_args: List[str]) -> None:
         assert not self.was_started
-        assert not self.errors(), self.errors()
+        assert not self.config_errors(), self.config_errors()
         self.stdout = ""
         self.stderr = ""
         self.last_exit_code = None
@@ -178,7 +179,7 @@ class RhubarbCommandWrapper:
 
     def log_status_line(self, log_json: dict):
         # {'log': {'level': 'Info', 'message': 'Msg'}}]
-        if not log_json or not 'log' in log_json.keys():
+        if not log_json or not 'log' in log_json:
             return  # Not log key included in the progress line
         level = log_json["log"]["level"]
         msg = log_json["log"]["message"]
@@ -210,9 +211,9 @@ class RhubarbCommandWrapper:
         for s in status_lines:
             self.log_status_line(s)
         by_type = {j["type"]: j for j in status_lines if j}
-        if "failure" in by_type.keys():
+        if "failure" in by_type:
             raise RuntimeError(f"Rhubarb binary failed:\n{by_type['failure']['reason']}")
-        if not "progress" in by_type.keys():
+        if not "progress" in by_type:
             return None
         v = by_type["progress"]["value"]
         return int(v * 100)
@@ -231,6 +232,7 @@ class RhubarbCommandWrapper:
                 if progress is None:
                     sleep(0.1)
                 else:
+                    self.last_progress = progress
                     self.queue.put(("PROGRESS", progress))
 
             except Exception as e:
@@ -282,6 +284,10 @@ class RhubarbCommandWrapper:
         #    return False
         return self.last_exit_code is not None
 
+    @property
+    def is_running(self) -> bool:
+        return self.was_started and not self.has_finished
+
     def get_lipsync_output_json(self) -> list[dict]:
         """Json - parsed output of the lipsync capture process"""
         assert self.has_finished, "Output is not available since the process has not finisehd"
@@ -328,3 +334,10 @@ class RhubarbCommandWrapper:
             self.stderr += n
         except StopIteration:
             log.debug(f"EOF reached while reading the stderr")  # Process has just terminated
+
+
+class RhubarbCommandResult:
+    """"""
+
+    def __init__(self, cmd: RhubarbCommandWrapper):
+        self.cmd = cmd

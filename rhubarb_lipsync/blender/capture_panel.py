@@ -129,46 +129,13 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
 
     def draw(self, context: Context):
         try:
-
+            props = CaptureProperties.from_context(context)
             self.ctx = context
             layout = self.layout
             # layout.use_property_split = True
             # layout.use_property_decorate = False  # No animation.
 
-            a = layout
-            # a = a.split()
-
-            c = a.column()
-
-            # c = a
-
-            row = c.row()
-
-            split = row.split(factor=0.3)
-            c = split.column()
-
-            c.label(text="Layers")
-            # split = split.split()
-            c = split.column()
-            c.label(text=f"bbb")
-
-            c = a.column()
-            row = c.row()
-            split = row.split(factor=0.3)
-            c = split.column()
-            c.label(text="Layers")
-            split = split.split()
-            c = split.column()
-            c.alert = True
-            c.label(text="aabbbaaaa")
-
-            a = layout.box()
-
-            a.label(text="aaaaaa")
-            a.label(text="bbbb")
-            a.label(text="cc")
-            a.label(text="dd")
-            a.label(text="ee")
+            layout.prop(props, "progress", text="Progress", slider=True)
 
             selection_error = CaptureProperties.context_selection_validation(context)
             if selection_error:
@@ -177,6 +144,7 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
                 self.draw_sound_setup()
             self.draw_info()
             # layout.operator(rhubarb_operators.ProcessSoundFile.bl_idname, icon="MONKEY")
+            layout.prop(props, "dialog_file")
             layout.operator(rhubarb_operators.ProcessSoundFile.bl_idname, icon_value=IconsManager.get('rhubarb64x64'))
 
         except Exception as e:

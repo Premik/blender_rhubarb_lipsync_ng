@@ -51,9 +51,13 @@ class RhubarbAddonPreferences(AddonPreferences):
     bl_idname = 'rhubarb_lipsync'
 
     @staticmethod
-    def from_context(ctx: Context) -> 'RhubarbAddonPreferences':
-        addon = ctx.preferences.addons[RhubarbAddonPreferences.bl_idname]
-        assert addon, f"The addon {RhubarbAddonPreferences.bl_idname} not found in the context."
+    def from_context(ctx: Context, require=True) -> 'RhubarbAddonPreferences':
+        blid = RhubarbAddonPreferences.bl_idname
+        if not blid in ctx.preferences.addons:
+            if require:  # There is no inbuilt Illegal state or similar exception in python
+                raise RuntimeError(f"The '{blid}' addon preferences not found in the context.")
+            return None  # type: ignore
+        addon = ctx.preferences.addons[blid]
         return cast(RhubarbAddonPreferences, addon.preferences)
 
     executable_path_string: StringProperty(  # type: ignore
@@ -100,7 +104,7 @@ class RhubarbAddonPreferences(AddonPreferences):
     info_panel_expanded: BoolProperty(default=True)  # type: ignore
     sound_source_panel_expanded: BoolProperty(default=True)  # type: ignore
 
-    def new_command_handler(self):
+    def new_command_handler(self) -> RhubarbCommandWrapper:
         return RhubarbCommandWrapper(self.executable_path, self.recognizer, self.use_extended_shapes)
 
     def draw(self, context: Context) -> None:
@@ -148,6 +152,7 @@ class CaptureProperties(PropertyGroup):
         description="Additional plain-text file with transcription of the sound file to improve accuracy. Works for english only",
         subtype='FILE_PATH',
     )
+    progress: IntProperty("progress", default=-1)  # type: ignore
 
     @staticmethod
     def from_context(ctx: Context) -> 'CaptureProperties':

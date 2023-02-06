@@ -7,10 +7,12 @@ import test_data
 import rhubarb_lipsync
 import rhubarb_lipsync.blender.auto_load
 from rhubarb_lipsync.blender.properties import CaptureProperties
+from rhubarb_lipsync.rhubarb.log_manager import logManager
 
 
 def setUpModule():
     rhubarb_lipsync.register()  # Simulate blender register call
+    logManager.set_debug()
 
 
 class PropertiesTest(unittest.TestCase):

@@ -48,6 +48,9 @@ class LogManager:
             except Exception as e:
                 print(f"Failed to set log level for '{l}': \n{e}")
 
+    def set_debug(self):
+        self.set_level(logging.DEBUG)
+
     @staticmethod
     def level2name(level: int) -> str:
         return logging._levelToName.get(level, "?")
