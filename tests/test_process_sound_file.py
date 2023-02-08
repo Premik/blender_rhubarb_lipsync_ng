@@ -1,8 +1,8 @@
 from functools import cached_property
 from pathlib import Path
 import unittest
-import rhubarb_lipsync.rhubarb.rhubarb_command_handling as rhubarb_command_handling
-from rhubarb_lipsync.rhubarb.rhubarb_command_handling import RhubarbCommandWrapper, RhubarbParser
+import rhubarb_lipsync.rhubarb.rhubarb_command as rhubarb_command
+from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandWrapper, RhubarbParser, RhubarbCommandAsyncJob
 from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue
 import logging
 from time import sleep
@@ -13,7 +13,7 @@ import test_data
 
 def enableDebug():
     logging.basicConfig()
-    rhubarb_command_handling.log.setLevel(logging.DEBUG)
+    rhubarb_command.log.setLevel(logging.DEBUG)
 
 
 def wait_until_finished(r: RhubarbCommandWrapper):
@@ -30,20 +30,19 @@ def wait_until_finished(r: RhubarbCommandWrapper):
     assert False, "Seems the process in hanging up"
 
 
-def wait_until_finished_async(r: RhubarbCommandWrapper, cancel_after=0):
-    assert r.was_started
+def wait_until_finished_async(job: RhubarbCommandAsyncJob, only_loop_times=0):
+    assert job.cmd.was_started
     loops = 0
     for i in range(0, 1000):
-        if r.has_finished:
+        if job.cmd.has_finished:
             assert loops > 2, f"No progress updates was provided "
             return
         sleep(0.1)
-        p = r.lipsync_check_progress_async()
+        p = job.lipsync_check_progress_async()
         if p is not None:
             loops += 1
             # print(f"{p}%")
-            if cancel_after > 0 and loops > cancel_after:
-                r.cancel()
+            if only_loop_times > 0 and loops > only_loop_times:
                 return
         # print(r.stderr)
         # print(r.stdout)
@@ -89,17 +88,43 @@ class RhubarbCommandWrapperTest(unittest.TestCase):
 
     def testLipsync_async(self):
         self.wrapper.lipsync_start(str(self.data.snd_file_path))
-        wait_until_finished_async(self.wrapper)
+        wait_until_finished_async(RhubarbCommandAsyncJob(self.wrapper))
+        assert not self.wrapper.was_started
+        assert self.wrapper.has_finished
         self.compare_testdata_with_current()
 
     def testLipsync_cancel(self):
+        job = RhubarbCommandAsyncJob(self.wrapper)
+        assert not self.wrapper.was_started
+        assert not self.wrapper.has_finished
         self.wrapper.lipsync_start(str(self.data.snd_file_path))
-        wait_until_finished_async(self.wrapper, 4)
-        # assert not self.wrapper.has_finished
+        assert self.wrapper.was_started
+        assert not self.wrapper.has_finished
+        wait_until_finished_async(job, 4)
+        assert self.wrapper.was_started
+        assert not self.wrapper.has_finished
+        job.cancel()
+        assert not self.wrapper.was_started
+        assert not self.wrapper.has_finished
 
         assert not self.wrapper.stdout, f"No cues expected since the process was canceled. But got\n'{self.wrapper.stdout}' "
 
         # self.assertEqual(len(s.fullyMatchingParts()), 2)
+
+    def testLipsync_cancel_restat(self):
+        job = RhubarbCommandAsyncJob(self.wrapper)
+        assert job.status == "Stopped"
+        self.wrapper.lipsync_start(str(self.data.snd_file_path))
+        assert job.status == "Running"
+        wait_until_finished_async(job, 4)
+        assert job.status == "Running"
+        job.cancel()
+        assert job.status == "Stopped"
+        # Start again resuing same cmd wrapper and job
+        self.wrapper.lipsync_start(str(self.data.snd_file_path))
+        wait_until_finished(self.wrapper)
+        assert job.status == "Done"
+        self.compare_testdata_with_current()
 
 
 class RhubarbParserTest(unittest.TestCase):

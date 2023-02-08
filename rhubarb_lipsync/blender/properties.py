@@ -5,7 +5,7 @@ from bpy.props import FloatProperty, StringProperty, BoolProperty, PointerProper
 from bpy.types import PropertyGroup, Context, UILayout, Sound, AddonPreferences
 import bpy.utils.previews
 from typing import Optional, cast
-from rhubarb_lipsync.rhubarb.rhubarb_command_handling import RhubarbCommandWrapper, RhubarbParser
+from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandWrapper, RhubarbParser
 import pathlib
 
 
