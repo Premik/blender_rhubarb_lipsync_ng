@@ -6,10 +6,12 @@ from bpy.types import Context, Sound, SoundSequence
 from typing import Optional, List, Dict, cast
 from bpy.props import FloatProperty, StringProperty, BoolProperty, PointerProperty, IntProperty
 from rhubarb_lipsync.blender.properties import RhubarbAddonPreferences, CaptureProperties
-from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandWrapper
+from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandWrapper, RhubarbCommandAsyncJob
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 import pathlib
 from rhubarb_lipsync.rhubarb.log_manager import logManager
+
+log = logging.getLogger(__name__)
 
 
 def rhubarcli_validation(context: Context, required_unpack=True) -> str:
@@ -28,14 +30,33 @@ class ProcessSoundFile(bpy.types.Operator):
     bl_label = "Run Rhubarb"
     bl_description = __doc__
 
+    # registered_jobs: dict[int, RhubarbCommandAsyncJob] = dict()
+    job_key = "rhubarb_lipsync_job"
+
+    @classmethod
+    def get_job(cls, context: Context) -> Optional[RhubarbCommandAsyncJob]:
+        """Get's the current running job (or the result) linked to the active object.
+        This is for external access (like from the panel)."""
+        o = context.object
+        if not o:
+            return None
+
+        return getattr(o, ProcessSoundFile.job_key, None)
+
+    @classmethod
+    def set_job(cls, context: Context, job: Optional[RhubarbCommandAsyncJob]) -> None:
+        o = context.object
+        assert o, "No active object"
+        setattr(o.__class__, ProcessSoundFile.job_key, job)
+
     @classmethod
     def disabled_reason(cls, context: Context) -> str:
         props = CaptureProperties.from_context(context)
         sound: Sound = props.sound
         # Use properties (binded to object) to check if already running.
         # This allows concurent running of the op provided each instance is linked to a different object
-        cmd = ProcessSoundFile.get_cmd(context)
-        if cmd and cmd.is_running:
+        job = ProcessSoundFile.get_job(context)
+        if job and job.cmd.is_running:
             return "Already running"
         error_common = CaptureProperties.sound_selection_validation(context)
         if error_common:
@@ -53,73 +74,92 @@ class ProcessSoundFile(bpy.types.Operator):
         return ui_utils.validation_poll(cls, context)
 
     @classmethod
-    def get_cmd(cls, context: Context):
+    def get_cmd(cls, context: Context) -> Optional[RhubarbCommandWrapper]:
+        job = ProcessSoundFile.get_job(context)
+        return getattr(job, 'cmd', None)
+
+    def update_progress(self, context: Context, progress=0):
         props = CaptureProperties.from_context(context)
-        if not hasattr(props, 'cmd'):
-            return None
-        return props.cmd
+        wm = context.window_manager
+        if progress == 0:
+            # https://blender.stackexchange.com/questions/1050/blender-ui-multithreading-progressbar
+            wm.progress_begin(0, 100)
+        else:
+            wm.progress_update(progress)
+        # Slider can only display value from  a blender property. And properties can't be modified in the draw methods, so setting here
+        props.progress = progress
+        context.area.tag_redraw()  # Force redraw
+
+    def invoke(self, context: Context, event) -> set[int] | set[str]:
+        job = ProcessSoundFile.get_job(context)
+        if job and job.get_lipsync_output_cues():
+            # Already some existing cues, confirm before overriding
+            wm = context.window_manager
+            return wm.invoke_confirm(self, event)
+        return self.execute(context)
 
     def execute(self, context: Context) -> set[str]:
         prefs = RhubarbAddonPreferences.from_context(context)
         props = CaptureProperties.from_context(context)
-        print(f"{'!'*100}\n{id(props)}")
+
         sound: Sound = props.sound
-        props.cmd = prefs.new_command_handler()
-        cmd = ProcessSoundFile.get_cmd(context)
+        cmd = prefs.new_command_handler()
+
+        job = RhubarbCommandAsyncJob(cmd)
+        ProcessSoundFile.set_job(context, job)  # Keep job reference for outer access
         cmd.lipsync_start(ui_utils.to_abs_path(sound.filepath), props.dialog_file)
         self.report({'INFO'}, f"Started")
 
         wm = context.window_manager
         wm.modal_handler_add(self)
         self.timer = wm.event_timer_add(0.1, window=context.window)
-        # https://blender.stackexchange.com/questions/1050/blender-ui-multithreading-progressbar
-        wm.progress_begin(0, 100)
-        props.progress = 0
-
+        self.update_progress(context)
+        log.debug("Operator execute")
         return {'RUNNING_MODAL'}
 
     def modal(self, context: Context, event) -> set[str]:
-        wm = context.window_manager
-        props = CaptureProperties.from_context(context)
-        try:
-            cmd = ProcessSoundFile.get_cmd(context)
-            if cmd.has_finished:
-                self.report({'INFO'}, f"Done")
 
-                self.finished(context)
-                return {'FINISHED'}
+        job = ProcessSoundFile.get_job(context)
+        assert job, f"No '{ProcessSoundFile.job_key}' key found on the active object"
+        if job.cmd.has_finished:
+            self.report({'INFO'}, f"Done")
 
-            if event.type in {'ESC'}:
-                self.report({'INFO'}, f"Cancel")
-                cmd.cancel()
-                self.finished(context)
-                return {'CANCELLED'}
-
-            try:
-                progress = cmd.lipsync_check_progress_async()
-            except RuntimeError as e:
-                self.report({'ERROR'}, str(e))
-                cmd.cancel()
-                self.finished(context)
-                return {'CANCELLED'}
-        finally:
             self.finished(context)
+            return {'FINISHED'}
+
+        if event.type in {'ESC'}:
+            log.info("Cancelling operator")
+            self.report({'INFO'}, f"Cancel")
+            job.cancel()
+            self.finished(context)
+            return {'CANCELLED'}
+
+        try:
+            progress = job.lipsync_check_progress_async()
+        except RuntimeError as e:
+            self.report({'ERROR'}, str(e))
+            log.exception(e)
+            job.cancel()
+            if not job.last_exception:
+                job.last_exception = e
+            self.finished(context)
+            return {'CANCELLED'}
 
         if progress is not None:
-            props.progress = progress
-            wm.progress_update(progress)
+            self.update_progress(context, progress)
             # self.report({'INFO'}, f"{progress}%")
         return {'PASS_THROUGH'}
 
-    def finished(self, context: Context):
+    def finished(self, context: Context) -> None:
+        log.info("Operator finished")
         wm = context.window_manager
         wm.event_timer_remove(self.timer)
-        cmd = ProcessSoundFile.get_cmd(context)
-        if cmd:
-            if cmd.stdout:
-                print(self.get_lipsync_output_cues())
-            cmd.close_process()
-            cmd.join_thread()
+        job = ProcessSoundFile.get_job(context)
+        if job:
+            print(job.get_lipsync_output_cues())
+            job.join_thread()
+            job.cmd.close_process()
+        self.update_progress(context, 100)
 
 
 class GetRhubarbExecutableVersion(bpy.types.Operator):

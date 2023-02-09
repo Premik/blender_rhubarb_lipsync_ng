@@ -146,13 +146,13 @@ class RhubarbAddonPreferences(AddonPreferences):
 class CaptureProperties(PropertyGroup):
 
     sound: PointerProperty(type=bpy.types.Sound, name="Sound")  # type: ignore
-    start_frame: FloatProperty(name="Start frame", default=0)  # type: ignore
+    # start_frame: FloatProperty(name="Start frame", default=0)  # type: ignore
     dialog_file: StringProperty(  # type: ignore
         name="Dialog file",
         description="Additional plain-text file with transcription of the sound file to improve accuracy. Works for english only",
         subtype='FILE_PATH',
     )
-    progress: IntProperty("progress", default=-1)  # type: ignore
+    progress: IntProperty("progress", default=-1, min=0, max=100)  # type: ignore
 
     @staticmethod
     def from_context(ctx: Context) -> 'CaptureProperties':

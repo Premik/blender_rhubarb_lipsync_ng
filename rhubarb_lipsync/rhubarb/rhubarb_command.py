@@ -177,7 +177,7 @@ class RhubarbCommandWrapper:
         Note this call blocks  when there is status update available on stderr.
         The rhubarb binary provides the status update few times per seconds typically.
         """
-        assert self.was_started
+        assert self.was_started, "Process not started. Can't check progress"
         if self.has_finished:
             self.close_process()
             return 100
@@ -299,6 +299,7 @@ class RhubarbCommandAsyncJob:
 
             except Exception as e:
                 log.error(f"Unexpected error while checking the progress status {e}")
+                self.last_exception = e
                 traceback.print_exc()
                 self.queue.put(("EXCEPTION", e))
                 raise

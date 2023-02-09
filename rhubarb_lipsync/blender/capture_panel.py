@@ -95,7 +95,7 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
 
         return True
 
-    def draw_info(self):
+    def draw_info(self) -> None:
         props = CaptureProperties.from_context(self.ctx)
         prefs = RhubarbAddonPreferences.from_context(self.ctx)
         sound: Sound = props.sound
@@ -127,6 +127,25 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
         line.label(text="FPS")
         line.label(text=f"{self.ctx.scene.render.fps}")
 
+    def draw_job(self) -> None:
+        props = CaptureProperties.from_context(self.ctx)
+        prefs = RhubarbAddonPreferences.from_context(self.ctx)
+        layout = self.layout
+
+        job = rhubarb_operators.ProcessSoundFile.get_job(self.ctx)
+        status = getattr(job, 'status', rhubarb_operators.ProcessSoundFile.bl_label)
+        layout.operator(rhubarb_operators.ProcessSoundFile.bl_idname, text=status, icon_value=IconsManager.get('rhubarb64x64'))
+        if not job:
+            return
+        # props.progress = job.last_progress #No allowed
+        if props.progress != 100 and props.progress > 0:
+            r = layout.row()
+            r.enabled = False
+            r.prop(props, "progress", text="Progress", slider=True)
+        ex = job.last_exception
+        if ex:
+            ui_utils.draw_error(layout, f"{type(ex).__name__}\n{' '.join(ex.args)}")
+
     def draw(self, context: Context):
         try:
             props = CaptureProperties.from_context(context)
@@ -134,8 +153,6 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
             layout = self.layout
             # layout.use_property_split = True
             # layout.use_property_decorate = False  # No animation.
-
-            layout.prop(props, "progress", text="Progress", slider=True)
 
             selection_error = CaptureProperties.context_selection_validation(context)
             if selection_error:
@@ -145,7 +162,7 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
             self.draw_info()
             # layout.operator(rhubarb_operators.ProcessSoundFile.bl_idname, icon="MONKEY")
             layout.prop(props, "dialog_file")
-            layout.operator(rhubarb_operators.ProcessSoundFile.bl_idname, icon_value=IconsManager.get('rhubarb64x64'))
+            self.draw_job()
 
         except Exception as e:
             ui_utils.draw_error(self.layout, f"Unexpected error. \n {e}")
