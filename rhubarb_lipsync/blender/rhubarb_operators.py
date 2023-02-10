@@ -5,8 +5,8 @@ from bpy.types import Context, Sound, SoundSequence
 
 from typing import Optional, List, Dict, cast
 from bpy.props import FloatProperty, StringProperty, BoolProperty, PointerProperty, IntProperty
-from rhubarb_lipsync.blender.properties import RhubarbAddonPreferences, CaptureProperties
-from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandWrapper, RhubarbCommandAsyncJob
+from rhubarb_lipsync.blender.properties import CaptureProperties
+from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 import pathlib
 from rhubarb_lipsync.rhubarb.log_manager import logManager

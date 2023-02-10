@@ -1,6 +1,40 @@
 import bpy
 from bpy.types import Context, Window, Area, UILayout, SoundSequence, Sound
 from typing import Any, Callable, Iterator, Type
+import pathlib
+
+
+class IconsManager:
+
+    _previews: bpy.utils.previews.ImagePreviewCollection = None
+    _loaded: set[str] = set()
+
+    @staticmethod
+    def unregister():
+        if IconsManager._previews:
+            bpy.utils.previews.remove(IconsManager._previews)
+            IconsManager._previews = None
+            IconsManager._loaded = set()
+
+    @staticmethod
+    def get(key: str):
+
+        if IconsManager._previews is None:
+            IconsManager._previews = bpy.utils.previews.new()
+        prew = IconsManager._previews
+        if not key in IconsManager._loaded:
+            IconsManager._loaded.add(key)
+            prew.load(key, str(resources_path() / f"{key}.png"), 'IMAGE')
+        return prew[key].icon_id
+
+
+def addons_path() -> pathlib.Path:
+    ap = bpy.utils.user_resource('SCRIPTS', path="addons")
+    return pathlib.Path(ap)
+
+
+def resources_path() -> pathlib.Path:
+    return addons_path() / 'rhubarb_lipsync' / 'resources'
 
 
 def find_areas_by_type(context: Context, area_type: str) -> Iterator[tuple[Window, Area]]:

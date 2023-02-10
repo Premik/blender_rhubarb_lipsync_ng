@@ -5,7 +5,8 @@ from bpy.types import Context, Sound, SoundSequence
 
 from typing import Optional, List, Dict, cast
 from bpy.props import FloatProperty, StringProperty, BoolProperty, PointerProperty, IntProperty, EnumProperty
-from rhubarb_lipsync.blender.properties import CaptureProperties, RhubarbAddonPreferences
+from rhubarb_lipsync.blender.properties import CaptureProperties
+from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 import pathlib
 import aud

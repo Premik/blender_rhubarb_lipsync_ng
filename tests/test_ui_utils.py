@@ -7,6 +7,7 @@ import test_data
 import rhubarb_lipsync
 import rhubarb_lipsync.blender.auto_load
 from rhubarb_lipsync.blender.properties import CaptureProperties
+from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 
 
