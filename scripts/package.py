@@ -1,7 +1,8 @@
+import re
 from functools import cached_property
 from pathlib import Path
+
 from config import project_cfg
-import re
 
 
 class PackagePlugin:

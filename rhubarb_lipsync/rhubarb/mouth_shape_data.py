@@ -1,6 +1,6 @@
-from functools import cache
-from typing import Optional, List, Dict
 import math
+from functools import cache
+from typing import Dict, List, Optional
 
 
 class MouthShapeDescription:

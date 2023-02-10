@@ -39,6 +39,13 @@ addopts = ["--import-mode=importlib"]
 # https://stackoverflow.com/questions/10253826/path-issue-with-pytest-importerror-no-module-named-yadayadayada/50610630#answer-50610630
 pythonpath = [".", "tests"] 
 
+[tool.black]
+line-length = 160
+skip-string-normalization = true
 
+[tool.isort]
+profile = "black"
+src_paths = ["rhubarb_lipsync", "tests", "scripts"]
+line_length = 160
 
 # https://docs.pytest.org/en/7.1.x/explanation/goodpractices.html

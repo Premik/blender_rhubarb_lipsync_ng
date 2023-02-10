@@ -1,15 +1,15 @@
 ## https://devtalk.blender.org/t/batch-registering-multiple-classes-in-blender-2-8/3253/8
 
-import os
-from types import ModuleType
-import bpy
-import sys
-import inspect
-import pkgutil
 import importlib
+import inspect
+import os
+import pkgutil
+import sys
 from pathlib import Path
-from typing import Iterator, Generator, get_type_hints
+from types import ModuleType
+from typing import Generator, Iterator, get_type_hints
 
+import bpy
 
 __all__ = (
     "init",

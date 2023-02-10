@@ -14,11 +14,12 @@ bl_info = {
 
 import bpy
 from bpy.props import PointerProperty
-from rhubarb_lipsync.blender.properties import CaptureProperties
+
+import rhubarb_lipsync.blender.auto_load
 from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences
+from rhubarb_lipsync.blender.properties import CaptureProperties
 from rhubarb_lipsync.blender.ui_utils import IconsManager
 from rhubarb_lipsync.rhubarb.log_manager import logManager
-import rhubarb_lipsync.blender.auto_load
 
 
 def init_loggers():

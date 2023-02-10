@@ -1,14 +1,15 @@
+import logging
+import unittest
 from functools import cached_property
 from pathlib import Path
-import unittest
-import rhubarb_lipsync.rhubarb.rhubarb_command as rhubarb_command
-from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandWrapper, RhubarbParser, RhubarbCommandAsyncJob
-from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue
-import logging
 from time import sleep
+
+import rhubarb_lipsync.rhubarb.rhubarb_command as rhubarb_command
 
 # import tests.test_data
 import test_data
+from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue
+from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandAsyncJob, RhubarbCommandWrapper, RhubarbParser
 
 
 def enableDebug():

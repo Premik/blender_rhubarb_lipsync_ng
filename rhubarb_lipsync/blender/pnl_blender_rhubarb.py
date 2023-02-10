@@ -1,6 +1,8 @@
 import bpy
 from bpy_extras.io_utils import ImportHelper
-from . import  op_blender_rhubarb
+
+from . import op_blender_rhubarb
+
 
 class RhubarbLipsyncPanel(bpy.types.Panel):
     bl_idname = "DATA_PT_rhubarb_lipsync"

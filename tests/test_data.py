@@ -1,10 +1,12 @@
+import json
 from functools import cached_property
 from pathlib import Path
-from bpy.types import Context, Sound, SoundSequence
 from typing import cast
-from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandWrapper, RhubarbParser
+
+from bpy.types import Context, Sound, SoundSequence
+
 from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue
-import json
+from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandWrapper, RhubarbParser
 
 test_data_path = Path(__file__).parent / "data"
 

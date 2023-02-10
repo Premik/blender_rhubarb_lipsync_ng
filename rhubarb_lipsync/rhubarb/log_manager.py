@@ -1,6 +1,6 @@
 import logging
-from types import ModuleType
 from functools import cached_property
+from types import ModuleType
 
 
 class LogManager:

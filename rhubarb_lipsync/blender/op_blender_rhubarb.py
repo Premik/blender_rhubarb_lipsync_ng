@@ -1,17 +1,17 @@
-import bpy
-from bpy.props import IntProperty, FloatProperty
-import blf
-import bgl
 import io
-import sys
-import select
-import subprocess
-from threading  import Thread
-from queue import Queue, Empty
 import json
 import os
-from mathutils import Matrix
+import select
+import subprocess
+import sys
+from queue import Empty, Queue
+from threading import Thread
 
+import bgl
+import blf
+import bpy
+from bpy.props import FloatProperty, IntProperty
+from mathutils import Matrix
 
 
 class RhubarbLipsyncOperator(bpy.types.Operator):

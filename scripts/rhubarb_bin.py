@@ -1,13 +1,14 @@
+import filecmp
+import hashlib
+import platform
+import re
+import shutil
+import urllib.request
+import zipfile
 from functools import cache, cached_property
 from pathlib import Path
+
 from config import rhubarb_cfg
-import urllib.request
-import shutil
-import hashlib
-import zipfile
-import platform
-import filecmp
-import re
 
 
 def sha256(filename: Path) -> str:

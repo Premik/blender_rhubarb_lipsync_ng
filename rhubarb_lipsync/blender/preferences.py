@@ -1,13 +1,14 @@
+import pathlib
 from functools import cached_property
-import pathlib
-import bpy
-from bpy.props import FloatProperty, StringProperty, BoolProperty, PointerProperty, EnumProperty, IntProperty
-from bpy.types import PropertyGroup, Context, UILayout, Sound, AddonPreferences
-import bpy.utils.previews
 from typing import Optional, cast
-from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandWrapper, RhubarbParser
-import pathlib
+
+import bpy
+import bpy.utils.previews
+from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty, PointerProperty, StringProperty
+from bpy.types import AddonPreferences, Context, PropertyGroup, Sound, UILayout
+
 import rhubarb_lipsync.blender.ui_utils as ui_utils
+from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandWrapper, RhubarbParser
 
 
 def default_executable_path() -> pathlib.Path:

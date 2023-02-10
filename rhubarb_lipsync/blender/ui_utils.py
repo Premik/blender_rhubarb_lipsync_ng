@@ -1,7 +1,8 @@
-import bpy
-from bpy.types import Context, Window, Area, UILayout, SoundSequence, Sound
-from typing import Any, Callable, Iterator, Type
 import pathlib
+from typing import Any, Callable, Iterator, Type
+
+import bpy
+from bpy.types import Area, Context, Sound, SoundSequence, UILayout, Window
 
 
 class IconsManager:

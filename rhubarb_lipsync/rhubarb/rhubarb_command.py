@@ -1,18 +1,19 @@
-from io import TextIOWrapper
-import os
-from subprocess import Popen, PIPE, TimeoutExpired
-from typing import Optional, List, Dict, Any
-import re
-import logging
-import pathlib
 import json
+import logging
+import os
+import pathlib
 import platform
-from collections import defaultdict
-from threading import Thread, Event
-from queue import SimpleQueue, Empty
-from time import sleep
-from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue
+import re
 import traceback
+from collections import defaultdict
+from io import TextIOWrapper
+from queue import Empty, SimpleQueue
+from subprocess import PIPE, Popen, TimeoutExpired
+from threading import Event, Thread
+from time import sleep
+from typing import Any, Dict, List, Optional
+
+from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue
 
 log = logging.getLogger(__name__)
 

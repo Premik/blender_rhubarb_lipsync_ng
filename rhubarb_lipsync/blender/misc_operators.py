@@ -1,14 +1,15 @@
-import bpy
-
-from typing import Optional, List, Dict, cast
-from types import ModuleType
-from bpy.props import FloatProperty, StringProperty, BoolProperty, PointerProperty, IntProperty, EnumProperty
-from bpy.types import Context
-import rhubarb_lipsync.blender.auto_load
 import logging
 from functools import cached_property
+from types import ModuleType
+from typing import Dict, List, Optional, cast
+
+import bpy
+from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty, PointerProperty, StringProperty
+from bpy.types import Context
+
+import rhubarb_lipsync.blender.auto_load
+from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences
 from rhubarb_lipsync.rhubarb.log_manager import logManager
-from rhubarb_lipsync.blender.properties import RhubarbAddonPreferences
 
 
 class SetLogLevel(bpy.types.Operator):
