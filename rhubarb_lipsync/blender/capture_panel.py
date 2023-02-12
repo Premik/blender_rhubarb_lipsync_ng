@@ -11,8 +11,9 @@ import rhubarb_lipsync.blender.rhubarb_operators as rhubarb_operators
 import rhubarb_lipsync.blender.sound_operators as sound_operators
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences
-from rhubarb_lipsync.blender.properties import CaptureProperties
+from rhubarb_lipsync.blender.properties import CaptureProperties, MouthCueList
 from rhubarb_lipsync.blender.ui_utils import IconsManager
+from rhubarb_lipsync.blender.cue_list import MouthCueUIList
 
 log = logging.getLogger(__name__)
 
@@ -128,11 +129,12 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
 
         line = box.split()
         line.label(text="FPS")
-        line.label(text=f"{self.ctx.scene.render.fps}")
+        r = self.ctx.scene.render
+
+        line.label(text=f"{r.fps/r.fps_base:0.2f}")
 
     def draw_job(self) -> None:
         props = CaptureProperties.from_context(self.ctx)
-        prefs = RhubarbAddonPreferences.from_context(self.ctx)
         layout = self.layout
 
         job = rhubarb_operators.ProcessSoundFile.get_job(self.ctx)
@@ -148,6 +150,14 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
         ex = job.last_exception
         if ex:
             ui_utils.draw_error(layout, f"{type(ex).__name__}\n{' '.join(ex.args)}")
+
+    def draw_cues(self) -> None:
+        props = CaptureProperties.from_context(self.ctx)
+        layout = self.layout
+        # row = layout.row()
+        lst: MouthCueList = props.cue_list
+        layout.template_list(MouthCueUIList.bl_idname, "Mouth cues", lst, "items", lst, "index")
+        layout.template_list(MouthCueUIList.bl_idname, "Mouth cues", lst, "items", lst, "index", type="GRID")
 
     def draw(self, context: Context):
         try:
@@ -166,6 +176,7 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
             # layout.operator(rhubarb_operators.ProcessSoundFile.bl_idname, icon="MONKEY")
             layout.prop(props, "dialog_file")
             self.draw_job()
+            self.draw_cues()
 
         except Exception as e:
             ui_utils.draw_error(self.layout, f"Unexpected error. \n {e}")

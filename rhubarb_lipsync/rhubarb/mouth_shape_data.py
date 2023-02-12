@@ -36,6 +36,21 @@ class MouthCue:
     def of_json(cue_json: Dict) -> 'MouthCue':
         return MouthCue(cue_json["value"], cue_json["start"], cue_json["end"])
 
+    @staticmethod
+    def time2frame(time: float, fps: int, fps_base=1.0) -> int:
+        return int(round(MouthCue.time2subframe(time, fps, fps_base)))
+
+    @staticmethod
+    def time2subframe(time: float, fps: int, fps_base=1.0) -> float:
+        assert fps > 0 and fps_base > 0, f"Can't convert to frame when fps is {fps}/{fps_base}"
+        return time * fps / fps_base
+
+    def start_frame(self, fps: int, fps_base=1.0) -> int:
+        return MouthCue.time2frame(self.start, fps, fps_base)
+
+    def start_subframe(self, fps: int, fps_base=1.0) -> float:
+        return MouthCue.time2subframe(self.start, fps, fps_base)
+
     def __eq__(self, other):
         if not isinstance(other, MouthCue):
             return NotImplemented  # https://stackoverflow.com/questions/1227121/compare-object-instances-for-equality-by-their-attributes

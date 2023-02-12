@@ -9,9 +9,10 @@ from bpy.types import Context, Sound, SoundSequence
 
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences
-from rhubarb_lipsync.blender.properties import CaptureProperties
+from rhubarb_lipsync.blender.properties import CaptureProperties, MouthCueList
 from rhubarb_lipsync.rhubarb.log_manager import logManager
 from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandAsyncJob, RhubarbCommandWrapper
+
 
 log = logging.getLogger(__name__)
 
@@ -154,13 +155,15 @@ class ProcessSoundFile(bpy.types.Operator):
 
     def finished(self, context: Context) -> None:
         log.info("Operator finished")
+        props = CaptureProperties.from_context(context)
         wm = context.window_manager
         wm.event_timer_remove(self.timer)
         job = ProcessSoundFile.get_job(context)
         if job:
-            print(job.get_lipsync_output_cues())
+            lst: MouthCueList = props.cue_list            
             job.join_thread()
             job.cmd.close_process()
+            lst.add_cues(job.get_lipsync_output_cues())
         self.update_progress(context, 100)
 
 

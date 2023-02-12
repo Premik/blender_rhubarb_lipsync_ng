@@ -4,10 +4,56 @@ from typing import Optional, cast
 
 import bpy
 import bpy.utils.previews
-from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty, PointerProperty, StringProperty
+from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty, PointerProperty, StringProperty, CollectionProperty
 from bpy.types import AddonPreferences, Context, PropertyGroup, Sound, UILayout
 
+from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue
 from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandWrapper, RhubarbParser
+
+
+class MouthCueListItem(PropertyGroup):
+    key: StringProperty("key", description="Mouth cue key symbol (A,B,C..)")  # type: ignore
+    start: FloatProperty(name="start", description="Start time of the cue")  # type: ignore
+    end: FloatProperty(name="end", description="End time of the cue (usually matches start of the previous cue")  # type: ignore
+
+    @cached_property
+    def cue(self) -> MouthCue:
+        return MouthCue(self.key, self.start, self.end)
+
+    def set_from_cue(self, cue: MouthCue) -> None:
+        self.key = cue.key
+        self.start = cue.start
+        self.end = cue.end
+
+    def frame(self, ctx: Context) -> int:
+        return self.cue.start_frame(ctx.scene.render.fps, ctx.scene.render.fps_base)
+
+    def subframe(self, ctx: Context) -> int | float:
+        return self.cue.start_subframe(ctx.scene.render.fps, ctx.scene.render.fps_base)
+
+    def frame_str(self, ctx: Context) -> str:
+        if ctx.scene.show_subframe:
+            return f"{self.subframe(ctx):0.2f}"
+        return f"{self.frame(ctx)}"
+
+    @property
+    def time_str(self) -> str:
+        return f"{self.start:0.2f}"
+
+
+class MouthCueList(PropertyGroup):
+
+    items: CollectionProperty(type=MouthCueListItem, name="Cue items")  # type: ignore
+
+    def add_cues(self, cues: list[MouthCue]) -> None:
+        for cue in cues:
+            item: MouthCueListItem = self.items.add()
+            item.set_from_cue(cue)
+
+    def on_index_changed(self, context: Context) -> None:
+        pass
+
+    index: IntProperty(name="Selected cue index", update=on_index_changed)  # type: ignore
 
 
 class CaptureProperties(PropertyGroup):
@@ -20,6 +66,7 @@ class CaptureProperties(PropertyGroup):
         subtype='FILE_PATH',
     )
     progress: IntProperty("progress", default=-1, min=0, max=100)  # type: ignore
+    cue_list: PointerProperty(type=MouthCueList, name="Cues")  # type: ignore
 
     @staticmethod
     def from_context(ctx: Context) -> 'CaptureProperties':

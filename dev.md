@@ -107,6 +107,7 @@ https://blender.stackexchange.com/questions/8699/what-ui-would-work-for-choosing
 https://blender.stackexchange.com/questions/717/is-it-possible-to-print-to-the-report-window-in-the-info-view
 
 https://blender.stackexchange.com/questions/44356/fighting-split-col-and-aligning-row-content
+https://sinestesia.co/blog/tutorials/using-uilists-in-blender/
 
 Icons:
 https://wilkinson.graphics/blender-icons/
@@ -123,6 +124,8 @@ https://docs.blender.org/api/current/info_best_practice.html
 * Set start frame?
 * place-on-strip op - add redo support, asking for channel and frame
 * Set the panel tab name in the preferences
+* Job instance is hooked to Object class, so it is incorrectly shared between blender object, make some per-object registration
+
 
 ## Baking
 
