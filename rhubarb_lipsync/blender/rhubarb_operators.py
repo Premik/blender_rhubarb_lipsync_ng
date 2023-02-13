@@ -30,8 +30,7 @@ class ProcessSoundFile(bpy.types.Operator):
     """Process the selected sound file using the rhubarb executable"""
 
     bl_idname = "rhubarb.process_sound_file"
-    bl_label = "Run Rhubarb"
-    bl_description = __doc__
+    bl_label = "Capture"
 
     # registered_jobs: dict[int, RhubarbCommandAsyncJob] = dict()
     job_key = "rhubarb_lipsync_job"
@@ -160,7 +159,7 @@ class ProcessSoundFile(bpy.types.Operator):
         wm.event_timer_remove(self.timer)
         job = ProcessSoundFile.get_job(context)
         if job:
-            lst: MouthCueList = props.cue_list            
+            lst: MouthCueList = props.cue_list
             job.join_thread()
             job.cmd.close_process()
             lst.add_cues(job.get_lipsync_output_cues())
@@ -172,7 +171,6 @@ class GetRhubarbExecutableVersion(bpy.types.Operator):
 
     bl_idname = "rhubarb.get_executable_version"
     bl_label = "Check rhubarb version"
-    bl_description = __doc__
 
     executable_version = ""
     executable_last_path = ""

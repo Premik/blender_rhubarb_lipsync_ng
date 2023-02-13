@@ -54,7 +54,6 @@ class CreateSoundStripWithSound(bpy.types.Operator):
 
     bl_idname = "rhubarb.place_sound_strip"
     bl_label = "Place as strip"
-    bl_description = __doc__
     bl_options = {'UNDO', 'REGISTER'}
 
     start_frame: IntProperty(name="Start Frame", default=1)  # type: ignore
@@ -125,11 +124,10 @@ class RemoveSoundStripWithSound(bpy.types.Operator):
 
     bl_idname = "rhubarb.remove_sound_strip"
     bl_label = "Remove strip"
-    bl_description = __doc__
     bl_options = {'UNDO', 'REGISTER'}
 
     @classmethod
-    def disabled_reason(cls, context: Context, limit=0) -> str:
+    def disabled_reason(cls, context: Context, limit=poll_search_limit) -> str:
         error_common = CaptureProperties.sound_selection_validation(context, False)
         if error_common:
             return error_common
@@ -143,7 +141,7 @@ class RemoveSoundStripWithSound(bpy.types.Operator):
         return ui_utils.validation_poll(cls, context)
 
     def execute(self, context: Context) -> set[str]:
-        error = self.disabled_reason(context)  # Run validation again, without the limit this time
+        error = self.disabled_reason(context, 0)  # Run validation again, without the limit this time
         if error:
             self.report({"ERROR"}, error)
             return {'CANCELLED'}
@@ -197,7 +195,6 @@ class ConvertSoundFromat(bpy.types.Operator):
 
     bl_idname = "rhubarb.sound_convert"
     bl_label = "Convert"
-    bl_description = __doc__
 
     codec: EnumProperty(  # type: ignore
         name="Codec",
@@ -296,6 +293,11 @@ class ConvertSoundFromat(bpy.types.Operator):
 
         layout.prop(self, "target_folder")
         layout.prop(self, "target_filename")
+
+        if not RemoveSoundStripWithSound.disabled_reason(context):
+            box = layout.box()
+            box.label(text="Sound already used in the sequencer")
+            box.operator(RemoveSoundStripWithSound.bl_idname, icon='MUTE_IPO_OFF')
         if self.target_path_full and self.target_path_full.exists():
             ui_utils.draw_error(self.layout, f"The file exists and will be overwritten:\n{self.target_path_full}")
             # ui_utils.draw_error(self.layout, f"exists and will be overwritten.")

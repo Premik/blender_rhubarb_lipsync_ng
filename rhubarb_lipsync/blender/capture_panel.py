@@ -14,6 +14,7 @@ from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences
 from rhubarb_lipsync.blender.properties import CaptureProperties, MouthCueList
 from rhubarb_lipsync.blender.ui_utils import IconsManager
 from rhubarb_lipsync.blender.cue_list import MouthCueUIList
+from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandAsyncJob
 
 log = logging.getLogger(__name__)
 
@@ -60,6 +61,8 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
         row.operator(sound_operators.CreateSoundStripWithSound.bl_idname, icon='SPEAKER')
         row.operator(sound_operators.RemoveSoundStripWithSound.bl_idname, icon='MUTE_IPO_OFF')
         layout.prop(self.ctx.scene, 'use_audio_scrub')
+        if sound:
+            layout.prop(sound, "use_memory_cache")
 
         if sound.packed_file:
             ui_utils.draw_error(self.layout, "Rhubarb requires the file on disk.\n Please unpack the sound.")
@@ -133,13 +136,20 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
 
         line.label(text=f"{r.fps/r.fps_base:0.2f}")
 
+    def get_job_status_title(self, job: Optional[RhubarbCommandAsyncJob]) -> str:
+        status = getattr(job, 'status', None)
+        if not status:
+            return rhubarb_operators.ProcessSoundFile.bl_label
+        return f"Capture ({status})"
+
     def draw_job(self) -> None:
         props = CaptureProperties.from_context(self.ctx)
         layout = self.layout
 
         job = rhubarb_operators.ProcessSoundFile.get_job(self.ctx)
-        status = getattr(job, 'status', rhubarb_operators.ProcessSoundFile.bl_label)
-        layout.operator(rhubarb_operators.ProcessSoundFile.bl_idname, text=status, icon_value=IconsManager.get('rhubarb64x64'))
+        title = self.get_job_status_title(job)
+        layout.operator(rhubarb_operators.ProcessSoundFile.bl_idname, text=title, icon_value=IconsManager.get('rhubarb64x64'))
+
         if not job:
             return
         # props.progress = job.last_progress #No allowed
@@ -151,9 +161,23 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
         if ex:
             ui_utils.draw_error(layout, f"{type(ex).__name__}\n{' '.join(ex.args)}")
 
-    def draw_cues(self) -> None:
+    def draw_capture(self) -> None:
+
+        prefs = RhubarbAddonPreferences.from_context(self.ctx)
+        job = rhubarb_operators.ProcessSoundFile.get_job(self.ctx)
+        title = self.get_job_status_title(job)
+        error = getattr(job, 'last_exception', False)
+
+        if not ui_utils.draw_expandable_header(prefs, "caputre_panel_expanded", title, self.layout, error):
+            return
+
+        self.draw_job()
         props = CaptureProperties.from_context(self.ctx)
+
         layout = self.layout
+        layout.prop(props, "dialog_file")
+        layout.prop(prefs, "use_extended_shapes")
+
         # row = layout.row()
         lst: MouthCueList = props.cue_list
         layout.template_list(MouthCueUIList.bl_idname, "Mouth cues", lst, "items", lst, "index")
@@ -173,10 +197,8 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
             else:
                 self.draw_sound_setup()
             self.draw_info()
-            # layout.operator(rhubarb_operators.ProcessSoundFile.bl_idname, icon="MONKEY")
-            layout.prop(props, "dialog_file")
-            self.draw_job()
-            self.draw_cues()
+
+            self.draw_capture()
 
         except Exception as e:
             ui_utils.draw_error(self.layout, f"Unexpected error. \n {e}")

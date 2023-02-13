@@ -3,9 +3,10 @@ from functools import cached_property
 from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty, PointerProperty, StringProperty
 from bpy.types import AddonPreferences, Context, PropertyGroup, UIList, UILayout, CollectionProperty
 
+import math
 from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue
 from rhubarb_lipsync.blender.properties import MouthCueListItem, MouthCueList
-from rhubarb_lipsync.blender.misc_operators import PlayAndStop
+from rhubarb_lipsync.blender.misc_operators import PlayRange
 from typing import Any
 
 
@@ -39,9 +40,9 @@ class MouthCueUIList(UIList):
             row = split.row()
             row.label(text=f"{item.frame_str(context)}")
             row.label(text=f"{item.time_str}s")
-            op = row.operator(PlayAndStop.bl_idname, text="", icon="TRIA_RIGHT_BAR")
-            op.start_frame = item.frame_float(context)
-            op.play_frames = int(item.end_frame_float(context) - item.frame_float(context))
+            op = row.operator(PlayRange.bl_idname, text="", icon="TRIA_RIGHT_BAR")
+            op.start_frame = int(item.frame_float(context))
+            op.play_frames = int(math.ceil(item.end_frame_float(context) - item.frame_float(context)))
 
             # row.prop(item, 'start')
 
