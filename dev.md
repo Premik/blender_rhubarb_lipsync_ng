@@ -144,3 +144,6 @@ So from the use-case perspective, it makes more sense to split the whole process
 So these thought led me to start working on this plugin more. But it took me more time than I anticipated and it ended up in a rewrite.
 
 Currently I have the first part "Setup and Capture" is pretty much done on [my branch](https://github.com/Premik/blender-rhubarb-lipsync/tree/rework). But the mapping setup and baking the cues is still WIP.
+
+
+https://blender.stackexchange.com/questions/206231/how-can-i-make-an-object-use-its-animation-action-at-a-specific-frame-in-blende

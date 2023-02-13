@@ -157,7 +157,7 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
         # row = layout.row()
         lst: MouthCueList = props.cue_list
         layout.template_list(MouthCueUIList.bl_idname, "Mouth cues", lst, "items", lst, "index")
-        layout.template_list(MouthCueUIList.bl_idname, "Mouth cues", lst, "items", lst, "index", type="GRID")
+        # layout.template_list(MouthCueUIList.bl_idname, "Mouth cues", lst, "items", lst, "index", type="GRID")
 
     def draw(self, context: Context):
         try:

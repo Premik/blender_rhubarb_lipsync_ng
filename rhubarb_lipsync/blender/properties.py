@@ -28,12 +28,15 @@ class MouthCueListItem(PropertyGroup):
     def frame(self, ctx: Context) -> int:
         return self.cue.start_frame(ctx.scene.render.fps, ctx.scene.render.fps_base)
 
-    def subframe(self, ctx: Context) -> int | float:
+    def frame_float(self, ctx: Context) -> float:
+        return self.cue.start_frame_float(ctx.scene.render.fps, ctx.scene.render.fps_base)
+
+    def subframe(self, ctx: Context) -> tuple[int, float]:
         return self.cue.start_subframe(ctx.scene.render.fps, ctx.scene.render.fps_base)
 
     def frame_str(self, ctx: Context) -> str:
         if ctx.scene.show_subframe:
-            return f"{self.subframe(ctx):0.2f}"
+            return f"{self.frame_float(ctx):0.2f}"
         return f"{self.frame(ctx)}"
 
     @property
@@ -50,10 +53,40 @@ class MouthCueList(PropertyGroup):
             item: MouthCueListItem = self.items.add()
             item.set_from_cue(cue)
 
+    @property
+    def index_within_bounds(self) -> int:
+        l = len(self.items)
+        if l == 0:
+            return -1  # Empty list
+        if self.index < 0:  # Befor the first
+            return 0
+        if self.index >= l:  # After the last
+            return l - 1
+        return self.index
+
+    def ensure_index_bounds(self) -> None:
+        new = self.index_within_bounds
+        if self.index != new:
+            self.index = new
+
+    @property
+    def selected_item(self) -> Optional[MouthCueListItem]:
+        if self.index < 0 or self.index >= len(self.items):
+            return None
+        return self.items[self.index]
+
     def on_index_changed(self, context: Context) -> None:
-        pass
+        self.ensure_index_bounds()
+        i = self.selected_item
+        if not i:
+            return
+        frame, subframe = i.subframe(context)
+
+        context.scene.frame_set(frame=frame, subframe=subframe)
+        # context.scene.frame_float = i.frame_float
 
     index: IntProperty(name="Selected cue index", update=on_index_changed)  # type: ignore
+    # index: IntProperty(name="Selected cue index")  # type: ignore
 
 
 class CaptureProperties(PropertyGroup):

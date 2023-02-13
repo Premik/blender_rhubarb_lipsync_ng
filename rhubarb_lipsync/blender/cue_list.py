@@ -5,6 +5,7 @@ from bpy.types import AddonPreferences, Context, PropertyGroup, UIList, UILayout
 
 from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue
 from rhubarb_lipsync.blender.properties import MouthCueListItem, MouthCueList
+from rhubarb_lipsync.blender.misc_operators import PlayAndStop
 from typing import Any
 
 
@@ -38,6 +39,7 @@ class MouthCueUIList(UIList):
             row = split.row()
             row.label(text=f"{item.frame_str(context)}")
             row.label(text=f"{item.time_str}s")
+            row.operator(PlayAndStop.bl_idname, text="", icon="TRIA_RIGHT_BAR")
 
             # row.prop(item, 'start')
 

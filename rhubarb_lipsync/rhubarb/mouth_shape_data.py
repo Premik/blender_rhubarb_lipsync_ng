@@ -38,18 +38,25 @@ class MouthCue:
 
     @staticmethod
     def time2frame(time: float, fps: int, fps_base=1.0) -> int:
-        return int(round(MouthCue.time2subframe(time, fps, fps_base)))
+        return int(round(MouthCue.time2frame_float(time, fps, fps_base)))
 
     @staticmethod
-    def time2subframe(time: float, fps: int, fps_base=1.0) -> float:
+    def time2frame_float(time: float, fps: int, fps_base=1.0) -> float:
         assert fps > 0 and fps_base > 0, f"Can't convert to frame when fps is {fps}/{fps_base}"
         return time * fps / fps_base
 
     def start_frame(self, fps: int, fps_base=1.0) -> int:
+        """Whole frame number of the cue start time"""
         return MouthCue.time2frame(self.start, fps, fps_base)
 
-    def start_subframe(self, fps: int, fps_base=1.0) -> float:
-        return MouthCue.time2subframe(self.start, fps, fps_base)
+    def start_frame_float(self, fps: int, fps_base=1.0) -> float:
+        """Exact decimal frame number of the cue start time"""
+        return MouthCue.time2frame_float(self.start, fps, fps_base)
+
+    def start_subframe(self, fps: int, fps_base=1.0) -> tuple[int, float]:
+        """Whole frame (without rounding) + decimal part (between 0.0 and 1.0) of the exact frame number."""
+        i, f = math.modf(self.start_frame_float(fps, fps_base))
+        return int(f), i
 
     def __eq__(self, other):
         if not isinstance(other, MouthCue):

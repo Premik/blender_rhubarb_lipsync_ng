@@ -70,7 +70,7 @@ class RhubarbAddonPreferences(AddonPreferences):
     )
 
     log_level: IntProperty(default=0)  # type: ignore
-    info_panel_expanded: BoolProperty(default=True)  # type: ignore
+    info_panel_expanded: BoolProperty(default=False)  # type: ignore
     sound_source_panel_expanded: BoolProperty(default=True)  # type: ignore
 
     def new_command_handler(self) -> RhubarbCommandWrapper:

@@ -139,3 +139,21 @@ def validation_poll(cls: Type, context: Context, disabled_reason: Callable[[Cont
     # Following is not a class method per doc. But seems to work like it
     cls.poll_message_set(ret)  # type: ignore
     return False
+
+
+def func_fqname(fn: Callable) -> str:
+    """Fully qualified function name. Including module name"""
+    return f"{fn.__module__}/{fn.__qualname__}"
+
+
+def remove_handler(handlers: list[Callable], fn: Callable) -> bool:
+    """Remove function(s) from the handler list. Returns true if anything was removed"""
+    fqfn = func_fqname(fn)
+    remove = None
+    try:
+        remove = next((f for f in handlers if func_fqname(f) == fqfn))
+        handlers.remove(remove)
+        remove_handler(handlers, fn)
+        return True
+    except StopIteration:
+        return False
