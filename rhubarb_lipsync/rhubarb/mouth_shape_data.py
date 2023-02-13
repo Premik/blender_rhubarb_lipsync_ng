@@ -53,10 +53,14 @@ class MouthCue:
         """Exact decimal frame number of the cue start time"""
         return MouthCue.time2frame_float(self.start, fps, fps_base)
 
+    def end_frame_float(self, fps: int, fps_base=1.0) -> float:
+        """Exact decimal frame number of the cue stop time"""
+        return MouthCue.time2frame_float(self.end, fps, fps_base)
+
     def start_subframe(self, fps: int, fps_base=1.0) -> tuple[int, float]:
         """Whole frame (without rounding) + decimal part (between 0.0 and 1.0) of the exact frame number."""
-        i, f = math.modf(self.start_frame_float(fps, fps_base))
-        return int(f), i
+        f, i = math.modf(self.start_frame_float(fps, fps_base))
+        return int(i), f
 
     def __eq__(self, other):
         if not isinstance(other, MouthCue):

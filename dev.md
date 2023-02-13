@@ -125,6 +125,7 @@ https://docs.blender.org/api/current/info_best_practice.html
 * place-on-strip op - add redo support, asking for channel and frame
 * Set the panel tab name in the preferences
 * Job instance is hooked to Object class, so it is incorrectly shared between blender object, make some per-object registration
+* Cue item-add onchanged handlers to properties to flush the cached Cue object
 
 
 ## Baking

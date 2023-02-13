@@ -31,6 +31,9 @@ class MouthCueListItem(PropertyGroup):
     def frame_float(self, ctx: Context) -> float:
         return self.cue.start_frame_float(ctx.scene.render.fps, ctx.scene.render.fps_base)
 
+    def end_frame_float(self, ctx: Context) -> float:
+        return self.cue.end_frame_float(ctx.scene.render.fps, ctx.scene.render.fps_base)
+
     def subframe(self, ctx: Context) -> tuple[int, float]:
         return self.cue.start_subframe(ctx.scene.render.fps, ctx.scene.render.fps_base)
 

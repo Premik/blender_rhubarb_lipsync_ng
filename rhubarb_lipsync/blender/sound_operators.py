@@ -78,7 +78,8 @@ class CreateSoundStripWithSound(bpy.types.Operator):
 
     def execute(self, context: Context) -> set[str]:
 
-        error = CreateSoundStripWithSound.disabled_reason(context, 0)  # Run validation again, without the limit this time
+        # Run validation again, without the limit this time
+        error = CreateSoundStripWithSound.disabled_reason(context, 0)
         if error:
             self.report({"ERROR"}, error)
             return {'CANCELLED'}
