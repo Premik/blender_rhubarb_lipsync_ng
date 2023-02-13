@@ -69,6 +69,17 @@ class RhubarbAddonPreferences(AddonPreferences):
         default=False,
     )
 
+    highlight_long_cues: FloatProperty(  # type: ignore
+        name="Highlight long cues",
+        description="If a captured cue is longer that this given time (in second) the cue is drawn in red in the list. Set to -1 to disable.",
+        default=0.3,
+    )
+    highlight_short_cues: FloatProperty(  # type: ignore
+        name="Highlight short cues",
+        description="If a captured cue is shorter that this given time (in second) the cue is drawn in red in the list. Set to -1 to disable.",
+        default=0.01,
+    )
+
     log_level: IntProperty(default=0)  # type: ignore
     info_panel_expanded: BoolProperty(default=False)  # type: ignore
     sound_source_panel_expanded: BoolProperty(default=True)  # type: ignore
@@ -101,6 +112,9 @@ class RhubarbAddonPreferences(AddonPreferences):
         layout.prop(self, "recognizer")
 
         layout.prop(self, "use_extended_shapes")
+        layout.prop(self, "highlight_long_cues")
+        layout.prop(self, "highlight_short_cues")
+
         layout.separator()
         layout.prop(self, 'default_converted_output_folder')
         layout.prop(self, 'always_show_conver')

@@ -148,7 +148,7 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
 
         job = rhubarb_operators.ProcessSoundFile.get_job(self.ctx)
         title = self.get_job_status_title(job)
-        layout.operator(rhubarb_operators.ProcessSoundFile.bl_idname, text=title, icon_value=IconsManager.get('rhubarb64x64'))
+        layout.operator(rhubarb_operators.ProcessSoundFile.bl_idname, text=title, icon_value=IconsManager.logo_icon())
 
         if not job:
             return

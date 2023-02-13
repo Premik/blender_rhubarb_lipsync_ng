@@ -11,15 +11,14 @@ class IconsManager:
     _loaded: set[str] = set()
 
     @staticmethod
-    def unregister():
+    def unregister() -> None:
         if IconsManager._previews:
             bpy.utils.previews.remove(IconsManager._previews)
             IconsManager._previews = None
             IconsManager._loaded = set()
 
     @staticmethod
-    def get(key: str):
-
+    def get(key: str) -> int:
         if IconsManager._previews is None:
             IconsManager._previews = bpy.utils.previews.new()
         prew = IconsManager._previews
@@ -27,6 +26,18 @@ class IconsManager:
             IconsManager._loaded.add(key)
             prew.load(key, str(resources_path() / f"{key}.png"), 'IMAGE')
         return prew[key].icon_id
+
+    @staticmethod
+    def logo_icon() -> int:
+        return IconsManager.get('rhubarb64x64')
+
+    @staticmethod
+    def cue_image(key:str) -> int:
+        return IconsManager.get(f"lisa-{key}")
+
+    @staticmethod
+    def cue_icon(key:str) -> int:
+        return IconsManager.get(f"lisa-{key}")
 
 
 def addons_path() -> pathlib.Path:

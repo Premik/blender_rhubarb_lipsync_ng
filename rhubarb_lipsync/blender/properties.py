@@ -6,6 +6,7 @@ import bpy
 import bpy.utils.previews
 from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty, PointerProperty, StringProperty, CollectionProperty
 from bpy.types import AddonPreferences, Context, PropertyGroup, Sound, UILayout
+import math
 
 from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue
 from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandWrapper, RhubarbParser
@@ -43,8 +44,19 @@ class MouthCueListItem(PropertyGroup):
         return f"{self.frame(ctx)}"
 
     @property
+    def duration(self) -> float:
+        return self.cue.end - self.cue.start
+
+    def duration_frames(self, ctx: Context) -> int:
+        return int(math.ceil(self.end_frame_float(ctx) - self.frame_float(ctx)))
+
+    @property
     def time_str(self) -> str:
         return f"{self.start:0.2f}"
+
+    @property
+    def duration_str(self) -> str:
+        return f"{self.duration:0.2f}"
 
 
 class MouthCueList(PropertyGroup):
