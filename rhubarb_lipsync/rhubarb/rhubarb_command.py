@@ -283,12 +283,14 @@ class RhubarbCommandAsyncJob:
 
     def _thread_run(self) -> None:
         """Runs on a separate threads, pushing progress message via Q"""
-        log.debug("Entered progress check thread")
+        log.trace("Entered progress check thread")  # type: ignore
         while True:
             try:
                 if self.cmd.has_finished:
+                    log.trace("Process finished")  # type: ignore
                     break
                 if self.stop_event.is_set():
+                    log.trace("Stop event received")  # type: ignore
                     break  # Cancelled
                 progress = self.cmd.lipsync_check_progress()
 
@@ -335,6 +337,7 @@ class RhubarbCommandAsyncJob:
 
         try:
             (msg, obj) = self.queue.get_nowait()
+            log.trace(f"Received {msg}={obj}")  # type: ignore
             if msg == 'PROGRESS':
                 return int(obj)
             if msg == 'EXCEPTION':

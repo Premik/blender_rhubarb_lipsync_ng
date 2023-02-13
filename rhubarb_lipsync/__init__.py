@@ -11,6 +11,7 @@ bl_info = {
     'category': 'Animation',
 }
 
+from rhubarb_lipsync.rhubarb.log_manager import logManager
 
 import bpy
 from bpy.props import PointerProperty
@@ -19,7 +20,6 @@ import rhubarb_lipsync.blender.auto_load
 from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences
 from rhubarb_lipsync.blender.properties import CaptureProperties
 from rhubarb_lipsync.blender.ui_utils import IconsManager
-from rhubarb_lipsync.rhubarb.log_manager import logManager
 
 
 def init_loggers():

@@ -65,11 +65,11 @@ class PlayAndStop(bpy.types.Operator):
 
     @staticmethod
     def on_frame(scene):
-        if log.isEnabledFor(logging.DEBUG):
-            log.debug(f"On frame {PlayAndStop.frames_left}")
+        if log.isEnabledFor(logging.TRACE):
+            log.trace(f"On frame {PlayAndStop.frames_left}")
         PlayAndStop.frames_left -= 1
         if PlayAndStop.frames_left <= 0:
-            log.debug("Stopping playback. Counter reached zero.")
+            log.trace("Stopping playback. Counter reached zero.")
             bpy.ops.screen.animation_cancel(restore_frame=False)
             if not PlayAndStop.remove_handlers():
                 log.warn(
@@ -102,7 +102,7 @@ class PlayAndStop(bpy.types.Operator):
 
     def execute(self, context: Context) -> set[str]:
         PlayAndStop.frames_left = self.play_frames
-        log.debug(f"Starting animation playback. With counter {self.play_frames}.")
+        log.debug(f"Starting animation playback from {self.start_frame} frame. Frames to play: {self.play_frames}.")
         PlayAndStop.remove_handlers()
         if self.start_frame >= 0:
             f, i = math.modf(self.start_frame)
@@ -110,5 +110,7 @@ class PlayAndStop(bpy.types.Operator):
 
         if not getattr(context.screen, 'is_animation_playing', False):
             bpy.ops.screen.animation_play()  # Another play call would stop the playback if already playing
+        else:
+            log.trace("Animation is already playing.")  # type: ignore
         bpy.app.handlers.frame_change_post.append(PlayAndStop.on_frame)
         return {'FINISHED'}

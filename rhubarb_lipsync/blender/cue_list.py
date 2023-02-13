@@ -41,7 +41,7 @@ class MouthCueUIList(UIList):
             row.label(text=f"{item.time_str}s")
             op = row.operator(PlayAndStop.bl_idname, text="", icon="TRIA_RIGHT_BAR")
             op.start_frame = item.frame_float(context)
-            op.play_frames = int(round(item.end_frame_float(context) - item.frame_float(context)))
+            op.play_frames = int(item.end_frame_float(context) - item.frame_float(context))
 
             # row.prop(item, 'start')
 
