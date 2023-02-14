@@ -16,6 +16,51 @@ def default_executable_path() -> pathlib.Path:
     return ui_utils.addons_path() / 'rhubarb_lipsync' / 'bin' / exe
 
 
+class CueListPreferences(PropertyGroup):
+
+    highlight_long_cues: FloatProperty(  # type: ignore
+        name="Highlight long cues",
+        description="If a captured cue is longer that this given time (in second) the cue is drawn in red in the list. Set to -1 to disable.",
+        default=0.3,
+        soft_min=0.2,
+        soft_max=2,
+    )
+    highlight_short_cues: FloatProperty(  # type: ignore
+        name="Highlight short cues",
+        description="If a captured cue is shorter that this given time (in second) the cue is drawn in red in the list. Set to -1 to disable.",
+        default=0.01,
+        soft_min=0.005,
+        soft_max=0.3,
+    )
+
+    show_col_icon: BoolProperty(default=True, name="Show cue icon")  # type: ignore
+    show_col_start_frame: BoolProperty(default=True, name="Show cue start frame")  # type: ignore
+    show_col_start_time: BoolProperty(default=False, name="Show cue start time")  # type: ignore
+    show_col_len_frame: BoolProperty(default=False, name="Show cue duration in frames")  # type: ignore
+    show_col_len_time: BoolProperty(default=True, name="Show cue duration in seconds")  # type: ignore
+    show_col_play: BoolProperty(default=True, name="Show cue play button")  # type: ignore
+
+    as_grid: BoolProperty(default=False, name="Display the list in the grid mode")  # type: ignore
+
+    @property
+    def timecols(self) -> list[bool]:
+        return [
+            self.show_col_start_frame,
+            self.show_col_start_time,
+            self.show_col_len_frame,
+            self.show_col_len_time,
+        ]
+
+    def visible_timecols_count(self) -> int:
+        return self.timecols.count(True)
+
+    def props_names(self) -> list[str]:
+        return [k for k in self.__annotations__]
+
+    def col_props_names(self) -> list[str]:
+        return [k for k in self.props_names() if 'show_col' in k]
+
+
 class RhubarbAddonPreferences(AddonPreferences):
     bl_idname = 'rhubarb_lipsync'
 
@@ -69,21 +114,12 @@ class RhubarbAddonPreferences(AddonPreferences):
         default=False,
     )
 
-    highlight_long_cues: FloatProperty(  # type: ignore
-        name="Highlight long cues",
-        description="If a captured cue is longer that this given time (in second) the cue is drawn in red in the list. Set to -1 to disable.",
-        default=0.3,
-    )
-    highlight_short_cues: FloatProperty(  # type: ignore
-        name="Highlight short cues",
-        description="If a captured cue is shorter that this given time (in second) the cue is drawn in red in the list. Set to -1 to disable.",
-        default=0.01,
-    )
-
     log_level: IntProperty(default=0)  # type: ignore
     info_panel_expanded: BoolProperty(default=False)  # type: ignore
     sound_source_panel_expanded: BoolProperty(default=True)  # type: ignore
     caputre_panel_expanded: BoolProperty(default=True)  # type: ignore
+
+    cue_list_prefs: PointerProperty(type=CueListPreferences, name="Cues list preferences")  # type: ignore
 
     def new_command_handler(self) -> RhubarbCommandWrapper:
         return RhubarbCommandWrapper(self.executable_path, self.recognizer, self.use_extended_shapes)
@@ -112,8 +148,8 @@ class RhubarbAddonPreferences(AddonPreferences):
         layout.prop(self, "recognizer")
 
         layout.prop(self, "use_extended_shapes")
-        layout.prop(self, "highlight_long_cues")
-        layout.prop(self, "highlight_short_cues")
+        layout.prop(self.cue_list_prefs, "highlight_long_cues")
+        layout.prop(self.cue_list_prefs, "highlight_short_cues")
 
         layout.separator()
         layout.prop(self, 'default_converted_output_folder')

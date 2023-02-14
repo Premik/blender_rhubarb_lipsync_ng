@@ -10,7 +10,7 @@ from bpy.types import Context, Sound, SoundSequence
 import rhubarb_lipsync.blender.rhubarb_operators as rhubarb_operators
 import rhubarb_lipsync.blender.sound_operators as sound_operators
 import rhubarb_lipsync.blender.ui_utils as ui_utils
-from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences
+from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences, CueListPreferences
 from rhubarb_lipsync.blender.properties import CaptureProperties, MouthCueList
 from rhubarb_lipsync.blender.ui_utils import IconsManager
 from rhubarb_lipsync.blender.cue_list import MouthCueUIList
@@ -19,9 +19,43 @@ from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandAsyncJob
 log = logging.getLogger(__name__)
 
 
+class CaptureExtraOptionsPanel(bpy.types.Panel):
+
+    bl_idname = "RLPS_PT_capture_extra_options"
+    bl_label = "RLPS: Additional capture options"
+    bl_space_type = "PROPERTIES"
+    bl_region_type = "HEADER"
+    # bl_category = "RLSP"
+
+    def draw(self, context: Context) -> None:
+        prefs = RhubarbAddonPreferences.from_context(context)
+        props = CaptureProperties.from_context(context)
+
+        layout = self.layout
+        layout.label(props)
+        layout.prop(props, "dialog_file")
+        layout.prop(prefs, "use_extended_shapes")
+
+
+class CueListOptionsPanel(bpy.types.Panel):
+
+    bl_idname = "RLPS_PT_cue_list_options"
+    bl_label = "RLPS: Cue list display options"
+    bl_space_type = "PROPERTIES"
+    bl_region_type = "HEADER"
+    # bl_category = "RLSP"
+
+    def draw(self, context: Context) -> None:
+        prefs = RhubarbAddonPreferences.from_context(context)
+        o: CueListPreferences = prefs.cue_list_prefs
+        layout = self.layout
+        for name in o.props_names():
+            layout.prop(o, name)
+
+
 class CaptureMouthCuesPanel(bpy.types.Panel):
 
-    bl_idname = "RLPS_PT_capture_panel"
+    bl_idname = "RLPS_PT_capture"
     bl_label = "RLPS: Sound setup and cues capture"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
@@ -148,7 +182,9 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
 
         job = rhubarb_operators.ProcessSoundFile.get_job(self.ctx)
         title = self.get_job_status_title(job)
-        layout.operator(rhubarb_operators.ProcessSoundFile.bl_idname, text=title, icon_value=IconsManager.logo_icon())
+        row = layout.row(align=True)
+        row.operator(rhubarb_operators.ProcessSoundFile.bl_idname, text=title, icon_value=IconsManager.logo_icon())
+        row.popover(panel=CaptureExtraOptionsPanel.bl_idname, text="", icon="DOWNARROW_HLT")
 
         if not job:
             return
@@ -175,13 +211,13 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
         props = CaptureProperties.from_context(self.ctx)
 
         layout = self.layout
-        layout.prop(props, "dialog_file")
-        layout.prop(prefs, "use_extended_shapes")
 
-        # row = layout.row()
+        row = layout.row()
+        row.popover(panel=CueListOptionsPanel.bl_idname, text="", icon="VIS_SEL_11")
+
         lst: MouthCueList = props.cue_list
-        layout.template_list(MouthCueUIList.bl_idname, "Mouth cues", lst, "items", lst, "index")
-        # layout.template_list(MouthCueUIList.bl_idname, "Mouth cues", lst, "items", lst, "index", type="GRID")
+        list_type = 'GRID' if prefs.cue_list_prefs.as_grid else 'DEFAULT'
+        layout.template_list(MouthCueUIList.bl_idname, "Mouth cues", lst, "items", lst, "index", type=list_type)
 
     def draw(self, context: Context):
         try:

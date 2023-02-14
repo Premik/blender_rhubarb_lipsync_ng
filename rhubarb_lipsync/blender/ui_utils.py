@@ -24,19 +24,23 @@ class IconsManager:
         prew = IconsManager._previews
         if not key in IconsManager._loaded:
             IconsManager._loaded.add(key)
-            prew.load(key, str(resources_path() / f"{key}.png"), 'IMAGE')
+            fn = key
+            if not pathlib.Path(key).suffix:
+                fn = f"{key}.png"  # .png default extension
+            prew.load(key, str(resources_path() / fn), 'IMAGE')
         return prew[key].icon_id
 
     @staticmethod
     def logo_icon() -> int:
         return IconsManager.get('rhubarb64x64')
+        # return IconsManager.get('drawing.svg')
 
     @staticmethod
-    def cue_image(key:str) -> int:
+    def cue_image(key: str) -> int:
         return IconsManager.get(f"lisa-{key}")
 
     @staticmethod
-    def cue_icon(key:str) -> int:
+    def cue_icon(key: str) -> int:
         return IconsManager.get(f"lisa-{key}")
 
 
