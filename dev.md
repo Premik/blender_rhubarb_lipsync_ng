@@ -127,6 +127,7 @@ https://docs.blender.org/api/current/info_best_practice.html
 * Job instance is hooked to Object class, so it is incorrectly shared between blender object, make some per-object registration
 * Cue item-add onchanged handlers to properties to flush the cached Cue object. And change the properties to use setter/gettr of the Cue object directly
 * Add license files
+* Icons (especially cue icons) hard to see. Nearli inivisible on dark background
 
 
 ## Baking

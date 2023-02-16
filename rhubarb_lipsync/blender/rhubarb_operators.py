@@ -196,3 +196,37 @@ class GetRhubarbExecutableVersion(bpy.types.Operator):
         # Cache to alow re-run on config changes
         GetRhubarbExecutableVersion.executable_last_path = str(cmd.executable_path)
         return {'FINISHED'}
+
+
+class ClearCueList(bpy.types.Operator):
+    """Removes all captured cues from the cue list"""
+
+    bl_idname = "rhubarb.clear_cue_list"
+    bl_label = "Clear the cue list"
+    bl_options = {'UNDO'}
+
+    @classmethod
+    def disabled_reason(cls, context: Context) -> str:
+        selection_error = CaptureProperties.context_selection_validation(context)
+        if selection_error:
+            return selection_error
+        props = CaptureProperties.from_context(context)
+        cl: MouthCueList = props.cue_list
+        if len(cl.items) <= 0:
+            return "Cue list is empty"
+        return ""
+
+    @classmethod
+    def poll(cls, context: Context) -> bool:
+        return ui_utils.validation_poll(cls, context)
+
+    # def invoke(self, context: Context, event) -> set[int] | set[str]:
+    #    wm = context.window_manager
+    #    return wm.invoke_confirm(self, event)
+
+    def execute(self, context: Context) -> set[str]:
+        props = CaptureProperties.from_context(context)
+        cl: MouthCueList = props.cue_list
+        cl.items.clear()
+
+        return {'FINISHED'}

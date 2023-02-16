@@ -34,10 +34,10 @@ class CueListPreferences(PropertyGroup):
     )
 
     show_col_icon: BoolProperty(default=True, name="Icon")  # type: ignore
-    show_col_start_frame: BoolProperty(default=True, name="Start frame")  # type: ignore
-    show_col_start_time: BoolProperty(default=False, name="Start time")  # type: ignore
-    show_col_len_frame: BoolProperty(default=False, name="Duration in frames")  # type: ignore
-    show_col_len_time: BoolProperty(default=True, name="Duration in seconds")  # type: ignore
+    show_col_start_frame: BoolProperty(default=True, name="Start (frames)")  # type: ignore
+    show_col_start_time: BoolProperty(default=False, name="Start (time)")  # type: ignore
+    show_col_len_frame: BoolProperty(default=False, name="Duration (frames)")  # type: ignore
+    show_col_len_time: BoolProperty(default=True, name="Duration (seconds)")  # type: ignore
     show_col_play: BoolProperty(default=True, name="Play button")  # type: ignore
 
     as_grid: BoolProperty(default=False, name="As gird", description="Display the list in the grid mode")  # type: ignore
@@ -59,11 +59,17 @@ class CueListPreferences(PropertyGroup):
     def visible_timecols_count(self) -> int:
         return self.timecols.count(True)
 
+    @cached_property
     def props_names(self) -> list[str]:
         return [k for k in self.__annotations__]
 
+    @cached_property
     def col_props_names(self) -> list[str]:
-        return [k for k in self.props_names() if 'show_col' in k]
+        return [k for k in self.props_names if 'show_col' in k]
+
+    @cached_property
+    def noncol_props_names(self) -> list[str]:
+        return [k for k in self.props_names if not 'show_col' in k]
 
 
 class RhubarbAddonPreferences(AddonPreferences):

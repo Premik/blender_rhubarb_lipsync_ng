@@ -39,16 +39,35 @@ class CaptureExtraOptionsPanel(bpy.types.Panel):
 class CueListOptionsPanel(bpy.types.Panel):
 
     bl_idname = "RLPS_PT_cue_list_options"
-    bl_label = "RLPS: Cue list display options"
+    bl_label = "Cue list display options"
     bl_space_type = "PROPERTIES"
     bl_region_type = "HEADER"
+
     # bl_category = "RLSP"
 
     def draw(self, context: Context) -> None:
         prefs = RhubarbAddonPreferences.from_context(context)
         o: CueListPreferences = prefs.cue_list_prefs
         layout = self.layout
-        for name in o.props_names():
+        layout.label(text=CueListOptionsPanel.bl_label)
+        for name in o.noncol_props_names:
+            layout.prop(o, name)
+
+
+class CueListColsVisibilityPanel(bpy.types.Panel):
+
+    bl_idname = "RLPS_PT_cue_list_columns"
+    bl_label = "Visible columns"
+    bl_space_type = "PROPERTIES"
+    bl_region_type = "HEADER"
+    bl_parent_id = CueListOptionsPanel.bl_idname
+    # bl_category = "RLSP"
+
+    def draw(self, context: Context) -> None:
+        prefs = RhubarbAddonPreferences.from_context(context)
+        o: CueListPreferences = prefs.cue_list_prefs
+        layout = self.layout
+        for name in o.col_props_names:
             layout.prop(o, name)
 
 
@@ -222,8 +241,9 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
 
         layout = self.layout
 
-        row = layout.row()
+        row = layout.row(align=True)
         row.popover(panel=CueListOptionsPanel.bl_idname, text="", icon="VIS_SEL_11")
+        row.operator(rhubarb_operators.ClearCueList.bl_idname, text="", icon="PANEL_CLOSE")
 
         lst: MouthCueList = props.cue_list
         list_type = 'GRID' if prefs.cue_list_prefs.as_grid else 'DEFAULT'
