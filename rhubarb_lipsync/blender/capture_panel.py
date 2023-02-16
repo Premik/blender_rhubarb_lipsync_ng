@@ -11,7 +11,7 @@ import rhubarb_lipsync.blender.rhubarb_operators as rhubarb_operators
 import rhubarb_lipsync.blender.sound_operators as sound_operators
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences, CueListPreferences
-from rhubarb_lipsync.blender.properties import CaptureProperties, MouthCueList
+from rhubarb_lipsync.blender.properties import CaptureProperties, MouthCueList, MouthCueListItem
 from rhubarb_lipsync.blender.ui_utils import IconsManager
 from rhubarb_lipsync.blender.cue_list import MouthCueUIList
 from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandAsyncJob
@@ -32,7 +32,6 @@ class CaptureExtraOptionsPanel(bpy.types.Panel):
         props = CaptureProperties.from_context(context)
 
         layout = self.layout
-        layout.label(props)
         layout.prop(props, "dialog_file")
         layout.prop(prefs, "use_extended_shapes")
 
@@ -63,6 +62,17 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
     # bl_parent_id= 'VIEW3D_PT_example_panel'
     # bl_description = "Tool tip"
     # bl_context = "object"
+
+    @staticmethod
+    def on_cuelist_index_changed(cueList: MouthCueList, ctx: Context, item: MouthCueListItem) -> None:
+        # Even handler called when the cue list index changes in the properties.
+        cp: CueListPreferences = RhubarbAddonPreferences.from_context(ctx).cue_list_prefs
+        if not cp.sync_on_select:
+            return
+        frame, subframe = item.subframe(ctx)
+        ctx.scene.frame_set(frame=frame, subframe=subframe)
+
+    MouthCueList.index_changed = on_cuelist_index_changed  # Register callback
 
     def draw_sound_setup(self) -> bool:
         props = CaptureProperties.from_context(self.ctx)

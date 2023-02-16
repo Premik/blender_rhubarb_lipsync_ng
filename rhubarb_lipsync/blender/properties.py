@@ -1,6 +1,6 @@
 import pathlib
 from functools import cached_property
-from typing import Optional, cast
+from typing import Any, Callable, Optional, cast
 
 import bpy
 import bpy.utils.previews
@@ -63,6 +63,10 @@ class MouthCueList(PropertyGroup):
 
     items: CollectionProperty(type=MouthCueListItem, name="Cue items")  # type: ignore
 
+    # Autoload would fail in the typing reflection because of the 'MouthCueList' being unknown
+    # index_changed: Callable[['MouthCueList', Context, MouthCueListItem], None] | None
+    index_changed: Callable[[PropertyGroup, Context, MouthCueListItem], None]
+
     def add_cues(self, cues: list[MouthCue]) -> None:
         for cue in cues:
             item: MouthCueListItem = self.items.add()
@@ -91,13 +95,15 @@ class MouthCueList(PropertyGroup):
         return self.items[self.index]
 
     def on_index_changed(self, context: Context) -> None:
+        if not getattr(MouthCueList, 'index_changed', None):
+            return
         self.ensure_index_bounds()
         i = self.selected_item
         if not i:
             return
-        frame, subframe = i.subframe(context)
+        # prefs = RhubarbAddonPreferences.from_context(self.ctx)
+        MouthCueList.index_changed(self, context, i)
 
-        context.scene.frame_set(frame=frame, subframe=subframe)
         # context.scene.frame_float = i.frame_float
 
     index: IntProperty(name="Selected cue index", update=on_index_changed)  # type: ignore

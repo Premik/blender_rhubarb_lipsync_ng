@@ -19,28 +19,33 @@ def default_executable_path() -> pathlib.Path:
 class CueListPreferences(PropertyGroup):
 
     highlight_long_cues: FloatProperty(  # type: ignore
-        name="Highlight long cues",
+        name="Flag long cues time",
         description="If a captured cue is longer that this given time (in second) the cue is drawn in red in the list. Set to -1 to disable.",
         default=0.3,
         soft_min=0.2,
         soft_max=2,
     )
     highlight_short_cues: FloatProperty(  # type: ignore
-        name="Highlight short cues",
+        name="Flag short cues time",
         description="If a captured cue is shorter that this given time (in second) the cue is drawn in red in the list. Set to -1 to disable.",
         default=0.01,
         soft_min=0.005,
         soft_max=0.3,
     )
 
-    show_col_icon: BoolProperty(default=True, name="Show cue icon")  # type: ignore
-    show_col_start_frame: BoolProperty(default=True, name="Show cue start frame")  # type: ignore
-    show_col_start_time: BoolProperty(default=False, name="Show cue start time")  # type: ignore
-    show_col_len_frame: BoolProperty(default=False, name="Show cue duration in frames")  # type: ignore
-    show_col_len_time: BoolProperty(default=True, name="Show cue duration in seconds")  # type: ignore
-    show_col_play: BoolProperty(default=True, name="Show cue play button")  # type: ignore
+    show_col_icon: BoolProperty(default=True, name="Icon")  # type: ignore
+    show_col_start_frame: BoolProperty(default=True, name="Start frame")  # type: ignore
+    show_col_start_time: BoolProperty(default=False, name="Start time")  # type: ignore
+    show_col_len_frame: BoolProperty(default=False, name="Duration in frames")  # type: ignore
+    show_col_len_time: BoolProperty(default=True, name="Duration in seconds")  # type: ignore
+    show_col_play: BoolProperty(default=True, name="Play button")  # type: ignore
 
-    as_grid: BoolProperty(default=False, name="Display the list in the grid mode")  # type: ignore
+    as_grid: BoolProperty(default=False, name="As gird", description="Display the list in the grid mode")  # type: ignore
+    sync_on_select: BoolProperty(  # type: ignore
+        default=True,
+        name="Sync time on select",
+        description="Synchronize the timeline with the cue start time when the item is selected",
+    )
 
     @property
     def timecols(self) -> list[bool]:
