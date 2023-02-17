@@ -116,6 +116,9 @@ Best practice:
 https://docs.blender.org/api/current/info_best_practice.html
 
 
+Properties
+https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=floatproperty#get-set-example
+
 ## Todo
 
 * Add [speaker](https://docs.blender.org/manual/en/latest/render/output/audio/speaker.html) as an alternative to Sequencer audio clip
@@ -128,7 +131,7 @@ https://docs.blender.org/api/current/info_best_practice.html
 * Cue item-add onchanged handlers to properties to flush the cached Cue object. And change the properties to use setter/gettr of the Cue object directly
 * Add license files
 * Icons (especially cue icons) hard to see. Nearli inivisible on dark background
-
+* Limit possible selection to armature and mesh-object only? (and not obj.library). Or hook the properties to the Collection instead of Object?
 
 ## Baking
 

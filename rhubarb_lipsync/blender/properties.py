@@ -5,21 +5,38 @@ from typing import Any, Callable, Optional, cast
 import bpy
 import bpy.utils.previews
 from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty, PointerProperty, StringProperty, CollectionProperty
-from bpy.types import AddonPreferences, Context, PropertyGroup, Sound, UILayout
+from bpy.types import AddonPreferences, Context, PropertyGroup, Sound, UILayout, Action
 import math
 
-from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue
+from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue, MouthShapeDescription
 from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandWrapper, RhubarbParser
 
 
+class MappingListItem(PropertyGroup):
+    action: PointerProperty(type=bpy.types.Action, name="Action")  # type: ignore
+
+    @cached_property
+    def cue_desc(self) -> MouthShapeDescription:
+        pass
+
+
 class MouthCueListItem(PropertyGroup):
-    key: StringProperty("key", description="Mouth cue key symbol (A,B,C..)")  # type: ignore
+    key: StringProperty(  # type: ignore
+        "key",
+        description="Mouth cue key symbol (A,B,C..)",
+        # get=lambda s: s.cue.key,
+        # get=lambda s: s['key'],
+        # set=lambda s, v: setattr(s.cue.key, v),
+        # set=lambda s, v: s.gg(v),
+    )
     start: FloatProperty(name="start", description="Start time of the cue")  # type: ignore
     end: FloatProperty(name="end", description="End time of the cue (usually matches start of the previous cue")  # type: ignore
 
     @cached_property
     def cue(self) -> MouthCue:
         return MouthCue(self.key, self.start, self.end)
+        # print("New")
+        # return MouthCue(self['key'], self['start'], self['end'])
 
     def set_from_cue(self, cue: MouthCue) -> None:
         self.key = cue.key
@@ -60,7 +77,6 @@ class MouthCueListItem(PropertyGroup):
 
 
 class MouthCueList(PropertyGroup):
-
     items: CollectionProperty(type=MouthCueListItem, name="Cue items")  # type: ignore
 
     # Autoload would fail in the typing reflection because of the 'MouthCueList' being unknown
@@ -111,7 +127,6 @@ class MouthCueList(PropertyGroup):
 
 
 class CaptureProperties(PropertyGroup):
-
     sound: PointerProperty(type=bpy.types.Sound, name="Sound")  # type: ignore
     # start_frame: FloatProperty(name="Start frame", default=0)  # type: ignore
     dialog_file: StringProperty(  # type: ignore
@@ -128,12 +143,8 @@ class CaptureProperties(PropertyGroup):
             return None  # type: ignore
         # Seems the data-block properties are lazily created
         # and doesn't exist until accessed for the first time
-        # if not 'rhubarb_lipsync' in self.ctx.active_object:
-        try:
-            p = ctx.object.rhubarb_lipsync  # type: ignore
-        except AttributeError:
-            return None  # type: ignore
-        return p
+
+        return getattr(ctx.object, 'rhubarb_lipsync')  # type: ignore
 
     @staticmethod
     def context_selection_validation(ctx: Context) -> str:
@@ -190,7 +201,6 @@ class CaptureProperties(PropertyGroup):
         return str(p.parent)
 
     def is_sound_format_supported(self) -> bool:
-
         return self.sound_file_extension in ["ogg", "wav"]
 
     def get_sound_name_with_new_extension(self, new_ext: str) -> str:

@@ -93,8 +93,9 @@ class ProcessSoundFile(bpy.types.Operator):
         context.area.tag_redraw()  # Force redraw
 
     def invoke(self, context: Context, event) -> set[int] | set[str]:
-        job = ProcessSoundFile.get_job(context)
-        if job and job.get_lipsync_output_cues():
+        props = CaptureProperties.from_context(context)
+        cl: MouthCueList = props.cue_list
+        if len(cl.items) > 0:
             # Already some existing cues, confirm before overriding
             wm = context.window_manager
             return wm.invoke_confirm(self, event)
