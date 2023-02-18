@@ -139,12 +139,15 @@ class CaptureProperties(PropertyGroup):
 
     @staticmethod
     def from_context(ctx: Context) -> 'CaptureProperties':
-        if not ctx.object:
+        return CaptureProperties.from_object(ctx.object)
+
+    @staticmethod
+    def from_object(obj: bpy.types.Object) -> 'CaptureProperties':
+        if not obj:
             return None  # type: ignore
         # Seems the data-block properties are lazily created
         # and doesn't exist until accessed for the first time
-
-        return getattr(ctx.object, 'rhubarb_lipsync')  # type: ignore
+        return getattr(obj, 'rhubarb_lipsync')  # type: ignore
 
     @staticmethod
     def context_selection_validation(ctx: Context) -> str:

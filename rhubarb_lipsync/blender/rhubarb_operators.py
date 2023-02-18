@@ -12,7 +12,7 @@ from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences
 from rhubarb_lipsync.blender.properties import CaptureProperties, MouthCueList
 from rhubarb_lipsync.rhubarb.log_manager import logManager
 from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandAsyncJob, RhubarbCommandWrapper
-
+from collections import defaultdict
 
 log = logging.getLogger(__name__)
 
@@ -32,24 +32,28 @@ class ProcessSoundFile(bpy.types.Operator):
     bl_idname = "rhubarb.process_sound_file"
     bl_label = "Capture"
 
-    # registered_jobs: dict[int, RhubarbCommandAsyncJob] = dict()
-    job_key = "rhubarb_lipsync_job"
+    registered_jobs: dict[int, Optional[RhubarbCommandAsyncJob]] = defaultdict(lambda: None)
+
+    @classmethod
+    def get_job_from_obj(cls, obj: bpy.types.Object) -> Optional[RhubarbCommandAsyncJob]:
+        """Get's the current running job (or the result) linked to the provided object."""
+        if not obj:
+            return None
+        key = id(obj)
+        return ProcessSoundFile.registered_jobs[key]
 
     @classmethod
     def get_job(cls, context: Context) -> Optional[RhubarbCommandAsyncJob]:
         """Get's the current running job (or the result) linked to the active object.
         This is for external access (like from the panel)."""
-        o = context.object
-        if not o:
-            return None
-
-        return getattr(o, ProcessSoundFile.job_key, None)
+        return ProcessSoundFile.get_job_from_obj(context.object)
 
     @classmethod
     def set_job(cls, context: Context, job: Optional[RhubarbCommandAsyncJob]) -> None:
         o = context.object
         assert o, "No active object"
-        setattr(o.__class__, ProcessSoundFile.job_key, job)
+        key = id(o)
+        ProcessSoundFile.registered_jobs[key] = job
 
     @classmethod
     def disabled_reason(cls, context: Context) -> str:
@@ -80,18 +84,6 @@ class ProcessSoundFile(bpy.types.Operator):
         job = ProcessSoundFile.get_job(context)
         return getattr(job, 'cmd', None)
 
-    def update_progress(self, context: Context, progress=0):
-        props = CaptureProperties.from_context(context)
-        wm = context.window_manager
-        if progress == 0:
-            # https://blender.stackexchange.com/questions/1050/blender-ui-multithreading-progressbar
-            wm.progress_begin(0, 100)
-        else:
-            wm.progress_update(progress)
-        # Slider can only display value from  a blender property. And properties can't be modified in the draw methods, so setting here
-        props.progress = progress
-        context.area.tag_redraw()  # Force redraw
-
     def invoke(self, context: Context, event) -> set[int] | set[str]:
         props = CaptureProperties.from_context(context)
         cl: MouthCueList = props.cue_list
@@ -115,15 +107,32 @@ class ProcessSoundFile(bpy.types.Operator):
 
         wm = context.window_manager
         wm.modal_handler_add(self)
-        self.timer = wm.event_timer_add(0.1, window=context.window)
+        self.timer = wm.event_timer_add(0.2, window=context.window)
+        self.object = context.object  # Save the current active object in case the selection chagned later
         self.update_progress(context)
         log.debug("Operator execute")
         return {'RUNNING_MODAL'}
 
-    def modal(self, context: Context, event) -> set[str]:
+    @property
+    def running_props(self) -> CaptureProperties:
+        """Properties bound to the object when the operator has been started.
+        Since the operator is modal (background) the selected object can be changed while operator is still running
+        """
+        # TODO: Ensure the self.object has not beed delete in the meantime(save id(obj))
+        return CaptureProperties.from_object(self.object)
 
-        job = ProcessSoundFile.get_job(context)
-        assert job, f"No '{ProcessSoundFile.job_key}' key found on the active object"
+    @property
+    def running_job(self) -> Optional[RhubarbCommandAsyncJob]:
+        return ProcessSoundFile.get_job_from_obj(self.object)
+
+    def modal(self, context: Context, event) -> set[str]:
+        # print(f"{id(self)}  {id(context.object)}")
+        job = self.running_job()
+        if not job:
+            self.report({'ERROR'}, f"No job object found registered for the active object")
+            self.finished(context)
+            return {'CANCELLED'}
+
         if job.cmd.has_finished:
             self.report({'INFO'}, f"Done")
 
@@ -153,9 +162,22 @@ class ProcessSoundFile(bpy.types.Operator):
             # self.report({'INFO'}, f"{progress}%")
         return {'PASS_THROUGH'}
 
+    def update_progress(self, context: Context, progress=0):
+        wm = context.window_manager
+        if progress == 0:
+            # https://blender.stackexchange.com/questions/1050/blender-ui-multithreading-progressbar
+            wm.progress_begin(0, 100)
+        else:
+            wm.progress_update(progress)
+        # Slider can only display value from  a blender property. And properties can't be modified in the draw methods, so setting here
+        self.running_props.progress = progress
+        context.area.tag_redraw()  # Force redraw
+
     def finished(self, context: Context) -> None:
         log.info("Operator finished")
-        props = CaptureProperties.from_context(context)
+        self.update_progress(context, 100)
+        props = self.running_props
+        self.object = None  # Remove the cached object since the operator modal operator about to end
         wm = context.window_manager
         wm.event_timer_remove(self.timer)
         job = ProcessSoundFile.get_job(context)
@@ -164,7 +186,6 @@ class ProcessSoundFile(bpy.types.Operator):
             job.join_thread()
             job.cmd.close_process()
             lst.add_cues(job.get_lipsync_output_cues())
-        self.update_progress(context, 100)
 
 
 class GetRhubarbExecutableVersion(bpy.types.Operator):
