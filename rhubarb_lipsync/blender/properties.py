@@ -134,11 +134,12 @@ class CaptureProperties(PropertyGroup):
         description="Additional plain-text file with transcription of the sound file to improve accuracy. Works for english only",
         subtype='FILE_PATH',
     )
-    progress: IntProperty("progress", default=-1, min=0, max=100)  # type: ignore
+    progress: IntProperty("progress", default=-1, min=0, max=100, options={'SKIP_SAVE'})  # type: ignore
     cue_list: PointerProperty(type=MouthCueList, name="Cues")  # type: ignore
 
     @staticmethod
     def from_context(ctx: Context) -> 'CaptureProperties':
+        # ctx.selected_editable_objects
         return CaptureProperties.from_object(ctx.object)
 
     @staticmethod

@@ -49,7 +49,7 @@ class ProcessSoundFile(bpy.types.Operator):
         return ProcessSoundFile.get_job_from_obj(context.object)
 
     @classmethod
-    def set_job(cls, context: Context, job: Optional[RhubarbCommandAsyncJob]) -> None:
+    def register_job(cls, context: Context, job: Optional[RhubarbCommandAsyncJob]) -> None:
         o = context.object
         assert o, "No active object"
         key = id(o)
@@ -79,11 +79,6 @@ class ProcessSoundFile(bpy.types.Operator):
     def poll(cls, context: Context):
         return ui_utils.validation_poll(cls, context)
 
-    @classmethod
-    def get_cmd(cls, context: Context) -> Optional[RhubarbCommandWrapper]:
-        job = ProcessSoundFile.get_job(context)
-        return getattr(job, 'cmd', None)
-
     def invoke(self, context: Context, event) -> set[int] | set[str]:
         props = CaptureProperties.from_context(context)
         cl: MouthCueList = props.cue_list
@@ -100,10 +95,11 @@ class ProcessSoundFile(bpy.types.Operator):
         sound: Sound = props.sound
         cmd = prefs.new_command_handler()
 
-        job = RhubarbCommandAsyncJob(cmd)
-        ProcessSoundFile.set_job(context, job)  # Keep job reference for outer access
+        self.job = RhubarbCommandAsyncJob(cmd)
+        ProcessSoundFile.register_job(context, self.job)  # Keep job reference for outer access
         cmd.lipsync_start(ui_utils.to_abs_path(sound.filepath), props.dialog_file)
         self.report({'INFO'}, f"Started")
+        
 
         wm = context.window_manager
         wm.modal_handler_add(self)
@@ -125,15 +121,16 @@ class ProcessSoundFile(bpy.types.Operator):
     def running_job(self) -> Optional[RhubarbCommandAsyncJob]:
         return ProcessSoundFile.get_job_from_obj(self.object)
 
-    def modal(self, context: Context, event) -> set[str]:
+    def modal(self, context: Context, event: bpy.types.Event) -> set[str]:
         # print(f"{id(self)}  {id(context.object)}")
-        job = self.running_job()
-        if not job:
+        
+
+        if not self.job:
             self.report({'ERROR'}, f"No job object found registered for the active object")
             self.finished(context)
             return {'CANCELLED'}
 
-        if job.cmd.has_finished:
+        if self.job.cmd.has_finished:
             self.report({'INFO'}, f"Done")
 
             self.finished(context)
@@ -142,18 +139,18 @@ class ProcessSoundFile(bpy.types.Operator):
         if event.type in {'ESC'}:
             log.info("Cancelling operator")
             self.report({'INFO'}, f"Cancel")
-            job.cancel()
+            self.job.cancel()
             self.finished(context)
             return {'CANCELLED'}
 
         try:
-            progress = job.lipsync_check_progress_async()
+            progress = self.job.lipsync_check_progress_async()
         except RuntimeError as e:
             self.report({'ERROR'}, str(e))
             log.exception(e)
-            job.cancel()
-            if not job.last_exception:
-                job.last_exception = e
+            self.job.cancel()
+            if not self.job.last_exception:
+                self.job.last_exception = e
             self.finished(context)
             return {'CANCELLED'}
 
@@ -180,12 +177,12 @@ class ProcessSoundFile(bpy.types.Operator):
         self.object = None  # Remove the cached object since the operator modal operator about to end
         wm = context.window_manager
         wm.event_timer_remove(self.timer)
-        job = ProcessSoundFile.get_job(context)
-        if job:
+        if self.job:
             lst: MouthCueList = props.cue_list
-            job.join_thread()
-            job.cmd.close_process()
-            lst.add_cues(job.get_lipsync_output_cues())
+            self.job.join_thread()
+            self.job.cmd.close_process()
+            lst.add_cues(self.job.get_lipsync_output_cues())
+            del self.job
 
 
 class GetRhubarbExecutableVersion(bpy.types.Operator):

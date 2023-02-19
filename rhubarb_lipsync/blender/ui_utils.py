@@ -6,14 +6,14 @@ from bpy.types import Area, Context, Sound, SoundSequence, UILayout, Window
 
 
 class IconsManager:
-
     _previews: bpy.utils.previews.ImagePreviewCollection = None
     _loaded: set[str] = set()
 
     @staticmethod
     def unregister() -> None:
         if IconsManager._previews:
-            bpy.utils.previews.remove(IconsManager._previews)
+            IconsManager._previews.close()
+            # bpy.utils.previews.remove(IconsManager._previews)
             IconsManager._previews = None
             IconsManager._loaded = set()
 
@@ -33,7 +33,7 @@ class IconsManager:
     @staticmethod
     def logo_icon() -> int:
         return IconsManager.get('rhubarb64x64')
-        # return IconsManager.get('drawing.svg')
+        # return IconsManager.get('1.dat')
 
     @staticmethod
     def cue_image(key: str) -> int:
@@ -119,7 +119,6 @@ def draw_error(layout, msg: str):
     if not lines:
         lines = [""]
     if len(lines) == 1:  # Single line
-
         box.label(text=msg, icon="ERROR")
         return
     # Multiline
