@@ -17,7 +17,6 @@ def default_executable_path() -> pathlib.Path:
 
 
 class CueListPreferences(PropertyGroup):
-
     highlight_long_cues: FloatProperty(  # type: ignore
         name="Flag long cues time",
         description="If a captured cue is longer that this given time (in second) the cue is drawn in red in the list. Set to -1 to disable.",
@@ -159,8 +158,8 @@ class RhubarbAddonPreferences(AddonPreferences):
         layout.prop(self, "recognizer")
 
         layout.prop(self, "use_extended_shapes")
-        layout.prop(self.cue_list_prefs, "highlight_long_cues")
-        layout.prop(self.cue_list_prefs, "highlight_short_cues")
+        # layout.prop(self.cue_list_prefs, "highlight_long_cues")
+        # layout.prop(self.cue_list_prefs, "highlight_short_cues")
 
         layout.separator()
         layout.prop(self, 'default_converted_output_folder')

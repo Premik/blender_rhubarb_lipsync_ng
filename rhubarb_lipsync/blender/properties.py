@@ -9,7 +9,7 @@ from bpy.types import AddonPreferences, Context, PropertyGroup, Sound, UILayout,
 import math
 
 from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue, MouthShapeDescription
-from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandWrapper, RhubarbParser
+from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandWrapper, RhubarbParser, RhubarbCommandAsyncJob
 
 
 class MappingListItem(PropertyGroup):
@@ -126,6 +126,21 @@ class MouthCueList(PropertyGroup):
     # index: IntProperty(name="Selected cue index")  # type: ignore
 
 
+class JobProperties(PropertyGroup):
+    progress: IntProperty("Progress", default=-1, min=0, max=100)  # type: ignore
+    status: StringProperty("Capture status")  # type: ignore
+    error: StringProperty("Error message")  # type: ignore
+    cancel_request: BoolProperty(default=False, name="Cancel requested")  # type: ignore
+
+    def update_from_async_job(self, job: RhubarbCommandAsyncJob) -> None:
+        self.progress = job.last_progress
+        self.status = job.status
+        if not job.last_exception:
+            self.error = ""
+        else:
+            self.error = f"{type(job.last_exception).__name__}\n{' '.join(job.last_exception.args)}"
+
+
 class CaptureProperties(PropertyGroup):
     sound: PointerProperty(type=bpy.types.Sound, name="Sound")  # type: ignore
     # start_frame: FloatProperty(name="Start frame", default=0)  # type: ignore
@@ -134,11 +149,12 @@ class CaptureProperties(PropertyGroup):
         description="Additional plain-text file with transcription of the sound file to improve accuracy. Works for english only",
         subtype='FILE_PATH',
     )
-    progress: IntProperty("progress", default=-1, min=0, max=100, options={'SKIP_SAVE'})  # type: ignore
+    job: PointerProperty(type=JobProperties, name="Job")  # type: ignore
     cue_list: PointerProperty(type=MouthCueList, name="Cues")  # type: ignore
 
     @staticmethod
     def from_context(ctx: Context) -> 'CaptureProperties':
+        """Get the properties bound to the current active object in the context"""
         # ctx.selected_editable_objects
         return CaptureProperties.from_object(ctx.object)
 
@@ -146,9 +162,14 @@ class CaptureProperties(PropertyGroup):
     def from_object(obj: bpy.types.Object) -> 'CaptureProperties':
         if not obj:
             return None  # type: ignore
-        # Seems the data-block properties are lazily created
-        # and doesn't exist until accessed for the first time
         return getattr(obj, 'rhubarb_lipsync')  # type: ignore
+
+    @staticmethod
+    def by_object_name(obj_name: str) -> 'CaptureProperties':
+        if not obj_name:
+            return None  # type: ignore
+        obj = bpy.data.objects.get(obj_name, None)
+        return CaptureProperties.from_object(obj)
 
     @staticmethod
     def context_selection_validation(ctx: Context) -> str:

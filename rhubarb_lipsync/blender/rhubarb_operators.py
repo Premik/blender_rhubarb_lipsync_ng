@@ -9,7 +9,7 @@ from bpy.types import Context, Sound, SoundSequence
 
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences
-from rhubarb_lipsync.blender.properties import CaptureProperties, MouthCueList
+from rhubarb_lipsync.blender.properties import CaptureProperties, MouthCueList, JobProperties
 from rhubarb_lipsync.rhubarb.log_manager import logManager
 from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandAsyncJob, RhubarbCommandWrapper
 from collections import defaultdict
@@ -99,12 +99,11 @@ class ProcessSoundFile(bpy.types.Operator):
         ProcessSoundFile.register_job(context, self.job)  # Keep job reference for outer access
         cmd.lipsync_start(ui_utils.to_abs_path(sound.filepath), props.dialog_file)
         self.report({'INFO'}, f"Started")
-        
 
         wm = context.window_manager
         wm.modal_handler_add(self)
         self.timer = wm.event_timer_add(0.2, window=context.window)
-        self.object = context.object  # Save the current active object in case the selection chagned later
+        self.object_name = context.object.name  # Save the current active object name in case the selection chagned later
         self.update_progress(context)
         log.debug("Operator execute")
         return {'RUNNING_MODAL'}
@@ -114,8 +113,8 @@ class ProcessSoundFile(bpy.types.Operator):
         """Properties bound to the object when the operator has been started.
         Since the operator is modal (background) the selected object can be changed while operator is still running
         """
-        # TODO: Ensure the self.object has not beed delete in the meantime(save id(obj))
-        return CaptureProperties.from_object(self.object)
+        # TODO: Ensure the self.object has not beed delete in the meantime(save id(obj) or obj.as_pointer() ?)
+        return CaptureProperties.by_object_name(self.object_name)
 
     @property
     def running_job(self) -> Optional[RhubarbCommandAsyncJob]:
@@ -123,10 +122,17 @@ class ProcessSoundFile(bpy.types.Operator):
 
     def modal(self, context: Context, event: bpy.types.Event) -> set[str]:
         # print(f"{id(self)}  {id(context.object)}")
-        
 
         if not self.job:
             self.report({'ERROR'}, f"No job object found registered for the active object")
+            self.finished(context)
+            return {'CANCELLED'}
+
+        if not self.running_props:
+            msg = f"Failed get the properties \nfrom the '{self.object_name}' object.\n Object delete or renamed?"
+            self.report({'ERROR'}, msg)
+            self.job.last_exception = Exception(msg)
+            self.job.cancel()
             self.finished(context)
             return {'CANCELLED'}
 
@@ -145,7 +151,7 @@ class ProcessSoundFile(bpy.types.Operator):
 
         try:
             progress = self.job.lipsync_check_progress_async()
-        except RuntimeError as e:
+        except Exception as e:
             self.report({'ERROR'}, str(e))
             log.exception(e)
             self.job.cancel()
@@ -155,33 +161,41 @@ class ProcessSoundFile(bpy.types.Operator):
             return {'CANCELLED'}
 
         if progress is not None:
-            self.update_progress(context, progress)
+            self.update_progress(context)
             # self.report({'INFO'}, f"{progress}%")
         return {'PASS_THROUGH'}
 
-    def update_progress(self, context: Context, progress=0):
+    def update_progress(self, context: Context):
         wm = context.window_manager
-        if progress == 0:
-            # https://blender.stackexchange.com/questions/1050/blender-ui-multithreading-progressbar
-            wm.progress_begin(0, 100)
-        else:
-            wm.progress_update(progress)
+
+        # Only changes mouse cursor, looks ugly
+        # if progress == 0:
+        #    # https://blender.stackexchange.com/questions/1050/blender-ui-multithreading-progressbar
+        #    wm.progress_begin(0, 100)
+        # else:
+        #    wm.progress_update(progress)
         # Slider can only display value from  a blender property. And properties can't be modified in the draw methods, so setting here
-        self.running_props.progress = progress
+        if self.running_props:
+            jprops: JobProperties = self.running_props.job
+            jprops.update_from_async_job(self.job)
         context.area.tag_redraw()  # Force redraw
 
     def finished(self, context: Context) -> None:
         log.info("Operator finished")
-        self.update_progress(context, 100)
-        props = self.running_props
-        self.object = None  # Remove the cached object since the operator modal operator about to end
+
         wm = context.window_manager
         wm.event_timer_remove(self.timer)
         if self.job:
-            lst: MouthCueList = props.cue_list
+            self.job.last_progress = 100
+            self.update_progress(context)
             self.job.join_thread()
             self.job.cmd.close_process()
-            lst.add_cues(self.job.get_lipsync_output_cues())
+            props = self.running_props
+            if props and self.job.get_lipsync_output_cues():
+                lst: MouthCueList = props.cue_list
+                lst.add_cues(self.job.get_lipsync_output_cues())
+            else:
+                self.report({'ERROR'}, f"Failed to update the cue list on the '{self.object_name}' object.")
             del self.job
 
 

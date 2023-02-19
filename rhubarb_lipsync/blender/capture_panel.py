@@ -11,7 +11,7 @@ import rhubarb_lipsync.blender.rhubarb_operators as rhubarb_operators
 import rhubarb_lipsync.blender.sound_operators as sound_operators
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences, CueListPreferences
-from rhubarb_lipsync.blender.properties import CaptureProperties, MouthCueList, MouthCueListItem
+from rhubarb_lipsync.blender.properties import CaptureProperties, MouthCueList, MouthCueListItem, JobProperties
 from rhubarb_lipsync.blender.ui_utils import IconsManager
 from rhubarb_lipsync.blender.cue_list import MouthCueUIList
 from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandAsyncJob
@@ -20,7 +20,6 @@ log = logging.getLogger(__name__)
 
 
 class CaptureExtraOptionsPanel(bpy.types.Panel):
-
     bl_idname = "RLPS_PT_capture_extra_options"
     bl_label = "RLPS: Additional capture options"
     bl_space_type = "PROPERTIES"
@@ -37,7 +36,6 @@ class CaptureExtraOptionsPanel(bpy.types.Panel):
 
 
 class CueListOptionsPanel(bpy.types.Panel):
-
     bl_idname = "RLPS_PT_cue_list_options"
     bl_label = "Cue list display options"
     bl_space_type = "PROPERTIES"
@@ -55,7 +53,6 @@ class CueListOptionsPanel(bpy.types.Panel):
 
 
 class CueListColsVisibilityPanel(bpy.types.Panel):
-
     bl_idname = "RLPS_PT_cue_list_columns"
     bl_label = "Visible columns"
     bl_space_type = "PROPERTIES"
@@ -72,7 +69,6 @@ class CueListColsVisibilityPanel(bpy.types.Panel):
 
 
 class CaptureMouthCuesPanel(bpy.types.Panel):
-
     bl_idname = "RLPS_PT_capture"
     bl_label = "RLPS: Sound setup and cues capture"
     bl_space_type = "VIEW_3D"
@@ -168,12 +164,13 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
     def draw_info(self) -> None:
         props = CaptureProperties.from_context(self.ctx)
         prefs = RhubarbAddonPreferences.from_context(self.ctx)
-        sound: Sound = props.sound
+
         if not ui_utils.draw_expandable_header(prefs, "info_panel_expanded", "Additional info", self.layout):
             return
         box = self.layout.box().column(align=True)
         # line = layout.split()
-        if sound:
+        if props and props.sound:
+            sound: Sound = props.sound
             line = box.split()
             line.label(text="Sample rate")
             line.label(text=f"{sound.samplerate} Hz")
@@ -199,45 +196,40 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
 
         line.label(text=f"{r.fps/r.fps_base:0.2f}")
 
-    def get_job_status_title(self, job: Optional[RhubarbCommandAsyncJob]) -> str:
-        status = getattr(job, 'status', None)
+    def get_job_status_title(self, status: str) -> str:
         if not status:
-            return rhubarb_operators.ProcessSoundFile.bl_label
+            return "Capture"
         return f"Capture ({status})"
 
     def draw_job(self) -> None:
-        props = CaptureProperties.from_context(self.ctx)
+        jprops: JobProperties = CaptureProperties.from_context(self.ctx).job
         layout = self.layout
 
-        job = rhubarb_operators.ProcessSoundFile.get_job(self.ctx)
-        title = self.get_job_status_title(job)
+        title = self.get_job_status_title(jprops.status)
         row = layout.row(align=True)
         row.operator(rhubarb_operators.ProcessSoundFile.bl_idname, text=title, icon_value=IconsManager.logo_icon())
         row.popover(panel=CaptureExtraOptionsPanel.bl_idname, text="", icon="DOWNARROW_HLT")
 
-        if not job:
-            return
-        # props.progress = job.last_progress #No allowed
-        if props.progress != 100 and props.progress > 0:
+        if jprops.progress != 100 and jprops.progress > 0:
             r = layout.row()
             r.enabled = False
-            r.prop(props, "progress", text="Progress", slider=True)
-        ex = job.last_exception
-        if ex:
-            ui_utils.draw_error(layout, f"{type(ex).__name__}\n{' '.join(ex.args)}")
+            r.prop(jprops, "progress", text="Progress", slider=True)
+        if jprops.error:
+            ui_utils.draw_error(layout, jprops.error)
 
     def draw_capture(self) -> None:
-
         prefs = RhubarbAddonPreferences.from_context(self.ctx)
-        job = rhubarb_operators.ProcessSoundFile.get_job(self.ctx)
-        title = self.get_job_status_title(job)
-        error = getattr(job, 'last_exception', False)
+        props = CaptureProperties.from_context(self.ctx)
+        if not props:
+            return
+        jprops: JobProperties = props.job
+        title = self.get_job_status_title(jprops.status)
+        error = bool(jprops.error)
 
         if not ui_utils.draw_expandable_header(prefs, "caputre_panel_expanded", title, self.layout, error):
             return
 
         self.draw_job()
-        props = CaptureProperties.from_context(self.ctx)
 
         layout = self.layout
 
