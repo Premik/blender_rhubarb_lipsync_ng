@@ -210,10 +210,14 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
         row.operator(rhubarb_operators.ProcessSoundFile.bl_idname, text=title, icon_value=IconsManager.logo_icon())
         row.popover(panel=CaptureExtraOptionsPanel.bl_idname, text="", icon="DOWNARROW_HLT")
 
-        if jprops.progress != 100 and jprops.progress > 0:
-            r = layout.row()
+        if jprops.running:
+            row = layout.row(align=True)
+            r = row.row(align=True)
             r.enabled = False
             r.prop(jprops, "progress", text="Progress", slider=True)
+            r = row.row(align=True)
+            r.enabled = not jprops.cancel_request
+            r.prop(jprops, "cancel_request", text="", icon="PANEL_CLOSE")
         if jprops.error:
             ui_utils.draw_error(layout, jprops.error)
 

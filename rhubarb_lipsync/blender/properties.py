@@ -132,6 +132,10 @@ class JobProperties(PropertyGroup):
     error: StringProperty("Error message")  # type: ignore
     cancel_request: BoolProperty(default=False, name="Cancel requested")  # type: ignore
 
+    @property
+    def running(self) -> bool:
+        return self.progress > 0 and self.progress != 100
+
     def update_from_async_job(self, job: RhubarbCommandAsyncJob) -> None:
         self.progress = job.last_progress
         self.status = job.status

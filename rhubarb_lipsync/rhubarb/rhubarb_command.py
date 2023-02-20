@@ -19,7 +19,6 @@ log = logging.getLogger(__name__)
 
 
 class RhubarbParser:
-
     version_info_rx = re.compile(r"version\s+(?P<ver>\d+\.\d+\.\d+)")
 
     LOG_LEVELS_MAP: dict[str, int] = defaultdict(lambda: logging.DEBUG)
@@ -51,7 +50,6 @@ class RhubarbParser:
         if not stderr_line:
             return {}
         try:
-
             return json.loads(stderr_line)
             # { "type":"start", "file":"1.ogg", "log":{"level":"Info","message": "Application startup." } }
             # { "type": "failure", "reason": ...
@@ -175,7 +173,7 @@ class RhubarbCommandWrapper:
 
     def lipsync_check_progress(self) -> int | None:
         """Reads the stderr of the lipsync command where the progress and status in being reported.
-        Note this call blocks  when there is status update available on stderr.
+        Note this call blocks until there is status update available on stderr.
         The rhubarb binary provides the status update few times per seconds typically.
         """
         assert self.was_started, "Process not started. Can't check progress"
@@ -249,12 +247,13 @@ class RhubarbCommandWrapper:
             return
 
         # (stdout, stderr) = self.process.communicate(timeout=timeout)
-        self.last_exit_code = self.process.poll()
-        if self.last_exit_code is not None:  # Process has finished
+        exit_code = self.process.poll()
+        if exit_code is not None:  # Process has finished
             # Collect the output just in case
             self.collect_output_sync(ignore_timeout_error=True)
-            if self.last_exit_code != 0:
-                raise RuntimeError(f"Rhubarb binary exited with a non-zero exit code")
+            self.last_exit_code = exit_code
+            if exit_code != 0:
+                raise RuntimeError(f"Rhubarb binary exited with a non-zero exit code {exit_code}")
             return
 
         try:
@@ -288,6 +287,7 @@ class RhubarbCommandAsyncJob:
             try:
                 if self.cmd.has_finished:
                     log.trace("Process finished")  # type: ignore
+                    # print(f"'{self.cmd.stdout}'")
                     break
                 if self.stop_event.is_set():
                     log.trace("Stop event received")  # type: ignore
@@ -347,7 +347,7 @@ class RhubarbCommandAsyncJob:
             return None
 
     def cancel(self):
-        log.info("Received cancel request")
+        log.info("Cancel request. Stopping the process and the status thread.")
         self.stop_event.set()
         self.join_thread()
         self.cmd.close_process()
@@ -374,7 +374,7 @@ class RhubarbCommandAsyncJob:
     @property
     def status(self) -> str:
         if not self.cmd.was_started and not self.cmd.has_finished:
-            # Not started yet or cancelled
+            # Not started yet. Or cancelled
             return "Failed" if self.failed else "Stopped"
         if self.cmd.has_finished:
             return "Done" if self.get_lipsync_output_cues() else "No data"

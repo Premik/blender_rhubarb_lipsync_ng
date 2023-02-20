@@ -127,11 +127,11 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 * Set start frame?
 * place-on-strip op - add redo support, asking for channel and framein the re-do dialog
 * Set the panel tab name in the preferences
-* Job instance is hooked to Object class, so it is incorrectly shared between blender object, make some per-object registration
 * Cue item-add onchanged handlers to properties to flush the cached Cue object. And change the properties to use setter/gettr of the Cue object directly
 * Add license files
-* Icons (especially cue icons) hard to see. Nearli inivisible on dark background
+* Icons (especially cue icons) hard to see. Nearly  inivisible on dark background. Blender supports automatic icon inverting/coloring only for inbuilt incons.
 * Limit possible selection to armature and mesh-object only? (and not obj.library). Or hook the properties to the Collection instead of Object?
+* CapturePanel: Place the two button cui list should be placed elsewhere. The Visual Options and Cleanup.
 
 ## Baking
 

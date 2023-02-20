@@ -32,37 +32,15 @@ class ProcessSoundFile(bpy.types.Operator):
     bl_idname = "rhubarb.process_sound_file"
     bl_label = "Capture"
 
-    registered_jobs: dict[int, Optional[RhubarbCommandAsyncJob]] = defaultdict(lambda: None)
-
-    @classmethod
-    def get_job_from_obj(cls, obj: bpy.types.Object) -> Optional[RhubarbCommandAsyncJob]:
-        """Get's the current running job (or the result) linked to the provided object."""
-        if not obj:
-            return None
-        key = id(obj)
-        return ProcessSoundFile.registered_jobs[key]
-
-    @classmethod
-    def get_job(cls, context: Context) -> Optional[RhubarbCommandAsyncJob]:
-        """Get's the current running job (or the result) linked to the active object.
-        This is for external access (like from the panel)."""
-        return ProcessSoundFile.get_job_from_obj(context.object)
-
-    @classmethod
-    def register_job(cls, context: Context, job: Optional[RhubarbCommandAsyncJob]) -> None:
-        o = context.object
-        assert o, "No active object"
-        key = id(o)
-        ProcessSoundFile.registered_jobs[key] = job
-
     @classmethod
     def disabled_reason(cls, context: Context) -> str:
         props = CaptureProperties.from_context(context)
         sound: Sound = props.sound
         # Use properties (binded to object) to check if already running.
         # This allows concurent running of the op provided each instance is linked to a different object
-        job = ProcessSoundFile.get_job(context)
-        if job and job.cmd.is_running:
+        jprops: JobProperties = props.job
+
+        if jprops.running:
             return "Already running"
         error_common = CaptureProperties.sound_selection_validation(context)
         if error_common:
@@ -91,12 +69,14 @@ class ProcessSoundFile(bpy.types.Operator):
     def execute(self, context: Context) -> set[str]:
         prefs = RhubarbAddonPreferences.from_context(context)
         props = CaptureProperties.from_context(context)
+        jprops: JobProperties = props.job
 
         sound: Sound = props.sound
+        jprops.cancel_request = False  # Clear any (stalled)  cancel request states
+        self.cancel_on_next = False
         cmd = prefs.new_command_handler()
 
         self.job = RhubarbCommandAsyncJob(cmd)
-        ProcessSoundFile.register_job(context, self.job)  # Keep job reference for outer access
         cmd.lipsync_start(ui_utils.to_abs_path(sound.filepath), props.dialog_file)
         self.report({'INFO'}, f"Started")
 
@@ -137,17 +117,22 @@ class ProcessSoundFile(bpy.types.Operator):
             return {'CANCELLED'}
 
         if self.job.cmd.has_finished:
-            self.report({'INFO'}, f"Done")
+            self.report({'INFO'}, f"{self.object_name} Done")
 
             self.finished(context)
             return {'FINISHED'}
 
-        if event.type in {'ESC'}:
-            log.info("Cancelling operator")
+        jprops: JobProperties = self.running_props.job
+        if event.type in {'ESC'} or jprops.cancel_request:
+            jprops.cancel_request = False
+            self.cancel_on_next = True
+            log.info("Received cancel request. Will cancel on next update")
             self.report({'INFO'}, f"Cancel")
-            self.job.cancel()
-            self.finished(context)
-            return {'CANCELLED'}
+            jprops.status = "Cancelling"
+            # https://blender.stackexchange.com/questions/157227/how-to-redraw-status-bar-in-blender-2-80
+            context.workspace.status_text_set_internal(None)
+            # Defere the actuall canceling to give Blender UI chance to update (show the Cancel report)
+            return {'PASS_THROUGH'}
 
         try:
             progress = self.job.lipsync_check_progress_async()
@@ -163,6 +148,13 @@ class ProcessSoundFile(bpy.types.Operator):
         if progress is not None:
             self.update_progress(context)
             # self.report({'INFO'}, f"{progress}%")
+
+        if self.cancel_on_next:
+            log.info("Cancelling the operator")
+            self.job.cancel()
+            self.finished(context)
+            return {'CANCELLED'}
+
         return {'PASS_THROUGH'}
 
     def update_progress(self, context: Context):
@@ -185,17 +177,16 @@ class ProcessSoundFile(bpy.types.Operator):
 
         wm = context.window_manager
         wm.event_timer_remove(self.timer)
+        del self.timer
         if self.job:
             self.job.last_progress = 100
             self.update_progress(context)
             self.job.join_thread()
             self.job.cmd.close_process()
             props = self.running_props
-            if props and self.job.get_lipsync_output_cues():
+            if props:
                 lst: MouthCueList = props.cue_list
                 lst.add_cues(self.job.get_lipsync_output_cues())
-            else:
-                self.report({'ERROR'}, f"Failed to update the cue list on the '{self.object_name}' object.")
             del self.job
 
 
@@ -221,6 +212,34 @@ class GetRhubarbExecutableVersion(bpy.types.Operator):
     @classmethod
     def poll(cls, context):
         return ui_utils.validation_poll(cls, context, rhubarcli_validation)
+
+    def execute(self, context: Context) -> set[str]:
+        prefs = RhubarbAddonPreferences.from_context(context)
+        cmd = prefs.new_command_handler()
+        GetRhubarbExecutableVersion.executable_version = cmd.get_version()
+        # Cache to alow re-run on config changes
+        GetRhubarbExecutableVersion.executable_last_path = str(cmd.executable_path)
+        return {'FINISHED'}
+
+
+class CancelCaptureJob(bpy.types.Operator):
+    """Cancels the running caputre job"""
+
+    bl_idname = "rhubarb.cancel_job"
+    bl_label = "Cancel"
+
+    @classmethod
+    def disabled_reason(cls, context: Context) -> str:
+        selection_error = CaptureProperties.context_selection_validation(context)
+        if selection_error:
+            return selection_error
+        props = CaptureProperties.from_context(context)
+
+        return ""
+
+    @classmethod
+    def poll(cls, context):
+        return ui_utils.validation_poll(cls, context)
 
     def execute(self, context: Context) -> set[str]:
         prefs = RhubarbAddonPreferences.from_context(context)
