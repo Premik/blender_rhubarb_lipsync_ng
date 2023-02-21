@@ -1,33 +1,37 @@
 import math
 from functools import cache
 from typing import Dict, List, Optional
+from enum import Enum
 
 
-class MouthShapeDescription:
+class MouthShapeInfo:
     def __init__(self, key: str, short_dest: str = "", description: str = ""):
         self.key = key
         self.short_dest = short_dest
         self.description = description
 
+    def __str__(self) -> str:
+        return f"({self.key}) {self.short_dest}"
 
-key2mouth_shaped_desc = {
+    def __repr__(self) -> str:
+        return f"{self.key}"
+
+
+class MouthShapeInfos(Enum):
     # TODO Generate from md/html https://github.com/DanielSWolf/rhubarb-lip-sync#readme
-    'A': MouthShapeDescription('A'),
-    'B': MouthShapeDescription('B'),
-    'C': MouthShapeDescription('C'),
-    'D': MouthShapeDescription('D'),
-    'E': MouthShapeDescription('E'),
-    'F': MouthShapeDescription('F'),
-    'G': MouthShapeDescription('G'),
-    'H': MouthShapeDescription('H'),
-    'X': MouthShapeDescription('X'),
-}
+    A = MouthShapeInfo('A')
+    B = MouthShapeInfo('B')
+    C = MouthShapeInfo('C')
+    D = MouthShapeInfo('D')
+    E = MouthShapeInfo('E')
+    F = MouthShapeInfo('F')
+    G = MouthShapeInfo('G')
+    H = MouthShapeInfo('H')
+    X = MouthShapeInfo('X')
 
 
 class MouthCue:
     def __init__(self, key: str, start: float, end: float):
-        global key2mouth_shaped_desc
-        assert key in key2mouth_shaped_desc.keys(), f"The shape with the '{key}' key is unknown. Keys: {key2mouth_shaped_desc.keys()}"
         self.key = key
         self.start = float(start)
         self.end = float(end)
@@ -44,6 +48,10 @@ class MouthCue:
     def time2frame_float(time: float, fps: int, fps_base=1.0) -> float:
         assert fps > 0 and fps_base > 0, f"Can't convert to frame when fps is {fps}/{fps_base}"
         return time * fps / fps_base
+
+    @property
+    def info(self) -> MouthShapeInfo:
+        return MouthShapeInfos[self.key].value
 
     def start_frame(self, fps: int, fps_base=1.0) -> int:
         """Whole frame number of the cue start time"""
@@ -71,3 +79,9 @@ class MouthCue:
 
     def __repr__(self) -> str:
         return f"'{self.key}' {self.start:0.2f}-{self.end:0.2f}"
+
+
+if __name__ == '__main__':
+    print(MouthCue('X', 1, 2).info)
+
+    print("Done")
