@@ -8,16 +8,37 @@ from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty, Po
 from bpy.types import AddonPreferences, Context, PropertyGroup, Sound, UILayout, Action
 import math
 
-from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue, MouthShapeDescription
+from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue, MouthShapeInfo, MouthShapeInfos
 from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandWrapper, RhubarbParser, RhubarbCommandAsyncJob
 
 
 class MappingListItem(PropertyGroup):
+    key: StringProperty("key", description="Mouth cue key symbol (A,B,C..)")  # type: ignore
     action: PointerProperty(type=bpy.types.Action, name="Action")  # type: ignore
 
     @cached_property
-    def cue_desc(self) -> MouthShapeDescription:
-        pass
+    def cue_desc(self) -> MouthShapeInfo:
+        if not self.key:
+            return None  # type: ignore
+        return MouthShapeInfos[self.key].value
+
+
+class MappingList(PropertyGroup):
+    def build_itemsxx(self):
+        itms = self['items']
+        if not itms:
+            pass
+        return itms
+
+    items: CollectionProperty(type=MappingListItem, name="Mapping items")  # type: ignore
+    index: IntProperty(name="Selected mapping index")  # type: ignore
+
+    def build_items(self) -> None:
+        if len(self.items) > 0:
+            return  # Already built (assume)
+        for msi in MouthShapeInfos.all():
+            item: MappingListItem = self.items.add()
+            item.key = msi
 
 
 class MouthCueListItem(PropertyGroup):
@@ -155,6 +176,7 @@ class CaptureProperties(PropertyGroup):
     )
     job: PointerProperty(type=JobProperties, name="Job")  # type: ignore
     cue_list: PointerProperty(type=MouthCueList, name="Cues")  # type: ignore
+    mapping: PointerProperty(type=MappingList, name="Mapping")  # type: ignore
 
     @staticmethod
     def from_context(ctx: Context) -> 'CaptureProperties':
@@ -166,7 +188,9 @@ class CaptureProperties(PropertyGroup):
     def from_object(obj: bpy.types.Object) -> 'CaptureProperties':
         if not obj:
             return None  # type: ignore
-        return getattr(obj, 'rhubarb_lipsync')  # type: ignore
+        ret: CaptureProperties = getattr(obj, 'rhubarb_lipsync')  # type: ignore
+        #ret.mapping.build_items()  # Ensure cue infos are created
+        return ret
 
     @staticmethod
     def by_object_name(obj_name: str) -> 'CaptureProperties':

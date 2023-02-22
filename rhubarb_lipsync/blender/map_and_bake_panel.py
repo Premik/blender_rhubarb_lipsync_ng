@@ -11,16 +11,15 @@ import rhubarb_lipsync.blender.rhubarb_operators as rhubarb_operators
 import rhubarb_lipsync.blender.sound_operators as sound_operators
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences, CueListPreferences
-from rhubarb_lipsync.blender.properties import CaptureProperties, MouthCueList, MouthCueListItem
+from rhubarb_lipsync.blender.properties import CaptureProperties, MappingList, MappingListItem
 from rhubarb_lipsync.blender.ui_utils import IconsManager
-from rhubarb_lipsync.blender.cue_list import MouthCueUIList
+from rhubarb_lipsync.blender.mapping_list import MappingUIList
 from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandAsyncJob
 
 log = logging.getLogger(__name__)
 
 
 class CaptureMouthCuesPanel(bpy.types.Panel):
-
     bl_idname = "RLPS_PT_map_and_bake"
     bl_label = "RLPS: Cue mapping and baking"
     bl_space_type = "VIEW_3D"
@@ -28,15 +27,14 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
     bl_category = "RLSP"
 
     def draw_mapping_list(self) -> None:
-
         prefs = RhubarbAddonPreferences.from_context(self.ctx)
         props = CaptureProperties.from_context(self.ctx)
 
         layout = self.layout
 
         row = layout.row(align=True)
-        # lst: MouthCueList = props.cue_list
-        # layout.template_list(MouthCueUIList.bl_idname, "Mouth cues", lst, "items", lst, "index", type=list_type)
+        lst: MappingList = props.mapping
+        layout.template_list(MappingUIList.bl_idname, "Mapping", lst, "items", lst, "index")
 
     def draw(self, context: Context):
         try:
