@@ -24,12 +24,6 @@ class MappingListItem(PropertyGroup):
 
 
 class MappingList(PropertyGroup):
-    def build_itemsxx(self):
-        itms = self['items']
-        if not itms:
-            pass
-        return itms
-
     items: CollectionProperty(type=MappingListItem, name="Mapping items")  # type: ignore
     index: IntProperty(name="Selected mapping index")  # type: ignore
 
@@ -38,7 +32,7 @@ class MappingList(PropertyGroup):
             return  # Already built (assume)
         for msi in MouthShapeInfos.all():
             item: MappingListItem = self.items.add()
-            item.key = msi
+            item.key = msi.key
 
 
 class MouthCueListItem(PropertyGroup):
@@ -189,7 +183,7 @@ class CaptureProperties(PropertyGroup):
         if not obj:
             return None  # type: ignore
         ret: CaptureProperties = getattr(obj, 'rhubarb_lipsync')  # type: ignore
-        #ret.mapping.build_items()  # Ensure cue infos are created
+        # ret.mapping.build_items()  # Ensure cue infos are created
         return ret
 
     @staticmethod

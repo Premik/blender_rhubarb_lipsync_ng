@@ -20,6 +20,9 @@ class MouthShapeInfo:
 
 class MouthShapeInfos(Enum):
     # TODO Generate from md/html https://github.com/DanielSWolf/rhubarb-lip-sync#readme
+
+    _all: list[MouthShapeInfo]
+
     A = MouthShapeInfo(
         'A',
         'P B M sounds. Closed mouth.',
@@ -97,7 +100,9 @@ class MouthShapeInfos(Enum):
 
     @staticmethod
     def all() -> list[MouthShapeInfo]:
-        return [m.value for m in MouthShapeInfos.__members__.values()]
+        if not getattr(MouthShapeInfos, '_all', None):
+            MouthShapeInfos._all = [m.value for m in MouthShapeInfos.__members__.values()]
+        return MouthShapeInfos._all  # type: ignore
 
 
 class MouthCue:
