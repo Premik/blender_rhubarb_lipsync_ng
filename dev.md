@@ -132,6 +132,10 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 * Icons (especially cue icons) hard to see. Nearly  inivisible on dark background. Blender supports automatic icon inverting/coloring only for inbuilt incons.
 * Limit possible selection to armature and mesh-object only? (and not obj.library). Or hook the properties to the Collection instead of Object?
 * CapturePanel: Place the two button cui list should be placed elsewhere. The Visual Options and Cleanup.
+* add sub-frames tickbox
+
+## Check
+https://github.com/Hunanbean/Papagayo-NGLipsyncImporterForBlender
 
 ## Baking
 

@@ -34,6 +34,12 @@ class MappingList(PropertyGroup):
             item: MappingListItem = self.items.add()
             item.key = msi.key
 
+    @property
+    def selected_item(self) -> Optional[MappingListItem]:
+        if self.index < 0 or self.index >= len(self.items):
+            return None
+        return self.items[self.index]
+
 
 class MouthCueListItem(PropertyGroup):
     key: StringProperty(  # type: ignore

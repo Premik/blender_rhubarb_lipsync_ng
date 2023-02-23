@@ -40,6 +40,7 @@ class CueListPreferences(PropertyGroup):
     show_col_play: BoolProperty(default=True, name="Play button")  # type: ignore
 
     as_grid: BoolProperty(default=False, name="As gird", description="Display the list in the grid mode")  # type: ignore
+    as_circle: BoolProperty(default=True, name="Cue key circle font", description="Show the cue keys A,B,C as Ⓐ,Ⓑ,Ⓒ")  # type: ignore
     sync_on_select: BoolProperty(  # type: ignore
         default=True,
         name="Sync time on select",

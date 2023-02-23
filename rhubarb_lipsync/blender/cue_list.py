@@ -12,7 +12,6 @@ from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue
 
 
 class MouthCueUIList(UIList):
-
     bl_idname = "RLPS_UL_cues"
 
     def cuelist_prefs(self, ctx: Context) -> CueListPreferences:
@@ -31,7 +30,6 @@ class MouthCueUIList(UIList):
         index: int,
         flt_flag: int,
     ) -> None:
-
         if self.layout_type in {'DEFAULT', 'COMPACT'}:
             self.draw_compact(layout, item, context)
         elif self.layout_type in {'GRID'}:
@@ -53,7 +51,10 @@ class MouthCueUIList(UIList):
 
         if clp.show_col_icon:
             row.label(icon_value=IconsManager.cue_image(item.cue.key))
-        row.label(text=item.key)
+        if clp.as_circle:
+            row.label(text=item.cue.info.key_displ)
+        else:
+            row.label(text=item.key)
 
         row = split.row()  # Times and operators (0.8)
         if clp.show_col_play:

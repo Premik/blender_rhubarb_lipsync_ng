@@ -75,8 +75,12 @@ class CreateSoundStripWithSound(bpy.types.Operator):
     def poll(cls, context: Context) -> bool:
         return ui_utils.validation_poll(cls, context)
 
-    def execute(self, context: Context) -> set[str]:
+    def invoke(self, context: Context, event) -> set[int] | set[str]:
+        # Open dialog
+        wm = context.window_manager
+        return wm.invoke_props_dialog(self, width=500)
 
+    def execute(self, context: Context) -> set[str]:
         # Run validation again, without the limit this time
         error = CreateSoundStripWithSound.disabled_reason(context, 0)
         if error:
@@ -253,7 +257,6 @@ class ConvertSoundFromat(bpy.types.Operator):
 
     @staticmethod
     def init_props_from_sound(op_props, context: Context) -> None:
-
         prefs = RhubarbAddonPreferences.from_context(context)
         props = CaptureProperties.from_context(bpy.context)
         """Init the self's props from layout.prop call."""
@@ -282,7 +285,6 @@ class ConvertSoundFromat(bpy.types.Operator):
         return ui_utils.validation_poll(cls, context, CaptureProperties.sound_selection_validation)
 
     def draw(self, context: Context):
-
         layout = self.layout
         layout.prop(self, "codec")
         ui_utils.draw_prop_with_label(self, "rate", "Rate", layout)
@@ -308,7 +310,6 @@ class ConvertSoundFromat(bpy.types.Operator):
         return wm.invoke_props_dialog(self)
 
     def execute(self, context: Context) -> set[str]:
-
         props = CaptureProperties.from_context(context)
         sound: Sound = props.sound
         src_path = pathlib.Path(bpy.path.abspath(sound.filepath))

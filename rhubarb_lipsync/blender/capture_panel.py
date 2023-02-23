@@ -206,8 +206,11 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
         layout = self.layout
 
         title = self.get_job_status_title(jprops.status)
-        row = layout.row(align=True)
-        row.operator(rhubarb_operators.ProcessSoundFile.bl_idname, text=title, icon_value=IconsManager.logo_icon())
+        row = layout.row()
+        row.template_icon(icon_value=IconsManager.logo_icon(), scale=2)
+        row = row.row(align=True)
+        row.scale_y = 2
+        row.operator(rhubarb_operators.ProcessSoundFile.bl_idname, text=title)
         row.popover(panel=CaptureExtraOptionsPanel.bl_idname, text="", icon="DOWNARROW_HLT")
 
         if jprops.running:

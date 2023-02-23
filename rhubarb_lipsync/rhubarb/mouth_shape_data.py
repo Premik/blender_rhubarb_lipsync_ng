@@ -6,10 +6,11 @@ import textwrap
 
 
 class MouthShapeInfo:
-    def __init__(self, key: str, short_dest: str = "", description: str = "", extended=False):
+    def __init__(self, key: str, key_displ: str, short_dest: str = "", description: str = "", extended=False):
         self.key = key
         self.short_dest = short_dest
         self.description = textwrap.dedent(description)
+        self.key_displ = key_displ
 
     def __str__(self) -> str:
         return f"({self.key})-'{self.short_dest}'"
@@ -25,6 +26,7 @@ class MouthShapeInfos(Enum):
 
     A = MouthShapeInfo(
         'A',
+        'Ⓐ',
         'P B M sounds. Closed mouth.',
         '''\
             Closed mouth for the “P”, “B”, and “M” sounds. 
@@ -32,6 +34,7 @@ class MouthShapeInfos(Enum):
     )
     B = MouthShapeInfo(
         'B',
+        'Ⓑ',
         'K S T sounds. Slightly opened mouth.',
         '''\
             Slightly open mouth with clenched teeth. 
@@ -40,6 +43,7 @@ class MouthShapeInfos(Enum):
     )
     C = MouthShapeInfo(
         'C',
+        'Ⓒ',
         'EH AE sounds. Opened mouth.',
         '''\
             Open mouth. This mouth shape is used for vowels like “EH” as in men and “AE” as in bat. 
@@ -49,12 +53,14 @@ class MouthShapeInfos(Enum):
     )
     D = MouthShapeInfo(
         'D',
+        'Ⓓ',
         'A sound. Wide opened mouth.',
         '''\
             Wide open mouth. This mouth shapes is used for vowels like “AA” as in father.''',
     )
     E = MouthShapeInfo(
         'E',
+        'Ⓔ',
         'AO ER sounds. Slightly rounded mouth.',
         '''\
             Slightly rounded mouth. This mouth shape is used for vowels like “AO” as in off and “ER” as in bird.
@@ -64,12 +70,14 @@ class MouthShapeInfos(Enum):
     )
     F = MouthShapeInfo(
         'F',
+        'Ⓕ',
         'UW OW W sounds. Puckered lips.',
         '''\
             Puckered lips. This mouth shape is used for “UW” as in you, “OW” as in show, and “W” as in way.''',
     )
     G = MouthShapeInfo(
         'G',
+        'Ⓖ',
         'F V sounds. Teeth touched lip.',
         '''\
             Upper teeth touching the lower lip for “F” as in for and “V” as in very.
@@ -78,6 +86,7 @@ class MouthShapeInfos(Enum):
     )
     H = MouthShapeInfo(
         'H',
+        'Ⓗ',
         'L sounds. Tongue raised.',
         '''\
             This shape is used for long “L” sounds, with the tongue raised behind the upper teeth. 
@@ -88,6 +97,7 @@ class MouthShapeInfos(Enum):
     )
     X = MouthShapeInfo(
         'X',
+        'Ⓧ',
         'Idle.',
         '''\
             Idle position. This mouth shape is used for pauses in speech. 
