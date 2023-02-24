@@ -32,7 +32,7 @@ class CueListPreferences(PropertyGroup):
         soft_max=0.3,
     )
 
-    show_col_icon: BoolProperty(default=True, name="Icon")  # type: ignore
+    show_col_icon: BoolProperty(default=False, name="Icon")  # type: ignore
     show_col_start_frame: BoolProperty(default=True, name="Start (frames)")  # type: ignore
     show_col_start_time: BoolProperty(default=False, name="Start (time)")  # type: ignore
     show_col_len_frame: BoolProperty(default=False, name="Duration (frames)")  # type: ignore

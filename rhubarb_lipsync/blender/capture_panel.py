@@ -202,12 +202,18 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
         return f"Capture ({status})"
 
     def draw_job(self) -> None:
-        jprops: JobProperties = CaptureProperties.from_context(self.ctx).job
+        props = CaptureProperties.from_context(self.ctx)
+        jprops: JobProperties = props.job
+        cue_list: MouthCueList = props.cue_list
         layout = self.layout
 
         title = self.get_job_status_title(jprops.status)
         row = layout.row()
-        row.template_icon(icon_value=IconsManager.logo_icon(), scale=2)
+        if cue_list.selected_item:
+            ico = IconsManager.cue_icon(cue_list.selected_item.key)
+        else:
+            ico = IconsManager.logo_icon()
+        row.template_icon(icon_value=ico, scale=2.5)
         row = row.row(align=True)
         row.scale_y = 2
         row.operator(rhubarb_operators.ProcessSoundFile.bl_idname, text=title)
