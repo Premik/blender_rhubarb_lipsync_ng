@@ -1,6 +1,7 @@
 import logging
 import pathlib
 from io import TextIOWrapper
+import traceback
 from typing import Dict, List, Optional, cast
 
 import aud
@@ -343,4 +344,71 @@ class ConvertSoundFromat(bpy.types.Operator):
             self.report({'WARNING'}, f"Failed to select the new file. The {self.target_path_full} not found in the sound datablocks")
             return {'FINISHED'}
         props.sound = new_sounds[0]
+        return {'FINISHED'}
+
+
+class PlayRange(bpy.types.Operator):
+    """Starts animation playback from the current frame and stops automatically after played certain number of frames."""
+
+    bl_idname = "rhubarb.play_range"
+    bl_label = "Play and Stop"
+
+    play_frames: IntProperty(name="Frames", description="Number of frames to play", default=10)  # type: ignore
+    start_frame: IntProperty(name="Start", description="Frame to jump to prior playing", default=-1)  # type: ignore
+    # restore_frame: BoolProperty(name="Restore frame", description="Jump back to the start frame after playback is done")  # type: ignore
+    frames_left = 0
+
+    @staticmethod
+    def on_frame(scene):
+        if log.isEnabledFor(logging.TRACE):
+            log.trace(f"On frame {PlayRange.frames_left}")
+        PlayRange.frames_left -= 1
+        if PlayRange.frames_left <= 0:
+            log.trace("Stopping playback. Counter reached zero.")
+            try:
+                bpy.ops.screen.animation_cancel(restore_frame=False)
+            except:
+                log.error(f"Failed to stop animation playback")
+                traceback.print_exception()
+            if not PlayRange.remove_handlers():
+                log.warn(
+                    f"""Coulnd't remove handler {ui_utils.func_fqname(PlayRange.on_frame)}. 
+                        Handler not found:\n{bpy.app.handlers.frame_change_post}"""
+                )
+
+    @staticmethod
+    def remove_handlers():
+        try:
+            # print(list(bpy.app.handlers.frame_change_post))
+            fn = PlayRange.on_frame
+            handlers = bpy.app.handlers.frame_change_post
+            return ui_utils.remove_handler(handlers, PlayRange.on_frame)
+        except:
+            log.error(f"Unexpected error while stopping the animation")
+            traceback.print_exception()
+            return False
+
+    @classmethod
+    def disabled_reason(cls, context: Context, limit=0) -> str:
+        # if getattr(context.screen, 'is_animation_playing', False):
+        #    return f"Animation is playing. Counter:{PlayRange.frames_left}"
+        # if self.pl
+        return ""
+
+    @classmethod
+    def poll(cls, context: Context) -> bool:
+        return ui_utils.validation_poll(cls, context)
+
+    def execute(self, context: Context) -> set[str]:
+        PlayRange.frames_left = self.play_frames
+        log.debug(f"Starting animation playback from {self.start_frame} frame. Frames to play: {self.play_frames}.")
+        PlayRange.remove_handlers()
+        if self.start_frame >= 0:
+            context.scene.frame_set(frame=self.start_frame, subframe=0)
+
+        if not getattr(context.screen, 'is_animation_playing', False):
+            bpy.ops.screen.animation_play()  # Another play call would stop the playback if already playing
+        else:
+            log.trace("Animation is already playing.")  # type: ignore
+        bpy.app.handlers.frame_change_post.append(PlayRange.on_frame)
         return {'FINISHED'}

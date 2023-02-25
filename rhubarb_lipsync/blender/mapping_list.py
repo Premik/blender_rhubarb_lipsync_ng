@@ -5,7 +5,7 @@ from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty, Po
 from bpy.types import AddonPreferences, CollectionProperty, Context, PropertyGroup, UILayout, UIList
 
 import rhubarb_lipsync.blender.mapping_operators as mapping_operators
-from rhubarb_lipsync.blender.misc_operators import PlayRange
+from rhubarb_lipsync.blender.sound_operators import PlayRange
 from rhubarb_lipsync.blender.preferences import CueListPreferences, RhubarbAddonPreferences
 from rhubarb_lipsync.blender.properties import MappingList, MappingListItem
 from rhubarb_lipsync.blender.ui_utils import IconsManager

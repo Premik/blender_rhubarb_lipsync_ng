@@ -4,7 +4,7 @@ from typing import Any
 from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty, PointerProperty, StringProperty
 from bpy.types import AddonPreferences, CollectionProperty, Context, PropertyGroup, UILayout, UIList
 
-from rhubarb_lipsync.blender.misc_operators import PlayRange
+from rhubarb_lipsync.blender.sound_operators import PlayRange
 from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences, CueListPreferences
 from rhubarb_lipsync.blender.properties import MouthCueList, MouthCueListItem
 from rhubarb_lipsync.blender.ui_utils import IconsManager
