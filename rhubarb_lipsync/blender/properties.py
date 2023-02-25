@@ -1,15 +1,20 @@
+import bisect
+import logging
+import math
+from operator import attrgetter
 import pathlib
 from functools import cached_property
 from typing import Any, Callable, Optional, cast
 
 import bpy
 import bpy.utils.previews
-from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty, PointerProperty, StringProperty, CollectionProperty
-from bpy.types import AddonPreferences, Context, PropertyGroup, Sound, UILayout, Action
-import math
+from bpy.props import BoolProperty, CollectionProperty, EnumProperty, FloatProperty, IntProperty, PointerProperty, StringProperty
+from bpy.types import Action, AddonPreferences, Context, PropertyGroup, Sound, UILayout
 
 from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue, MouthShapeInfo, MouthShapeInfos
-from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandWrapper, RhubarbParser, RhubarbCommandAsyncJob
+from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandAsyncJob, RhubarbCommandWrapper, RhubarbParser
+
+log = logging.getLogger(__name__)
 
 
 class MappingListItem(PropertyGroup):
@@ -28,8 +33,10 @@ class MappingList(PropertyGroup):
     index: IntProperty(name="Selected mapping index")  # type: ignore
 
     def build_items(self) -> None:
+        # log.trace("Already buil")  # type: ignore
         if len(self.items) > 0:
             return  # Already built (assume)
+        log.trace("Building mapping list")  # type: ignore
         for msi in MouthShapeInfos.all():
             item: MappingListItem = self.items.add()
             item.key = msi.key
@@ -130,6 +137,15 @@ class MouthCueList(PropertyGroup):
         if self.index < 0 or self.index >= len(self.items):
             return None
         return self.items[self.index]
+
+    def find_index_by_time(self, time: float) -> int:
+        return bisect.bisect_right(self.items, time, key=attrgetter('start'))
+
+    def find_cue_by_time(self, time: float) -> Optional[MouthCueListItem]:
+        idx = self.find_index_by_time(time)
+        if idx < 0 or idx >= len(self.items):
+            return None
+        return self.items[idx]
 
     def on_index_changed(self, context: Context) -> None:
         if not getattr(MouthCueList, 'index_changed', None):

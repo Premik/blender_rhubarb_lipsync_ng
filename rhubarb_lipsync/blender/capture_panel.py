@@ -15,6 +15,7 @@ from rhubarb_lipsync.blender.properties import CaptureProperties, MouthCueList, 
 from rhubarb_lipsync.blender.ui_utils import IconsManager
 from rhubarb_lipsync.blender.cue_list import MouthCueUIList
 from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandAsyncJob
+import rhubarb_lipsync.rhubarb.mouth_shape_data as shape_data
 
 log = logging.getLogger(__name__)
 
@@ -206,6 +207,23 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
             return "Capture"
         return f"Capture ({status})"
 
+    def get_cue_icon(self, cue_list: MouthCueList) -> int:
+        # When animation is running follow the icon from the cue list=> preview
+        cp: CueListPreferences = RhubarbAddonPreferences.from_context(self.ctx).cue_list_prefs
+        if getattr(self.ctx.screen, 'is_animation_playing', False) and cp.preview:
+            self.ctx.area.tag_redraw()  # Force redraw
+            f = self.ctx.scene.frame_current_final
+            t = shape_data.fram2time(f, self.ctx.scene.render.fps, self.ctx.scene.render.fps_base)
+            cue = cue_list.find_cue_by_time(t)
+            if cue:  # Time resolved to a cue, show its icon
+                return IconsManager.cue_icon(cue.key)
+            return IconsManager.cue_icon('X')  # No matching cue, show X
+        # When stopped use the icon from the selected cue
+        if cue_list.selected_item:
+            return IconsManager.cue_icon(cue_list.selected_item.key)
+        # If nothing selected (empty) use the default icon
+        return IconsManager.logo_icon()
+
     def draw_job(self) -> None:
         props = CaptureProperties.from_context(self.ctx)
         jprops: JobProperties = props.job
@@ -214,13 +232,10 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
 
         title = self.get_job_status_title(jprops.status)
         row = layout.row(align=True)
-        if cue_list.selected_item:
-            ico = IconsManager.cue_icon(cue_list.selected_item.key)
-        else:
-            ico = IconsManager.logo_icon()
+
         # box = row.box()
         # box.template_icon(icon_value=ico, scale=1.5)
-
+        ico = self.get_cue_icon(cue_list)
         row.template_icon(icon_value=ico, scale=2.5)
 
         row = row.row(align=True)

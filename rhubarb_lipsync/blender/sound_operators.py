@@ -390,6 +390,8 @@ class PlayRange(bpy.types.Operator):
 
     @classmethod
     def disabled_reason(cls, context: Context, limit=0) -> str:
+        if not context.scene:
+            return "No active scene"
         # if getattr(context.screen, 'is_animation_playing', False):
         #    return f"Animation is playing. Counter:{PlayRange.frames_left}"
         # if self.pl

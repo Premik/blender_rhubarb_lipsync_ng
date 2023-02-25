@@ -5,6 +5,20 @@ from enum import Enum
 import textwrap
 
 
+def time2frame_float(time: float, fps: int, fps_base=1.0) -> float:
+    assert fps > 0 and fps_base > 0, f"Can't convert to frame when fps is {fps}/{fps_base}"
+    return time * fps / fps_base
+
+
+def time2frame(time: float, fps: int, fps_base=1.0) -> int:
+    return int(round(time2frame_float(time, fps, fps_base)))
+
+
+def fram2time(frame: float, fps: int, fps_base=1.0) -> float:
+    assert fps > 0 and fps_base > 0, f"Can't convert to time when fps is {fps}/{fps_base}"
+    return frame * fps_base / fps
+
+
 class MouthShapeInfo:
     def __init__(self, key: str, key_displ: str, short_dest: str = "", description: str = "", extended=False) -> None:
         self.key = key
@@ -125,30 +139,21 @@ class MouthCue:
     def of_json(cue_json: dict) -> 'MouthCue':
         return MouthCue(cue_json["value"], cue_json["start"], cue_json["end"])
 
-    @staticmethod
-    def time2frame(time: float, fps: int, fps_base=1.0) -> int:
-        return int(round(MouthCue.time2frame_float(time, fps, fps_base)))
-
-    @staticmethod
-    def time2frame_float(time: float, fps: int, fps_base=1.0) -> float:
-        assert fps > 0 and fps_base > 0, f"Can't convert to frame when fps is {fps}/{fps_base}"
-        return time * fps / fps_base
-
     @property
     def info(self) -> MouthShapeInfo:
         return MouthShapeInfos[self.key].value
 
     def start_frame(self, fps: int, fps_base=1.0) -> int:
         """Whole frame number of the cue start time"""
-        return MouthCue.time2frame(self.start, fps, fps_base)
+        return time2frame(self.start, fps, fps_base)
 
     def start_frame_float(self, fps: int, fps_base=1.0) -> float:
         """Exact decimal frame number of the cue start time"""
-        return MouthCue.time2frame_float(self.start, fps, fps_base)
+        return time2frame_float(self.start, fps, fps_base)
 
     def end_frame_float(self, fps: int, fps_base=1.0) -> float:
         """Exact decimal frame number of the cue stop time"""
-        return MouthCue.time2frame_float(self.end, fps, fps_base)
+        return time2frame_float(self.end, fps, fps_base)
 
     def start_subframe(self, fps: int, fps_base=1.0) -> tuple[int, float]:
         """Whole frame (without rounding) + decimal part (between 0.0 and 1.0) of the exact frame number."""

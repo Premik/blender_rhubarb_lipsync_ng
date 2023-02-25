@@ -46,6 +46,11 @@ class CueListPreferences(PropertyGroup):
         name="Sync time on select",
         description="Synchronize the timeline with the cue start time when the item is selected",
     )
+    preview: BoolProperty(  # type: ignore
+        default=True,
+        name="Preview on playback",
+        description="Animate the icon in the panel when in playback.",
+    )
 
     @property
     def timecols(self) -> list[bool]:

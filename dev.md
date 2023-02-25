@@ -135,7 +135,7 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 * CapturePanel: Place the two button cui list should be placed elsewhere. The Visual Options and Cleanup.
 * add sub-frames tickbox
 * autoload - complete type-hints
-
+* Capture panel, optimize, store pref, props etc. directy on the self (same like self.ctx)
 ## Check
 https://github.com/Hunanbean/Papagayo-NGLipsyncImporterForBlender
 
