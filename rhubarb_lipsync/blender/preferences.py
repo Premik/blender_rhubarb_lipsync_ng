@@ -76,12 +76,12 @@ class RhubarbAddonPreferences(AddonPreferences):
     bl_idname = 'rhubarb_lipsync'
 
     @staticmethod
-    def from_context(ctx: Context, require=True) -> 'RhubarbAddonPreferences':
+    def from_context(ctx: Context, require=True) -> 'RhubarbAddonPreferences' | None:
         blid = RhubarbAddonPreferences.bl_idname
         if not blid in ctx.preferences.addons:
             if require:  # There is no inbuilt Illegal state or similar exception in python
                 raise RuntimeError(f"The '{blid}' addon preferences not found in the context.")
-            return None  # type: ignore
+            return None
         addon = ctx.preferences.addons[blid]
         return cast(RhubarbAddonPreferences, addon.preferences)
 
@@ -92,9 +92,9 @@ class RhubarbAddonPreferences(AddonPreferences):
     )
 
     @property
-    def executable_path(self) -> pathlib.Path:
+    def executable_path(self) -> pathlib.Path | None:
         if not self.executable_path_string:
-            return None  # type: ignore
+            return None
         return pathlib.Path(self.executable_path_string)
 
     recognizer: EnumProperty(  # type: ignore

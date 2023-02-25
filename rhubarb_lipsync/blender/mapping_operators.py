@@ -54,7 +54,7 @@ class ShowCueInfoHelp(bpy.types.Operator):
     key: StringProperty("Key", description="The cue type key to show the help on.", default="")  # type:ignore
 
     @staticmethod
-    def draw_popup(this: bpy.types.UIPopupMenu, key: str, context: Context):
+    def draw_popup(this: bpy.types.UIPopupMenu, key: str, context: Context) -> None:
         layout = this.layout
         msi: MouthShapeInfo = MouthShapeInfos[key].value
 

@@ -1,12 +1,12 @@
 import math
 from functools import cache
-from typing import Any, Callable, Optional, cast
+from typing import Any, Callable, Optional, cast, Type
 from enum import Enum
 import textwrap
 
 
 class MouthShapeInfo:
-    def __init__(self, key: str, key_displ: str, short_dest: str = "", description: str = "", extended=False):
+    def __init__(self, key: str, key_displ: str, short_dest: str = "", description: str = "", extended=False) -> None:
         self.key = key
         self.short_dest = short_dest
         self.description = textwrap.dedent(description)
@@ -116,7 +116,7 @@ class MouthShapeInfos(Enum):
 
 
 class MouthCue:
-    def __init__(self, key: str, start: float, end: float):
+    def __init__(self, key: str, start: float, end: float) -> None:
         self.key = key
         self.start = float(start)
         self.end = float(end)
@@ -155,9 +155,10 @@ class MouthCue:
         f, i = math.modf(self.start_frame_float(fps, fps_base))
         return int(i), f
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         if not isinstance(other, MouthCue):
-            return NotImplemented  # https://stackoverflow.com/questions/1227121/compare-object-instances-for-equality-by-their-attributes
+            # https://stackoverflow.com/questions/1227121/compare-object-instances-for-equality-by-their-attributes
+            return NotImplemented  # type: ignore
         c = lambda a, b: math.isclose(a, b, abs_tol=0.001)
         o: MouthCue = other
         return self.key == o.key and c(self.start, o.start) and c(self.end, o.end)

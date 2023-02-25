@@ -17,9 +17,9 @@ class MappingListItem(PropertyGroup):
     action: PointerProperty(type=bpy.types.Action, name="Action")  # type: ignore
 
     @cached_property
-    def cue_desc(self) -> MouthShapeInfo:
+    def cue_desc(self) -> MouthShapeInfo | None:
         if not self.key:
-            return None  # type: ignore
+            return None
         return MouthShapeInfos[self.key].value
 
 
@@ -179,23 +179,23 @@ class CaptureProperties(PropertyGroup):
     mapping: PointerProperty(type=MappingList, name="Mapping")  # type: ignore
 
     @staticmethod
-    def from_context(ctx: Context) -> 'CaptureProperties':
+    def from_context(ctx: Context) -> 'CaptureProperties' | None:
         """Get the properties bound to the current active object in the context"""
         # ctx.selected_editable_objects
         return CaptureProperties.from_object(ctx.object)
 
     @staticmethod
-    def from_object(obj: bpy.types.Object) -> 'CaptureProperties':
+    def from_object(obj: bpy.types.Object) -> 'CaptureProperties' | None:
         if not obj:
-            return None  # type: ignore
+            return None
         ret: CaptureProperties = getattr(obj, 'rhubarb_lipsync')  # type: ignore
         # ret.mapping.build_items()  # Ensure cue infos are created
         return ret
 
     @staticmethod
-    def by_object_name(obj_name: str) -> 'CaptureProperties':
+    def by_object_name(obj_name: str) -> 'CaptureProperties' | None:
         if not obj_name:
-            return None  # type: ignore
+            return None
         obj = bpy.data.objects.get(obj_name, None)
         return CaptureProperties.from_object(obj)
 
@@ -221,10 +221,10 @@ class CaptureProperties(PropertyGroup):
         return ""
 
     @property
-    def sound_file_path(self) -> pathlib.Path:
+    def sound_file_path(self) -> pathlib.Path | None:
         s: Sound = self.sound
         if not s or not s.filepath or s.packed_file:
-            return None  # type: ignore
+            return None
         return pathlib.Path(self.sound.filepath)
 
     @property

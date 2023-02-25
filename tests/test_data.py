@@ -17,16 +17,16 @@ assert test_data_path.is_dir()
 class SampleData:
     """Test data. Links to a sound file and additional data"""
 
-    def __init__(self, name: str, test_data_path=test_data_path):
+    def __init__(self, name: str, test_data_path=test_data_path) -> None:
         self.name = name
         self.test_data_path = test_data_path
 
     @cached_property
-    def snd_file_path(self):
+    def snd_file_path(self) -> Path:
         return self.test_data_path / f"{self.name}.ogg"
 
     @cached_property
-    def expected_json_path(self):
+    def expected_json_path(self) -> Path:
         return self.test_data_path / f"{self.name}-expected.json"
 
     @cached_property

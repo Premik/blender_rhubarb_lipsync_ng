@@ -38,7 +38,7 @@ class MappingAndBakingPanel(bpy.types.Panel):
         lst: MappingList = props.mapping
         layout.template_list(MappingUIList.bl_idname, "Mapping", lst, "items", lst, "index")
 
-    def draw(self, context: Context):
+    def draw(self, context: Context) -> None:
         try:
             self.ctx = context
             layout = self.layout
@@ -59,4 +59,4 @@ class MappingAndBakingPanel(bpy.types.Panel):
             ui_utils.draw_error(self.layout, f"Unexpected error. \n {e}")
             raise
         finally:
-            self.ctx = None  # type: ignore
+            self.ctx = None

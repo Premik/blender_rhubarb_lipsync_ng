@@ -11,7 +11,7 @@ class PackagePlugin:
     bl_info_version_pattern = r'''['"]version["']\s*:\s*\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*\)'''
     bl_info_version_rx = re.compile(f"(.*)({bl_info_version_pattern})(.*)", re.DOTALL)
 
-    def __init__(self, cfg: dict):
+    def __init__(self, cfg: dict) -> None:
         assert cfg and cfg["project"]
         self.cfg = cfg
 
@@ -21,7 +21,9 @@ class PackagePlugin:
 
     @cached_property
     def version_tuple(self) -> tuple[int, int, int]:
-        return tuple([int(p) for p in self.version_str.split(".")])  # type: ignore
+        t = tuple([int(p) for p in self.version_str.split(".")])
+        assert len(t) == 3, f"Unexpected version string. Expect 3 digits. Got '{self.version_str}'"
+        return t  # type: ignore
 
     @cached_property
     def project_dir(self) -> Path:
@@ -31,7 +33,7 @@ class PackagePlugin:
     def main__init__(self) -> Path:
         return self.project_dir / "rhubarb_lipsync" / "__init__.py"
 
-    def update_bl_info_version(self):
+    def update_bl_info_version(self) -> None:
         p = self.main__init__
         print(f"Updating version string to '{self.version_str}' in the {p}")
         assert p.exists(), f"The {p} doesn't exists "

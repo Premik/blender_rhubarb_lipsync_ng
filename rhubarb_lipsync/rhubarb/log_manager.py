@@ -2,6 +2,7 @@ import logging
 from functools import cached_property
 from types import ModuleType
 
+
 # https://stackoverflow.com/questions/2183233/how-to-add-a-custom-loglevel-to-pythons-logging-facility/35804945#35804945
 def addLoggingLevel(levelName, levelNum, methodName=None):
     """
@@ -41,11 +42,11 @@ def addLoggingLevel(levelName, levelNum, methodName=None):
     # This method was inspired by the answers to Stack Overflow post
     # http://stackoverflow.com/q/2183233/2988730, especially
     # http://stackoverflow.com/a/13638084/2988730
-    def logForLevel(self, message, *args, **kwargs):
+    def logForLevel(self, message, *args, **kwargs) -> None:
         if self.isEnabledFor(levelNum):
             self._log(levelNum, message, args, **kwargs)
 
-    def logToRoot(message, *args, **kwargs):
+    def logToRoot(message, *args, **kwargs) -> None:
         logging.log(levelNum, message, *args, **kwargs)
 
     logging.addLevelName(levelNum, levelName)
@@ -62,7 +63,7 @@ class LogManager:
     def __init__(self) -> None:
         self.modules: list[ModuleType] = []
 
-    def init(self, modules: list[ModuleType]):
+    def init(self, modules: list[ModuleType]) -> None:
         self.modules = modules
 
     @cached_property
@@ -76,7 +77,7 @@ class LogManager:
         return self.logs[0].level  # The (random) first logger's level
 
     @property
-    def current_level_name(self) -> int:
+    def current_level_name(self) -> str:
         return LogManager.level2name(self.current_level)
 
     @property
@@ -90,10 +91,10 @@ class LogManager:
         return max_level_logger.level
 
     @property
-    def current_level_max_name(self) -> int:
+    def current_level_max_name(self) -> str:
         return LogManager.level2name(self.current_level_max)
 
-    def set_level(self, level: int):
+    def set_level(self, level: int) -> None:
         for l in self.logs:
             try:
                 l.setLevel(level)
@@ -101,7 +102,7 @@ class LogManager:
             except Exception as e:
                 print(f"Failed to set log level for '{l}': \n{e}")
 
-    def set_debug(self):
+    def set_debug(self) -> None:
         self.set_level(logging.DEBUG)
 
     @staticmethod

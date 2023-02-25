@@ -38,7 +38,7 @@ class RhubarbBinary:
     include_file_list = [r"^[^/]+/[^/]+$", r"/res/"]  # All file in the root folder
     include_file_list_rx = [re.compile(pat, re.IGNORECASE) for pat in include_file_list]
 
-    def __init__(self, cfg: dict, platform_cfg: dict):
+    def __init__(self, cfg: dict, platform_cfg: dict) -> None:
         assert cfg and cfg["download"] and cfg["platforms"]
         self.cfg = cfg
         self.platform_cfg: dict = platform_cfg
@@ -126,7 +126,7 @@ class RhubarbBinary:
         download(self.download_url, self.download_file)
         return True
 
-    def verify_download_checksum(self):
+    def verify_download_checksum(self) -> None:
         checksum = sha256(self.download_file)
         if checksum != self.expected_download_sha256:
             raise ValueError(
@@ -144,23 +144,22 @@ class RhubarbBinary:
         self.unzip()
         return True
 
-    def rm_unzipped(self):
+    def rm_unzipped(self) -> None:
         """This will delete the whole platform-folder where the zip was unzipped."""
         if not Path.exists(self.unziped_dir):
             return
         print(f"Deleting {self.unziped_dir}")
         shutil.rmtree(self.unziped_dir)
 
-    def unzip(self):
+    def unzip(self) -> None:
         self.rm_unzipped()
         print(f"Unzipping the binaries for the {self.platform_cfg['name']} platform into {self.download_dir} ")
         with zipfile.ZipFile(self.download_file, 'r') as zip:
-
             # Only files matching any of the file_list patterns
             fl = [fn for fn in zip.filelist if any((rx.search(fn.filename) for rx in RhubarbBinary.include_file_list_rx))]
             zip.extractall(self.download_dir, fl)
 
-    def rm_bin(self):
+    def rm_bin(self) -> None:
         """This will delete the whole project's bin folder"""
         if not Path.exists(self.bin_dir):
             return
@@ -173,7 +172,7 @@ class RhubarbBinary:
             return False  # The bin/rhubar file don't even exists
         return filecmp.cmp(self.executable_path, self.executable_path_unzipped)
 
-    def deploy_to_bin(self):
+    def deploy_to_bin(self) -> None:
         self.rm_bin()
         print(f"Deploying {self.platform_cfg['name']} binary to {self.bin_dir} ")
         shutil.copytree(self.unziped_dir, self.bin_dir)
@@ -183,8 +182,7 @@ class RhubarbBinary:
         return platfrom in self.system_names
 
     @staticmethod
-    def download_all_and_deploy(deploy_platform=platform.system()):
-
+    def download_all_and_deploy(deploy_platform=platform.system()) -> None:
         platform_matched_count = 0
         for b in RhubarbBinary.all_platforms(rhubarb_cfg):
             b.ensure_download()

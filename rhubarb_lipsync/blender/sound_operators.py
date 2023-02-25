@@ -285,7 +285,7 @@ class ConvertSoundFromat(bpy.types.Operator):
     def poll(cls, context: Context) -> bool:
         return ui_utils.validation_poll(cls, context, CaptureProperties.sound_selection_validation)
 
-    def draw(self, context: Context):
+    def draw(self, context: Context) -> None:
         layout = self.layout
         layout.prop(self, "codec")
         ui_utils.draw_prop_with_label(self, "rate", "Rate", layout)
@@ -359,7 +359,7 @@ class PlayRange(bpy.types.Operator):
     frames_left = 0
 
     @staticmethod
-    def on_frame(scene):
+    def on_frame(scene) -> None:
         if log.isEnabledFor(logging.TRACE):
             log.trace(f"On frame {PlayRange.frames_left}")
         PlayRange.frames_left -= 1
@@ -369,7 +369,7 @@ class PlayRange(bpy.types.Operator):
                 bpy.ops.screen.animation_cancel(restore_frame=False)
             except:
                 log.error(f"Failed to stop animation playback")
-                traceback.print_exception()
+                traceback.print_exc()
             if not PlayRange.remove_handlers():
                 log.warn(
                     f"""Coulnd't remove handler {ui_utils.func_fqname(PlayRange.on_frame)}. 
@@ -377,7 +377,7 @@ class PlayRange(bpy.types.Operator):
                 )
 
     @staticmethod
-    def remove_handlers():
+    def remove_handlers() -> bool:
         try:
             # print(list(bpy.app.handlers.frame_change_post))
             fn = PlayRange.on_frame
@@ -385,7 +385,7 @@ class PlayRange(bpy.types.Operator):
             return ui_utils.remove_handler(handlers, PlayRange.on_frame)
         except:
             log.error(f"Unexpected error while stopping the animation")
-            traceback.print_exception()
+            traceback.print_exc()
             return False
 
     @classmethod

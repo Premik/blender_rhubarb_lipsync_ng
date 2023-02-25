@@ -82,7 +82,7 @@ Debug: https://github.com/JacquesLucke/blender_vscode
 
 ## Blender
 
-### 
+###
 For operator bl_idname, the same naming conventions as in 2.7x remain
 Registration: Menu, Panel, Header, UIList, Operator
 `UPPER_CASE_{SEPARATOR}_mixed_case` The separator for each identifier is listed below:

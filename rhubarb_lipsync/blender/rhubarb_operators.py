@@ -54,7 +54,7 @@ class ProcessSoundFile(bpy.types.Operator):
         return rhubarcli_validation(context)
 
     @classmethod
-    def poll(cls, context: Context):
+    def poll(cls, context: Context) -> bool:
         return ui_utils.validation_poll(cls, context)
 
     def invoke(self, context: Context, event) -> set[int] | set[str]:
@@ -157,7 +157,7 @@ class ProcessSoundFile(bpy.types.Operator):
 
         return {'PASS_THROUGH'}
 
-    def update_progress(self, context: Context):
+    def update_progress(self, context: Context) -> None:
         wm = context.window_manager
 
         # Only changes mouse cursor, looks ugly
@@ -210,7 +210,7 @@ class GetRhubarbExecutableVersion(bpy.types.Operator):
         return cls.executable_version
 
     @classmethod
-    def poll(cls, context):
+    def poll(cls, context) -> bool:
         return ui_utils.validation_poll(cls, context, rhubarcli_validation)
 
     def execute(self, context: Context) -> set[str]:
@@ -238,7 +238,7 @@ class CancelCaptureJob(bpy.types.Operator):
         return ""
 
     @classmethod
-    def poll(cls, context):
+    def poll(cls, context) -> bool:
         return ui_utils.validation_poll(cls, context)
 
     def execute(self, context: Context) -> set[str]:

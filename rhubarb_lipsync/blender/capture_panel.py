@@ -104,12 +104,12 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
             return not errors
 
         layout = self.layout
-        layout.template_ID(props, "sound", open="sound.open")  # type: ignore
+        layout.template_ID(props, "sound", open="sound.open")
         if sound is None:
             ui_utils.draw_error(self.layout, "Select a sound file.")
             return False
         row = layout.row(align=True)
-        row.prop(sound, "filepath", text="")  # type: ignore
+        row.prop(sound, "filepath", text="")
 
         blid = sound_operators.ToggleRelativePath.bl_idname
 
@@ -264,7 +264,7 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
         list_type = 'GRID' if prefs.cue_list_prefs.as_grid else 'DEFAULT'
         layout.template_list(MouthCueUIList.bl_idname, "Mouth cues", lst, "items", lst, "index", type=list_type)
 
-    def draw(self, context: Context):
+    def draw(self, context: Context) -> None:
         try:
             props = CaptureProperties.from_context(context)
             self.ctx = context
@@ -285,4 +285,4 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
             ui_utils.draw_error(self.layout, f"Unexpected error. \n {e}")
             raise
         finally:
-            self.ctx = None  # type: ignore
+            self.ctx = None

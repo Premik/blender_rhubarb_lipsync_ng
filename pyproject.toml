@@ -38,6 +38,7 @@ packages = ["rhubarb_lipsync"]
 addopts = ["--import-mode=importlib"]
 # https://stackoverflow.com/questions/10253826/path-issue-with-pytest-importerror-no-module-named-yadayadayada/50610630#answer-50610630
 pythonpath = [".", "tests"] 
+# https://docs.pytest.org/en/7.1.x/explanation/goodpractices.html
 
 [tool.black]
 line-length = 160
@@ -48,4 +49,11 @@ profile = "black"
 src_paths = ["rhubarb_lipsync", "tests", "scripts"]
 line_length = 160
 
-# https://docs.pytest.org/en/7.1.x/explanation/goodpractices.html
+
+[tool.mypy]
+strict_optional = false
+warn_unused_configs = true
+
+[[tool.mypy.overrides]]
+module = ["bpy.*", "bgl", "blf", "aud"]
+ignore_missing_imports = true

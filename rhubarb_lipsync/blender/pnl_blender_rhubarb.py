@@ -14,8 +14,7 @@ class RhubarbLipsyncPanel(bpy.types.Panel):
     @classmethod
     def poll(cls, context):
         obj = context.object
-        return (obj and obj.type == 'ARMATURE')
-
+        return obj and obj.type == 'ARMATURE'
 
     def draw(self, context):
         layout = self.layout
@@ -48,24 +47,24 @@ class RhubarbLipsyncPanel(bpy.types.Panel):
             row.label(text="Please set rhubarb executable location in addon preferences")
             row = layout.row()
 
-        row.operator(operator = "object.rhubarb_lipsync")
+        row.operator(operator="object.rhubarb_lipsync")
 
 
-#https://blender.stackexchange.com/a/78592 
+# https://blender.stackexchange.com/a/78592
 enum_items_store = []
 
-def enum_items(self, context):
 
+def enum_items(self, context):
     items = []
     for action in bpy.data.actions:
         not_an_action = False
-        if (not(action.asset_data is None)):
+        if not (action.asset_data is None):
             for i in action.fcurves:
-                if (not (i.data_path.split("\"")[1] in context.object.pose.bones)):
+                if not (i.data_path.split("\"")[1] in context.object.pose.bones):
                     not_an_action = True
-                    print("hello!")    
+                    print("hello!")
                     break
-                    
+
         else:
             continue
         if not_an_action:
@@ -84,12 +83,13 @@ def enum_items(self, context):
                 break
 
         if not found:
-            enum_items_store.append((maxid+1, action.name))
+            enum_items_store.append((maxid + 1, action.name))
 
         # AMENDED CODE - include the ID
-        items.append( (action.name, action.name, "", id) )
+        items.append((action.name, action.name, "", id))
 
     return items
+
 
 poses = bpy.props.EnumProperty(
     items=enum_items,
@@ -97,23 +97,25 @@ poses = bpy.props.EnumProperty(
     description='Poses',
 )
 
+
 class MouthShapesProperty(bpy.types.PropertyGroup):
-    mouth_a : poses
-    mouth_b : poses
-    mouth_c : poses
-    mouth_d : poses
-    mouth_e : poses
-    mouth_f : poses
-    mouth_g : poses
-    mouth_h : poses
-    mouth_x : poses
+    mouth_a: poses
+    mouth_b: poses
+    mouth_c: poses
+    mouth_d: poses
+    mouth_e: poses
+    mouth_f: poses
+    mouth_g: poses
+    mouth_h: poses
+    mouth_x: poses
 
-    sound_file : bpy.props.StringProperty(name="sound_file",subtype='FILE_PATH')
-    dialog_file : bpy.props.StringProperty(name="dialog_file",subtype='FILE_PATH')
+    sound_file: bpy.props.StringProperty(name="sound_file", subtype='FILE_PATH')
+    dialog_file: bpy.props.StringProperty(name="dialog_file", subtype='FILE_PATH')
 
-    start_frame : bpy.props.IntProperty(name="start_frame")
+    start_frame: bpy.props.IntProperty(name="start_frame")
 
-#def register():
+
+# def register():
 #    bpy.utils.register_class(MouthShapesProperty)
 #    bpy.utils.register_class(RhubarbLipsyncPanel)
 

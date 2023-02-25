@@ -13,14 +13,13 @@ from rhubarb_lipsync.blender.properties import CaptureProperties
 from rhubarb_lipsync.rhubarb.log_manager import logManager
 
 
-def setUpModule():
+def setUpModule() -> None:
     rhubarb_lipsync.register()  # Simulate blender register call
     logManager.set_debug()
 
 
 class PropertiesTest(unittest.TestCase):
-    def setUp(self):
-
+    def setUp(self) -> None:
         # There is the default cube already..
         # bpy.ops.mesh.primitive_cube_add()
         # obj = bpy.context.object
@@ -28,7 +27,7 @@ class PropertiesTest(unittest.TestCase):
         self.props = CaptureProperties.from_context(bpy.context)
         assert self.props
 
-    def testSoundFilePath(self):
+    def testSoundFilePath(self) -> None:
         props = self.props
         props.sound = test_data.snd_en_male_watchingtv.to_sound(bpy.context)
 

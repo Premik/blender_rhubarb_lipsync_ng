@@ -83,7 +83,7 @@ class RhubarbCommandWrapper:
 
     thread_wait_timeout = 5
 
-    def __init__(self, executable_path: pathlib.Path, recognizer="pocketSphinx", extended=True, extra_args=[]):
+    def __init__(self, executable_path: pathlib.Path, recognizer="pocketSphinx", extended=True, extra_args=[]) -> None:
         self.executable_path = executable_path
         self.recognizer = recognizer
         self.use_extended = extended
@@ -138,7 +138,7 @@ class RhubarbCommandWrapper:
         # universal_newlines forces text mode
         self.process = Popen(self.extra_args + cmd_args, stdout=PIPE, stderr=PIPE, universal_newlines=True)
 
-    def close_process(self):
+    def close_process(self) -> None:
         if self.was_started:
             log.debug(f"Terminating the process {self.process}")
             self.process.terminate()
@@ -156,7 +156,7 @@ class RhubarbCommandWrapper:
         self.collect_output_sync(ignore_timeout_error=False)
         return RhubarbParser.parse_version_info(self.stdout)
 
-    def log_status_line(self, log_json: dict):
+    def log_status_line(self, log_json: dict) -> None:
         # {'log': {'level': 'Info', 'message': 'Msg'}}]
         if not log_json or not 'log' in log_json:
             return  # Not log key included in the progress line
@@ -165,7 +165,7 @@ class RhubarbCommandWrapper:
 
         log.log(RhubarbParser.LOG_LEVELS_MAP[level], f"Rhubarb: {msg}")
 
-    def lipsync_start(self, input_file: str, dialog_file: Optional[str] = None):
+    def lipsync_start(self, input_file: str, dialog_file: Optional[str] = None) -> None:
         """Start the main lipsync command. Process runs in background"""
         self.close_process()
         args = self.build_lipsync_args(input_file, dialog_file)
@@ -226,7 +226,7 @@ class RhubarbCommandWrapper:
         json = self.get_lipsync_output_json()
         return RhubarbParser.lipsync_json2MouthCues(json)
 
-    def collect_output_sync(self, ignore_timeout_error=True, timeout=1):
+    def collect_output_sync(self, ignore_timeout_error=True, timeout=1) -> None:
         """
         Waits (with a timeout) for the process to finish. Then collects its std out and std error
         """
@@ -241,7 +241,7 @@ class RhubarbCommandWrapper:
                 raise
         self.close_process()
 
-    def read_process_stderr_line(self):
+    def read_process_stderr_line(self) -> None:
         assert self.was_started
         if self.has_finished:
             return
@@ -270,7 +270,7 @@ class RhubarbCommandAsyncJob:
 
     thread_wait_timeout = 5
 
-    def __init__(self, cmd: RhubarbCommandWrapper):
+    def __init__(self, cmd: RhubarbCommandWrapper) -> None:
         assert cmd
         self.cmd = cmd
         self.thread: Optional[Thread] = None
@@ -346,7 +346,7 @@ class RhubarbCommandAsyncJob:
         except Empty as e:
             return None
 
-    def cancel(self):
+    def cancel(self) -> None:
         log.info("Cancel request. Stopping the process and the status thread.")
         self.stop_event.set()
         self.join_thread()

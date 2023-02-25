@@ -51,7 +51,7 @@ def wait_until_finished_async(job: RhubarbCommandAsyncJob, only_loop_times=0):
 
 
 class RhubarbCommandWrapperTest(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         enableDebug()
         self.wrapper = RhubarbCommandWrapper(self.executable_path)
 
@@ -78,7 +78,7 @@ class RhubarbCommandWrapperTest(unittest.TestCase):
     def compare_testdata_with_current(self) -> None:
         self.compare_cues_testdata(self.data, self.wrapper)
 
-    def testVersion(self):
+    def testVersion(self) -> None:
         self.assertEqual(self.wrapper.get_version(), "1.13.0")
         self.assertEqual(self.wrapper.get_version(), "1.13.0")
 
@@ -87,14 +87,14 @@ class RhubarbCommandWrapperTest(unittest.TestCase):
         wait_until_finished(self.wrapper)
         self.compare_testdata_with_current()
 
-    def testLipsync_async(self):
+    def testLipsync_async(self) -> None:
         self.wrapper.lipsync_start(str(self.data.snd_file_path))
         wait_until_finished_async(RhubarbCommandAsyncJob(self.wrapper))
         assert not self.wrapper.was_started
         assert self.wrapper.has_finished
         self.compare_testdata_with_current()
 
-    def testLipsync_cancel(self):
+    def testLipsync_cancel(self) -> None:
         job = RhubarbCommandAsyncJob(self.wrapper)
         assert not self.wrapper.was_started
         assert not self.wrapper.has_finished
@@ -112,7 +112,7 @@ class RhubarbCommandWrapperTest(unittest.TestCase):
 
         # self.assertEqual(len(s.fullyMatchingParts()), 2)
 
-    def testLipsync_cancel_restat(self):
+    def testLipsync_cancel_restat(self) -> None:
         job = RhubarbCommandAsyncJob(self.wrapper)
         assert job.status == "Stopped"
         self.wrapper.lipsync_start(str(self.data.snd_file_path))
@@ -129,15 +129,15 @@ class RhubarbCommandWrapperTest(unittest.TestCase):
 
 
 class RhubarbParserTest(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         enableDebug()
 
-    def testVersion(self):
+    def testVersion(self) -> None:
         self.assertFalse(RhubarbParser.parse_version_info(""))
         self.assertFalse(RhubarbParser.parse_version_info("invalid"))
         self.assertEqual(RhubarbParser.parse_version_info("\nRhubarb Lip Sync version 01.2.3 \n"), "01.2.3")
 
-    def testStatusLine(self):
+    def testStatusLine(self) -> None:
         failed = '''{ "type": "failure", "reason": "Error processing file Foo\\nBar\\n" }'''
         sts = RhubarbParser.parse_status_infos(failed)
         assert len(sts) == 1
