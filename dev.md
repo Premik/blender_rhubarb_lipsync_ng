@@ -6,6 +6,7 @@ https://docs.pytest.org/en/7.1.x/explanation/goodpractices.html#src-layout
 source /opt/mambaforge/etc/profile.d/conda.sh
 ```
 
+https://github.com/DanielSWolf/rhubarb-lip-sync
 
 ## License
 `# SPDX-License-Identifier: MIT`

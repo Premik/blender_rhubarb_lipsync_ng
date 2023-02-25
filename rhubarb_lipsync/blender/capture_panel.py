@@ -114,6 +114,11 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
         blid = sound_operators.ToggleRelativePath.bl_idname
 
         op = row.operator(blid, text="", icon="DOT").relative = True
+        if not props.sound_file_path.exists():
+            absp = pathlib.Path(ui_utils.to_abs_path(sound.filepath))
+            if absp.exists():
+                row.alert = True
+
         op = row.operator(blid, text="", icon="ITALIC").relative = False
 
         row = layout.row(align=True)
@@ -208,12 +213,16 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
         layout = self.layout
 
         title = self.get_job_status_title(jprops.status)
-        row = layout.row()
+        row = layout.row(align=True)
         if cue_list.selected_item:
             ico = IconsManager.cue_icon(cue_list.selected_item.key)
         else:
             ico = IconsManager.logo_icon()
+        # box = row.box()
+        # box.template_icon(icon_value=ico, scale=1.5)
+
         row.template_icon(icon_value=ico, scale=2.5)
+
         row = row.row(align=True)
         row.scale_y = 2
         row.operator(rhubarb_operators.ProcessSoundFile.bl_idname, text=title)
@@ -247,6 +256,7 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
         layout = self.layout
 
         row = layout.row(align=True)
+        row.alignment = 'RIGHT'
         row.popover(panel=CueListOptionsPanel.bl_idname, text="", icon="VIS_SEL_11")
         row.operator(rhubarb_operators.ClearCueList.bl_idname, text="", icon="PANEL_CLOSE")
 

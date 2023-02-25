@@ -33,7 +33,7 @@ class MouthCueUIList(UIList):
         if self.layout_type in {'DEFAULT', 'COMPACT'}:
             self.draw_compact(layout, item, context)
         elif self.layout_type in {'GRID'}:
-            self.draw_grid(layout, item)
+            self.draw_grid(layout, item, context)
 
     def draw_compact(self, layout: UILayout, item: MouthCueListItem, context: Context) -> None:
         clp = self.cuelist_prefs(context)
@@ -89,7 +89,7 @@ class MouthCueUIList(UIList):
             op.start_frame = int(item.frame_float(context))
             op.play_frames = item.duration_frames(context)
 
-    def draw_grid(self, layout: UILayout, item: MouthCueListItem) -> None:
+    def draw_grid(self, layout: UILayout, item: MouthCueListItem, context: Context) -> None:
         layout.alignment = 'CENTER'
 
         # l.emboss = 'NONE'
@@ -97,5 +97,7 @@ class MouthCueUIList(UIList):
         # l = layout.row()
         # l.scale_x = 1
         # l.alignment = 'CENTER'
-
-        layout.label(text=item.key)
+        if self.cuelist_prefs(context).as_circle:
+            layout.label(text=item.cue.info.key_displ)
+        else:
+            layout.label(text=item.key)
