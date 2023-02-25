@@ -179,13 +179,13 @@ class CaptureProperties(PropertyGroup):
     mapping: PointerProperty(type=MappingList, name="Mapping")  # type: ignore
 
     @staticmethod
-    def from_context(ctx: Context) -> 'CaptureProperties' | None:
+    def from_context(ctx: Context) -> Optional['CaptureProperties']:
         """Get the properties bound to the current active object in the context"""
         # ctx.selected_editable_objects
         return CaptureProperties.from_object(ctx.object)
 
     @staticmethod
-    def from_object(obj: bpy.types.Object) -> 'CaptureProperties' | None:
+    def from_object(obj: bpy.types.Object) -> Optional['CaptureProperties']:
         if not obj:
             return None
         ret: CaptureProperties = getattr(obj, 'rhubarb_lipsync')  # type: ignore
@@ -193,7 +193,7 @@ class CaptureProperties(PropertyGroup):
         return ret
 
     @staticmethod
-    def by_object_name(obj_name: str) -> 'CaptureProperties' | None:
+    def by_object_name(obj_name: str) -> Optional['CaptureProperties']:
         if not obj_name:
             return None
         obj = bpy.data.objects.get(obj_name, None)

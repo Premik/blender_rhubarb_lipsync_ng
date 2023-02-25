@@ -22,7 +22,7 @@ from rhubarb_lipsync.blender.properties import CaptureProperties
 from rhubarb_lipsync.blender.ui_utils import IconsManager
 
 
-def init_loggers():
+def init_loggers() -> None:
     logManager.init(rhubarb_lipsync.blender.auto_load.modules)
     prefs = RhubarbAddonPreferences.from_context(bpy.context, False)
     if hasattr(prefs, 'log_level') and prefs.log_level != 0:  # 0 default level
@@ -33,13 +33,13 @@ def init_loggers():
 rhubarb_lipsync.blender.auto_load.init(__file__)
 
 
-def register():
+def register() -> None:
     rhubarb_lipsync.blender.auto_load.register()
     bpy.types.Object.rhubarb_lipsync = PointerProperty(type=CaptureProperties)
     init_loggers()
 
 
-def unregister():
+def unregister() -> None:
     rhubarb_lipsync.blender.auto_load.unregister()
     del bpy.types.Object.rhubarb_lipsync
 

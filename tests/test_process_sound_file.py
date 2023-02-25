@@ -12,12 +12,12 @@ from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue
 from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandAsyncJob, RhubarbCommandWrapper, RhubarbParser
 
 
-def enableDebug():
+def enableDebug() -> None:
     logging.basicConfig()
     rhubarb_command.log.setLevel(logging.DEBUG)
 
 
-def wait_until_finished(r: RhubarbCommandWrapper):
+def wait_until_finished(r: RhubarbCommandWrapper) -> None:
     assert r.was_started
     for i in range(0, 1000):
         if r.has_finished:
@@ -31,7 +31,7 @@ def wait_until_finished(r: RhubarbCommandWrapper):
     assert False, "Seems the process in hanging up"
 
 
-def wait_until_finished_async(job: RhubarbCommandAsyncJob, only_loop_times=0):
+def wait_until_finished_async(job: RhubarbCommandAsyncJob, only_loop_times=0) -> None:
     assert job.cmd.was_started
     loops = 0
     for i in range(0, 1000):

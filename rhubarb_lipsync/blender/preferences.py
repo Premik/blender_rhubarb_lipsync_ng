@@ -76,7 +76,7 @@ class RhubarbAddonPreferences(AddonPreferences):
     bl_idname = 'rhubarb_lipsync'
 
     @staticmethod
-    def from_context(ctx: Context, require=True) -> 'RhubarbAddonPreferences' | None:
+    def from_context(ctx: Context, require=True) -> Optional['RhubarbAddonPreferences']:
         blid = RhubarbAddonPreferences.bl_idname
         if not blid in ctx.preferences.addons:
             if require:  # There is no inbuilt Illegal state or similar exception in python

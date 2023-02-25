@@ -33,7 +33,7 @@ def init(root: str = __file__):
     ordered_classes = get_ordered_classes_to_register(modules)
 
 
-def register():
+def register() -> None:
     for cls in ordered_classes:
         # print(f"Registering class {cls}")
         bpy.utils.register_class(cls)
@@ -46,7 +46,7 @@ def register():
             module.register()
 
 
-def unregister():
+def unregister() -> None:
     for cls in reversed(ordered_classes):
         bpy.utils.unregister_class(cls)
 
