@@ -122,20 +122,26 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 
 ## Todo
 
-* Add [speaker](https://docs.blender.org/manual/en/latest/render/output/audio/speaker.html) as an alternative to Sequencer audio clip
-* Rename capture_panel to something better? (sound setup?)
-* Create github build-job, running unit tests/integration tests?
+### High
 * Set start frame?
 * place-on-strip op - add redo support, asking for channel and framein the re-do dialog
 * Set the panel tab name in the preferences
-* Cue item-add onchanged handlers to properties to flush the cached Cue object. And change the properties to use setter/gettr of the Cue object directly
+* mapping/baking panel and ops
+
+### Normal
 * Add license files
-* Icons (especially cue icons) hard to see. Nearly  inivisible on dark background. Blender supports automatic icon inverting/coloring only for inbuilt incons.
 * Limit possible selection to armature and mesh-object only? (and not obj.library). Or hook the properties to the Collection instead of Object?
-* CapturePanel: Place the two button cui list should be placed elsewhere. The Visual Options and Cleanup.
 * add sub-frames tickbox
+
+### Low
+* Add [speaker](https://docs.blender.org/manual/en/latest/render/output/audio/speaker.html) as an alternative to Sequencer audio clip
+* Rename capture_panel to something better? (sound setup?)
+* Create github build-job, running unit tests/integration tests?
+* The scaled down icons (32x32) still hard to see. Pre-scale different set icons?
 * autoload - complete type-hints
 * Capture panel, optimize, store pref, props etc. directy on the self (same like self.ctx)
+* Register some startup handler to call CueMappingList.buildItems. Can't be lazily done from since prop's are not allowed to be changed from the draw method
+
 ## Check
 https://github.com/Hunanbean/Papagayo-NGLipsyncImporterForBlender
 

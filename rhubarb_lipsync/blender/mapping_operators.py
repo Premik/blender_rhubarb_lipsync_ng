@@ -14,6 +14,7 @@ from rhubarb_lipsync.rhubarb.log_manager import logManager
 from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue, MouthShapeInfos, MouthShapeInfo
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 import traceback
+from rhubarb_lipsync.blender.ui_utils import IconsManager
 
 log = logging.getLogger(__name__)
 
@@ -57,11 +58,13 @@ class ShowCueInfoHelp(bpy.types.Operator):
     def draw_popup(this: bpy.types.UIPopupMenu, key: str, context: Context) -> None:
         layout = this.layout
         msi: MouthShapeInfo = MouthShapeInfos[key].value
-
-        # r = layout.row()
-
-        # layout.label(text=msi.description)
-        ui_utils.draw_error(layout, msi.description)
+        # split = layout.split(factor=0.2)
+        row = layout.row()
+        row.template_icon(icon_value=IconsManager.cue_image(key), scale=6)
+        col = row.column(align=False)
+        lines = msi.description.splitlines()
+        for l in lines:
+            col.label(text=l)
 
     @classmethod
     def poll(cls, context: Context) -> bool:
@@ -79,6 +82,6 @@ class ShowCueInfoHelp(bpy.types.Operator):
 
         draw = lambda this, ctx: ShowCueInfoHelp.draw_popup(this, self.key, ctx)
         msi: MouthShapeInfo = MouthShapeInfos[self.key].value
-        bpy.context.window_manager.popup_menu(draw, title=msi.short_dest, icon='INFO')
+        bpy.context.window_manager.popup_menu(draw, title=f"{msi.short_dest:<25}", icon='INFO')
 
         return {'FINISHED'}

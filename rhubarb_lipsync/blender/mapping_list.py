@@ -33,13 +33,13 @@ class MappingUIList(UIList):
 
         split = layout.split(factor=0.4)
         row = split.row()
-        row.template_icon(icon_value=IconsManager.cue_image(item.key), scale=5)
-        row = split.row()
+        # row.template_icon(icon_value=IconsManager.cue_image(item.key), scale=5)
+        #row = split.row()
         if clp.as_circle:
             row.label(text=item.cue_desc.key_displ)
         else:
             row.label(text=item.key)
         row.prop(item, 'action', text="")
-        row.operator(mapping_operators.ShowCueInfoHelp.bl_idname).key = item.key
+        row.operator(mapping_operators.ShowCueInfoHelp.bl_idname, icon="QUESTION", text="").key = item.key
 
         # return wm.invoke_search_popup(self)
