@@ -52,7 +52,11 @@ line_length = 160
 
 [tool.mypy]
 strict_optional = false
+disallow_untyped_calls = true
 warn_unused_configs = true
+# disallow_untyped_defs = true 
+check_untyped_defs = true
+pretty = true
 
 [[tool.mypy.overrides]]
 module = ["bpy.*", "bgl", "blf", "aud"]

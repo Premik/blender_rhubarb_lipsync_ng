@@ -88,17 +88,17 @@ def iter_submodule_names(path: Path, root="") -> Iterator[str]:
 #################################################
 
 
-def get_ordered_classes_to_register(modules):
+def get_ordered_classes_to_register(modules: list[ModuleType]):
     return toposort(get_register_deps_dict(modules))
 
 
-def get_register_deps_dict(modules):
+def get_register_deps_dict(modules: list[ModuleType]):
     my_classes = set(iter_my_classes(modules))
     my_classes_by_idname = {cls.bl_idname: cls for cls in my_classes if hasattr(cls, "bl_idname")}
 
     deps_dict = {}
     for cls in my_classes:
-        deps_dict[cls] = set(iter_my_register_deps(cls, my_classes, my_classes_by_idname))
+        deps_dict[cls] = set(iter_my_register_deps(cls, my_classes, my_classes_by_idname))  # type: ignore
     return deps_dict
 
 

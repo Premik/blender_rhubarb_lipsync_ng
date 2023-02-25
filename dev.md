@@ -134,6 +134,7 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 * Limit possible selection to armature and mesh-object only? (and not obj.library). Or hook the properties to the Collection instead of Object?
 * CapturePanel: Place the two button cui list should be placed elsewhere. The Visual Options and Cleanup.
 * add sub-frames tickbox
+* autoload - complete type-hints
 
 ## Check
 https://github.com/Hunanbean/Papagayo-NGLipsyncImporterForBlender

@@ -159,7 +159,7 @@ class MouthCue:
         if not isinstance(other, MouthCue):
             # https://stackoverflow.com/questions/1227121/compare-object-instances-for-equality-by-their-attributes
             return NotImplemented  # type: ignore
-        c = lambda a, b: math.isclose(a, b, abs_tol=0.001)
+        c: Callable[[float, float], bool] = lambda a, b: math.isclose(a, b, abs_tol=0.001)
         o: MouthCue = other
         return self.key == o.key and c(self.start, o.start) and c(self.end, o.end)
 

@@ -76,7 +76,7 @@ def get_sequencer_context(context: Context) -> dict:
     }
 
 
-def assert_op_ret(ret: set[str]):
+def assert_op_ret(ret: set[str]) -> None:
     assert 'FINISHED' in ret, f"Operation execution failed with {ret} code"
 
 
@@ -104,7 +104,7 @@ def draw_expandable_header(props: Any, property_name: str, label: str, layout: U
     return expanded
 
 
-def draw_prop_with_label(props: Any, property_name: str, label, layout: UILayout):
+def draw_prop_with_label(props: Any, property_name: str, label, layout: UILayout) -> None:
     col = layout.column()
     split = col.split(factor=0.229)
     split.alignment = 'LEFT'
@@ -112,7 +112,7 @@ def draw_prop_with_label(props: Any, property_name: str, label, layout: UILayout
     split.prop(props, property_name, text="")
 
 
-def draw_error(layout, msg: str):
+def draw_error(layout, msg: str) -> None:
     box = layout.box()
     box.alert = True
     lines = msg.splitlines()

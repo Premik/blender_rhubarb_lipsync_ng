@@ -17,7 +17,7 @@ from collections import defaultdict
 log = logging.getLogger(__name__)
 
 
-def rhubarcli_validation(context: Context, required_unpack=True) -> str:
+def rhubarcli_validation(context: Context) -> str:
     prefs = RhubarbAddonPreferences.from_context(context)
     cmd = prefs.new_command_handler()
     cmd_error = cmd.config_errors()
@@ -57,7 +57,7 @@ class ProcessSoundFile(bpy.types.Operator):
     def poll(cls, context: Context) -> bool:
         return ui_utils.validation_poll(cls, context)
 
-    def invoke(self, context: Context, event) -> set[int] | set[str]:
+    def invoke(self, context: Context, event: bpy.types.Event) -> set[int] | set[str]:
         props = CaptureProperties.from_context(context)
         cl: MouthCueList = props.cue_list
         if len(cl.items) > 0:
@@ -210,7 +210,7 @@ class GetRhubarbExecutableVersion(bpy.types.Operator):
         return cls.executable_version
 
     @classmethod
-    def poll(cls, context) -> bool:
+    def poll(cls, context: Context) -> bool:
         return ui_utils.validation_poll(cls, context, rhubarcli_validation)
 
     def execute(self, context: Context) -> set[str]:
@@ -238,7 +238,7 @@ class CancelCaptureJob(bpy.types.Operator):
         return ""
 
     @classmethod
-    def poll(cls, context) -> bool:
+    def poll(cls, context: Context) -> bool:
         return ui_utils.validation_poll(cls, context)
 
     def execute(self, context: Context) -> set[str]:

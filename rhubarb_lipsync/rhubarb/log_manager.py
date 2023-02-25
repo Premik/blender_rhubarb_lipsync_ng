@@ -4,7 +4,7 @@ from types import ModuleType
 
 
 # https://stackoverflow.com/questions/2183233/how-to-add-a-custom-loglevel-to-pythons-logging-facility/35804945#35804945
-def addLoggingLevel(levelName, levelNum, methodName=None):
+def addLoggingLevel(levelName, levelNum, methodName=None) -> None:
     """
     Comprehensively adds a new logging level to the `logging` module and the
     currently configured logging class.
