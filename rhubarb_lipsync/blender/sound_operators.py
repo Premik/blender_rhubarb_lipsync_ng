@@ -360,11 +360,11 @@ class PlayRange(bpy.types.Operator):
 
     @staticmethod
     def on_frame(scene: bpy.types.Scene) -> None:
-        if log.isEnabledFor(logging.TRACE):
-            log.trace(f"On frame {PlayRange.frames_left}")
+        if log.isEnabledFor(logging.TRACE):  # type: ignore
+            log.trace(f"On frame {PlayRange.frames_left}")  # type: ignore
         PlayRange.frames_left -= 1
         if PlayRange.frames_left <= 0:
-            log.trace("Stopping playback. Counter reached zero.")
+            log.trace("Stopping playback. Counter reached zero.")  # type: ignore
             try:
                 bpy.ops.screen.animation_cancel(restore_frame=False)
             except:

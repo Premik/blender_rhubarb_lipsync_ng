@@ -7,7 +7,7 @@ import pkgutil
 import sys
 from pathlib import Path
 from types import ModuleType
-from typing import Generator, Iterator, get_type_hints
+from typing import Generator, Iterator, get_type_hints, Any, Type
 
 import bpy
 
@@ -94,20 +94,19 @@ def get_ordered_classes_to_register(modules: list[ModuleType]):
 
 def get_register_deps_dict(modules: list[ModuleType]):
     my_classes = set(iter_my_classes(modules))
-    my_classes_by_idname = {cls.bl_idname: cls for cls in my_classes if hasattr(cls, "bl_idname")}
-
     deps_dict = {}
     for cls in my_classes:
-        deps_dict[cls] = set(iter_my_register_deps(cls, my_classes, my_classes_by_idname))  # type: ignore
+        deps_dict[cls] = set(iter_my_register_deps(cls, my_classes))
     return deps_dict
 
 
-def iter_my_register_deps(cls, my_classes, my_classes_by_idname):
+def iter_my_register_deps(cls: Type, my_classes: set[Type]):
     yield from iter_my_deps_from_annotations(cls, my_classes)
+    my_classes_by_idname = {cls.bl_idname: cls for cls in my_classes if hasattr(cls, "bl_idname")}
     yield from iter_my_deps_from_parent_id(cls, my_classes_by_idname)
 
 
-def iter_my_deps_from_annotations(cls, my_classes):
+def iter_my_deps_from_annotations(cls: Type, my_classes: set[Type]) -> Generator[Type, None, None]:
     for value in get_type_hints(cls, {}, {}).values():
         dependency = get_dependency_from_annotation(value)
         if dependency is not None:
@@ -115,7 +114,7 @@ def iter_my_deps_from_annotations(cls, my_classes):
                 yield dependency
 
 
-def get_dependency_from_annotation(value):
+def get_dependency_from_annotation(value: Any) -> Type:
     if blender_version >= (2, 93):
         if isinstance(value, bpy.props._PropertyDeferred):
             return value.keywords.get("type")
@@ -126,7 +125,7 @@ def get_dependency_from_annotation(value):
     return None
 
 
-def iter_my_deps_from_parent_id(cls, my_classes_by_idname) -> Generator:
+def iter_my_deps_from_parent_id(cls: Type, my_classes_by_idname: dict[str, Type]) -> Generator:
     if bpy.types.Panel in cls.__bases__:
         parent_idname = getattr(cls, "bl_parent_id", None)
         if parent_idname is not None:
@@ -135,7 +134,7 @@ def iter_my_deps_from_parent_id(cls, my_classes_by_idname) -> Generator:
                 yield parent_cls
 
 
-def iter_my_classes(modules) -> Generator:
+def iter_my_classes(modules: list[ModuleType]) -> Generator[Type, None, None]:
     base_types = get_register_base_types()
     for cls in get_classes_in_modules(modules):
         if any(base in base_types for base in cls.__bases__):
@@ -157,7 +156,7 @@ def iter_classes_in_module(module) -> Generator:
             yield value
 
 
-def get_register_base_types() -> set:
+def get_register_base_types() -> set[Type]:
     return set(
         getattr(bpy.types, name)
         for name in [
