@@ -31,14 +31,18 @@ class MappingUIList(UIList):
         prefs = RhubarbAddonPreferences.from_context(context)
         clp: CueListPreferences = prefs.cue_list_prefs
 
-        split = layout.split(factor=0.4)
+        split = layout.split(factor=0.1)
         row = split.row()
         # row.template_icon(icon_value=IconsManager.cue_image(item.key), scale=5)
-        #row = split.row()
+        # row = split.row()
+
+        # item.cue_desc.extended
+        row.enabled = False
         if clp.as_circle:
             row.label(text=item.cue_desc.key_displ)
         else:
             row.label(text=item.key)
+        row = split.row()
         row.prop(item, 'action', text="")
         row.operator(mapping_operators.ShowCueInfoHelp.bl_idname, icon="QUESTION", text="").key = item.key
 

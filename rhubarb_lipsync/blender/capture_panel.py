@@ -256,10 +256,12 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
 
     def draw_capture(self) -> None:
         prefs = RhubarbAddonPreferences.from_context(self.ctx)
+        cpref: CueListPreferences = prefs.cue_list_prefs
         props = CaptureProperties.from_context(self.ctx)
         if not props:
             return
         jprops: JobProperties = props.job
+
         title = self.get_job_status_title(jprops.status)
         error = bool(jprops.error)
 
@@ -267,15 +269,20 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
             return
 
         self.draw_job()
+        lst: MouthCueList = props.cue_list
 
         layout = self.layout
 
-        row = layout.row(align=True)
+        row = layout.row(align=False)
         row.alignment = 'RIGHT'
+        toolRow = row.row(align=True)
+        toolRow.prop(cpref, 'preview', icon="UV_SYNC_SELECT", icon_only=True)
+        toolRow.prop(cpref, 'sync_on_select', icon="RESTRICT_SELECT_OFF", icon_only=True)
+
+        toolRow.enabled = bool(lst.items)
         row.popover(panel=CueListOptionsPanel.bl_idname, text="", icon="VIS_SEL_11")
         row.operator(rhubarb_operators.ClearCueList.bl_idname, text="", icon="PANEL_CLOSE")
 
-        lst: MouthCueList = props.cue_list
         list_type = 'GRID' if prefs.cue_list_prefs.as_grid else 'DEFAULT'
         layout.template_list(MouthCueUIList.bl_idname, "Mouth cues", lst, "items", lst, "index", type=list_type)
 

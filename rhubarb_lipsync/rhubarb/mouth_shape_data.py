@@ -25,6 +25,7 @@ class MouthShapeInfo:
         self.short_dest = short_dest
         self.description = textwrap.dedent(description)
         self.key_displ = key_displ
+        self.extended = extended
 
     def __str__(self) -> str:
         return f"({self.key})-'{self.short_dest}'"
