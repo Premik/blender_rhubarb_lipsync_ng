@@ -112,8 +112,8 @@ class RhubarbAddonPreferences(AddonPreferences):
     )
 
     use_extended_shapes: BoolProperty(  # type: ignore
-        name="Use extended shapes",
-        description="Use three additional mouth shapes G,H,X on top of the six basic",
+        name="Use extended shapes ",
+        description="Use three additional mouth shapes ⒼⒽⓍ on top of the six basic",
         default=True,
     )
 

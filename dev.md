@@ -132,6 +132,10 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 * Add license files
 * Limit possible selection to armature and mesh-object only? (and not obj.library). Or hook the properties to the Collection instead of Object?
 * add sub-frames tickbox
+* extended shapes- seems they are generated even when disabled -check
+* Icon preview playback - doesn't refresh when mouse is not in the 3d view. Improve the refresh to find the correct 3d viewspace
+* Checkbox on "X" and "A" cue type "same as X/A"
+
 
 ### Low
 * Add [speaker](https://docs.blender.org/manual/en/latest/render/output/audio/speaker.html) as an alternative to Sequencer audio clip
@@ -141,6 +145,18 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 * autoload - complete type-hints
 * Capture panel, optimize, store pref, props etc. directy on the self (same like self.ctx)
 * Register some startup handler to call CueMappingList.buildItems. Can't be lazily done from since prop's are not allowed to be changed from the draw method
+* Verify the Dialog file is working
+* copy+paste cue-list, so can be translated to another object
+* Add "null" cue type to indicate un-detected cues?
+
+## Action selector
+- only from the selected object?
+- asset/nonasset
+- shapekey/action
+- armature actions only?
+- match by name sub-string/regexp
+- match by action group?
+
 
 ## Check
 https://github.com/Hunanbean/Papagayo-NGLipsyncImporterForBlender

@@ -70,6 +70,8 @@ class ProcessSoundFile(bpy.types.Operator):
         prefs = RhubarbAddonPreferences.from_context(context)
         props = CaptureProperties.from_context(context)
         jprops: JobProperties = props.job
+        lst: MouthCueList = props.cue_list
+        lst.items.clear()
 
         sound: Sound = props.sound
         jprops.cancel_request = False  # Clear any (stalled)  cancel request states

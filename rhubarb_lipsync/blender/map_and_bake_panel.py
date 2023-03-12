@@ -27,6 +27,7 @@ class MappingAndBakingPanel(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_category = "RLSP"
+    bl_options = {'DEFAULT_CLOSED'}
 
     def draw_mapping_list(self) -> None:
         prefs = RhubarbAddonPreferences.from_context(self.ctx)

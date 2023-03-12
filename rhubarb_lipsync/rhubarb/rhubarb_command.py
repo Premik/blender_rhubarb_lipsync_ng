@@ -111,14 +111,13 @@ class RhubarbCommandWrapper:
 
     def build_lipsync_args(self, input_file: str, dialog_file: Optional[str] = None) -> list[str]:
         dialog = ["--dialogFile", dialog_file] if dialog_file else []
-        extended = ["--extendedShapes"] if self.use_extended else []
+        extended = ["--extendedShapes", "GHX"] if self.use_extended else []
         return [
             str(self.executable_path),
             "-f",
             "json",
             "--machineReadable",
             *extended,
-            "GHX",
             "-r",
             self.recognizer,
             *dialog,
