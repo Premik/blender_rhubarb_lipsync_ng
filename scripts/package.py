@@ -2,14 +2,37 @@ import re
 from functools import cached_property
 from pathlib import Path
 
-from config import project_cfg
+from config import project_cfg, rhubarb_cfg
+import os
+import zipfile
+import shutil
+from rhubarb_bin import RhubarbBinary
+import pathlib
+
+
+def dist_zip_name(platform: str, ver: str) -> str:
+    return f"rhubarb-lipsync-{platform}-{ver}"
+
+
+def clean_temp_files_at(start_path: Path) -> int:
+    # https://stackoverflow.com/questions/28991015/python3-project-remove-pycache-folders-and-pyc-files
+    deleted = 0
+    for p in start_path.rglob('*.py[co]'):
+        p.unlink()
+        deleted += 1
+    for p in start_path.rglob('__pycache__'):
+        p.rmdir()
+        deleted += 1
+    return deleted
 
 
 class PackagePlugin:
     """Package (zip) project for the distribution"""
 
+    # 'version': (4, 0, 0),
     bl_info_version_pattern = r'''['"]version["']\s*:\s*\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*\)'''
     bl_info_version_rx = re.compile(f"(.*)({bl_info_version_pattern})(.*)", re.DOTALL)
+    main_package_name = 'rhubarb_lipsync'
 
     def __init__(self, cfg: dict) -> None:
         assert cfg and cfg["project"]
@@ -31,7 +54,11 @@ class PackagePlugin:
 
     @cached_property
     def main__init__(self) -> Path:
-        return self.project_dir / "rhubarb_lipsync" / "__init__.py"
+        return self.project_dir / PackagePlugin.main_package_name / "__init__.py"
+
+    @cached_property
+    def dist_dir(self) -> Path:
+        return self.project_dir / "dist"
 
     def update_bl_info_version(self) -> None:
         p = self.main__init__
@@ -47,8 +74,26 @@ class PackagePlugin:
         with open(p, 'w', encoding='utf-8') as s:
             s.write(text)
 
+    def clean_temp_files(self) -> None:
+        d = clean_temp_files_at(self.project_dir)
+        print(f"Deleted {d} temp/cache files/dirs from the {self.project_dir}")
+
+    def zip_dist(self, platform: str):
+        """Creates the zip for distribution. Assumes the correct binaries are already deployed in the bin_dir subfolder"""
+        zip = self.dist_dir / dist_zip_name(platform, self.version_str)
+        # https://stackoverflow.com/questions/1855095/how-to-create-a-zip-archive-of-a-directory#
+        print(f"Creating {zip}.")
+
+        shutil.make_archive(str(zip), 'zip', self.project_dir, PackagePlugin.main_package_name)
+
 
 if __name__ == '__main__':
     pp = PackagePlugin(project_cfg)
     pp.update_bl_info_version()
-    # TODO Create zip archives
+    pp.clean_temp_files()
+    current = RhubarbBinary.currently_deployed_platform(rhubarb_cfg)  # Keep the current platform bin
+    for b in RhubarbBinary.all_platforms(rhubarb_cfg):
+        b.deploy_to_bin()  # Deploy the corret platfrom before zipping
+        pp.zip_dist(b.platform_name)
+    if current:  # Recover the previously deployed platform, if any
+        current.deploy_to_bin()

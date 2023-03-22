@@ -7,7 +7,7 @@ import urllib.request
 import zipfile
 from functools import cache, cached_property
 from pathlib import Path
-
+from typing import Dict, List, Optional, cast
 from config import rhubarb_cfg
 
 
@@ -47,6 +47,13 @@ class RhubarbBinary:
     def all_platforms(cfg: dict) -> list['RhubarbBinary']:
         return [RhubarbBinary(cfg, p) for p in cfg["platforms"]]
 
+    @staticmethod
+    def currently_deployed_platform(cfg: dict) -> Optional['RhubarbBinary']:
+        for b in RhubarbBinary.all_platforms(cfg):
+            if b.is_deployed_to_bin():
+                return b
+        return None
+
     @property
     def base_url(self) -> str:
         return self.cfg["download"]["base_url"]
@@ -54,6 +61,10 @@ class RhubarbBinary:
     @property
     def base_name(self) -> str:
         return self.cfg["download"]["base_name"]
+
+    @property
+    def platform_name(self) -> str:
+        return self.platform_cfg["name"]
 
     @property
     def expected_download_sha256(self) -> str:

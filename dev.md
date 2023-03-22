@@ -11,29 +11,36 @@ https://github.com/DanielSWolf/rhubarb-lip-sync
 ## License
 `# SPDX-License-Identifier: MIT`
 
-### Create
-#mamba env create  -f environment.yaml
+## Conda
 
+### Create
+
+Create blank env with only python/pip.
+
+```sh
+mamba create -n rhubarb python=3.10 pip=22.2 
+```
+Then Activate and Update the env (see below)
+Note it seems it has to be done in two steps. since the base(system) python and pip would have been used to install the dependencies instead.
 
 ### Activate
 
 ```sh
-env_name=rhubarb
-conda activate $env_name
-export MY_EXTRA_PROMPT1="($env_name)"
-zsh
+conda activate rhubarb
+which python # Verify it points somewhere like `.conda/envs`. Not to the system python.
 ```
 
 ### Update
 
+Activate the env first. The `--prune` is only needed if deps. were removed/renamed. Note the  `-f environment.yml` is used implicitly.
 ```sh
-conda activate $env_name
-mamba env update -f environment.yaml --prune
-
+mamba env update --prune
 ```
 
 ### Win
 Install: https://mamba.readthedocs.io/en/latest/installation.html#windows
+
+```sh
 set MAMBA_ROOT_PREFIX=r:\mm
 
 micromamba shell init -s cmd.exe -p R:\mambaPrefix
@@ -43,8 +50,11 @@ micromamba create -f environment.yaml
 micromamba activate rhubarb
 
 r:\mambaPrefix\Scripts\activate
+```
 
 ## Vs Code
+Probably the easiest is to run the `code` or `code-oss` from within the activated conda env.
+Then run `Python: Select Interpreter` and select the one from conda env.
 
 ### Pylance
 
@@ -77,7 +87,7 @@ Official bpy from pip:
 ```
 
 Debug: https://github.com/JacquesLucke/blender_vscode
-
+https://marketplace.visualstudio.com/items?itemName=JacquesLucke.blender-development
 
 
 ## Blender
