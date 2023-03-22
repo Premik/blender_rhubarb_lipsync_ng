@@ -111,7 +111,7 @@ class RhubarbBinary:
 
     @cached_property
     def bin_dir(self) -> Path:
-        return self.project_dir / "bin"
+        return self.project_dir / "rhubarb_lipsync" / "bin"
 
     @cached_property
     def executable_path(self) -> Path:
