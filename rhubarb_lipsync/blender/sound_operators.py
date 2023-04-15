@@ -88,6 +88,7 @@ class CreateSoundStripWithSound(bpy.types.Operator):
             self.report({"ERROR"}, error)
             return {'CANCELLED'}
         props = CaptureProperties.from_context(context)
+        prefs = RhubarbAddonPreferences.from_context(context)
         sound: Sound = props.sound
 
         # sctx = ui_utils.get_sequencer_context(context)
@@ -112,9 +113,11 @@ class CreateSoundStripWithSound(bpy.types.Operator):
             self.report({"ERROR"}, f"There is more than one sound strips using the sound with '{sound.filepath}'.")
             return {'CANCELLED'}
 
+        sound.use_memory_cache = prefs.sound_mem_cache_default
         strip = strips[0]
         oldSound = strip.sound
         assert oldSound
+
         # Set to the current sound instead. This would leave the newly created copy with 0 users.
         strip.sound = sound
         strip.show_waveform = self.show_waveform
