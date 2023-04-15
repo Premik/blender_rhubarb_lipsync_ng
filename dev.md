@@ -82,13 +82,13 @@ Already in `project.toml`. To add to the settings.json manually:
 
 ### bpy modules
 
-Fake bpy modules (seems more complete)
+[Fake bpy modules](https://github.com/nutti/fake-bpy-module) (seems more complete)
 ```json
     "python.autoComplete.extraPaths": [
-        "/data/src/Blender/fake_bpy_modules_3.3-20221006"
+        "/data/src/fake_bpy_modules_3.4-20230117"
     ],
     "python.analysis.extraPaths": [
-        "/data/src/Blender/fake_bpy_modules_3.3-20221006"
+        "/data/src/fake_bpy_modules_3.4-20230117"
     ],
 ```
 
