@@ -18,6 +18,8 @@ log = logging.getLogger(__name__)
 
 
 class MappingListItem(PropertyGroup):
+    """Mapping of a single mouth shape type to action(s)"""
+
     key: StringProperty("key", description="Mouth cue key symbol (A,B,C..)")  # type: ignore
     action: PointerProperty(type=bpy.types.Action, name="Action")  # type: ignore
 
@@ -29,6 +31,8 @@ class MappingListItem(PropertyGroup):
 
 
 class MappingList(PropertyGroup):
+    """Mapping of all the mouth shape types to action(s)"""
+
     items: CollectionProperty(type=MappingListItem, name="Mapping items")  # type: ignore
     index: IntProperty(name="Selected mapping index")  # type: ignore
 
@@ -49,6 +53,8 @@ class MappingList(PropertyGroup):
 
 
 class MouthCueListItem(PropertyGroup):
+    """A captured mouth cue."""
+
     key: StringProperty(  # type: ignore
         "key",
         description="Mouth cue key symbol (A,B,C..)",
@@ -105,6 +111,8 @@ class MouthCueListItem(PropertyGroup):
 
 
 class MouthCueList(PropertyGroup):
+    """List of the captured mouth cues."""
+
     items: CollectionProperty(type=MouthCueListItem, name="Cue items")  # type: ignore
 
     # Autoload would fail in the typing reflection because of the 'MouthCueList' being unknown
@@ -164,6 +172,8 @@ class MouthCueList(PropertyGroup):
 
 
 class JobProperties(PropertyGroup):
+    """Describes current state of the capture-process"""
+
     progress: IntProperty("Progress", default=-1, min=0, max=100)  # type: ignore
     status: StringProperty("Capture status")  # type: ignore
     error: StringProperty("Error message")  # type: ignore
@@ -183,6 +193,8 @@ class JobProperties(PropertyGroup):
 
 
 class CaptureProperties(PropertyGroup):
+    """The entry point of lipsync properties. Hooked to a blender object"""
+
     sound: PointerProperty(type=bpy.types.Sound, name="Sound")  # type: ignore
     # start_frame: FloatProperty(name="Start frame", default=0)  # type: ignore
     dialog_file: StringProperty(  # type: ignore

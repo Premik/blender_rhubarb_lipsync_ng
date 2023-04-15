@@ -20,6 +20,8 @@ def frame2time(frame: float, fps: int, fps_base=1.0) -> float:
 
 
 class MouthShapeInfo:
+    """Description of a mouth shape. Metadata."""
+
     def __init__(self, key: str, key_displ: str, short_dest: str = "", description: str = "", extended=False) -> None:
         self.key = key
         self.short_dest = short_dest
@@ -35,7 +37,7 @@ class MouthShapeInfo:
 
 
 class MouthShapeInfos(Enum):
-    # Based on the  https://github.com/DanielSWolf/rhubarb-lip-sync#readme
+    """All possible mouth shapes. Based on the  https://github.com/DanielSWolf/rhubarb-lip-sync#readme"""
 
     _all: list[MouthShapeInfo]
 
@@ -131,6 +133,8 @@ class MouthShapeInfos(Enum):
 
 
 class MouthCue:
+    """Instance of a mouth shape at specific time-interval."""
+
     def __init__(self, key: str, start: float, end: float) -> None:
         self.key = key
         self.start = float(start)
