@@ -14,7 +14,7 @@ def time2frame(time: float, fps: int, fps_base=1.0) -> int:
     return int(round(time2frame_float(time, fps, fps_base)))
 
 
-def fram2time(frame: float, fps: int, fps_base=1.0) -> float:
+def frame2time(frame: float, fps: int, fps_base=1.0) -> float:
     assert fps > 0 and fps_base > 0, f"Can't convert to time when fps is {fps}/{fps_base}"
     return frame * fps_base / fps
 
@@ -35,7 +35,7 @@ class MouthShapeInfo:
 
 
 class MouthShapeInfos(Enum):
-    # TODO Generate from md/html https://github.com/DanielSWolf/rhubarb-lip-sync#readme
+    # Based on the  https://github.com/DanielSWolf/rhubarb-lip-sync#readme
 
     _all: list[MouthShapeInfo]
 

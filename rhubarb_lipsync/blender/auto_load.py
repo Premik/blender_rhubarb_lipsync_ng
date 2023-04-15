@@ -23,7 +23,7 @@ modules: list[ModuleType] = []
 ordered_classes: list = []
 
 
-def init(root: str = __file__):
+def init(root: str = __file__) -> None:
     # print(root)
     global modules
     global ordered_classes

@@ -49,7 +49,7 @@ class CueListPreferences(PropertyGroup):
     preview: BoolProperty(  # type: ignore
         default=True,
         name="Preview on playback",
-        description="Animate the icon in the panel when in playback.",
+        description="Animate the icon in the panel while in playback.",
     )
 
     @property

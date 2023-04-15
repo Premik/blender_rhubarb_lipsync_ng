@@ -18,10 +18,11 @@ https://github.com/DanielSWolf/rhubarb-lip-sync
 Create blank env with only python/pip.
 
 ```sh
-mamba create -n rhubarb python=3.10 pip=22.2 
+mamba create -n rhubarb -c conda-forge python=3.10 pip~=22.2 
 ```
+
 Then Activate and Update the env (see below)
-Note it seems it has to be done in two steps. since the base(system) python and pip would have been used to install the dependencies instead.
+Note it seems it has to be done in two steps. Since the base(system) python and pip would have been used to install the dependencies instead.
 
 ### Activate
 
@@ -52,6 +53,14 @@ micromamba activate rhubarb
 r:\mambaPrefix\Scripts\activate
 ```
 
+## Release
+
+- Verify the rhubarb binary versions+hashes are the latest version available
+- `cd scripts`
+- `python rhubarb_bin.py` to download rhubar binaries and verify the checksums. It would also deploy the correct binary to the /bin folder based on the current platform (linux/mac/win).
+- `python package.py` to create zipped distributions for each platform.
+
+
 ## Vs Code
 Probably the easiest is to run the `code` or `code-oss` from within the activated conda env.
 Then run `Python: Select Interpreter` and select the one from conda env.
@@ -62,6 +71,13 @@ Then run `Python: Select Interpreter` and select the one from conda env.
     "python.analysis.diagnosticSeverityOverrides": {
         "reportOptionalMemberAccess": "none",
     }
+```
+
+Already in `project.toml`. To add to the settings.json manually:
+```json
+ "python.formatting.provider": "black",
+ "python.formatting.blackArgs": ["--line-length", "160", "--skip-string-normalization"],
+ "python.formatting.blackPath": "/bin/black",
 ```
 
 ### bpy modules
@@ -143,7 +159,6 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 * Limit possible selection to armature and mesh-object only? (and not obj.library). Or hook the properties to the Collection instead of Object?
 * add sub-frames tickbox
 * extended shapes- seems they are generated even when disabled -check
-* Icon preview playback - doesn't refresh when mouse is not in the 3d view. Improve the refresh to find the correct 3d viewspace
 * Checkbox on "X" and "A" cue type "same as X/A"
 
 

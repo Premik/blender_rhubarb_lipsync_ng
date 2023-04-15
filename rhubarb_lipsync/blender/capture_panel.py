@@ -211,9 +211,13 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
         # When animation is running follow the icon from the cue list=> preview
         cp: CueListPreferences = RhubarbAddonPreferences.from_context(self.ctx).cue_list_prefs
         if getattr(self.ctx.screen, 'is_animation_playing', False) and cp.preview:
-            self.ctx.area.tag_redraw()  # Force redraw
+            # https://blender.stackexchange.com/questions/211184/how-to-tag-a-redraw-in-all-viewports
+            # self.ctx.area.tag_redraw()  # Force redraw
+            for area in self.ctx.screen.areas:
+                if area.type == 'VIEW_3D':
+                    area.tag_redraw()
             f = self.ctx.scene.frame_current_final
-            t = shape_data.fram2time(f, self.ctx.scene.render.fps, self.ctx.scene.render.fps_base)
+            t = shape_data.frame2time(f, self.ctx.scene.render.fps, self.ctx.scene.render.fps_base)
             cue = cue_list.find_cue_by_time(t)
             if cue:  # Time resolved to a cue, show its icon
                 return IconsManager.cue_icon(cue.key)
