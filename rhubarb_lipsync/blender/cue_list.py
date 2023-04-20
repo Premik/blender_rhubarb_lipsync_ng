@@ -6,7 +6,7 @@ from bpy.types import AddonPreferences, CollectionProperty, Context, PropertyGro
 
 from rhubarb_lipsync.blender.sound_operators import PlayRange
 from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences, CueListPreferences
-from rhubarb_lipsync.blender.properties import MouthCueList, MouthCueListItem
+from rhubarb_lipsync.blender.capture_properties import MouthCueList, MouthCueListItem
 from rhubarb_lipsync.blender.ui_utils import IconsManager
 from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue
 

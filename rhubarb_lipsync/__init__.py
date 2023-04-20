@@ -53,7 +53,7 @@ def unregister() -> None:
 # bpy.utils.register_classes_factory
 
 # from rhubarb_lipsync.blender.testing_panel import ExamplePanel, TestOpOperator
-# from rhubarb_lipsync.blender.properties import LipsyncProperties
+# from rhubarb_lipsync.blender.capture_properties import LipsyncProperties
 
 # register2, unregister = bpy.utils.register_classes_factory([LipsyncProperties, ExamplePanel, TestOpOperator])
 

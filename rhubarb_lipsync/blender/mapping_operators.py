@@ -9,7 +9,8 @@ from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty, Po
 from bpy.types import Context
 
 
-from rhubarb_lipsync.blender.properties import CaptureProperties, MappingList
+from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, MouthCueList, JobProperties
+from rhubarb_lipsync.blender.mapping_properties import MappingListProperties
 from rhubarb_lipsync.rhubarb.log_manager import logManager
 from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue, MouthShapeInfos, MouthShapeInfo
 import rhubarb_lipsync.blender.ui_utils as ui_utils
@@ -27,7 +28,7 @@ class BuildCueInfoUIList(bpy.types.Operator):
 
     # @classmethod
     # def disabled_reason(cls, context: Context, limit=0) -> str:
-    #    props = CaptureProperties.from_context(context)
+    #    props = CaptureListProperties.capture_from_context(context)
     #    mporps: MappingList = props.mapping
     #    if len(mporps.items) > 0:
     #        return f"Cue mapping info is already populated"
@@ -38,8 +39,8 @@ class BuildCueInfoUIList(bpy.types.Operator):
     #    return ui_utils.validation_poll(cls, context)
 
     def execute(self, context: Context) -> set[str]:
-        props = CaptureProperties.from_context(context)
-        mporps: MappingList = props.mapping
+        props = CaptureListProperties.capture_from_context(context)
+        mporps: MappingListProperties = props.mapping
         mporps.items.clear()
         mporps.build_items()
 
@@ -71,8 +72,8 @@ class ShowCueInfoHelp(bpy.types.Operator):
         return ui_utils.validation_poll(cls, context, CaptureProperties.context_selection_validation)
 
     def execute(self, context: Context) -> set[str]:
-        props = CaptureProperties.from_context(context)
-        mporps: MappingList = props.mapping
+        props = CaptureListProperties.capture_from_context(context)
+        mporps: MappingListProperties = props.mapping
         if not self.key:
             si = mporps.selected_item
             if not si:

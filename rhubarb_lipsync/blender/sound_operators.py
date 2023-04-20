@@ -11,7 +11,8 @@ from bpy.types import Context, Sound, SoundSequence
 
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences
-from rhubarb_lipsync.blender.properties import CaptureProperties
+from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, MouthCueList, JobProperties
+from rhubarb_lipsync.blender.mapping_properties import MappingListProperties
 
 log = logging.getLogger(__name__)
 
@@ -22,7 +23,7 @@ poll_search_limit = 50
 def find_strips_of_sound(context: Context, limit=0) -> list[SoundSequence]:
     '''Finds a sound strip which is using the selected sounds.'''
     ret: list[SoundSequence] = []
-    props = CaptureProperties.from_context(context)
+    props = CaptureListProperties.capture_from_context(context)
     sound: Sound = props.sound
     if not sound:
         return []
@@ -66,7 +67,7 @@ class CreateSoundStripWithSound(bpy.types.Operator):
         error_common = CaptureProperties.sound_selection_validation(context, False)
         if error_common:
             return error_common
-        props = CaptureProperties.from_context(context)
+        props = CaptureListProperties.capture_from_context(context)
         strip = find_strips_of_sound(context, limit)
         if strip:
             return f"Already placed on a strip on the channel {strip[0].channel} at frame {strip[0].frame_start}."
@@ -87,7 +88,7 @@ class CreateSoundStripWithSound(bpy.types.Operator):
         if error:
             self.report({"ERROR"}, error)
             return {'CANCELLED'}
-        props = CaptureProperties.from_context(context)
+        props = CaptureListProperties.capture_from_context(context)
         prefs = RhubarbAddonPreferences.from_context(context)
         sound: Sound = props.sound
 
@@ -153,7 +154,7 @@ class RemoveSoundStripWithSound(bpy.types.Operator):
         if error:
             self.report({"ERROR"}, error)
             return {'CANCELLED'}
-        props = CaptureProperties.from_context(context)
+        props = CaptureListProperties.capture_from_context(context)
         sound: Sound = props.sound
         strips = find_strips_of_sound(context)
         assert strips
@@ -189,7 +190,7 @@ class ToggleRelativePath(bpy.types.Operator):
             return ui_utils.to_abs_path(sound.filepath)
 
     def execute(self, context: Context) -> set[str]:
-        props = CaptureProperties.from_context(context)
+        props = CaptureListProperties.capture_from_context(context)
         sound: Sound = props.sound
         old = sound.filepath
         sound.filepath = self.get_converted(sound)
@@ -262,7 +263,7 @@ class ConvertSoundFromat(bpy.types.Operator):
     @staticmethod
     def init_props_from_sound(op_props, context: Context) -> None:
         prefs = RhubarbAddonPreferences.from_context(context)
-        props = CaptureProperties.from_context(bpy.context)
+        props = CaptureListProperties.capture_from_context(bpy.context)
         """Init the self's props from layout.prop call."""
         this = cast(ConvertSoundFromat, op_props)  #  The op_props arg contains the same set of properties as self)
         sound: Sound = props.sound
@@ -314,7 +315,7 @@ class ConvertSoundFromat(bpy.types.Operator):
         return wm.invoke_props_dialog(self)
 
     def execute(self, context: Context) -> set[str]:
-        props = CaptureProperties.from_context(context)
+        props = CaptureListProperties.capture_from_context(context)
         sound: Sound = props.sound
         src_path = pathlib.Path(bpy.path.abspath(sound.filepath))
         bpy.context.window.cursor_set("WAIT")

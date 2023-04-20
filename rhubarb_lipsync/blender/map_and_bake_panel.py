@@ -13,7 +13,8 @@ import rhubarb_lipsync.blender.sound_operators as sound_operators
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 from rhubarb_lipsync.blender.mapping_list import MappingUIList
 from rhubarb_lipsync.blender.preferences import CueListPreferences, RhubarbAddonPreferences
-from rhubarb_lipsync.blender.properties import CaptureProperties, MappingList, MappingListItem
+from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, MouthCueList, JobProperties
+from rhubarb_lipsync.blender.mapping_properties import MappingListProperties
 from rhubarb_lipsync.blender.ui_utils import IconsManager
 from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue, MouthShapeInfo, MouthShapeInfos
 from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandAsyncJob
@@ -31,12 +32,12 @@ class MappingAndBakingPanel(bpy.types.Panel):
 
     def draw_mapping_list(self) -> None:
         prefs = RhubarbAddonPreferences.from_context(self.ctx)
-        props = CaptureProperties.from_context(self.ctx)
+        props = CaptureListProperties.capture_from_context(self.ctx)
 
         layout = self.layout
 
         row = layout.row(align=True)
-        lst: MappingList = props.mapping
+        lst: MappingListProperties = props.mapping
         layout.template_list(MappingUIList.bl_idname, "Mapping", lst, "items", lst, "index")
 
     def draw(self, context: Context) -> None:
@@ -48,8 +49,8 @@ class MappingAndBakingPanel(bpy.types.Panel):
             if selection_error:
                 ui_utils.draw_error(self.layout, selection_error)
                 return
-            props = CaptureProperties.from_context(context)
-            mporps: MappingList = props.mapping
+            props = CaptureListProperties.capture_from_context(context)
+            mporps: MappingListProperties = props.mapping
             if len(mporps.items) != len(MouthShapeInfos.all()):
                 layout.alert = True
                 layout.operator(mapping_operators.BuildCueInfoUIList.bl_idname)

@@ -11,7 +11,7 @@ import rhubarb_lipsync.blender.rhubarb_operators as rhubarb_operators
 import rhubarb_lipsync.blender.sound_operators as sound_operators
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences, CueListPreferences
-from rhubarb_lipsync.blender.capture_properties import CaptureProperties, MouthCueList, MouthCueListItem, JobProperties
+from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, MouthCueList, MouthCueListItem, JobProperties
 from rhubarb_lipsync.blender.ui_utils import IconsManager
 from rhubarb_lipsync.blender.cue_list import MouthCueUIList
 from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandAsyncJob
@@ -29,7 +29,7 @@ class CaptureExtraOptionsPanel(bpy.types.Panel):
 
     def draw(self, context: Context) -> None:
         prefs = RhubarbAddonPreferences.from_context(context)
-        props = CaptureProperties.from_context(context)
+        props = CaptureListProperties.capture_from_context(context)
 
         layout = self.layout
         layout.prop(props, "dialog_file")
@@ -91,7 +91,7 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
     MouthCueList.index_changed = on_cuelist_index_changed  # Register callback
 
     def draw_sound_setup(self) -> bool:
-        props = CaptureProperties.from_context(self.ctx)
+        props = CaptureListProperties.capture_from_context(self.ctx)
         prefs = RhubarbAddonPreferences.from_context(self.ctx)
         sound: Sound = props.sound
 
@@ -168,7 +168,7 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
         return True
 
     def draw_info(self) -> None:
-        props = CaptureProperties.from_context(self.ctx)
+        props = CaptureListProperties.capture_from_context(self.ctx)
         prefs = RhubarbAddonPreferences.from_context(self.ctx)
 
         if not ui_utils.draw_expandable_header(prefs, "info_panel_expanded", "Additional info", self.layout):
@@ -229,7 +229,7 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
         return IconsManager.logo_icon()
 
     def draw_job(self) -> None:
-        props = CaptureProperties.from_context(self.ctx)
+        props = CaptureListProperties.capture_from_context(self.ctx)
         jprops: JobProperties = props.job
         cue_list: MouthCueList = props.cue_list
         layout = self.layout
@@ -261,7 +261,7 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
     def draw_capture(self) -> None:
         prefs = RhubarbAddonPreferences.from_context(self.ctx)
         cpref: CueListPreferences = prefs.cue_list_prefs
-        props = CaptureProperties.from_context(self.ctx)
+        props = CaptureListProperties.capture_from_context(self.ctx)
         if not props:
             return
         jprops: JobProperties = props.job
@@ -292,7 +292,7 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
 
     def draw(self, context: Context) -> None:
         try:
-            props = CaptureProperties.from_context(context)
+            props = CaptureListProperties.capture_from_context(context)
             self.ctx = context
             layout = self.layout
             # layout.use_property_split = True

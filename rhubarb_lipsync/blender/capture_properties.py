@@ -197,7 +197,7 @@ class CaptureProperties(PropertyGroup):
         """Validates there is an active object with the rhubarb properties in the blender context"""
         if not ctx.object:
             return "No active object selected"
-        if not CaptureProperties.from_context(ctx):
+        if not CaptureListProperties.capture_from_context(ctx):
             return "'rhubarb_lipsync' not found on the active object"
         return ""
 
@@ -205,7 +205,7 @@ class CaptureProperties(PropertyGroup):
         selection_error = CaptureProperties.context_selection_validation(context)
         if selection_error:
             return selection_error
-        props = CaptureProperties.from_context(context)
+        props = CaptureListProperties.capture_from_context(context)
         if not props.sound:
             return "No sound selected"
         sound: Sound = props.sound

@@ -9,7 +9,8 @@ from bpy.types import Context, Sound, SoundSequence
 
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences
-from rhubarb_lipsync.blender.properties import CaptureProperties, MouthCueList, JobProperties, MappingList
+from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, MouthCueList, JobProperties
+from rhubarb_lipsync.blender.mapping_properties import MappingListProperties
 from rhubarb_lipsync.rhubarb.log_manager import logManager
 from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandAsyncJob, RhubarbCommandWrapper
 from collections import defaultdict
@@ -34,7 +35,7 @@ class ProcessSoundFile(bpy.types.Operator):
 
     @classmethod
     def disabled_reason(cls, context: Context) -> str:
-        props = CaptureProperties.from_context(context)
+        props = CaptureListProperties.capture_from_context(context)
         sound: Sound = props.sound
         # Use properties (binded to object) to check if already running.
         # This allows concurent running of the op provided each instance is linked to a different object
@@ -58,7 +59,7 @@ class ProcessSoundFile(bpy.types.Operator):
         return ui_utils.validation_poll(cls, context)
 
     def invoke(self, context: Context, event: bpy.types.Event) -> set[int] | set[str]:
-        props = CaptureProperties.from_context(context)
+        props = CaptureListProperties.capture_from_context(context)
         cl: MouthCueList = props.cue_list
         if len(cl.items) > 0:
             # Already some existing cues, confirm before overriding
@@ -68,7 +69,7 @@ class ProcessSoundFile(bpy.types.Operator):
 
     def execute(self, context: Context) -> set[str]:
         prefs = RhubarbAddonPreferences.from_context(context)
-        props = CaptureProperties.from_context(context)
+        props = CaptureListProperties.capture_from_context(context)
         jprops: JobProperties = props.job
         lst: MouthCueList = props.cue_list
         lst.items.clear()
@@ -191,7 +192,7 @@ class ProcessSoundFile(bpy.types.Operator):
                 lst: MouthCueList = props.cue_list
                 lst.add_cues(self.job.get_lipsync_output_cues())
                 # Ensure  the mapping list is initialized. As it would be likely needed anyway
-                mp: MappingList = props.mapping
+                mp: MappingListProperties = props.mapping
                 mp.build_items()
 
             del self.job
@@ -240,7 +241,7 @@ class CancelCaptureJob(bpy.types.Operator):
         selection_error = CaptureProperties.context_selection_validation(context)
         if selection_error:
             return selection_error
-        props = CaptureProperties.from_context(context)
+        props = CaptureListProperties.capture_from_context(context)
 
         return ""
 
@@ -269,7 +270,7 @@ class ClearCueList(bpy.types.Operator):
         selection_error = CaptureProperties.context_selection_validation(context)
         if selection_error:
             return selection_error
-        props = CaptureProperties.from_context(context)
+        props = CaptureListProperties.capture_from_context(context)
         cl: MouthCueList = props.cue_list
         if len(cl.items) <= 0:
             return "Cue list is empty"
@@ -284,7 +285,7 @@ class ClearCueList(bpy.types.Operator):
     #    return wm.invoke_confirm(self, event)
 
     def execute(self, context: Context) -> set[str]:
-        props = CaptureProperties.from_context(context)
+        props = CaptureListProperties.capture_from_context(context)
         cl: MouthCueList = props.cue_list
         cl.items.clear()
 

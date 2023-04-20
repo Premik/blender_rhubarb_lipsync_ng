@@ -9,7 +9,8 @@ import rhubarb_lipsync
 import rhubarb_lipsync.blender.auto_load
 import test_data
 from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences
-from rhubarb_lipsync.blender.properties import CaptureProperties
+from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, MouthCueList, JobProperties
+from rhubarb_lipsync.blender.mapping_properties import MappingListProperties
 from rhubarb_lipsync.rhubarb.log_manager import logManager
 
 
@@ -24,7 +25,7 @@ class PropertiesTest(unittest.TestCase):
         # bpy.ops.mesh.primitive_cube_add()
         # obj = bpy.context.object
         # assert obj
-        self.props = CaptureProperties.from_context(bpy.context)
+        self.props = CaptureListProperties.capture_from_context(bpy.context)
         assert self.props
 
     def testSoundFilePath(self) -> None:
