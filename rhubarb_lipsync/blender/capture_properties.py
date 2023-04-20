@@ -17,41 +17,6 @@ from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandAsyncJob, Rhub
 log = logging.getLogger(__name__)
 
 
-class MappingListItem(PropertyGroup):
-    """Mapping of a single mouth shape type to action(s)"""
-
-    key: StringProperty("key", description="Mouth cue key symbol (A,B,C..)")  # type: ignore
-    action: PointerProperty(type=bpy.types.Action, name="Action")  # type: ignore
-
-    @cached_property
-    def cue_desc(self) -> MouthShapeInfo | None:
-        if not self.key:
-            return None
-        return MouthShapeInfos[self.key].value
-
-
-class MappingList(PropertyGroup):
-    """Mapping of all the mouth shape types to action(s)"""
-
-    items: CollectionProperty(type=MappingListItem, name="Mapping items")  # type: ignore
-    index: IntProperty(name="Selected mapping index")  # type: ignore
-
-    def build_items(self) -> None:
-        # log.trace("Already buil")  # type: ignore
-        if len(self.items) > 0:
-            return  # Already built (assume)
-        log.trace("Building mapping list")  # type: ignore
-        for msi in MouthShapeInfos.all():
-            item: MappingListItem = self.items.add()
-            item.key = msi.key
-
-    @property
-    def selected_item(self) -> Optional[MappingListItem]:
-        if self.index < 0 or self.index >= len(self.items):
-            return None
-        return self.items[self.index]
-
-
 class MouthCueListItem(PropertyGroup):
     """A captured mouth cue."""
 
@@ -193,7 +158,7 @@ class JobProperties(PropertyGroup):
 
 
 class CaptureProperties(PropertyGroup):
-    """The entry point of lipsync properties. Hooked to a blender object"""
+    """Capture setup and list of captured cues"""
 
     sound: PointerProperty(type=bpy.types.Sound, name="Sound")  # type: ignore
     # start_frame: FloatProperty(name="Start frame", default=0)  # type: ignore
@@ -204,11 +169,11 @@ class CaptureProperties(PropertyGroup):
     )
     job: PointerProperty(type=JobProperties, name="Job")  # type: ignore
     cue_list: PointerProperty(type=MouthCueList, name="Cues")  # type: ignore
-    mapping: PointerProperty(type=MappingList, name="Mapping")  # type: ignore
+    # mapping: PointerProperty(type=MappingList, name="Mapping")  # type: ignore
 
     @staticmethod
     def from_context(ctx: Context) -> Optional['CaptureProperties']:
-        """Get the properties bound to the current active object in the context"""
+        """Get the selecrted capture properties from the current scene of the provided context"""
         # ctx.selected_editable_objects
         return CaptureProperties.from_object(ctx.object)
 
@@ -289,3 +254,32 @@ class CaptureProperties(PropertyGroup):
         assert p, "Can't change extension while sound file is not set"
         assert new_ext is not None
         return f"{p}.{new_ext.lower()}"
+
+
+class CaptureListProperties(PropertyGroup):
+    """List of capture setup and cues. Hooked to blender scene"""
+
+    items: CollectionProperty(type=CaptureProperties, name="Captures")  # type: ignore
+    index: IntProperty(name="Selected capture index")  # type: ignore
+
+    @property
+    def selected_item(self) -> Optional[CaptureProperties]:
+        if self.index < 0 or self.index >= len(self.items):
+            return None
+        return self.items[self.index]
+
+    @staticmethod
+    def from_context(ctx: Context) -> Optional['CaptureListProperties']:
+        """Get the  properties from the current scene of the provided context"""
+
+        if not ctx.scene:
+            return None
+        ret: CaptureListProperties = getattr(ctx.scene, 'rhubarb_lipsync_captures')  # type: ignore
+        return ret
+
+    @staticmethod
+    def capture_from_context(ctx: Context) -> Optional['CaptureProperties']:
+        cl = CaptureListProperties.from_context(ctx)
+        if not cl:
+            return None
+        return cl.selected_item
