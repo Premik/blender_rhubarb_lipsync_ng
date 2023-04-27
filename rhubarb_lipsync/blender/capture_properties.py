@@ -171,40 +171,10 @@ class CaptureProperties(PropertyGroup):
     cue_list: PointerProperty(type=MouthCueList, name="Cues")  # type: ignore
     # mapping: PointerProperty(type=MappingList, name="Mapping")  # type: ignore
 
-    @staticmethod
-    def from_context(ctx: Context) -> Optional['CaptureProperties']:
-        """Get the selecrted capture properties from the current scene of the provided context"""
-        # ctx.selected_editable_objects
-        return CaptureProperties.from_object(ctx.object)
-
-    @staticmethod
-    def from_object(obj: bpy.types.Object) -> Optional['CaptureProperties']:
-        if not obj:
-            return None
-        ret: CaptureProperties = getattr(obj, 'rhubarb_lipsync')  # type: ignore
-        # ret.mapping.build_items()  # Ensure cue infos are created
-        return ret
-
-    @staticmethod
-    def by_object_name(obj_name: str) -> Optional['CaptureProperties']:
-        if not obj_name:
-            return None
-        obj = bpy.data.objects.get(obj_name, None)
-        return CaptureProperties.from_object(obj)
-
-    @staticmethod
-    def context_selection_validation(ctx: Context) -> str:
-        """Validates there is an active object with the rhubarb properties in the blender context"""
-        if not ctx.object:
-            return "No active object selected"
-        if not CaptureListProperties.capture_from_context(ctx):
-            return "'rhubarb_lipsync' not found on the active object"
-        return ""
-
     def sound_selection_validation(context: Context, required_unpack=True) -> str:
-        selection_error = CaptureProperties.context_selection_validation(context)
-        if selection_error:
-            return selection_error
+        # selection_error = MappingListProperties.context_selection_validation(context)
+        # if selection_error:
+        #    return selection_error
         props = CaptureListProperties.capture_from_context(context)
         if not props.sound:
             return "No sound selected"
