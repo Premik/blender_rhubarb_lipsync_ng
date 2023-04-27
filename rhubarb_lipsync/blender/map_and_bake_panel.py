@@ -45,13 +45,13 @@ class MappingAndBakingPanel(bpy.types.Panel):
             self.ctx = context
             layout = self.layout
 
-            selection_error = CaptureProperties.context_selection_validation(context)
+            selection_error = MappingListProperties.context_selection_validation(context)
             if selection_error:
                 ui_utils.draw_error(self.layout, selection_error)
                 return
             props = CaptureListProperties.capture_from_context(context)
-            mporps: MappingListProperties = props.mapping
-            if len(mporps.items) != len(MouthShapeInfos.all()):
+            mprops: MappingListProperties = props.mapping
+            if len(mprops.items) != len(MouthShapeInfos.all()):
                 layout.alert = True
                 layout.operator(mapping_operators.BuildCueInfoUIList.bl_idname)
                 return

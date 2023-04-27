@@ -50,3 +50,33 @@ class MappingListProperties(PropertyGroup):
         if self.index < 0 or self.index >= len(self.items):
             return None
         return self.items[self.index]
+
+    @staticmethod
+    def from_context(ctx: Context) -> Optional['MappingListProperties']:
+        """Get the selecrted capture properties from the current scene of the provided context"""
+        # ctx.selected_editable_objects
+        return MappingListProperties.from_object(ctx.object)
+
+    @staticmethod
+    def from_object(obj: bpy.types.Object) -> Optional['MappingListProperties']:
+        if not obj:
+            return None
+        ret: CaptureProperties = getattr(obj, 'rhubarb_lipsync')  # type: ignore
+        # ret.mapping.build_items()  # Ensure cue infos are created
+        return ret
+
+    @staticmethod
+    def by_object_name(obj_name: str) -> Optional['MappingListProperties']:
+        if not obj_name:
+            return None
+        obj = bpy.data.objects.get(obj_name, None)
+        return MappingListProperties.from_object(obj)
+
+    @staticmethod
+    def context_selection_validation(ctx: Context) -> str:
+        """Validates there is an active object with the rhubarb properties in the blender context"""
+        if not ctx.object:
+            return "No active object selected"
+        if not MappingListProperties.capture_from_context(ctx):
+            return "'rhubarb_lipsync' not found on the active object"
+        return ""

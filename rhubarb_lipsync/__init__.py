@@ -44,7 +44,7 @@ def register() -> None:
 
 def unregister() -> None:
     rhubarb_lipsync.blender.auto_load.unregister()
-    del bpy.types.Object.rhubarb_lipsync_captures
+    del bpy.types.Scene.rhubarb_lipsync_captures
     del bpy.types.Object.rhubarb_lipsync_mapping
 
     IconsManager.unregister()

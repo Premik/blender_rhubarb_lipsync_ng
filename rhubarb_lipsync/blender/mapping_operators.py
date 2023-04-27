@@ -69,7 +69,7 @@ class ShowCueInfoHelp(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context: Context) -> bool:
-        return ui_utils.validation_poll(cls, context, CaptureProperties.context_selection_validation)
+        return ui_utils.validation_poll(cls, context, MappingListProperties.context_selection_validation)
 
     def execute(self, context: Context) -> set[str]:
         props = CaptureListProperties.capture_from_context(context)

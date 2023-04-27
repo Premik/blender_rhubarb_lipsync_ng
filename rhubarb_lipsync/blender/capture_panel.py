@@ -9,6 +9,7 @@ from bpy.types import Context, Sound, SoundSequence
 
 import rhubarb_lipsync.blender.rhubarb_operators as rhubarb_operators
 import rhubarb_lipsync.blender.sound_operators as sound_operators
+import rhubarb_lipsync.blender.capture_operators as capture_operators
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences, CueListPreferences
 from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, MouthCueList, MouthCueListItem, JobProperties
@@ -93,22 +94,26 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
     def draw_sound_setup(self) -> bool:
         props = CaptureListProperties.capture_from_context(self.ctx)
         prefs = RhubarbAddonPreferences.from_context(self.ctx)
-        sound: Sound = props.sound
+        sound: Sound = props and props.sound
 
         # Redundant validations to allow collapsing this sub-panel while still indicating any errors
         if sound is None:
             errors = True
         else:
             path = pathlib.Path(sound.filepath)
-            errors = sound.packed_file or not path.exists or not props.is_sound_format_supported()
+            errors = not sound or sound.packed_file or not path.exists or not props.is_sound_format_supported()
         if not ui_utils.draw_expandable_header(prefs, "sound_source_panel_expanded", "Input sound setup", self.layout, errors):
             return not errors
-
         layout = self.layout
+
+        if not props:
+            ui_utils.draw_error(self.layout, "No capture props in scene.")
+            return False
         layout.template_ID(props, "sound", open="sound.open")
         if sound is None:
             ui_utils.draw_error(self.layout, "Select a sound file.")
             return False
+
         row = layout.row(align=True)
         row.prop(sound, "filepath", text="")
 
@@ -285,7 +290,7 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
 
         toolRow.enabled = bool(lst.items)
         row.popover(panel=CueListOptionsPanel.bl_idname, text="", icon="VIS_SEL_11")
-        row.operator(rhubarb_operators.ClearCueList.bl_idname, text="", icon="PANEL_CLOSE")
+        row.operator(capture_operators.ClearCueList.bl_idname, text="", icon="PANEL_CLOSE")
 
         list_type = 'GRID' if prefs.cue_list_prefs.as_grid else 'DEFAULT'
         layout.template_list(MouthCueUIList.bl_idname, "Mouth cues", lst, "items", lst, "index", type=list_type)
@@ -298,11 +303,18 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
             # layout.use_property_split = True
             # layout.use_property_decorate = False  # No animation.
 
-            selection_error = CaptureProperties.context_selection_validation(context)
-            if selection_error:
-                ui_utils.draw_error(self.layout, selection_error)
-            else:
-                self.draw_sound_setup()
+            # selection_error = MappingListProperties.context_selection_validation(context)
+            # if selection_error:
+            #     ui_utils.draw_error(self.layout, selection_error)
+            # else:
+            # , open="sound.open"
+            # layout.template_list(props, "items")
+            rootProps = CaptureListProperties.from_context(context)
+            # layout.prop(rootProps, "items")
+            # layout.template_list(rootProps, "items")
+            layout.template_ID(rootProps, "items")
+            layout.operator(capture_operators.CreateCaptureProps.bl_idname, text="", icon="DUPLICATE")
+            self.draw_sound_setup()
             self.draw_info()
 
             self.draw_capture()

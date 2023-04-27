@@ -61,7 +61,7 @@ class RhubarbCommandWrapperTest(unittest.TestCase):
 
     @cached_property
     def executable_path(self) -> Path:
-        return self.project_dir / "bin" / RhubarbCommandWrapper.executable_default_filename()
+        return self.project_dir / "rhubarb_lipsync" / "bin" / RhubarbCommandWrapper.executable_default_filename()
 
     @cached_property
     def data(self) -> test_data.SampleData:
