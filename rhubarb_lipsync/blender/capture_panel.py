@@ -309,11 +309,22 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
             # else:
             # , open="sound.open"
             # layout.template_list(props, "items")
+            # https://devtalk.blender.org/t/prop-search-with-activate-init/28887/3R
             rootProps = CaptureListProperties.from_context(context)
-            # layout.prop(rootProps, "items")
+            # layout.prop_search(rootProps.items)
+            # layout.prop_search()
+            # row.prop_search(scene.keying_sets, "active", scene, "keying_sets", text="")
             # layout.template_list(rootProps, "items")
-            layout.template_ID(rootProps, "items")
-            layout.operator(capture_operators.CreateCaptureProps.bl_idname, text="", icon="DUPLICATE")
+            # layout.template_ID(rootProps, "items")
+            # layout.template_search(rootProps, 'items')
+            if rootProps.items:
+                row = layout.row(align=True)
+                row.prop(rootProps, 'name_search', text="")
+                row.operator(capture_operators.CreateCaptureProps.bl_idname, text="", icon="DUPLICATE")
+                row.operator(capture_operators.DeleteCaptureProps.bl_idname, text="", icon="PANEL_CLOSE")
+            else:
+                layout.operator(capture_operators.CreateCaptureProps.bl_idname, icon="DUPLICATE")
+
             self.draw_sound_setup()
             self.draw_info()
 

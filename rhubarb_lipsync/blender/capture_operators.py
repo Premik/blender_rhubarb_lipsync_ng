@@ -1,4 +1,5 @@
 import logging
+from operator import index
 import pathlib
 from io import TextIOWrapper
 import traceback
@@ -27,23 +28,25 @@ class CreateCaptureProps(bpy.types.Operator):
     def execute(self, context: Context) -> set[str]:
         rootProps = CaptureListProperties.from_context(context)
         assert rootProps, "Failed to got root properties from the scene. Registration error?"
-
+        log.trace("Creating new capture properties")  # type: ignore
+        item: CaptureProperties = rootProps.items.add()
+        rootProps.index = len(rootProps.items) - 1  # Select the newly created item
         return {'FINISHED'}
 
 
-class CancelCaptureJob(bpy.types.Operator):
-    """Cancels the running caputre job"""
+class DeleteCaptureProps(bpy.types.Operator):
+    """Delete existing CaptureProperties item"""
 
-    bl_idname = "rhubarb.cancel_job"
-    bl_label = "Cancel"
+    bl_idname = "rhubarb.delete_capture_props"
+    bl_label = "Delete capture"
+    bl_options = {'UNDO', 'REGISTER'}
 
     @classmethod
     def disabled_reason(cls, context: Context) -> str:
-        selection_error = MappingListProperties.context_selection_validation(context)
-        if selection_error:
-            return selection_error
-        props = CaptureListProperties.capture_from_context(context)
-
+        rootProps = CaptureListProperties.from_context(context)
+        if not rootProps.selected_item:
+            return "No capture selected"
+        # TODO Check capture is not runnig
         return ""
 
     @classmethod
@@ -51,11 +54,9 @@ class CancelCaptureJob(bpy.types.Operator):
         return ui_utils.validation_poll(cls, context)
 
     def execute(self, context: Context) -> set[str]:
-        prefs = RhubarbAddonPreferences.from_context(context)
-        cmd = prefs.new_command_handler()
-        GetRhubarbExecutableVersion.executable_version = cmd.get_version()
-        # Cache to alow re-run on config changes
-        GetRhubarbExecutableVersion.executable_last_path = str(cmd.executable_path)
+        rootProps = CaptureListProperties.from_context(context)
+        rootProps.items.remove(rootProps.index)
+        rootProps.index = rootProps.index - 1
         return {'FINISHED'}
 
 

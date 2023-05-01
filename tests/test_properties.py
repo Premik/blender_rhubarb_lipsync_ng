@@ -25,6 +25,7 @@ class PropertiesTest(unittest.TestCase):
         # bpy.ops.mesh.primitive_cube_add()
         # obj = bpy.context.object
         # assert obj
+        bpy.ops.rhubarb.create_capture_props()  # Create new capture item
         self.props = CaptureListProperties.capture_from_context(bpy.context)
         assert self.props
 

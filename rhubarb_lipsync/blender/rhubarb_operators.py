@@ -69,6 +69,7 @@ class ProcessSoundFile(bpy.types.Operator):
 
     def execute(self, context: Context) -> set[str]:
         prefs = RhubarbAddonPreferences.from_context(context)
+        rootProps = CaptureListProperties.from_context(context)
         props = CaptureListProperties.capture_from_context(context)
         jprops: JobProperties = props.job
         lst: MouthCueList = props.cue_list
@@ -86,22 +87,27 @@ class ProcessSoundFile(bpy.types.Operator):
         wm = context.window_manager
         wm.modal_handler_add(self)
         self.timer = wm.event_timer_add(0.2, window=context.window)
-        self.object_name = context.object.name  # Save the current active object name in case the selection chagned later
+        # self.object_name = context.object.name  # Save the current active object name in case the selection chagned later
+        # Save index of the currently selected capture in case the selection chagned while the job is still running
+        self.capture_index = rootProps.index
         self.update_progress(context)
         log.debug("Operator execute")
         return {'RUNNING_MODAL'}
 
-    @property
-    def running_props(self) -> CaptureProperties:
-        """Properties bound to the object when the operator has been started.
-        Since the operator is modal (background) the selected object can be changed while operator is still running
+    def running_props(self, context: Context) -> CaptureProperties:
+        """Properties bound to capture when the operator has been started.
+        Since the operator is modal (background) the selected capture can be changed while operator is still running
         """
         # TODO: Ensure the self.object has not beed delete in the meantime(save id(obj) or obj.as_pointer() ?)
-        return CaptureProperties.by_object_name(self.object_name)
+        # return CaptureProperties.by_object_name(self.object_name)
+        rootProps = CaptureListProperties.from_context(context)
+        if self.capture_index < 0 or self.capture_index >= len(rootProps.items):
+            return None
+        return rootProps.items[self.capture_index]
 
-    @property
-    def running_job(self) -> Optional[RhubarbCommandAsyncJob]:
-        return ProcessSoundFile.get_job_from_obj(self.object)
+    # @property
+    # def running_job(self) -> Optional[RhubarbCommandAsyncJob]:
+    #    return ProcessSoundFile.get_job_from_obj(self.object)
 
     def modal(self, context: Context, event: bpy.types.Event) -> set[str]:
         # print(f"{id(self)}  {id(context.object)}")
@@ -111,8 +117,8 @@ class ProcessSoundFile(bpy.types.Operator):
             self.finished(context)
             return {'CANCELLED'}
 
-        if not self.running_props:
-            msg = f"Failed get the properties \nfrom the '{self.object_name}' object.\n Object delete or renamed?"
+        if not self.running_props(context):
+            msg = f"Failed get the capture at index: '{self.capture_index}'.\n Object delete or renamed?"
             self.report({'ERROR'}, msg)
             self.job.last_exception = Exception(msg)
             self.job.cancel()
@@ -120,12 +126,12 @@ class ProcessSoundFile(bpy.types.Operator):
             return {'CANCELLED'}
 
         if self.job.cmd.has_finished:
-            self.report({'INFO'}, f"{self.object_name} Done")
+            self.report({'INFO'}, f"Capture @{self.capture_index} Done")
 
             self.finished(context)
             return {'FINISHED'}
 
-        jprops: JobProperties = self.running_props.job
+        jprops: JobProperties = self.running_props(context).job
         if event.type in {'ESC'} or jprops.cancel_request:
             jprops.cancel_request = False
             self.cancel_on_next = True
@@ -170,8 +176,8 @@ class ProcessSoundFile(bpy.types.Operator):
         # else:
         #    wm.progress_update(progress)
         # Slider can only display value from  a blender property. And properties can't be modified in the draw methods, so setting here
-        if self.running_props:
-            jprops: JobProperties = self.running_props.job
+        if self.running_props(context):
+            jprops: JobProperties = self.running_props(context).job
             jprops.update_from_async_job(self.job)
         context.area.tag_redraw()  # Force redraw
 
@@ -187,13 +193,13 @@ class ProcessSoundFile(bpy.types.Operator):
             self.update_progress(context)
             self.job.join_thread()
             self.job.cmd.close_process()
-            props = self.running_props
+            props = self.running_props(context)
             if props:
                 lst: MouthCueList = props.cue_list
                 lst.add_cues(self.job.get_lipsync_output_cues())
                 # Ensure  the mapping list is initialized. As it would be likely needed anyway
-                mp: MappingListProperties = props.mapping
-                mp.build_items()
+                # mp: MappingListProperties = props.mapping
+                # mp.build_items()
 
             del self.job
 
@@ -228,4 +234,3 @@ class GetRhubarbExecutableVersion(bpy.types.Operator):
         # Cache to alow re-run on config changes
         GetRhubarbExecutableVersion.executable_last_path = str(cmd.executable_path)
         return {'FINISHED'}
-

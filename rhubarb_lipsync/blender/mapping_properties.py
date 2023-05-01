@@ -61,7 +61,7 @@ class MappingListProperties(PropertyGroup):
     def from_object(obj: bpy.types.Object) -> Optional['MappingListProperties']:
         if not obj:
             return None
-        ret: CaptureProperties = getattr(obj, 'rhubarb_lipsync')  # type: ignore
+        ret: CaptureProperties = getattr(obj, 'rhubarb_lipsync_mapping')  # type: ignore
         # ret.mapping.build_items()  # Ensure cue infos are created
         return ret
 
@@ -77,6 +77,6 @@ class MappingListProperties(PropertyGroup):
         """Validates there is an active object with the rhubarb properties in the blender context"""
         if not ctx.object:
             return "No active object selected"
-        if not MappingListProperties.capture_from_context(ctx):
+        if not MappingListProperties.from_context(ctx):
             return "'rhubarb_lipsync' not found on the active object"
         return ""

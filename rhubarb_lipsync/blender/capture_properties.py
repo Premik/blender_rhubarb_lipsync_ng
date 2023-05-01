@@ -1,7 +1,7 @@
 import bisect
 import logging
 import math
-from operator import attrgetter
+from operator import attrgetter, index
 import pathlib
 from functools import cached_property
 from typing import Any, Callable, Optional, cast
@@ -13,6 +13,7 @@ from bpy.types import Action, AddonPreferences, Context, PropertyGroup, Sound, U
 
 from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue, MouthShapeInfo, MouthShapeInfos
 from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandAsyncJob, RhubarbCommandWrapper, RhubarbParser
+import re
 
 log = logging.getLogger(__name__)
 
@@ -160,7 +161,12 @@ class JobProperties(PropertyGroup):
 class CaptureProperties(PropertyGroup):
     """Capture setup and list of captured cues"""
 
-    sound: PointerProperty(type=bpy.types.Sound, name="Sound")  # type: ignore
+    def on_sound_update(self, ctx: Context) -> None:
+        # ctx.area.tag_redraw()
+        rootProps = CaptureListProperties.from_context(ctx)
+        rootProps.name_search = self.short_desc(rootProps.index)
+
+    sound: PointerProperty(type=bpy.types.Sound, name="Sound", update=on_sound_update)  # type: ignore
     # start_frame: FloatProperty(name="Start frame", default=0)  # type: ignore
     dialog_file: StringProperty(  # type: ignore
         name="Dialog file",
@@ -225,12 +231,58 @@ class CaptureProperties(PropertyGroup):
         assert new_ext is not None
         return f"{p}.{new_ext.lower()}"
 
+    def short_desc(self, indx: int):
+        jprops: JobProperties = self.job
+        if jprops and jprops.status:
+            status = f" ({jprops.status})"
+        else:
+            status = ""
+
+        if self.sound:
+            fn = f"{self.sound_file_basename}.{self.sound_file_extension}"
+        else:
+            fn = "<No sound selected>"
+        return f"{fn}{status}.{str(indx).zfill(3)}"
+
 
 class CaptureListProperties(PropertyGroup):
-    """List of capture setup and cues. Hooked to blender scene"""
+    """List of capture setup and cues. Hooked to Blender scene"""
+
+    search_index_re = re.compile(r".*\.(?P<idx>\d+\d+\d+)$")
 
     items: CollectionProperty(type=CaptureProperties, name="Captures")  # type: ignore
     index: IntProperty(name="Selected capture index")  # type: ignore
+
+    @property
+    def name_search_index(self) -> int:
+        if not self.name_search:
+            return -1
+        m = CaptureListProperties.search_index_re.search(self.name_search)
+        if m is None:
+            return -1
+        idx = m.groupdict()["idx"]
+        if idx is None:
+            return -1
+        return int(idx)
+
+    def as_prop_search(self, ctx: Context, edit_text):
+        rootProps = CaptureListProperties.from_context(ctx)
+        caps: list[CaptureProperties] = rootProps and rootProps.items
+        for i, p in enumerate(caps or []):
+            yield p.short_desc(i)
+            # yield (p.short_desc, str(i))
+        # return [(m, str(i)) for i, m in enumerate(materials)]
+
+    def on_search_update(self, ctx: Context) -> None:
+        # Change selected item based on the search(take index from the name sufx)
+        idx = self.name_search_index
+        if idx < 0:
+            return
+        if self.index == idx:
+            return  # Already selected
+        self.index = idx
+
+    name_search: StringProperty(name="name_search", description="Selected capture", search=as_prop_search, update=on_search_update)  # type: ignore
 
     @property
     def selected_item(self) -> Optional[CaptureProperties]:
