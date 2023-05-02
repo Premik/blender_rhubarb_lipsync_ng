@@ -31,6 +31,7 @@ class CreateCaptureProps(bpy.types.Operator):
         log.trace("Creating new capture properties")  # type: ignore
         item: CaptureProperties = rootProps.items.add()
         rootProps.index = len(rootProps.items) - 1  # Select the newly created item
+        rootProps.sync_search_with_index(context)
         return {'FINISHED'}
 
 
@@ -57,6 +58,9 @@ class DeleteCaptureProps(bpy.types.Operator):
         rootProps = CaptureListProperties.from_context(context)
         rootProps.items.remove(rootProps.index)
         rootProps.index = rootProps.index - 1
+        if rootProps.index < 0 and len(rootProps.items) > 0:
+            rootProps.index = 1
+        rootProps.sync_search_with_index(context)
         return {'FINISHED'}
 
 

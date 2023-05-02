@@ -242,13 +242,14 @@ class CaptureProperties(PropertyGroup):
             fn = f"{self.sound_file_basename}.{self.sound_file_extension}"
         else:
             fn = "<No sound selected>"
-        return f"{fn}{status}.{str(indx).zfill(3)}"
+        # return f"{fn}{status}.{str(indx).zfill(3)}"
+        return f"{str(indx).zfill(3)} {fn}"
 
 
 class CaptureListProperties(PropertyGroup):
     """List of capture setup and cues. Hooked to Blender scene"""
 
-    search_index_re = re.compile(r".*\.(?P<idx>\d+\d+\d+)$")
+    search_index_re = re.compile(r"^(?P<idx>\d+\d+\d+)\s.*")
 
     items: CollectionProperty(type=CaptureProperties, name="Captures")  # type: ignore
     index: IntProperty(name="Selected capture index")  # type: ignore
@@ -272,6 +273,15 @@ class CaptureListProperties(PropertyGroup):
             yield p.short_desc(i)
             # yield (p.short_desc, str(i))
         # return [(m, str(i)) for i, m in enumerate(materials)]
+
+    def sync_search_with_index(self, ctx: Context):
+        items = list(self.as_prop_search(ctx, ""))
+        if self.index < 0 or self.index >= len(self.items):
+            v = ""
+        else:
+            v = items[self.index]
+        if v != self.name_search:
+            self.name_search = v
 
     def on_search_update(self, ctx: Context) -> None:
         # Change selected item based on the search(take index from the name sufx)

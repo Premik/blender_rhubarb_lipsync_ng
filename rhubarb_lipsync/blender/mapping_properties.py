@@ -76,7 +76,7 @@ class MappingListProperties(PropertyGroup):
     def context_selection_validation(ctx: Context) -> str:
         """Validates there is an active object with the rhubarb properties in the blender context"""
         if not ctx.object:
-            return "No active object selected"
+            return "No object selected"
         if not MappingListProperties.from_context(ctx):
             return "'rhubarb_lipsync' not found on the active object"
         return ""
