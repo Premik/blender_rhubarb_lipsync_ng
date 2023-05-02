@@ -39,10 +39,9 @@ class BuildCueInfoUIList(bpy.types.Operator):
     #    return ui_utils.validation_poll(cls, context)
 
     def execute(self, context: Context) -> set[str]:
-        props = CaptureListProperties.capture_from_context(context)
-        mporps: MappingListProperties = props.mapping
-        mporps.items.clear()
-        mporps.build_items()
+        mprops: MappingListProperties = MappingListProperties.from_context(context)
+        mprops.items.clear()
+        mprops.build_items()
 
         return {'FINISHED'}
 
@@ -72,10 +71,9 @@ class ShowCueInfoHelp(bpy.types.Operator):
         return ui_utils.validation_poll(cls, context, MappingListProperties.context_selection_validation)
 
     def execute(self, context: Context) -> set[str]:
-        props = CaptureListProperties.capture_from_context(context)
-        mporps: MappingListProperties = props.mapping
+        mprops: MappingListProperties = MappingListProperties.from_context(context)
         if not self.key:
-            si = mporps.selected_item
+            si = mprops.selected_item
             if not si:
                 self.report(type={'ERROR'}, message=f"No cue key provided and no mapping item selected.")
                 return {'CANCELLED'}

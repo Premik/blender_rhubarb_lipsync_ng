@@ -32,13 +32,12 @@ class MappingAndBakingPanel(bpy.types.Panel):
 
     def draw_mapping_list(self) -> None:
         prefs = RhubarbAddonPreferences.from_context(self.ctx)
-        props = CaptureListProperties.capture_from_context(self.ctx)
+        mprops: MappingListProperties = MappingListProperties.from_context(self.ctx)
 
         layout = self.layout
 
         row = layout.row(align=True)
-        lst: MappingListProperties = props.mapping
-        layout.template_list(MappingUIList.bl_idname, "Mapping", lst, "items", lst, "index")
+        layout.template_list(MappingUIList.bl_idname, "Mapping", mprops, "items", mprops, "index")
 
     def draw(self, context: Context) -> None:
         try:
@@ -49,8 +48,7 @@ class MappingAndBakingPanel(bpy.types.Panel):
             if selection_error:
                 ui_utils.draw_error(self.layout, selection_error)
                 return
-            props = CaptureListProperties.capture_from_context(context)
-            mprops: MappingListProperties = props.mapping
+            mprops: MappingListProperties = MappingListProperties.from_context(context)
             if len(mprops.items) != len(MouthShapeInfos.all()):
                 layout.alert = True
                 layout.operator(mapping_operators.BuildCueInfoUIList.bl_idname)
