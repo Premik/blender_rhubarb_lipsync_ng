@@ -178,7 +178,7 @@ class CaptureProperties(PropertyGroup):
     # mapping: PointerProperty(type=MappingList, name="Mapping")  # type: ignore
 
     def sound_selection_validation(context: Context, required_unpack=True) -> str:
-        # selection_error = MappingListProperties.context_selection_validation(context)
+        # selection_error = MappingProperties.context_selection_validation(context)
         # if selection_error:
         #    return selection_error
         props = CaptureListProperties.capture_from_context(context)

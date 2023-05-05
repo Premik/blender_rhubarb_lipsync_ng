@@ -10,7 +10,7 @@ from bpy.types import Context
 
 
 from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, MouthCueList, JobProperties
-from rhubarb_lipsync.blender.mapping_properties import MappingListProperties
+from rhubarb_lipsync.blender.mapping_properties import MappingProperties
 from rhubarb_lipsync.rhubarb.log_manager import logManager
 from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue, MouthShapeInfos, MouthShapeInfo
 import rhubarb_lipsync.blender.ui_utils as ui_utils
@@ -39,7 +39,7 @@ class BuildCueInfoUIList(bpy.types.Operator):
     #    return ui_utils.validation_poll(cls, context)
 
     def execute(self, context: Context) -> set[str]:
-        mprops: MappingListProperties = MappingListProperties.from_context(context)
+        mprops: MappingProperties = MappingProperties.from_context(context)
         mprops.items.clear()
         mprops.build_items()
 
@@ -68,10 +68,36 @@ class ShowCueInfoHelp(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context: Context) -> bool:
-        return ui_utils.validation_poll(cls, context, MappingListProperties.context_selection_validation)
+        return ui_utils.validation_poll(cls, context, MappingProperties.context_selection_validation)
 
     def execute(self, context: Context) -> set[str]:
-        mprops: MappingListProperties = MappingListProperties.from_context(context)
+        mprops: MappingProperties = MappingProperties.from_context(context)
+        if not self.key:
+            si = mprops.selected_item
+            if not si:
+                self.report(type={'ERROR'}, message=f"No cue key provided and no mapping item selected.")
+                return {'CANCELLED'}
+            self.key = si.key
+
+        draw = lambda this, ctx: ShowCueInfoHelp.draw_popup(this, self.key, ctx)
+        msi: MouthShapeInfo = MouthShapeInfos[self.key].value
+        bpy.context.window_manager.popup_menu(draw, title=f"{msi.short_dest:<25}", icon='INFO')
+
+        return {'FINISHED'}
+
+
+class BakeToNLA(bpy.types.Operator):
+    """Bake the selected objects to nla tracks"""
+
+    bl_idname = "rhubarb.bake_to_nla"
+    bl_label = "Bake to NLA"
+
+    @classmethod
+    def poll(cls, context: Context) -> bool:
+        return ui_utils.validation_poll(cls, context, MappingProperties.context_selection_validation)
+
+    def execute(self, context: Context) -> set[str]:
+        mprops: MappingProperties = MappingProperties.from_context(context)
         if not self.key:
             si = mprops.selected_item
             if not si:

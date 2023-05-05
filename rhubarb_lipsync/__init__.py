@@ -19,7 +19,7 @@ from bpy.props import PointerProperty
 import rhubarb_lipsync.blender.auto_load
 from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences
 from rhubarb_lipsync.blender.capture_properties import CaptureListProperties
-from rhubarb_lipsync.blender.mapping_properties import MappingListProperties
+from rhubarb_lipsync.blender.mapping_properties import MappingProperties
 from rhubarb_lipsync.blender.ui_utils import IconsManager
 
 
@@ -37,7 +37,7 @@ rhubarb_lipsync.blender.auto_load.init(__file__)
 def register() -> None:
     rhubarb_lipsync.blender.auto_load.register()
     bpy.types.Scene.rhubarb_lipsync_captures = PointerProperty(type=CaptureListProperties)
-    bpy.types.Object.rhubarb_lipsync_mapping = PointerProperty(type=MappingListProperties)
+    bpy.types.Object.rhubarb_lipsync_mapping = PointerProperty(type=MappingProperties)
 
     init_loggers()
 

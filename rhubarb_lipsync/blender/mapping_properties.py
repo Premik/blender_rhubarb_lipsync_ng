@@ -30,11 +30,12 @@ class MappingListItem(PropertyGroup):
         return MouthShapeInfos[self.key].value
 
 
-class MappingListProperties(PropertyGroup):
+class MappingProperties(PropertyGroup):
     """Mapping of all the mouth shape types to action(s)"""
 
     items: CollectionProperty(type=MappingListItem, name="Mapping items")  # type: ignore
     index: IntProperty(name="Selected mapping index")  # type: ignore
+    # nla_track1: PointerProperty(type=bpy.types.NlaTrack, name="Tract 1")  # type: ignore
 
     def build_items(self) -> None:
         # log.trace("Already buil")  # type: ignore
@@ -52,31 +53,31 @@ class MappingListProperties(PropertyGroup):
         return self.items[self.index]
 
     @staticmethod
-    def from_context(ctx: Context) -> Optional['MappingListProperties']:
+    def from_context(ctx: Context) -> Optional['MappingProperties']:
         """Get the selecrted capture properties from the current scene of the provided context"""
         # ctx.selected_editable_objects
-        return MappingListProperties.from_object(ctx.object)
+        return MappingProperties.from_object(ctx.object)
 
     @staticmethod
-    def from_object(obj: bpy.types.Object) -> Optional['MappingListProperties']:
+    def from_object(obj: bpy.types.Object) -> Optional['MappingProperties']:
         if not obj:
             return None
-        ret: CaptureProperties = getattr(obj, 'rhubarb_lipsync_mapping')  # type: ignore
+        ret: MappingProperties = getattr(obj, 'rhubarb_lipsync_mapping')  # type: ignore
         # ret.mapping.build_items()  # Ensure cue infos are created
         return ret
 
     @staticmethod
-    def by_object_name(obj_name: str) -> Optional['MappingListProperties']:
+    def by_object_name(obj_name: str) -> Optional['MappingProperties']:
         if not obj_name:
             return None
         obj = bpy.data.objects.get(obj_name, None)
-        return MappingListProperties.from_object(obj)
+        return MappingProperties.from_object(obj)
 
     @staticmethod
     def context_selection_validation(ctx: Context) -> str:
         """Validates there is an active object with the rhubarb properties in the blender context"""
         if not ctx.object:
             return "No object selected"
-        if not MappingListProperties.from_context(ctx):
+        if not MappingProperties.from_context(ctx):
             return "'rhubarb_lipsync' not found on the active object"
         return ""

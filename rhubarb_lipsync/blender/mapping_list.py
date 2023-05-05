@@ -7,7 +7,7 @@ from bpy.types import AddonPreferences, CollectionProperty, Context, PropertyGro
 import rhubarb_lipsync.blender.mapping_operators as mapping_operators
 from rhubarb_lipsync.blender.sound_operators import PlayRange
 from rhubarb_lipsync.blender.preferences import CueListPreferences, RhubarbAddonPreferences
-from rhubarb_lipsync.blender.mapping_properties import MappingListProperties, MappingListItem
+from rhubarb_lipsync.blender.mapping_properties import MappingProperties, MappingListItem
 from rhubarb_lipsync.blender.ui_utils import IconsManager
 
 from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue, MouthShapeInfos, MouthShapeInfo
@@ -20,10 +20,10 @@ class MappingUIList(UIList):
         self,
         context: Context,
         layout: UILayout,
-        data: MappingListProperties,
+        data: MappingProperties,
         item: MappingListItem,
         icon: int,
-        active_data: MappingListProperties,
+        active_data: MappingProperties,
         active_property: str,
         index: int,
         flt_flag: int,

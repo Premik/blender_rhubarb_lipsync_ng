@@ -10,7 +10,7 @@ import rhubarb_lipsync.blender.auto_load
 import test_data
 from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences
 from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, MouthCueList, JobProperties
-from rhubarb_lipsync.blender.mapping_properties import MappingListProperties
+from rhubarb_lipsync.blender.mapping_properties import MappingProperties
 from rhubarb_lipsync.rhubarb.log_manager import logManager
 
 

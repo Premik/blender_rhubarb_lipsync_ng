@@ -303,7 +303,7 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
             # layout.use_property_split = True
             # layout.use_property_decorate = False  # No animation.
 
-            # selection_error = MappingListProperties.context_selection_validation(context)
+            # selection_error = MappingProperties.context_selection_validation(context)
             # if selection_error:
             #     ui_utils.draw_error(self.layout, selection_error)
             # else:

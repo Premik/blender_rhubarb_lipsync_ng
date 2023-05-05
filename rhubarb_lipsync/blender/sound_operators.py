@@ -12,7 +12,7 @@ from bpy.types import Context, Sound, SoundSequence
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences
 from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, MouthCueList, JobProperties
-from rhubarb_lipsync.blender.mapping_properties import MappingListProperties
+from rhubarb_lipsync.blender.mapping_properties import MappingProperties
 
 log = logging.getLogger(__name__)
 

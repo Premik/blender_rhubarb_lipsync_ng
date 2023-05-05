@@ -14,7 +14,7 @@ import rhubarb_lipsync.blender.ui_utils as ui_utils
 from rhubarb_lipsync.blender.mapping_list import MappingUIList
 from rhubarb_lipsync.blender.preferences import CueListPreferences, RhubarbAddonPreferences
 from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, MouthCueList, JobProperties
-from rhubarb_lipsync.blender.mapping_properties import MappingListProperties
+from rhubarb_lipsync.blender.mapping_properties import MappingProperties
 from rhubarb_lipsync.blender.ui_utils import IconsManager
 from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue, MouthShapeInfo, MouthShapeInfos
 from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandAsyncJob
@@ -32,28 +32,35 @@ class MappingAndBakingPanel(bpy.types.Panel):
 
     def draw_mapping_list(self) -> None:
         prefs = RhubarbAddonPreferences.from_context(self.ctx)
-        mprops: MappingListProperties = MappingListProperties.from_context(self.ctx)
+        mprops: MappingProperties = MappingProperties.from_context(self.ctx)
 
         layout = self.layout
 
         row = layout.row(align=True)
         layout.template_list(MappingUIList.bl_idname, "Mapping", mprops, "items", mprops, "index")
 
+    def draw_nla_setup(self) -> None:
+        prefs = RhubarbAddonPreferences.from_context(self.ctx)
+        mprops: MappingProperties = MappingProperties.from_context(self.ctx)
+        layout = self.layout
+        layout.prop(mprops, 'nla_track1')
+
     def draw(self, context: Context) -> None:
         try:
             self.ctx = context
             layout = self.layout
 
-            selection_error = MappingListProperties.context_selection_validation(context)
+            selection_error = MappingProperties.context_selection_validation(context)
             if selection_error:
                 ui_utils.draw_error(self.layout, selection_error)
                 return
-            mprops: MappingListProperties = MappingListProperties.from_context(context)
+            mprops: MappingProperties = MappingProperties.from_context(context)
             if len(mprops.items) != len(MouthShapeInfos.all()):
                 layout.alert = True
                 layout.operator(mapping_operators.BuildCueInfoUIList.bl_idname)
                 return
             self.draw_mapping_list()
+            self.draw_nla_setup()
 
         except Exception as e:
             ui_utils.draw_error(self.layout, f"Unexpected error. \n {e}")
