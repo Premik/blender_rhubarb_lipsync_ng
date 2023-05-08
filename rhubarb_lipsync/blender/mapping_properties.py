@@ -4,7 +4,7 @@ import math
 from operator import attrgetter
 import pathlib
 from functools import cached_property
-from typing import Any, Callable, Optional, cast
+from typing import Any, Callable, Optional, cast, Generator
 
 import bpy
 import bpy.utils.previews
@@ -13,15 +13,58 @@ from bpy.types import Action, AddonPreferences, Context, PropertyGroup, Sound, U
 
 from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue, MouthShapeInfo, MouthShapeInfos
 from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandAsyncJob, RhubarbCommandWrapper, RhubarbParser
+import re
+
 
 log = logging.getLogger(__name__)
 
 
-class MappingListItem(PropertyGroup):
+class NlaTrackRef(PropertyGroup):
+    """Reference to an nla track. By name and index sincle NLA track is a non-ID object"""
+
+    search_index_re = re.compile(r"^(?P<idx>\d+\d+\d+)\s.*")
+
+    def on_name_update(self, ctx: Context) -> None:
+        pass
+
+        # Change selected item based on the search
+        # idx = self.name_search_index
+        # if idx < 0:
+        #     return
+        # if self.index == idx:
+        #     return  # Already selected
+        # self.index = idx
+
+    @property
+    def name_to_index(self) -> int:
+        if not self.name:
+            return -1
+        m = NlaTrackRef.search_index_re.search(self.name_search)
+        if m is None:
+            return -1
+        idx = m.groupdict()["idx"]
+        if idx is None:
+            return -1
+        return int(idx)
+
+    def values_to_search(self, ctx: Context, edit_text) -> Generator[str | Any, Any, None]:
+        obj = ctx.active_object
+        if not obj or not obj.animation_data:
+            return
+        for i, t in enumerate(obj.animation_data.nla_tracks or []):
+            yield f"{str(i).zfill(3)} {t.name}"
+
+    name: StringProperty(name="NLA Track", description="Name of the selected NLA track", search=values_to_search, update=on_name_update)  # type: ignore
+    index: IntProperty(name="Index of the selected track")  # type: ignore
+
+
+class MappingItem(PropertyGroup):
     """Mapping of a single mouth shape type to action(s)"""
 
     key: StringProperty("key", description="Mouth cue key symbol (A,B,C..)")  # type: ignore
     action: PointerProperty(type=bpy.types.Action, name="Action")  # type: ignore
+    shapekey_action: PointerProperty(type=bpy.types.Action, name="Shape key")  # type: ignore
+    # action: PointerProperty(type=bpy.types.ShapeKey, name="Action")  # type: ignore
 
     @cached_property
     def cue_desc(self) -> MouthShapeInfo | None:
@@ -33,9 +76,26 @@ class MappingListItem(PropertyGroup):
 class MappingProperties(PropertyGroup):
     """Mapping of all the mouth shape types to action(s)"""
 
-    items: CollectionProperty(type=MappingListItem, name="Mapping items")  # type: ignore
+    items: CollectionProperty(type=MappingItem, name="Mapping items")  # type: ignore
     index: IntProperty(name="Selected mapping index")  # type: ignore
     # nla_track1: PointerProperty(type=bpy.types.NlaTrack, name="Tract 1")  # type: ignore
+    nla_track1: PointerProperty(type=NlaTrackRef, name="Track 1")  # type: ignore
+    nla_track2: PointerProperty(type=NlaTrackRef, name="Track 2")  # type: ignore
+
+    def on_nla_map_action_update(self, ctx: Context) -> None:
+        if self.nla_map_shapekey or self.nla_map_action:
+            return  # Either one tick should be checked
+        # Neither is selected, meaning this one has been uticked. Check the other one
+        self.nla_map_shapekey = True
+
+    def on_nla_map_shapekey_update(self, ctx: Context) -> None:
+        if self.nla_map_shapekey or self.nla_map_action:
+            return  # Either one tick should be checked
+        # Neither is selected, meaning this one has been uticked. Check the other one
+        self.nla_map_action = True
+
+    nla_map_action: BoolProperty(default=True, name="Action", description="Map cues to regular Action", update=on_nla_map_action_update)  # type: ignore
+    nla_map_shapekey: BoolProperty(default=False, name="Shape key", description="Map cues to shape-key Action", update=on_nla_map_shapekey_update)  # type: ignore
 
     def build_items(self) -> None:
         # log.trace("Already buil")  # type: ignore
@@ -43,11 +103,11 @@ class MappingProperties(PropertyGroup):
             return  # Already built (assume)
         log.trace("Building mapping list")  # type: ignore
         for msi in MouthShapeInfos.all():
-            item: MappingListItem = self.items.add()
+            item: MappingItem = self.items.add()
             item.key = msi.key
 
     @property
-    def selected_item(self) -> Optional[MappingListItem]:
+    def selected_item(self) -> Optional[MappingItem]:
         if self.index < 0 or self.index >= len(self.items):
             return None
         return self.items[self.index]

@@ -160,7 +160,8 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 * add sub-frames tickbox
 * extended shapes- seems they are generated even when disabled -check
 * Checkbox on "X" and "A" cue type "same as X/A"
-
+* Cleanup - remove old files
+* Capture doesn't work for long sound files. Rhubarb finishes but the list is empty.
 
 ### Low
 * Add [speaker](https://docs.blender.org/manual/en/latest/render/output/audio/speaker.html) as an alternative to Sequencer audio clip
@@ -173,6 +174,7 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 * Verify the Dialog file is working
 * copy+paste cue-list, so can be translated to another object
 * Add "null" cue type to indicate un-detected cues?
+* `layout.prop(mlp, "actions_multiline_view") ` doesn't currently work
 
 ## Action selector
 - only from the selected object?
@@ -206,3 +208,18 @@ Currently I have the first part "Setup and Capture" is pretty much done on [my b
 
 
 https://blender.stackexchange.com/questions/206231/how-can-i-make-an-object-use-its-animation-action-at-a-specific-frame-in-blende
+
+
+## NLA
+
+NLA object tracks:
+
+```python
+[t.name for t in C.object.animation_data.nla_tracks]
+```
+
+NLA shape-key tracks:
+
+```python
+[t.name for t in C.object.data.shape_keys.animation_data.nla_tracks]
+```

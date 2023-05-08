@@ -4,7 +4,7 @@ import math
 from operator import attrgetter, index
 import pathlib
 from functools import cached_property
-from typing import Any, Callable, Optional, cast
+from typing import Any, Callable, Optional, cast, Generator
 
 import bpy
 import bpy.utils.previews
@@ -266,7 +266,7 @@ class CaptureListProperties(PropertyGroup):
             return -1
         return int(idx)
 
-    def as_prop_search(self, ctx: Context, edit_text):
+    def as_prop_search(self, ctx: Context, edit_text) -> Generator[str, Any, None]:
         rootProps = CaptureListProperties.from_context(ctx)
         caps: list[CaptureProperties] = rootProps and rootProps.items
         for i, p in enumerate(caps or []):

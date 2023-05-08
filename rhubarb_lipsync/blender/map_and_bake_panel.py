@@ -12,7 +12,7 @@ import rhubarb_lipsync.blender.rhubarb_operators as rhubarb_operators
 import rhubarb_lipsync.blender.sound_operators as sound_operators
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 from rhubarb_lipsync.blender.mapping_list import MappingUIList
-from rhubarb_lipsync.blender.preferences import CueListPreferences, RhubarbAddonPreferences
+from rhubarb_lipsync.blender.preferences import CueListPreferences, RhubarbAddonPreferences, MappingListPreferences
 from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, MouthCueList, JobProperties
 from rhubarb_lipsync.blender.mapping_properties import MappingProperties
 from rhubarb_lipsync.blender.ui_utils import IconsManager
@@ -22,6 +22,25 @@ from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandAsyncJob
 log = logging.getLogger(__name__)
 
 
+class MappingListOptionsPanel(bpy.types.Panel):
+    bl_idname = "RLPS_PT_mapping_list_options"
+    bl_label = "Mapping list display options"
+    bl_space_type = "PROPERTIES"
+    bl_region_type = "HEADER"
+
+    # bl_category = "RLSP"
+
+    def draw(self, context: Context) -> None:
+        prefs = RhubarbAddonPreferences.from_context(context)
+        clp: CueListPreferences = prefs.cue_list_prefs
+        mlp: MappingListPreferences = prefs.mapping_list_prefs
+        layout = self.layout
+        layout.label(text=MappingListOptionsPanel.bl_label)
+        # layout.prop(mlp, "actions_multiline_view") # Doesn't work
+        layout.prop(mlp, "show_help_button")
+        layout.prop(clp, "as_circle")
+
+
 class MappingAndBakingPanel(bpy.types.Panel):
     bl_idname = "RLPS_PT_map_and_bake"
     bl_label = "RLPS: Cue mapping and baking"
@@ -29,6 +48,14 @@ class MappingAndBakingPanel(bpy.types.Panel):
     bl_region_type = "UI"
     bl_category = "RLSP"
     bl_options = {'DEFAULT_CLOSED'}
+
+    def draw_config(self) -> None:
+        mprops: MappingProperties = MappingProperties.from_context(self.ctx)
+        layout = self.layout
+        row = layout.row(align=True)
+        row.prop(mprops, 'nla_map_action', toggle=True)
+        row.prop(mprops, 'nla_map_shapekey', toggle=True)
+        row.popover(panel=MappingListOptionsPanel.bl_idname, text="", icon="VIS_SEL_11")
 
     def draw_mapping_list(self) -> None:
         prefs = RhubarbAddonPreferences.from_context(self.ctx)
@@ -43,7 +70,9 @@ class MappingAndBakingPanel(bpy.types.Panel):
         prefs = RhubarbAddonPreferences.from_context(self.ctx)
         mprops: MappingProperties = MappingProperties.from_context(self.ctx)
         layout = self.layout
-        layout.prop(mprops, 'nla_track1')
+        row = layout.row(align=True)
+        layout.prop(mprops.nla_track1, 'name', text="NLA Track 1")
+        layout.prop(mprops.nla_track2, 'name', text="NLA Track 2")
 
     def draw(self, context: Context) -> None:
         try:
@@ -59,6 +88,7 @@ class MappingAndBakingPanel(bpy.types.Panel):
                 layout.alert = True
                 layout.operator(mapping_operators.BuildCueInfoUIList.bl_idname)
                 return
+            self.draw_config()
             self.draw_mapping_list()
             self.draw_nla_setup()
 

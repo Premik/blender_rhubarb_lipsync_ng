@@ -77,6 +77,20 @@ class CueListPreferences(PropertyGroup):
         return [k for k in self.props_names if not 'show_col' in k]
 
 
+class MappingListPreferences(PropertyGroup):
+    actions_multiline_view: BoolProperty(  # type: ignore
+        name="Show actions on two lines",
+        description="When both regular action and shape-key action are visible show them on two lines instead of side-by-side.",
+        default=False,
+    )
+
+    show_help_button: BoolProperty(  # type: ignore
+        name="Show help button",
+        description="For each cue-type show the question-mark button with a help popup.",
+        default=True,
+    )
+
+
 class RhubarbAddonPreferences(AddonPreferences):
     bl_idname = 'rhubarb_lipsync'
 
@@ -142,6 +156,7 @@ class RhubarbAddonPreferences(AddonPreferences):
     caputre_panel_expanded: BoolProperty(default=True)  # type: ignore
 
     cue_list_prefs: PointerProperty(type=CueListPreferences, name="Cues list preferences")  # type: ignore
+    mapping_list_prefs: PointerProperty(type=MappingListPreferences, name="Mapping list preferences")  # type: ignore
 
     def new_command_handler(self) -> RhubarbCommandWrapper:
         return RhubarbCommandWrapper(self.executable_path, self.recognizer, self.use_extended_shapes)

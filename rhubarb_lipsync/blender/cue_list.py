@@ -3,6 +3,7 @@ from typing import Any
 
 from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty, PointerProperty, StringProperty
 from bpy.types import AddonPreferences, CollectionProperty, Context, PropertyGroup, UILayout, UIList
+from bpy.types import UI_UL_list
 
 from rhubarb_lipsync.blender.sound_operators import PlayRange
 from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences, CueListPreferences
@@ -17,6 +18,11 @@ class MouthCueUIList(UIList):
     def cuelist_prefs(self, ctx: Context) -> CueListPreferences:
         prefs = RhubarbAddonPreferences.from_context(ctx)
         return prefs.cue_list_prefs
+
+    def filter_items(self, context: Context, data: MouthCueList, propname: str):
+        f = self.filter_name.upper()
+        filtered = UI_UL_list.filter_items_by_name(f, self.bitflag_filter_item, data.items, "key", reverse=False)
+        return filtered, []
 
     def draw_item(
         self,
