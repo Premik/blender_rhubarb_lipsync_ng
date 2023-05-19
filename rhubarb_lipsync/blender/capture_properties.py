@@ -184,8 +184,10 @@ class CaptureProperties(PropertyGroup):
         # if selection_error:
         #    return selection_error
         props = CaptureListProperties.capture_from_context(context)
+        if not props:
+            return "No capture selected"
         if not props.sound:
-            return "No sound selected"
+            return "Capture has no sound selected"
         sound: Sound = props.sound
         if required_unpack and sound.packed_file:
             return "Please unpack the sound first."
@@ -258,7 +260,7 @@ class CaptureListProperties(PropertyGroup):
     def name_search_index(self) -> int:
         return ui_utils.name_search_index(self.name_search)
 
-    def as_prop_search(self, ctx: Context, edit_text) -> Generator[str, Any, None]:
+    def search_value(self, ctx: Context, edit_text) -> Generator[str, Any, None]:
         rootProps = CaptureListProperties.from_context(ctx)
         caps: list[CaptureProperties] = rootProps and rootProps.items
         for i, p in enumerate(caps or []):
@@ -267,7 +269,7 @@ class CaptureListProperties(PropertyGroup):
         # return [(m, str(i)) for i, m in enumerate(materials)]
 
     def sync_search_with_index(self, ctx: Context) -> None:
-        items = list(self.as_prop_search(ctx, ""))
+        items = list(self.search_value(ctx, ""))
         if self.index < 0 or self.index >= len(self.items):
             v = ""
         else:
@@ -284,7 +286,7 @@ class CaptureListProperties(PropertyGroup):
             return  # Already selected
         self.index = idx
 
-    name_search: StringProperty(name="name_search", description="Selected capture", search=as_prop_search, update=on_search_update)  # type: ignore
+    name_search: StringProperty(name="name_search", description="Selected capture", search=search_value, update=on_search_update)  # type: ignore
 
     @property
     def selected_item(self) -> Optional[CaptureProperties]:

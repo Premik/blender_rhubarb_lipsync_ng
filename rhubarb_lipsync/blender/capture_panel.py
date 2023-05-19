@@ -109,7 +109,7 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
         layout = self.layout
 
         if not props:
-            ui_utils.draw_error(self.layout, "No capture props in scene.")
+            ui_utils.draw_error(self.layout, "Select a capture.")
             return False
         layout.template_ID(props, "sound", open="sound.open")
         if sound is None:

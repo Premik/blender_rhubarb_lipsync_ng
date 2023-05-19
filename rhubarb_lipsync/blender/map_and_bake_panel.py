@@ -71,7 +71,7 @@ class MappingAndBakingPanel(bpy.types.Panel):
         row.prop(track, 'name', text=text)
         op: mapping_operators.CreateNLATrack = row.operator(mapping_operators.CreateNLATrack.bl_idname, text="", icon="DUPLICATE")
         obj_name = self.ctx.object and self.ctx.object.name or ''
-        op.name = f"{obj_name} {text}"
+        op.name = f"RLPS {obj_name} {text}"
 
         # row.operator(capture_operators.DeleteCaptureProps.bl_idname, text="", icon="PANEL_CLOSE")
 
@@ -92,6 +92,7 @@ class MappingAndBakingPanel(bpy.types.Panel):
                 ui_utils.draw_error(self.layout, selection_error)
                 return
             mprops: MappingProperties = MappingProperties.from_context(context)
+            cprops = CaptureListProperties.capture_from_context(self.ctx)
             if len(mprops.items) != len(MouthShapeInfos.all()):
                 layout.alert = True
                 layout.operator(mapping_operators.BuildCueInfoUIList.bl_idname)
@@ -99,6 +100,11 @@ class MappingAndBakingPanel(bpy.types.Panel):
             self.draw_config()
             self.draw_mapping_list()
             self.draw_nla_setup()
+
+            op: mapping_operators.BakeToNLA = layout.operator(mapping_operators.BakeToNLA.bl_idname, icon="LONGDISPLAY")
+            if cprops:
+                op.start_frame = cprops.start_frame
+            # op.star
 
         except Exception as e:
             ui_utils.draw_error(self.layout, f"Unexpected error. \n {e}")

@@ -92,22 +92,30 @@ class BakeToNLA(bpy.types.Operator):
     bl_idname = "rhubarb.bake_to_nla"
     bl_label = "Bake to NLA"
 
+    start_frame: IntProperty(name="Start Frame", default=1)  # type: ignore
+
+    @classmethod
+    def disabled_reason(cls, context: Context) -> str:
+        error_common = CaptureProperties.sound_selection_validation(context, False)
+        if error_common:
+            return error_common
+        error_common = MappingProperties.context_selection_validation(context)
+        if error_common:
+            return error_common
+        props = CaptureListProperties.capture_from_context(context)
+        return ""
+
     @classmethod
     def poll(cls, context: Context) -> bool:
-        return ui_utils.validation_poll(cls, context, MappingProperties.context_selection_validation)
+        return ui_utils.validation_poll(cls, context)
+
+    def invoke(self, context: Context, event: bpy.types.Event) -> set[int] | set[str]:
+        # Open dialog
+        wm = context.window_manager
+        return wm.invoke_props_dialog(self, width=500)
 
     def execute(self, context: Context) -> set[str]:
         mprops: MappingProperties = MappingProperties.from_context(context)
-        if not self.key:
-            si = mprops.selected_item
-            if not si:
-                self.report(type={'ERROR'}, message=f"No cue key provided and no mapping item selected.")
-                return {'CANCELLED'}
-            self.key = si.key
-
-        draw = lambda this, ctx: ShowCueInfoHelp.draw_popup(this, self.key, ctx)
-        msi: MouthShapeInfo = MouthShapeInfos[self.key].value
-        bpy.context.window_manager.popup_menu(draw, title=f"{msi.short_dest:<25}", icon='INFO')
 
         return {'FINISHED'}
 
@@ -126,8 +134,16 @@ class CreateNLATrack(bpy.types.Operator):
 
     def execute(self, ctx: Context) -> set[str]:
         mprops: MappingProperties = MappingProperties.from_context(ctx)
-        tracks = ctx.object.animation_data.nla_tracks
+        ad = ctx.object.animation_data
+        if not ad:  # No animation data, create them first
+            ctx.object.animation_data_create()
+            ad = ctx.object.animation_data
+            assert ad, "Failed to create new animation data"
+        tracks = ad.nla_tracks
         t = tracks.new()
         t.name = self.name
+        msg = f"Created new NLA track: {self.name}"
+        log.debug(msg)
+        self.report({'INFO'}, msg)
 
         return {'FINISHED'}

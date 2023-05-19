@@ -172,6 +172,7 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 * Verify the Dialog file is working
 * Add "null" cue type to indicate un-detected cues (those red longer than the limit)
 * `layout.prop(mlp, "actions_multiline_view") ` doesn't currently work. Should show regular action and shape-key action on two lines
+* After the new NLA track is selected auto-select it in the dropdown
 
 ## Action selector
 - only from the selected object?
