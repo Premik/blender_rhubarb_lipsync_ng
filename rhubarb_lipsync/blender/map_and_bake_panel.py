@@ -5,7 +5,7 @@ from typing import Dict, List, Optional, cast
 
 import bpy
 from bpy.props import BoolProperty, FloatProperty, IntProperty, PointerProperty, StringProperty
-from bpy.types import Context, Sound, SoundSequence
+from bpy.types import Context, Sound, SoundSequence, UILayout
 
 import rhubarb_lipsync.blender.mapping_operators as mapping_operators
 import rhubarb_lipsync.blender.rhubarb_operators as rhubarb_operators
@@ -14,7 +14,7 @@ import rhubarb_lipsync.blender.ui_utils as ui_utils
 from rhubarb_lipsync.blender.mapping_list import MappingUIList
 from rhubarb_lipsync.blender.preferences import CueListPreferences, RhubarbAddonPreferences, MappingListPreferences
 from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, MouthCueList, JobProperties
-from rhubarb_lipsync.blender.mapping_properties import MappingProperties
+from rhubarb_lipsync.blender.mapping_properties import MappingProperties, NlaTrackRef
 from rhubarb_lipsync.blender.ui_utils import IconsManager
 from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue, MouthShapeInfo, MouthShapeInfos
 from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandAsyncJob
@@ -66,13 +66,21 @@ class MappingAndBakingPanel(bpy.types.Panel):
         row = layout.row(align=True)
         layout.template_list(MappingUIList.bl_idname, "Mapping", mprops, "items", mprops, "index")
 
+    def draw_nla_track_picker(self, track: NlaTrackRef, text: str) -> None:
+        row = self.layout.row(align=True)
+        row.prop(track, 'name', text=text)
+        op: mapping_operators.CreateNLATrack = row.operator(mapping_operators.CreateNLATrack.bl_idname, text="", icon="DUPLICATE")
+        obj_name = self.ctx.object and self.ctx.object.name or ''
+        op.name = f"{obj_name} {text}"
+
+        # row.operator(capture_operators.DeleteCaptureProps.bl_idname, text="", icon="PANEL_CLOSE")
+
     def draw_nla_setup(self) -> None:
         prefs = RhubarbAddonPreferences.from_context(self.ctx)
         mprops: MappingProperties = MappingProperties.from_context(self.ctx)
-        layout = self.layout
-        row = layout.row(align=True)
-        layout.prop(mprops.nla_track1, 'name', text="NLA Track 1")
-        layout.prop(mprops.nla_track2, 'name', text="NLA Track 2")
+
+        self.draw_nla_track_picker(mprops.nla_track1, "Track 1")
+        self.draw_nla_track_picker(mprops.nla_track2, "Track 2")
 
     def draw(self, context: Context) -> None:
         try:

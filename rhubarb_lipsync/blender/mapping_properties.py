@@ -13,7 +13,7 @@ from bpy.types import Action, AddonPreferences, Context, PropertyGroup, Sound, U
 
 from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue, MouthShapeInfo, MouthShapeInfos
 from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandAsyncJob, RhubarbCommandWrapper, RhubarbParser
-import re
+from rhubarb_lipsync.blender import ui_utils
 
 
 log = logging.getLogger(__name__)
@@ -21,8 +21,6 @@ log = logging.getLogger(__name__)
 
 class NlaTrackRef(PropertyGroup):
     """Reference to an nla track. By name and index sincle NLA track is a non-ID object"""
-
-    search_index_re = re.compile(r"^(?P<idx>\d+\d+\d+)\s.*")
 
     def on_name_update(self, ctx: Context) -> None:
         pass
@@ -37,24 +35,16 @@ class NlaTrackRef(PropertyGroup):
 
     @property
     def name_to_index(self) -> int:
-        if not self.name:
-            return -1
-        m = NlaTrackRef.search_index_re.search(self.name_search)
-        if m is None:
-            return -1
-        idx = m.groupdict()["idx"]
-        if idx is None:
-            return -1
-        return int(idx)
+        return ui_utils.name_search_index(self.name)
 
-    def values_to_search(self, ctx: Context, edit_text) -> Generator[str | Any, Any, None]:
+    def search_value(self, ctx: Context, edit_text) -> Generator[str | Any, Any, None]:
         obj = ctx.active_object
         if not obj or not obj.animation_data:
             return
         for i, t in enumerate(obj.animation_data.nla_tracks or []):
             yield f"{str(i).zfill(3)} {t.name}"
 
-    name: StringProperty(name="NLA Track", description="Name of the selected NLA track", search=values_to_search, update=on_name_update)  # type: ignore
+    name: StringProperty(name="NLA Track", description="Name of the selected NLA track", search=search_value, update=on_name_update)  # type: ignore
     index: IntProperty(name="Index of the selected track")  # type: ignore
 
 

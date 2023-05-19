@@ -149,17 +149,17 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 ## Todo
 
 ### High
-* place-on-strip op - add redo support, asking for channel and framein the re-do dialog
 * Set the panel tab name in the preferences
-* mapping/baking panel and ops
+* Add create button to NLA track selector
+* Bake button- dialog with "bake only active", "bake all registered" etc
 
 ### Normal
 * Add license files
 * Limit possible selection to armature and mesh-object only? (and not obj.library). Or hook the properties to the Collection instead of Object?
 * add sub-frames tickbox
 * extended shapes- seems they are generated even when disabled -check
-* Checkbox on "X" and "A" cue type "same as X/A"
 * Cleanup - remove old files
+* Doc - new readme.md
 * Capture doesn't work for long sound files. Rhubarb finishes but the list is empty.
 
 ### Low
@@ -169,11 +169,9 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 * The scaled down icons (32x32) still hard to see. Pre-scale different set icons?
 * autoload - complete type-hints
 * Capture panel, optimize, store pref, props etc. directy on the self (same like self.ctx)
-* Register some startup handler to call CueMappingList.buildItems. Can't be lazily done from since prop's are not allowed to be changed from the draw method
 * Verify the Dialog file is working
-* copy+paste cue-list, so can be translated to another object
-* Add "null" cue type to indicate un-detected cues?
-* `layout.prop(mlp, "actions_multiline_view") ` doesn't currently work
+* Add "null" cue type to indicate un-detected cues (those red longer than the limit)
+* `layout.prop(mlp, "actions_multiline_view") ` doesn't currently work. Should show regular action and shape-key action on two lines
 
 ## Action selector
 - only from the selected object?

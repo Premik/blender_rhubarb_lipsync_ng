@@ -13,7 +13,8 @@ from bpy.types import Action, AddonPreferences, Context, PropertyGroup, Sound, U
 
 from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue, MouthShapeInfo, MouthShapeInfos
 from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandAsyncJob, RhubarbCommandWrapper, RhubarbParser
-import re
+from rhubarb_lipsync.blender import ui_utils
+
 
 log = logging.getLogger(__name__)
 
@@ -250,22 +251,12 @@ class CaptureProperties(PropertyGroup):
 class CaptureListProperties(PropertyGroup):
     """List of capture setup and cues. Hooked to Blender scene"""
 
-    search_index_re = re.compile(r"^(?P<idx>\d+\d+\d+)\s.*")
-
     items: CollectionProperty(type=CaptureProperties, name="Captures")  # type: ignore
     index: IntProperty(name="Selected capture index")  # type: ignore
 
     @property
     def name_search_index(self) -> int:
-        if not self.name_search:
-            return -1
-        m = CaptureListProperties.search_index_re.search(self.name_search)
-        if m is None:
-            return -1
-        idx = m.groupdict()["idx"]
-        if idx is None:
-            return -1
-        return int(idx)
+        return ui_utils.name_search_index(self.name_search)
 
     def as_prop_search(self, ctx: Context, edit_text) -> Generator[str, Any, None]:
         rootProps = CaptureListProperties.from_context(ctx)
@@ -275,7 +266,7 @@ class CaptureListProperties(PropertyGroup):
             # yield (p.short_desc, str(i))
         # return [(m, str(i)) for i, m in enumerate(materials)]
 
-    def sync_search_with_index(self, ctx: Context):
+    def sync_search_with_index(self, ctx: Context) -> None:
         items = list(self.as_prop_search(ctx, ""))
         if self.index < 0 or self.index >= len(self.items):
             v = ""

@@ -110,3 +110,24 @@ class BakeToNLA(bpy.types.Operator):
         bpy.context.window_manager.popup_menu(draw, title=f"{msi.short_dest:<25}", icon='INFO')
 
         return {'FINISHED'}
+
+
+class CreateNLATrack(bpy.types.Operator):
+    """Create a new NLA track to bake the actions into."""
+
+    name: StringProperty("Name", description="Name of the track to create")  # type:ignore
+
+    bl_idname = "rhubarb.new_nla_track"
+    bl_label = "New NLA track"
+
+    @classmethod
+    def poll(cls, context: Context) -> bool:
+        return ui_utils.validation_poll(cls, context, MappingProperties.context_selection_validation)
+
+    def execute(self, ctx: Context) -> set[str]:
+        mprops: MappingProperties = MappingProperties.from_context(ctx)
+        tracks = ctx.object.animation_data.nla_tracks
+        t = tracks.new()
+        t.name = self.name
+
+        return {'FINISHED'}

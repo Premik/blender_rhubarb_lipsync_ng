@@ -7,7 +7,7 @@ from bpy.types import UI_UL_list
 
 from rhubarb_lipsync.blender.sound_operators import PlayRange
 from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences, CueListPreferences
-from rhubarb_lipsync.blender.capture_properties import MouthCueList, MouthCueListItem
+from rhubarb_lipsync.blender.capture_properties import MouthCueList, MouthCueListItem, CaptureListProperties
 from rhubarb_lipsync.blender.ui_utils import IconsManager
 from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue
 
@@ -43,6 +43,7 @@ class MouthCueUIList(UIList):
 
     def draw_compact(self, layout: UILayout, item: MouthCueListItem, context: Context) -> None:
         clp = self.cuelist_prefs(context)
+        props = CaptureListProperties.capture_from_context(context)
         # row = layout.row()
         # prefs = RhubarbAddonPreferences.from_context(context)
         if clp.show_col_icon:
@@ -92,7 +93,9 @@ class MouthCueUIList(UIList):
         if clp.show_col_play:
             row = subs.row()  # Operator (0.15)
             op = row.operator(PlayRange.bl_idname, text="", icon="TRIA_RIGHT_BAR")
-            op.start_frame = int(item.frame_float(context))
+
+            sf = props and props.start_frame or 1
+            op.start_frame = int(item.frame_float(context)) + sf
             op.play_frames = item.duration_frames(context)
 
     def draw_grid(self, layout: UILayout, item: MouthCueListItem, context: Context) -> None:

@@ -1,4 +1,5 @@
 import pathlib
+import re
 from typing import Any, Callable, Iterator, Type
 
 import bpy
@@ -171,3 +172,21 @@ def remove_handler(handlers: list[Callable], fn: Callable) -> bool:
         return True
     except StopIteration:
         return False
+
+
+numbered_item_re = re.compile(r"^(?P<idx>\d+\d+\d+)\s.*")
+
+
+def name_search_index(numbered_item: str) -> int:
+    """Returns an index of a numbered item. Or -1 when not matching the pattern.
+    For example '001 The item'  => 1
+    """
+    if not numbered_item:
+        return -1
+    m = numbered_item_re.search(numbered_item)
+    if m is None:
+        return -1
+    idx = m.groupdict()["idx"]
+    if idx is None:
+        return -1
+    return int(idx)
