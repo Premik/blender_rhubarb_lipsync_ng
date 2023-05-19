@@ -17,16 +17,9 @@ from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue, MouthShapeInfos, 
 class MappingUIList(UIList):
     bl_idname = "RLPS_UL_mapping"
 
-    # def draw_filter(self, context, layout) -> None:
-    #    return
-
-    def filter_items(self, context: Context, data: MappingProperties, propname: str):
-        # Initialize with all items visible
-        # filtered = [self.bitflag_filter_item] * len(items)
-        # filtered[0] &= ~self.bitflag_filter_item
+    def filter_items(self, context: Context, data: MappingProperties, propname: str):        
         f = self.filter_name.upper()
         filtered = UI_UL_list.filter_items_by_name(f, self.bitflag_filter_item, data.items, "key", reverse=False)
-
         return filtered, []
 
     def draw_item(

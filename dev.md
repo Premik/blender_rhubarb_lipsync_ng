@@ -149,7 +149,6 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 ## Todo
 
 ### High
-* Set start frame?
 * place-on-strip op - add redo support, asking for channel and framein the re-do dialog
 * Set the panel tab name in the preferences
 * mapping/baking panel and ops

@@ -167,6 +167,7 @@ class CaptureProperties(PropertyGroup):
         rootProps.name_search = self.short_desc(rootProps.index)
 
     sound: PointerProperty(type=bpy.types.Sound, name="Sound", update=on_sound_update)  # type: ignore
+    start_frame: IntProperty(name="Start Frame", description="Used when placing the sound strip and when baking NLA clip.", default=1)  # type: ignore
     # start_frame: FloatProperty(name="Start frame", default=0)  # type: ignore
     dialog_file: StringProperty(  # type: ignore
         name="Dialog file",

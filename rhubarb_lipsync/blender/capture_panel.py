@@ -128,8 +128,9 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
         op = row.operator(blid, text="", icon="ITALIC").relative = False
 
         row = layout.row(align=True)
-        row.operator(sound_operators.CreateSoundStripWithSound.bl_idname, icon='SPEAKER')
+        row.operator(sound_operators.CreateSoundStripWithSound.bl_idname, icon='SPEAKER').start_frame = props.start_frame
         row.operator(sound_operators.RemoveSoundStripWithSound.bl_idname, icon='MUTE_IPO_OFF')
+        layout.prop(props, 'start_frame')
         layout.prop(self.ctx.scene, 'use_audio_scrub')
         if sound:
             layout.prop(sound, "use_memory_cache")
