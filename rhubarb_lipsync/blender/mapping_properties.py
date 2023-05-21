@@ -102,6 +102,25 @@ class MappingProperties(PropertyGroup):
             return None
         return self.items[self.index]
 
+    @property
+    def has_any_mapping(self) -> bool:
+        """Has any Action mapped at all"""
+        if not self.items or len(self.items) <= 0:
+            return False
+        for i in self.items:
+            mi: MappingItem = i
+            if mi.action or mi.shapekey_action:
+                return True
+        return False
+
+    @property
+    def blank_keys(self) -> list[str]:
+        return [mi.key for mi in self.items or [] if not mi.action]
+    
+    @property
+    def blank_shapekeys(self) -> list[str]:
+        return [mi.key for mi in self.items or [] if not mi.shapekey_action]
+
     @staticmethod
     def from_context(ctx: Context) -> Optional['MappingProperties']:
         """Get the selecrted capture properties from the current scene of the provided context"""

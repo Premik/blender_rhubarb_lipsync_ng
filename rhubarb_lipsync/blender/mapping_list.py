@@ -7,7 +7,7 @@ from bpy.types import UI_UL_list
 
 import rhubarb_lipsync.blender.mapping_operators as mapping_operators
 from rhubarb_lipsync.blender.sound_operators import PlayRange
-from rhubarb_lipsync.blender.preferences import CueListPreferences, RhubarbAddonPreferences, MappingListPreferences
+from rhubarb_lipsync.blender.preferences import CueListPreferences, RhubarbAddonPreferences, MappingPreferences
 from rhubarb_lipsync.blender.mapping_properties import MappingProperties, MappingItem
 from rhubarb_lipsync.blender.ui_utils import IconsManager
 
@@ -17,7 +17,7 @@ from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue, MouthShapeInfos, 
 class MappingUIList(UIList):
     bl_idname = "RLPS_UL_mapping"
 
-    def filter_items(self, context: Context, data: MappingProperties, propname: str):        
+    def filter_items(self, context: Context, data: MappingProperties, propname: str):
         f = self.filter_name.upper()
         filtered = UI_UL_list.filter_items_by_name(f, self.bitflag_filter_item, data.items, "key", reverse=False)
         return filtered, []
@@ -35,7 +35,7 @@ class MappingUIList(UIList):
         flt_flag: int,
     ) -> None:
         prefs = RhubarbAddonPreferences.from_context(context)
-        mlp: MappingListPreferences = prefs.mapping_list_prefs
+        mlp: MappingPreferences = prefs.mapping_prefs
         clp: CueListPreferences = prefs.cue_list_prefs
 
         split = layout.split(factor=0.1)

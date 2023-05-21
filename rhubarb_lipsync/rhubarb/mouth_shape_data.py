@@ -131,6 +131,10 @@ class MouthShapeInfos(Enum):
             MouthShapeInfos._all = [m.value for m in MouthShapeInfos.__members__.values()]
         return MouthShapeInfos._all  # type: ignore
 
+    @staticmethod
+    def extended() -> list[MouthShapeInfo]:
+        return [mi for mi in MouthShapeInfos.all() if mi.extended]
+
 
 class MouthCue:
     """Instance of a mouth shape at specific time-interval."""

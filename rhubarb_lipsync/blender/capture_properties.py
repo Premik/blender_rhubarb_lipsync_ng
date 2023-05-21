@@ -113,6 +113,12 @@ class MouthCueList(PropertyGroup):
             return None
         return self.items[self.index]
 
+    @property
+    def last_item(self) -> Optional[MouthCueListItem]:
+        if len(self.items) < 1:
+            return None
+        return self.items[-1]
+
     def find_index_by_time(self, time: float) -> int:
         return bisect.bisect_right(self.items, time, key=attrgetter('start'))
 

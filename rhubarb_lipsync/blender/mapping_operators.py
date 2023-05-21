@@ -6,11 +6,12 @@ import math
 
 import bpy
 from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty, PointerProperty, StringProperty, BoolProperty
-from bpy.types import Context
-
+from bpy.types import Context, Object
+from typing import Any, Callable, Optional, cast, Generator, Iterator
 
 from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, MouthCueList, JobProperties
-from rhubarb_lipsync.blender.mapping_properties import MappingProperties
+from rhubarb_lipsync.blender.mapping_properties import MappingProperties, MappingItem
+from rhubarb_lipsync.blender.preferences import CueListPreferences, RhubarbAddonPreferences, MappingPreferences
 from rhubarb_lipsync.rhubarb.log_manager import logManager
 from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue, MouthShapeInfos, MouthShapeInfo
 import rhubarb_lipsync.blender.ui_utils as ui_utils
@@ -18,6 +19,45 @@ import traceback
 from rhubarb_lipsync.blender.ui_utils import IconsManager
 
 log = logging.getLogger(__name__)
+
+
+def objects_with_mapping(objects: Iterator[Object]) -> Generator[Object | Any, Any, None]:
+    """Filter all objects which non-blank mapping properties"""
+    for o in objects or []:
+        mp = MappingProperties.from_object(o)
+        if mp and mp.has_any_mapping:
+            yield o
+
+
+def objects_to_bake(ctx: Context) -> Generator[Object | Any, Any, None]:
+    prefs = RhubarbAddonPreferences.from_context(ctx)
+    mp: MappingPreferences = prefs.mapping_prefs
+    yield from objects_with_mapping(mp.object_selection(ctx))
+
+
+def object_validation(obj: Object, ctx: Context) -> list[str]:
+    mprops: MappingProperties = MappingProperties.from_object(obj)
+    prefs = RhubarbAddonPreferences.from_context(ctx)
+
+    if not mprops:
+        return ["Object has no mapping properties"]
+    if not mprops.has_any_mapping:
+        return ["Object has no mapping"]
+    ret: list[str] = []
+    extended: list[str] = []
+    if prefs.use_extended_shapes:
+        extended = [msi.key for msi in MouthShapeInfos.extended()]
+    if mprops.nla_map_action:  # Find unmapped cues (regular action). Ignore extended if not used
+        lst = ','.join([k for k in mprops.blank_keys if k not in extended])
+        ret += [f"{lst} has no action mapped"]
+
+    if mprops.nla_map_shapekey:
+        lst = ','.join([k for k in mprops.blank_shapekeys if k not in extended])
+        ret += [f"{lst} has no shape-action mapped"]
+
+    if not mprops.nla_track1:
+        ret += [f"no NLA track selected"]
+    return ret
 
 
 class BuildCueInfoUIList(bpy.types.Operator):
@@ -105,6 +145,12 @@ class BakeToNLA(bpy.types.Operator):
         props = CaptureListProperties.capture_from_context(context)
         return ""
 
+    def cue_list(self, ctx: Context) -> Optional[MouthCueList]:
+        cprops = CaptureListProperties.capture_from_context(ctx)
+        if not cprops:
+            return None
+        return cprops.cue_list
+
     @classmethod
     def poll(cls, context: Context) -> bool:
         return ui_utils.validation_poll(cls, context)
@@ -112,12 +158,58 @@ class BakeToNLA(bpy.types.Operator):
     def invoke(self, context: Context, event: bpy.types.Event) -> set[int] | set[str]:
         # Open dialog
         wm = context.window_manager
-        return wm.invoke_props_dialog(self, width=500)
+        return wm.invoke_props_dialog(self, width=400)
 
     def execute(self, context: Context) -> set[str]:
         mprops: MappingProperties = MappingProperties.from_context(context)
 
         return {'FINISHED'}
+
+    def draw_info(self, ctx: Context) -> None:
+        prefs = RhubarbAddonPreferences.from_context(ctx)
+        mp: MappingPreferences = prefs.mapping_prefs
+        cprops = CaptureListProperties.capture_from_context(ctx)
+        objs = list(objects_to_bake(ctx))
+
+        box = self.layout.box().column(align=True)
+
+        if cprops:
+            line = box.split()
+            line.label(text="Capture")
+            line.label(text=f"{cprops.sound_file_basename}.{cprops.sound_file_extension}")
+
+        line = box.split()
+        line.label(text="Objects selected")
+        line.label(text=f"{len(list(mp.object_selection(ctx)))}")
+
+        line = box.split()
+        line.label(text="Objects with mapping")
+        line.label(text=f"{len(objs)}")
+        box = self.layout.box().column(align=True)
+        for o in objects_to_bake(ctx):
+            errs = object_validation(o, ctx)
+            if errs:
+                box.separator()
+                row = box.row()
+                row.label(text=o.name)
+                row.alert = True
+
+                for e in errs:
+                    box.label(text=e, icon="ERROR")
+
+    def draw(self, ctx: Context) -> None:
+        prefs = RhubarbAddonPreferences.from_context(ctx)
+        mlp: MappingPreferences = prefs.mapping_prefs
+        cl = self.cue_list(ctx)
+
+        layout = self.layout
+        row = layout.row(align=True)
+        row.prop(self, "start_frame")
+        if cl and cl.last_item:
+            row.label(text=f"last frame {cl.last_item.end_frame_float} ")
+        layout.prop(mlp, "object_selection_type")
+        self.draw_info(ctx)
+        # ui_utils.draw_prop_with_label(m, "rate", "Rate", layout)
 
 
 class CreateNLATrack(bpy.types.Operator):

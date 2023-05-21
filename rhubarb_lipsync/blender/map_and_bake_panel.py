@@ -12,7 +12,7 @@ import rhubarb_lipsync.blender.rhubarb_operators as rhubarb_operators
 import rhubarb_lipsync.blender.sound_operators as sound_operators
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 from rhubarb_lipsync.blender.mapping_list import MappingUIList
-from rhubarb_lipsync.blender.preferences import CueListPreferences, RhubarbAddonPreferences, MappingListPreferences
+from rhubarb_lipsync.blender.preferences import CueListPreferences, RhubarbAddonPreferences, MappingPreferences
 from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, MouthCueList, JobProperties
 from rhubarb_lipsync.blender.mapping_properties import MappingProperties, NlaTrackRef
 from rhubarb_lipsync.blender.ui_utils import IconsManager
@@ -33,7 +33,7 @@ class MappingListOptionsPanel(bpy.types.Panel):
     def draw(self, context: Context) -> None:
         prefs = RhubarbAddonPreferences.from_context(context)
         clp: CueListPreferences = prefs.cue_list_prefs
-        mlp: MappingListPreferences = prefs.mapping_list_prefs
+        mlp: MappingPreferences = prefs.mapping_prefs
         layout = self.layout
         layout.label(text=MappingListOptionsPanel.bl_label)
         # layout.prop(mlp, "actions_multiline_view") # Doesn't work

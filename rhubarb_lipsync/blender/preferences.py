@@ -5,8 +5,8 @@ from typing import Optional, cast
 import bpy
 import bpy.utils.previews
 from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty, PointerProperty, StringProperty
-from bpy.types import AddonPreferences, Context, PropertyGroup, Sound, UILayout
-
+from bpy.types import AddonPreferences, Context, PropertyGroup, Sound, UILayout, Object
+from typing import Any, Callable, Optional, cast, Generator, Iterator
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandWrapper, RhubarbParser
 
@@ -77,7 +77,7 @@ class CueListPreferences(PropertyGroup):
         return [k for k in self.props_names if not 'show_col' in k]
 
 
-class MappingListPreferences(PropertyGroup):
+class MappingPreferences(PropertyGroup):
     actions_multiline_view: BoolProperty(  # type: ignore
         name="Show actions on two lines",
         description="When both regular action and shape-key action are visible show them on two lines instead of side-by-side.",
@@ -89,6 +89,25 @@ class MappingListPreferences(PropertyGroup):
         description="For each cue-type show the question-mark button with a help popup.",
         default=True,
     )
+
+    object_selection_type: EnumProperty(  # type: ignore
+        name="Objects to bake",
+        items=[
+            ("Active", "Active", "Bake only the active object"),
+            ("Selected", "Selected", "Bake all the selected objects which has a mapping"),
+            ("All", "All", "Bake all the objects of the current scene which has a mapping"),
+        ],
+        default="All",
+    )
+
+    def object_selection(self, ctx: Context) -> Iterator[Object]:
+        if self.object_selection_type == 'Active':
+            return iter([ctx.active_object])
+        if self.object_selection_type == 'Selected':
+            return ctx.selected_objects
+        if self.object_selection_type == 'All':
+            return ctx.scene.objects
+        raise AttributeError(f"Unknown object_selection_type {self.bake_object_selection}")
 
 
 class RhubarbAddonPreferences(AddonPreferences):
@@ -156,7 +175,7 @@ class RhubarbAddonPreferences(AddonPreferences):
     caputre_panel_expanded: BoolProperty(default=True)  # type: ignore
 
     cue_list_prefs: PointerProperty(type=CueListPreferences, name="Cues list preferences")  # type: ignore
-    mapping_list_prefs: PointerProperty(type=MappingListPreferences, name="Mapping list preferences")  # type: ignore
+    mapping_prefs: PointerProperty(type=MappingPreferences, name="Mapping list preferences")  # type: ignore
 
     def new_command_handler(self) -> RhubarbCommandWrapper:
         return RhubarbCommandWrapper(self.executable_path, self.recognizer, self.use_extended_shapes)
@@ -169,7 +188,7 @@ class RhubarbAddonPreferences(AddonPreferences):
         # split = layout.row(heading="Label")
         row.label(text="Rhubarb executable version:")
 
-        # Hack to avoid circumvent circular imports
+        # Hack to circumvent circular imports
         import rhubarb_lipsync.blender.rhubarb_operators as rhubarb_operators
 
         ver = rhubarb_operators.GetRhubarbExecutableVersion.get_cached_value(context)
