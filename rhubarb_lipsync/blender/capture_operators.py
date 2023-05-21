@@ -23,7 +23,7 @@ class CreateCaptureProps(bpy.types.Operator):
 
     bl_idname = "rhubarb.create_capture_props"
     bl_label = "Create new capture"
-    # bl_options = {'UNDO', 'REGISTER'}
+    bl_options = {'UNDO', 'REGISTER'}
 
     def execute(self, context: Context) -> set[str]:
         rootProps = CaptureListProperties.from_context(context)
