@@ -101,9 +101,7 @@ class MappingAndBakingPanel(bpy.types.Panel):
             self.draw_mapping_list()
             self.draw_nla_setup()
 
-            op: mapping_operators.BakeToNLA = layout.operator(mapping_operators.BakeToNLA.bl_idname, icon="LONGDISPLAY")
-            if cprops:
-                op.start_frame = cprops.start_frame
+            layout.operator(mapping_operators.BakeToNLA.bl_idname, icon="LONGDISPLAY")
             # op.star
 
         except Exception as e:

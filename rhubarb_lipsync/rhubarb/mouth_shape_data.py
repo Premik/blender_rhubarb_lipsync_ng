@@ -152,25 +152,25 @@ class MouthCue:
     def info(self) -> MouthShapeInfo:
         return MouthShapeInfos[self.key].value
 
-    def start_frame(self, fps: int, fps_base=1.0) -> int:
+    def start_frame(self, fps: int, fps_base=1.0, offset=0) -> int:
         """Whole frame number of the cue start time"""
-        return time2frame(self.start, fps, fps_base)
+        return time2frame(self.start, fps, fps_base) + offset
 
-    def start_frame_float(self, fps: int, fps_base=1.0) -> float:
+    def start_frame_float(self, fps: int, fps_base=1.0, offset=0) -> float:
         """Exact decimal frame number of the cue start time"""
-        return time2frame_float(self.start, fps, fps_base)
+        return time2frame_float(self.start, fps, fps_base) + offset
 
-    def end_frame(self, fps: int, fps_base=1.0) -> int:
+    def end_frame(self, fps: int, fps_base=1.0, offset=0) -> int:
         """Whole frame number of the cue end time"""
-        return time2frame(self.end, fps, fps_base)
+        return time2frame(self.end, fps, fps_base) + offset
 
-    def end_frame_float(self, fps: int, fps_base=1.0) -> float:
+    def end_frame_float(self, fps: int, fps_base=1.0, offset=0) -> float:
         """Exact decimal frame number of the cue stop time"""
-        return time2frame_float(self.end, fps, fps_base)
+        return time2frame_float(self.end, fps, fps_base) + offset
 
-    def start_subframe(self, fps: int, fps_base=1.0) -> tuple[int, float]:
+    def start_subframe(self, fps: int, fps_base=1.0, offset=0) -> tuple[int, float]:
         """Whole frame (without rounding) + decimal part (between 0.0 and 1.0) of the exact frame number."""
-        f, i = math.modf(self.start_frame_float(fps, fps_base))
+        f, i = math.modf(self.start_frame_float(fps, fps_base, offset))
         return int(i), f
 
     def __eq__(self, other) -> bool:

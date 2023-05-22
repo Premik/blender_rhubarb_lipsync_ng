@@ -132,8 +132,6 @@ class BakeToNLA(bpy.types.Operator):
     bl_idname = "rhubarb.bake_to_nla"
     bl_label = "Bake to NLA"
 
-    start_frame: IntProperty(name="Start Frame", default=1)  # type: ignore
-
     @classmethod
     def disabled_reason(cls, context: Context) -> str:
         error_common = CaptureProperties.sound_selection_validation(context, False)
@@ -221,13 +219,14 @@ class BakeToNLA(bpy.types.Operator):
     def draw(self, ctx: Context) -> None:
         prefs = RhubarbAddonPreferences.from_context(ctx)
         mlp: MappingPreferences = prefs.mapping_prefs
+        cprops = CaptureListProperties.capture_from_context(ctx)
         cl = self.cue_list(ctx)
 
         layout = self.layout
         row = layout.row(align=False)
-        row.prop(self, "start_frame")
+        row.prop(cprops, "start_frame")
         if cl and cl.last_item:
-            row.label(text=f"End frame: {cl.last_item.end_frame_str(ctx) + self.start_frame}")
+            row.label(text=f"End frame: {cl.last_item.end_frame_str(ctx)}")
         layout.prop(mlp, "object_selection_type")
         self.draw_info(ctx)
         # ui_utils.draw_prop_with_label(m, "rate", "Rate", layout)

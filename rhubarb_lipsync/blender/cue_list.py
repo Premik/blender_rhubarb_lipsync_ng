@@ -84,7 +84,7 @@ class MouthCueUIList(UIList):
         if clp.show_col_start_frame:
             row.label(text=f"{item.frame_str(context)}")
         if clp.show_col_start_time:
-            row.label(text=f"{item.time_str}s")
+            row.label(text=f"{item.time_str(context)}s")
         if clp.show_col_len_frame:
             row.label(text=f"{item.duration_frames(context)}")
         if clp.show_col_len_time:
@@ -94,8 +94,7 @@ class MouthCueUIList(UIList):
             row = subs.row()  # Operator (0.15)
             op = row.operator(PlayRange.bl_idname, text="", icon="TRIA_RIGHT_BAR")
 
-            sf = props and props.start_frame or 1
-            op.start_frame = int(item.frame_float(context)) + sf
+            op.start_frame = int(item.frame_float(context))
             op.play_frames = item.duration_frames(context)
 
     def draw_grid(self, layout: UILayout, item: MouthCueListItem, context: Context) -> None:
