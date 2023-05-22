@@ -174,19 +174,31 @@ def remove_handler(handlers: list[Callable], fn: Callable) -> bool:
         return False
 
 
-numbered_item_re = re.compile(r"^(?P<idx>\d+\d+\d+)\s.*")
+class DropdownHelper:
+    numbered_item_re = re.compile(r"^(?P<idx>\d+\d+\d+)\s.*")
 
+    @staticmethod
+    def index_from_name(numbered_item: str) -> int:
+        """Returns an index of a numbered item. Or -1 when not matching the pattern.
+        For example '001 The item'  => 1
+        """
+        if not numbered_item:
+            return -1
+        m = DropdownHelper.numbered_item_re.search(numbered_item)
+        if m is None:
+            return -1
+        idx = m.groupdict()["idx"]
+        if idx is None:
+            return -1
+        return int(idx)
 
-def name_search_index(numbered_item: str) -> int:
-    """Returns an index of a numbered item. Or -1 when not matching the pattern.
-    For example '001 The item'  => 1
-    """
-    if not numbered_item:
-        return -1
-    m = numbered_item_re.search(numbered_item)
-    if m is None:
-        return -1
-    idx = m.groupdict()["idx"]
-    if idx is None:
-        return -1
-    return int(idx)
+    @staticmethod
+    def name2index(name_index_obj) -> None:
+        """Change the index property based on the name property. Take index from the name prefix"""
+        name: str = getattr(name_index_obj, 'name', "")
+        index = DropdownHelper.index_from_name(name)
+        if index < 0:
+            return  # Empty or invalid name, ignore
+        if getattr(name_index_obj, 'index', index) == index:
+            return  # Same index is already selected, ignore
+        setattr(name_index_obj, 'index', index)  # Change

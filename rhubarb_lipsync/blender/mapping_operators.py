@@ -156,7 +156,7 @@ class BakeToNLA(bpy.types.Operator):
     def invoke(self, context: Context, event: bpy.types.Event) -> set[int] | set[str]:
         # Open dialog
         wm = context.window_manager
-        return wm.invoke_props_dialog(self, width=400)
+        return wm.invoke_props_dialog(self, width=340)
 
     def execute(self, context: Context) -> set[str]:
         mprops: MappingProperties = MappingProperties.from_context(context)

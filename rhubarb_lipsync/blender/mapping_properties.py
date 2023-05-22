@@ -9,7 +9,7 @@ from typing import Any, Callable, Optional, cast, Generator
 import bpy
 import bpy.utils.previews
 from bpy.props import BoolProperty, CollectionProperty, EnumProperty, FloatProperty, IntProperty, PointerProperty, StringProperty
-from bpy.types import Action, AddonPreferences, Context, PropertyGroup, Sound, UILayout
+from bpy.types import Action, AddonPreferences, Context, PropertyGroup, Sound, UILayout, NlaTrack
 
 from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue, MouthShapeInfo, MouthShapeInfos
 from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandAsyncJob, RhubarbCommandWrapper, RhubarbParser
@@ -20,7 +20,7 @@ log = logging.getLogger(__name__)
 
 
 class NlaTrackRef(PropertyGroup):
-    """Reference to an nla track. By name and index sincle NLA track is a non-ID object"""
+    """Reference to an nla track. By name and index since NLA track is a non-ID object"""
 
     def on_name_update(self, ctx: Context) -> None:
         pass
@@ -35,7 +35,14 @@ class NlaTrackRef(PropertyGroup):
 
     @property
     def name_to_index(self) -> int:
-        return ui_utils.name_search_index(self.name)
+        return ui_utils.DropdownHelper.index_from_name(self.name)
+
+    def items(self, ctx: Context) -> Generator[NlaTrack | Any, Any, None]:
+        obj = ctx.active_object
+        if not obj or not obj.animation_data or not obj.animation_data.nla_tracks:
+            return
+        for t in obj.animation_data.nla_tracks:
+            yield t
 
     def search_value(self, ctx: Context, edit_text) -> Generator[str | Any, Any, None]:
         obj = ctx.active_object
@@ -44,8 +51,14 @@ class NlaTrackRef(PropertyGroup):
         for i, t in enumerate(obj.animation_data.nla_tracks or []):
             yield f"{str(i).zfill(3)} {t.name}"
 
-    name: StringProperty(name="NLA Track", description="Name of the selected NLA track", search=search_value, update=on_name_update)  # type: ignore
+    name: StringProperty(name="NLA Track", description="NLA track to add actions to", search=search_value, update=on_name_update)  # type: ignore
     index: IntProperty(name="Index of the selected track")  # type: ignore
+
+    @property
+    def selected_item(self) -> Optional[NlaTrack]:
+        if self.index < 0 or self.index >= len(self.items):
+            return None
+        return self.items[self.index]
 
 
 class MappingItem(PropertyGroup):
@@ -116,7 +129,7 @@ class MappingProperties(PropertyGroup):
     @property
     def blank_keys(self) -> list[str]:
         return [mi.key for mi in self.items or [] if not mi.action]
-    
+
     @property
     def blank_shapekeys(self) -> list[str]:
         return [mi.key for mi in self.items or [] if not mi.shapekey_action]

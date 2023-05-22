@@ -192,7 +192,7 @@ class CaptureProperties(PropertyGroup):
     def on_sound_update(self, ctx: Context) -> None:
         # ctx.area.tag_redraw()
         rootProps = CaptureListProperties.from_context(ctx)
-        rootProps.name_search = self.short_desc(rootProps.index)
+        rootProps.name = self.short_desc(rootProps.index)
 
     sound: PointerProperty(type=bpy.types.Sound, name="Sound", update=on_sound_update)  # type: ignore
     start_frame: IntProperty(name="Start Frame", description="Used when placing the sound strip and when baking NLA clip.", default=1)  # type: ignore
@@ -285,34 +285,33 @@ class CaptureProperties(PropertyGroup):
 
 
 class CaptureListProperties(PropertyGroup):
-    """List of capture setup and cues. Hooked to Blender scene"""
+    """List of captures (setup and cues). Hooked to Blender scene"""
 
     items: CollectionProperty(type=CaptureProperties, name="Captures")  # type: ignore
     index: IntProperty(name="Selected capture index")  # type: ignore
 
     @property
     def name_search_index(self) -> int:
-        return ui_utils.name_search_index(self.name_search)
+        return ui_utils.DropdownHelper.index_from_name(self.name)
 
     def search_value(self, ctx: Context, edit_text) -> Generator[str, Any, None]:
-        rootProps = CaptureListProperties.from_context(ctx)
-        caps: list[CaptureProperties] = rootProps and rootProps.items
-        for i, p in enumerate(caps or []):
+        for i, p in enumerate(self.items):
             yield p.short_desc(i)
             # yield (p.short_desc, str(i))
         # return [(m, str(i)) for i, m in enumerate(materials)]
 
-    def sync_search_with_index(self, ctx: Context) -> None:
+    def index2search(self, ctx: Context) -> None:
+        """Change the search string to match the item selected by the index"""
         items = list(self.search_value(ctx, ""))
         if self.index < 0 or self.index >= len(self.items):
             v = ""
         else:
             v = items[self.index]
-        if v != self.name_search:
-            self.name_search = v
+        if v != self.name:
+            self.name = v
 
-    def on_search_update(self, ctx: Context) -> None:
-        # Change selected item based on the search(take index from the name sufx)
+    def search2index(self, ctx: Context) -> None:
+        """Change selected item (index) based on the search string. Take index from the name sufix"""
         idx = self.name_search_index
         if idx < 0:
             return
@@ -320,7 +319,7 @@ class CaptureListProperties(PropertyGroup):
             return  # Already selected
         self.index = idx
 
-    name_search: StringProperty(name="name_search", description="Selected capture", search=search_value, update=on_search_update)  # type: ignore
+    name: StringProperty(name="name", description="Selected capture", search=search_value, update=search2index)  # type: ignore
 
     @property
     def selected_item(self) -> Optional[CaptureProperties]:
