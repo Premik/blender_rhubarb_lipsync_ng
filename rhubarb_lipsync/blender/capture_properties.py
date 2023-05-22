@@ -46,6 +46,9 @@ class MouthCueListItem(PropertyGroup):
 
     def frame(self, ctx: Context) -> int:
         return self.cue.start_frame(ctx.scene.render.fps, ctx.scene.render.fps_base)
+    
+    def end_frame(self, ctx: Context) -> int:
+        return self.cue.end_frame(ctx.scene.render.fps, ctx.scene.render.fps_base)
 
     def frame_float(self, ctx: Context) -> float:
         return self.cue.start_frame_float(ctx.scene.render.fps, ctx.scene.render.fps_base)
@@ -60,6 +63,11 @@ class MouthCueListItem(PropertyGroup):
         if ctx.scene.show_subframe:
             return f"{self.frame_float(ctx):0.2f}"
         return f"{self.frame(ctx)}"
+    
+    def end_frame_str(self, ctx: Context) -> str:
+        if ctx.scene.show_subframe:
+            return f"{self.end_frame_float(ctx):0.2f}"
+        return f"{self.end_frame(ctx)}"
 
     @property
     def duration(self) -> float:
@@ -115,7 +123,7 @@ class MouthCueList(PropertyGroup):
 
     @property
     def last_item(self) -> Optional[MouthCueListItem]:
-        if len(self.items) < 1:
+        if not self.items or len(self.items) < 1:
             return None
         return self.items[-1]
 
@@ -198,6 +206,13 @@ class CaptureProperties(PropertyGroup):
         if required_unpack and sound.packed_file:
             return "Please unpack the sound first."
         return ""
+
+    @property
+    def end_frame_time(self) -> float | None:
+        cl: MouthCueList = self.cue_list
+        if not cl or not cl.last_item:
+            return None
+        return cl.last_item.end
 
     @property
     def sound_file_path(self) -> pathlib.Path | None:

@@ -160,6 +160,10 @@ class MouthCue:
         """Exact decimal frame number of the cue start time"""
         return time2frame_float(self.start, fps, fps_base)
 
+    def end_frame(self, fps: int, fps_base=1.0) -> int:
+        """Whole frame number of the cue end time"""
+        return time2frame(self.end, fps, fps_base)
+
     def end_frame_float(self, fps: int, fps_base=1.0) -> float:
         """Exact decimal frame number of the cue stop time"""
         return time2frame_float(self.end, fps, fps_base)

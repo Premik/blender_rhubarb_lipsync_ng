@@ -6,7 +6,7 @@ import math
 
 import bpy
 from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty, PointerProperty, StringProperty, BoolProperty
-from bpy.types import Context, Object
+from bpy.types import Context, Object, UILayout
 from typing import Any, Callable, Optional, cast, Generator, Iterator
 
 from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, MouthCueList, JobProperties
@@ -165,26 +165,48 @@ class BakeToNLA(bpy.types.Operator):
 
         return {'FINISHED'}
 
+    def draw_error_inbox(self, l: UILayout, text: str) -> None:
+        l.alert = True
+        l.label(text=text, icon="ERROR")
+
     def draw_info(self, ctx: Context) -> None:
         prefs = RhubarbAddonPreferences.from_context(ctx)
         mp: MappingPreferences = prefs.mapping_prefs
         cprops = CaptureListProperties.capture_from_context(ctx)
-        objs = list(objects_to_bake(ctx))
+
+        if not cprops:
+            ui_utils.draw_error(self.layout, "No capture selected")
+            return
 
         box = self.layout.box().column(align=True)
 
-        if cprops:
-            line = box.split()
-            line.label(text="Capture")
-            line.label(text=f"{cprops.sound_file_basename}.{cprops.sound_file_extension}")
+        line = box.split()
+        line.label(text="Capture")
+        line.label(text=f"{cprops.sound_file_basename}.{cprops.sound_file_extension}")
+
+        line = box.split()
+        line.label(text="Mouth cues")
+        cl = self.cue_list(ctx)
+        if cl and cl.items:
+            line.label(text=str(len(cl.items)))
+        else:
+            self.draw_error_inbox(line, "No cues")
 
         line = box.split()
         line.label(text="Objects selected")
-        line.label(text=f"{len(list(mp.object_selection(ctx)))}")
+        selected_objects = list(mp.object_selection(ctx))
+        if selected_objects:
+            line.label(text=f"{len(selected_objects)}")
+        else:
+            self.draw_error_inbox(line, "None")
 
+        objs_to_bake = list(objects_to_bake(ctx))
         line = box.split()
         line.label(text="Objects with mapping")
-        line.label(text=f"{len(objs)}")
+        if len(objs_to_bake):
+            line.label(text=f"{len(objs_to_bake)}")
+        else:
+            self.draw_error_inbox(line, "None of the selected")
         box = self.layout.box().column(align=True)
         for o in objects_to_bake(ctx):
             errs = object_validation(o, ctx)
@@ -192,10 +214,9 @@ class BakeToNLA(bpy.types.Operator):
                 box.separator()
                 row = box.row()
                 row.label(text=o.name)
-                row.alert = True
 
                 for e in errs:
-                    box.label(text=e, icon="ERROR")
+                    self.draw_error_inbox(box.row(), e)
 
     def draw(self, ctx: Context) -> None:
         prefs = RhubarbAddonPreferences.from_context(ctx)
@@ -203,10 +224,10 @@ class BakeToNLA(bpy.types.Operator):
         cl = self.cue_list(ctx)
 
         layout = self.layout
-        row = layout.row(align=True)
+        row = layout.row(align=False)
         row.prop(self, "start_frame")
         if cl and cl.last_item:
-            row.label(text=f"last frame {cl.last_item.end_frame_float} ")
+            row.label(text=f"End frame: {cl.last_item.end_frame_str(ctx) + self.start_frame}")
         layout.prop(mlp, "object_selection_type")
         self.draw_info(ctx)
         # ui_utils.draw_prop_with_label(m, "rate", "Rate", layout)
