@@ -1,6 +1,7 @@
+from enum import Enum
 import pathlib
 import re
-from typing import Any, Callable, Iterator, Type
+from typing import Any, Callable, Iterator, Type, Sequence
 
 import bpy
 from bpy.types import Area, Context, Sound, SoundSequence, UILayout, Window
@@ -175,7 +176,41 @@ def remove_handler(handlers: list[Callable], fn: Callable) -> bool:
 
 
 class DropdownHelper:
-    numbered_item_re = re.compile(r"^(?P<idx>\d+\d+\d+)\s.*")
+    """Helper for building dropdowns for non-ID items of an collection. Item is referenced
+    by index and a (search-)name. Index is further encoded as number prefix of the name separated by space.
+    For example: `001 First item`.
+    The parent dropdown collection is required to have `name:str`, `index:int` and `items:Sequence` attrs.
+    """
+
+    numbered_item_re = re.compile(r"^(?P<idx>\d+)\s.*")
+    NameNotFoundHandling = Enum('NameNotFoundHandling', ['KEEP_LAST', 'UNSELECT'])
+
+    def __init__(self, dropdown, nameNotFoundHandling=NameNotFoundHandling.KEEP_LAST) -> None:
+        self.obj = dropdown
+        self.nameNotFoundHandling = nameNotFoundHandling
+        self.ensure_index_bounds()
+
+    @property
+    def index(self) -> int:
+        return getattr(self.obj, 'index', -1)
+
+    @index.setter
+    def index(self, index: int) -> None:
+        if self.index != index:
+            setattr(self.obj, 'index', index)
+
+    @property
+    def name(self) -> str:
+        return getattr(self.obj, 'name', "")
+
+    @name.setter
+    def name(self, n: str) -> None:
+        if self.name != n:
+            setattr(self.obj, 'name', n)
+
+    @property
+    def items(self) -> Sequence:
+        return getattr(self.obj, 'items', [])
 
     @staticmethod
     def index_from_name(numbered_item: str) -> int:
@@ -192,13 +227,43 @@ class DropdownHelper:
             return -1
         return int(idx)
 
-    @staticmethod
-    def name2index(name_index_obj) -> None:
-        """Change the index property based on the name property. Take index from the name prefix"""
-        name: str = getattr(name_index_obj, 'name', "")
-        index = DropdownHelper.index_from_name(name)
-        if index < 0:
-            return  # Empty or invalid name, ignore
-        if getattr(name_index_obj, 'index', index) == index:
+    def index_within_bounds(self, index=None) -> int:
+        """Returns index bounded to the items length without changing the `index` attr.
+        Returns -1 when the list is empty"""
+        l = len(self.items)
+        if l == 0:
+            return -1  # Empty list
+        if index == None:
+            index = self.index
+        if index < 0:  # Befor the first
+            return 0
+        if index >= l:  # After the last
+            return l - 1
+        return index
+
+    def ensure_index_bounds(self) -> None:
+        """Changes the `index` attr to be within the `items` bounds."""
+        new = self.index_within_bounds()
+        if self.index != new:
+            self.index = new
+
+    def name2index(self) -> None:
+        """Changes the index property based on the name property. Takes index from the name prefix"""
+        index = DropdownHelper.index_from_name(self.name)
+        if index < 0:  # Empty or invalid name
+            if self.nameNotFoundHandling == DropdownHelper.NameNotFoundHandling.UNSELECT:
+                self.index = -1
+            return
+
+        index = self.index_within_bounds(index)
+        if self.index == index:
             return  # Same index is already selected, ignore
-        setattr(name_index_obj, 'index', index)  # Change
+        self.index = index  # Change
+
+    def index2name(self) -> None:
+        """"""
+        self.ensure_index_bounds()
+        if self.index < 0:
+            self.name = ""
+            return
+        self.name = self.items[self.index]
