@@ -179,7 +179,7 @@ class DropdownHelper:
     """Helper for building dropdowns for non-ID items of an collection. Item is referenced
     by index and a (search-)name. Index is further encoded as number prefix of the name separated by space.
     For example: `001 First item`.
-    The parent dropdown collection is required to have `name:str`, `index:int` and `items:Sequence` attrs.
+    The parent dropdown collection is required to have `name:str`, `index:int` and `names:Sequence[str]` attrs.
     """
 
     numbered_item_re = re.compile(r"^(?P<idx>\d+)\s.*")
@@ -209,8 +209,8 @@ class DropdownHelper:
             setattr(self.obj, 'name', n)
 
     @property
-    def items(self) -> Sequence:
-        return getattr(self.obj, 'items', [])
+    def names(self) -> Sequence[str]:
+        return getattr(self.obj, 'names', [])
 
     @staticmethod
     def index_from_name(numbered_item: str) -> int:
@@ -228,9 +228,9 @@ class DropdownHelper:
         return int(idx)
 
     def index_within_bounds(self, index=None) -> int:
-        """Returns index bounded to the items length without changing the `index` attr.
+        """Returns index bounded to the names length without changing the `index` attr.
         Returns -1 when the list is empty"""
-        l = len(self.items)
+        l = len(self.names)
         if l == 0:
             return -1  # Empty list
         if index == None:
@@ -266,4 +266,4 @@ class DropdownHelper:
         if self.index < 0:
             self.name = ""
             return
-        self.name = self.items[self.index]
+        self.name = self.names[self.index]

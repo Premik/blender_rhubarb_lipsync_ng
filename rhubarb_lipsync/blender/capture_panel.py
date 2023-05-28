@@ -321,7 +321,7 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
             # layout.template_search(rootProps, 'items')
             if rootProps.items:
                 row = layout.row(align=True)
-                row.prop(rootProps, 'name_search', text="")
+                row.prop(rootProps, 'name', text="")
                 row.operator(capture_operators.CreateCaptureProps.bl_idname, text="", icon="DUPLICATE")
                 row.operator(capture_operators.DeleteCaptureProps.bl_idname, text="", icon="PANEL_CLOSE")
             else:

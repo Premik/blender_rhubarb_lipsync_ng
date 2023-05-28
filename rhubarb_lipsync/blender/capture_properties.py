@@ -4,7 +4,7 @@ import math
 from operator import attrgetter, index
 import pathlib
 from functools import cached_property
-from typing import Any, Callable, Optional, cast, Generator
+from typing import Any, Callable, Optional, Sequence, cast, Generator
 
 import bpy
 import bpy.utils.previews
@@ -288,38 +288,27 @@ class CaptureListProperties(PropertyGroup):
     """List of captures (setup and cues). Hooked to Blender scene"""
 
     items: CollectionProperty(type=CaptureProperties, name="Captures")  # type: ignore
+
     index: IntProperty(name="Selected capture index")  # type: ignore
 
-    @property
-    def name_search_index(self) -> int:
-        return ui_utils.DropdownHelper.index_from_name(self.name)
-
-    def search_value(self, ctx: Context, edit_text) -> Generator[str, Any, None]:
+    def search_names(self, ctx: Context, edit_text) -> Generator[str, Any, None]:
         for i, p in enumerate(self.items):
             yield p.short_desc(i)
             # yield (p.short_desc, str(i))
         # return [(m, str(i)) for i, m in enumerate(materials)]
 
-    def index2search(self, ctx: Context) -> None:
-        """Change the search string to match the item selected by the index"""
-        items = list(self.search_value(ctx, ""))
-        if self.index < 0 or self.index >= len(self.items):
-            v = ""
-        else:
-            v = items[self.index]
-        if v != self.name:
-            self.name = v
+    @property
+    def names(self) -> Sequence[str]:
+        return list(self.search_names(None, ""))
 
-    def search2index(self, ctx: Context) -> None:
-        """Change selected item (index) based on the search string. Take index from the name sufix"""
-        idx = self.name_search_index
-        if idx < 0:
-            return
-        if self.index == idx:
-            return  # Already selected
-        self.index = idx
+    @cached_property
+    def dropdown_helper(self) -> ui_utils.DropdownHelper:
+        return ui_utils.DropdownHelper(self)
 
-    name: StringProperty(name="name", description="Selected capture", search=search_value, update=search2index)  # type: ignore
+    def name_updated(self, ctx: Context) -> None:
+        self.dropdown_helper.name2index()
+
+    name: StringProperty(name="name", description="Selected capture", search=search_names, update=name_updated)  # type: ignore
 
     @property
     def selected_item(self) -> Optional[CaptureProperties]:

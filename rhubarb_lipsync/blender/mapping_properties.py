@@ -44,14 +44,14 @@ class NlaTrackRef(PropertyGroup):
         for t in obj.animation_data.nla_tracks:
             yield t
 
-    def search_value(self, ctx: Context, edit_text) -> Generator[str | Any, Any, None]:
+    def names(self, ctx: Context, edit_text) -> Generator[str | Any, Any, None]:
         obj = ctx.active_object
         if not obj or not obj.animation_data:
             return
         for i, t in enumerate(obj.animation_data.nla_tracks or []):
             yield f"{str(i).zfill(3)} {t.name}"
 
-    name: StringProperty(name="NLA Track", description="NLA track to add actions to", search=search_value, update=on_name_update)  # type: ignore
+    name: StringProperty(name="NLA Track", description="NLA track to add actions to", search=names, update=on_name_update)  # type: ignore
     index: IntProperty(name="Index of the selected track")  # type: ignore
 
     @property
