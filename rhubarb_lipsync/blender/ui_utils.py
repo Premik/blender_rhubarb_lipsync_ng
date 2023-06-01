@@ -179,14 +179,14 @@ class DropdownHelper:
     """Helper for building dropdowns for non-ID items of an collection. Item is referenced
     by index and a (search-)name. Index is further encoded as number prefix of the name separated by space.
     For example: `001 First item`.
-    The parent dropdown collection is required to have `name:str`, `index:int` and `names:Sequence[str]` attrs.
     """
 
     numbered_item_re = re.compile(r"^(?P<idx>\d+)\s.*")
     NameNotFoundHandling = Enum('NameNotFoundHandling', ['KEEP_LAST', 'UNSELECT'])
 
-    def __init__(self, dropdown, nameNotFoundHandling=NameNotFoundHandling.KEEP_LAST) -> None:
+    def __init__(self, dropdown, names: Sequence[str], nameNotFoundHandling=NameNotFoundHandling.KEEP_LAST) -> None:
         self.obj = dropdown
+        self.names = names
         self.nameNotFoundHandling = nameNotFoundHandling
         self.ensure_index_bounds()
 
@@ -207,10 +207,6 @@ class DropdownHelper:
     def name(self, n: str) -> None:
         if self.name != n:
             setattr(self.obj, 'name', n)
-
-    @property
-    def names(self) -> Sequence[str]:
-        return getattr(self.obj, 'names', [])
 
     @staticmethod
     def index_from_name(numbered_item: str) -> int:

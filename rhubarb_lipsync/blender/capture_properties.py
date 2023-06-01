@@ -297,16 +297,11 @@ class CaptureListProperties(PropertyGroup):
             # yield (p.short_desc, str(i))
         # return [(m, str(i)) for i, m in enumerate(materials)]
 
-    @property
-    def names(self) -> Sequence[str]:
-        return list(self.search_names(None, ""))
-
-    @cached_property
-    def dropdown_helper(self) -> ui_utils.DropdownHelper:
-        return ui_utils.DropdownHelper(self)
+    def dropdown_helper(self, ctx: Context) -> ui_utils.DropdownHelper:
+        return ui_utils.DropdownHelper(self, list(self.search_names(ctx, "")))
 
     def name_updated(self, ctx: Context) -> None:
-        self.dropdown_helper.name2index()
+        self.dropdown_helper(ctx).name2index()
 
     name: StringProperty(name="name", description="Selected capture", search=search_names, update=name_updated)  # type: ignore
 

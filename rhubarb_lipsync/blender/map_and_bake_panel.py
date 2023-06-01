@@ -66,12 +66,16 @@ class MappingAndBakingPanel(bpy.types.Panel):
         row = layout.row(align=True)
         layout.template_list(MappingUIList.bl_idname, "Mapping", mprops, "items", mprops, "index")
 
-    def draw_nla_track_picker(self, track: NlaTrackRef, text: str) -> None:
+    def draw_nla_track_picker(self, ctx: Context, track_field_name: str, text: str) -> None:
         row = self.layout.row(align=True)
+        mprops: MappingProperties = MappingProperties.from_context(self.ctx)
+        track: NlaTrackRef = getattr(mprops, track_field_name)
         row.prop(track, 'name', text=text)
         op: mapping_operators.CreateNLATrack = row.operator(mapping_operators.CreateNLATrack.bl_idname, text="", icon="DUPLICATE")
         obj_name = self.ctx.object and self.ctx.object.name or ''
         op.name = f"RLPS {obj_name} {text}"
+        op.track_field_name = track_field_name
+        # op.trackRef=track
 
         # row.operator(capture_operators.DeleteCaptureProps.bl_idname, text="", icon="PANEL_CLOSE")
 
@@ -79,8 +83,8 @@ class MappingAndBakingPanel(bpy.types.Panel):
         prefs = RhubarbAddonPreferences.from_context(self.ctx)
         mprops: MappingProperties = MappingProperties.from_context(self.ctx)
 
-        self.draw_nla_track_picker(mprops.nla_track1, "Track 1")
-        self.draw_nla_track_picker(mprops.nla_track2, "Track 2")
+        self.draw_nla_track_picker(self.ctx, "nla_track1", "Track 1")
+        self.draw_nla_track_picker(self.ctx, "nla_track2", "Track 2")
 
     def draw(self, context: Context) -> None:
         try:

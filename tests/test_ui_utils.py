@@ -20,8 +20,7 @@ from rhubarb_lipsync.blender.capture_properties import CaptureProperties
 
 
 class MockDropdown:
-    def __init__(self, lst: Sequence) -> None:
-        self.items = lst
+    def __init__(self) -> None:
         self.index = 0
         self.name = ""
 
@@ -34,15 +33,15 @@ class DrowpdownHelperTest(unittest.TestCase):
     #    self.blank = DropdownHelper()
 
     def testIndexEmpty(self) -> None:
-        d = ui_utils.DropdownHelper(MockDropdown([]))
+        d = ui_utils.DropdownHelper(MockDropdown(), [])
         d.ensure_index_bounds()
-        self.assertEqual(len(d.items), 0)
+        self.assertEqual(len(d.names), 0)
         self.assertEqual(d.name, "")
         self.assertEqual(d.index, -1)
 
     def testAdding(self) -> None:
         lst: list[str] = []
-        d = ui_utils.DropdownHelper(MockDropdown(lst))
+        d = ui_utils.DropdownHelper(MockDropdown(), lst)
         lst.append("aa")
         d.ensure_index_bounds()
         self.assertEqual(d.index, 0, "Originally invalid index didn't change to the first item")
@@ -53,7 +52,7 @@ class DrowpdownHelperTest(unittest.TestCase):
 
     def testIndex2Name(self) -> None:
         lst: list[str] = ["aa", "bb", "cc"]
-        d = ui_utils.DropdownHelper(MockDropdown(lst))
+        d = ui_utils.DropdownHelper(MockDropdown(), lst)
         self.assertEqual(d.index, 0)
         self.assertEqual(d.name, "")
         d.index2name()
@@ -64,7 +63,7 @@ class DrowpdownHelperTest(unittest.TestCase):
 
     def testName2index(self) -> None:
         lst: list[str] = ["000 aa", "001:bb", "2 cc"]
-        d = ui_utils.DropdownHelper(MockDropdown(lst))
+        d = ui_utils.DropdownHelper(MockDropdown(), lst)
         self.assertEqual(d.index, 0)
         d.name2index()
         self.assertEqual(d.index, 0)

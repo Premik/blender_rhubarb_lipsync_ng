@@ -10,7 +10,7 @@ from bpy.types import Context, Object, UILayout
 from typing import Any, Callable, Optional, cast, Generator, Iterator
 
 from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, MouthCueList, JobProperties
-from rhubarb_lipsync.blender.mapping_properties import MappingProperties, MappingItem
+from rhubarb_lipsync.blender.mapping_properties import MappingProperties, MappingItem, NlaTrackRef
 from rhubarb_lipsync.blender.preferences import CueListPreferences, RhubarbAddonPreferences, MappingPreferences
 from rhubarb_lipsync.rhubarb.log_manager import logManager
 from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue, MouthShapeInfos, MouthShapeInfo
@@ -236,6 +236,7 @@ class CreateNLATrack(bpy.types.Operator):
     """Create a new NLA track to bake the actions into."""
 
     name: StringProperty("Name", description="Name of the track to create")  # type:ignore
+    track_field_name: StringProperty(name="Track", description="Name of the NltTrackRef attr on the MappingProperties (internal)")  # type:ignore
 
     bl_idname = "rhubarb.new_nla_track"
     bl_label = "New NLA track"
@@ -257,5 +258,9 @@ class CreateNLATrack(bpy.types.Operator):
         msg = f"Created new NLA track: {self.name}"
         log.debug(msg)
         self.report({'INFO'}, msg)
+        if self.track_field_name:  # Select the newly created track
+            trackRef: NlaTrackRef = getattr(mprops, self.track_field_name)
+            trackRef.index += 1
+            trackRef.dropdown_helper(ctx).index2name()
 
         return {'FINISHED'}

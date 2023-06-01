@@ -22,20 +22,8 @@ log = logging.getLogger(__name__)
 class NlaTrackRef(PropertyGroup):
     """Reference to an nla track. By name and index since NLA track is a non-ID object"""
 
-    def on_name_update(self, ctx: Context) -> None:
-        pass
-
-        # Change selected item based on the search
-        # idx = self.name_search_index
-        # if idx < 0:
-        #     return
-        # if self.index == idx:
-        #     return  # Already selected
-        # self.index = idx
-
-    @property
-    def name_to_index(self) -> int:
-        return ui_utils.DropdownHelper.index_from_name(self.name)
+    def name_updated(self, ctx: Context) -> None:
+        self.dropdown_helper(ctx).name2index()
 
     def items(self, ctx: Context) -> Generator[NlaTrack | Any, Any, None]:
         obj = ctx.active_object
@@ -44,21 +32,22 @@ class NlaTrackRef(PropertyGroup):
         for t in obj.animation_data.nla_tracks:
             yield t
 
-    def names(self, ctx: Context, edit_text) -> Generator[str | Any, Any, None]:
-        obj = ctx.active_object
-        if not obj or not obj.animation_data:
-            return
-        for i, t in enumerate(obj.animation_data.nla_tracks or []):
+    def search_names(self, ctx: Context, edit_text) -> Generator[str | Any, Any, None]:
+        for i, t in enumerate(self.items(ctx)):
             yield f"{str(i).zfill(3)} {t.name}"
 
-    name: StringProperty(name="NLA Track", description="NLA track to add actions to", search=names, update=on_name_update)  # type: ignore
+    def dropdown_helper(self, ctx: Context) -> ui_utils.DropdownHelper:
+        return ui_utils.DropdownHelper(self, list(self.search_names(ctx, "")))
+
+    name: StringProperty(name="NLA Track", description="NLA track to add actions to", search=search_names, update=name_updated)  # type: ignore
     index: IntProperty(name="Index of the selected track")  # type: ignore
 
-    @property
-    def selected_item(self) -> Optional[NlaTrack]:
-        if self.index < 0 or self.index >= len(self.items):
+    def selected_item(self, ctx: Context) -> Optional[NlaTrack]:
+        items = list(self.items(ctx))
+        if self.index < 0 or self.index >= len(items):
             return None
-        return self.items[self.index]
+        self.dropdown_helper(ctx).index2name()
+        return items[self.index]
 
 
 class MappingItem(PropertyGroup):
