@@ -14,7 +14,7 @@ from bpy.types import Action, AddonPreferences, Context, PropertyGroup, Sound, U
 from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue, MouthShapeInfo, MouthShapeInfos, frame2time
 from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandAsyncJob, RhubarbCommandWrapper, RhubarbParser
 from rhubarb_lipsync.blender import ui_utils
-
+from rhubarb_lipsync.blender.ui_utils import DropdownHelper
 
 log = logging.getLogger(__name__)
 
@@ -288,8 +288,7 @@ class CaptureListProperties(PropertyGroup):
     """List of captures (setup and cues). Hooked to Blender scene"""
 
     items: CollectionProperty(type=CaptureProperties, name="Captures")  # type: ignore
-
-    index: IntProperty(name="Selected capture index")  # type: ignore
+    index: IntProperty(name="Selected capture index", default=-1)  # type: ignore
 
     def search_names(self, ctx: Context, edit_text) -> Generator[str, Any, None]:
         for i, p in enumerate(self.items):
@@ -297,8 +296,8 @@ class CaptureListProperties(PropertyGroup):
             # yield (p.short_desc, str(i))
         # return [(m, str(i)) for i, m in enumerate(materials)]
 
-    def dropdown_helper(self, ctx: Context) -> ui_utils.DropdownHelper:
-        return ui_utils.DropdownHelper(self, list(self.search_names(ctx, "")))
+    def dropdown_helper(self, ctx: Context) -> DropdownHelper:
+        return DropdownHelper(self, list(self.search_names(ctx, "")), DropdownHelper.NameNotFoundHandling.SELECT_ANY)
 
     def name_updated(self, ctx: Context) -> None:
         self.dropdown_helper(ctx).name2index()

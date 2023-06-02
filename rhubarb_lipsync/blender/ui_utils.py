@@ -188,10 +188,10 @@ class DropdownHelper:
         self.obj = dropdown
         self.names = names
         self.nameNotFoundHandling = nameNotFoundHandling
-        if nameNotFoundHandling == DropdownHelper.NameNotFoundHandling.UNSELECT:
-            self.index = -1
-        else:
-            self.ensure_index_bounds()
+        # if nameNotFoundHandling == DropdownHelper.NameNotFoundHandling.UNSELECT:
+        # self.index = -1
+        # else:
+        self.ensure_index_bounds()
 
     @property
     def index(self) -> int:
@@ -264,9 +264,8 @@ class DropdownHelper:
         """Changes the index property based on the name property. Takes index from the name prefix"""
         index = DropdownHelper.index_from_name(self.name)
         index = self.index_within_bounds(index)
-        if self.index == index:
-            return  # Same index is already selected, ignore
-        self.index = index  # Change
+        if self.index != index:
+            self.index = index  # Change
         self.index2name()  # Sync name too
 
     def index2name(self) -> None:
@@ -274,3 +273,7 @@ class DropdownHelper:
         self.ensure_index_bounds()
         if self.index >= 0:
             self.name = self.names[self.index]
+
+    def select_last(self) -> None:
+        l = len(self.names)
+        self.index = l - 1

@@ -14,7 +14,7 @@ from bpy.types import Action, AddonPreferences, Context, PropertyGroup, Sound, U
 from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue, MouthShapeInfo, MouthShapeInfos
 from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandAsyncJob, RhubarbCommandWrapper, RhubarbParser
 from rhubarb_lipsync.blender import ui_utils
-
+from rhubarb_lipsync.blender.ui_utils import DropdownHelper
 
 log = logging.getLogger(__name__)
 
@@ -36,11 +36,11 @@ class NlaTrackRef(PropertyGroup):
         for i, t in enumerate(self.items(ctx)):
             yield f"{str(i).zfill(3)} {t.name}"
 
-    def dropdown_helper(self, ctx: Context) -> ui_utils.DropdownHelper:
-        return ui_utils.DropdownHelper(self, list(self.search_names(ctx, "")))
+    def dropdown_helper(self, ctx: Context) -> DropdownHelper:
+        return DropdownHelper(self, list(self.search_names(ctx, "")), DropdownHelper.NameNotFoundHandling.UNSELECT)
 
     name: StringProperty(name="NLA Track", description="NLA track to add actions to", search=search_names, update=name_updated)  # type: ignore
-    index: IntProperty(name="Index of the selected track")  # type: ignore
+    index: IntProperty(name="Index of the selected track", default=-1)  # type: ignore
 
     def selected_item(self, ctx: Context) -> Optional[NlaTrack]:
         items = list(self.items(ctx))

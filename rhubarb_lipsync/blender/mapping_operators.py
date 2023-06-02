@@ -6,10 +6,10 @@ import math
 
 import bpy
 from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty, PointerProperty, StringProperty, BoolProperty
-from bpy.types import Context, Object, UILayout
+from bpy.types import Context, Object, UILayout, NlaTrack
 from typing import Any, Callable, Optional, cast, Generator, Iterator
 
-from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, MouthCueList, JobProperties
+from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, MouthCueList, MouthCueListItem
 from rhubarb_lipsync.blender.mapping_properties import MappingProperties, MappingItem, NlaTrackRef
 from rhubarb_lipsync.blender.preferences import CueListPreferences, RhubarbAddonPreferences, MappingPreferences
 from rhubarb_lipsync.rhubarb.log_manager import logManager
@@ -159,8 +159,18 @@ class BakeToNLA(bpy.types.Operator):
         wm = context.window_manager
         return wm.invoke_props_dialog(self, width=340)
 
-    def execute(self, context: Context) -> set[str]:
-        mprops: MappingProperties = MappingProperties.from_context(context)
+    def execute(self, ctx: Context) -> set[str]:
+        prefs = RhubarbAddonPreferences.from_context(ctx)
+        mp: MappingPreferences = prefs.mapping_prefs
+        cprops = CaptureListProperties.capture_from_context(ctx)
+        mprops: MappingProperties = MappingProperties.from_context(ctx)
+        trackRef: NlaTrackRef = mprops.nla_track1
+        track: NlaTrack = trackRef.selected_item
+        # track.strips
+
+        cueList: MouthCueList = cprops.cue_list
+        for cue in cueList.items:
+            c: MouthCueListItem = cue
 
         return {'FINISHED'}
 
@@ -261,7 +271,6 @@ class CreateNLATrack(bpy.types.Operator):
         self.report({'INFO'}, msg)
         if self.track_field_name:  # Select the newly created track
             trackRef: NlaTrackRef = getattr(mprops, self.track_field_name)
-            trackRef.index += 1
-            trackRef.dropdown_helper(ctx).index2name()
+            trackRef.dropdown_helper(ctx).select_last()
 
         return {'FINISHED'}
