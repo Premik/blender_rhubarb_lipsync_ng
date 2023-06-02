@@ -182,13 +182,16 @@ class DropdownHelper:
     """
 
     numbered_item_re = re.compile(r"^(?P<idx>\d+)\s.*")
-    NameNotFoundHandling = Enum('NameNotFoundHandling', ['KEEP_LAST', 'UNSELECT'])
+    NameNotFoundHandling = Enum('NameNotFoundHandling', ['SELECT_ANY', 'UNSELECT'])
 
-    def __init__(self, dropdown, names: Sequence[str], nameNotFoundHandling=NameNotFoundHandling.KEEP_LAST) -> None:
+    def __init__(self, dropdown, names: Sequence[str], nameNotFoundHandling=NameNotFoundHandling.SELECT_ANY) -> None:
         self.obj = dropdown
         self.names = names
         self.nameNotFoundHandling = nameNotFoundHandling
-        self.ensure_index_bounds()
+        if nameNotFoundHandling == DropdownHelper.NameNotFoundHandling.UNSELECT:
+            self.index = -1
+        else:
+            self.ensure_index_bounds()
 
     @property
     def index(self) -> int:
@@ -198,6 +201,7 @@ class DropdownHelper:
     def index(self, index: int) -> None:
         if self.index != index:
             setattr(self.obj, 'index', index)
+            self.index2name()
 
     @property
     def name(self) -> str:
@@ -207,6 +211,7 @@ class DropdownHelper:
     def name(self, n: str) -> None:
         if self.name != n:
             setattr(self.obj, 'name', n)
+            self.name2index()
 
     @staticmethod
     def index_from_name(numbered_item: str) -> int:
@@ -231,10 +236,17 @@ class DropdownHelper:
             return -1  # Empty list
         if index == None:
             index = self.index
-        if index < 0:  # Befor the first
-            return 0
         if index >= l:  # After the last
-            return l - 1
+            if self.nameNotFoundHandling == DropdownHelper.NameNotFoundHandling.SELECT_ANY:
+                index = l - 1  # Select last
+            else:
+                index = -1  # Unselect
+
+        if index < 0:  # Befor the first (unselected)
+            if self.nameNotFoundHandling == DropdownHelper.NameNotFoundHandling.SELECT_ANY:
+                index = 0  # Select first
+            else:
+                index = -1  # Keep unselected, make sure not <-1
         return index
 
     def ensure_index_bounds(self) -> None:
@@ -242,24 +254,23 @@ class DropdownHelper:
         new = self.index_within_bounds()
         if self.index != new:
             self.index = new
+            self.index2name()
+        if self.index < 0:
+            if self.name:
+                self.name = ""
+            return
 
     def name2index(self) -> None:
         """Changes the index property based on the name property. Takes index from the name prefix"""
         index = DropdownHelper.index_from_name(self.name)
-        if index < 0:  # Empty or invalid name
-            if self.nameNotFoundHandling == DropdownHelper.NameNotFoundHandling.UNSELECT:
-                self.index = -1
-            return
-
         index = self.index_within_bounds(index)
         if self.index == index:
             return  # Same index is already selected, ignore
         self.index = index  # Change
+        self.index2name()  # Sync name too
 
     def index2name(self) -> None:
         """"""
         self.ensure_index_bounds()
-        if self.index < 0:
-            self.name = ""
-            return
-        self.name = self.names[self.index]
+        if self.index >= 0:
+            self.name = self.names[self.index]

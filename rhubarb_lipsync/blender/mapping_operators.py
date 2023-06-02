@@ -55,7 +55,8 @@ def object_validation(obj: Object, ctx: Context) -> list[str]:
         lst = ','.join([k for k in mprops.blank_shapekeys if k not in extended])
         ret += [f"{lst} has no shape-action mapped"]
 
-    if not mprops.nla_track1:
+    track: NlaTrackRef = mprops.nla_track1
+    if not track.selected_item(ctx):
         ret += [f"no NLA track selected"]
     return ret
 

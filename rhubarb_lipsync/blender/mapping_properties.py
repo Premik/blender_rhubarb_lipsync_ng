@@ -46,7 +46,7 @@ class NlaTrackRef(PropertyGroup):
         items = list(self.items(ctx))
         if self.index < 0 or self.index >= len(items):
             return None
-        self.dropdown_helper(ctx).index2name()
+        # self.dropdown_helper(ctx).index2name()
         return items[self.index]
 
 
