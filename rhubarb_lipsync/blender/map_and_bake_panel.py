@@ -7,6 +7,7 @@ import bpy
 from bpy.props import BoolProperty, FloatProperty, IntProperty, PointerProperty, StringProperty
 from bpy.types import Context, Sound, SoundSequence, UILayout
 
+import rhubarb_lipsync.blender.baking_operators as baking_operators
 import rhubarb_lipsync.blender.mapping_operators as mapping_operators
 import rhubarb_lipsync.blender.rhubarb_operators as rhubarb_operators
 import rhubarb_lipsync.blender.sound_operators as sound_operators
@@ -106,7 +107,7 @@ class MappingAndBakingPanel(bpy.types.Panel):
             self.draw_mapping_list()
             self.draw_nla_setup()
 
-            layout.operator(mapping_operators.BakeToNLA.bl_idname, icon="LONGDISPLAY")
+            layout.operator(baking_operators.BakeToNLA.bl_idname, icon="LONGDISPLAY")
             # op.star
 
         except Exception as e:
