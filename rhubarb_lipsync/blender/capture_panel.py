@@ -50,6 +50,7 @@ class CueListOptionsPanel(bpy.types.Panel):
         o: CueListPreferences = prefs.cue_list_prefs
         layout = self.layout
         layout.label(text=CueListOptionsPanel.bl_label)
+        layout.prop(context.scene, "show_subframe", text="Use subframes")
         for name in o.noncol_props_names:
             layout.prop(o, name)
 
@@ -220,9 +221,7 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
         if getattr(self.ctx.screen, 'is_animation_playing', False) and cp.preview:
             # https://blender.stackexchange.com/questions/211184/how-to-tag-a-redraw-in-all-viewports
             # self.ctx.area.tag_redraw()  # Force redraw
-            for area in self.ctx.screen.areas:
-                if area.type == 'VIEW_3D':
-                    area.tag_redraw()
+            ui_utils.redraw_3dviews(self.ctx)
             f = self.ctx.scene.frame_current_final
             t = shape_data.frame2time(f, self.ctx.scene.render.fps, self.ctx.scene.render.fps_base)
             cue = cue_list.find_cue_by_time(t)

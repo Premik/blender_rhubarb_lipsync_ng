@@ -1,12 +1,13 @@
 import logging
 from functools import cached_property
+from pydoc import describe
 from types import ModuleType
 from typing import Dict, List, Optional, cast
 import math
 
 import bpy
 from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty, PointerProperty, StringProperty, BoolProperty
-from bpy.types import Context, Object, UILayout, NlaTrack
+from bpy.types import Context, Object, UILayout, NlaTrack, NlaStrip
 from typing import Any, Callable, Optional, cast, Generator, Iterator
 
 from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, MouthCueList, MouthCueListItem
@@ -96,6 +97,7 @@ class BakingContext:
     def cue_iter(self) -> Iterator[MouthCueListItem]:
         for i, c in enumerate(self.cue_items):
             self.cue_index = i
+            self.next_track()  # Alternate tracks for each cue change
             yield c
         self.cue_index = -1
 
@@ -122,6 +124,13 @@ class BakingContext:
     def mprops(self) -> MappingProperties:
         """Mapping properties of the current object"""
         return MappingProperties.from_object(self.current_object)
+
+    @property
+    def current_mapping_item(self) -> MappingItem:
+        if not self.mprops or not self.current_cue:
+            return None
+        cue_index = self.current_cue.cue.key_index
+        return self.mprops.items[cue_index]
 
     @property
     def track1(self) -> Optional[NlaTrack]:
@@ -168,11 +177,13 @@ class BakingContext:
             extended = [msi.key for msi in MouthShapeInfos.extended()]
         if self.mprops.nla_map_action:  # Find unmapped cues (regular action). Ignore extended if not used
             lst = ','.join([k for k in self.mprops.blank_keys if k not in extended])
-            ret += [f"{lst} has no action mapped"]
+            if lst:
+                ret += [f"{lst} has no action mapped"]
 
         if self.mprops.nla_map_shapekey:
             lst = ','.join([k for k in self.mprops.blank_shapekeys if k not in extended])
-            ret += [f"{lst} has no shape-action mapped"]
+            if lst:
+                ret += [f"{lst} has no shape-action mapped"]
 
         self.next_track()
         if not self.current_track:
@@ -203,11 +214,58 @@ class BakeToNLA(bpy.types.Operator):
 
     def invoke(self, context: Context, event: bpy.types.Event) -> set[int] | set[str]:
         # Open dialog
+
+        CaptureListProperties.from_context(context).last_error = ""
         wm = context.window_manager
         return wm.invoke_props_dialog(self, width=340)
 
+    def bake_cue_on(self, object: Object) -> None:
+        b = self.bctx
+
+        track = b.current_track
+        if not track:
+            log.error(f"{object} has no NLA track selected. Ignoring")
+            return
+        c = b.current_cue
+        m = b.current_mapping_item
+        if not m or not m.action:
+            log.error(f"There is no mapping for the cue {c} in the capture. Ignoring")
+            return
+        strip = track.strips.new(f"{c.cue}", c.frame(b.ctx), m.action)
+        if b.ctx.scene.show_subframe:  # Set start frame again as float (ctor takes only int)
+            strip.frame_start = c.frame_float(b.ctx)
+        # strip.frame_end = c.end_frame_float(b.ctx)
+
+    def bake_cue(self) -> None:
+        for o in self.bctx.object_iter():
+            if log.isEnabledFor(logging.TRACE):  # type: ignore
+                log.trace(f"Baking on object {o} ")  # type: ignore
+            self.bake_cue_on(o)
+
     def execute(self, ctx: Context) -> set[str]:
         self.bctx = BakingContext(ctx)
+        b = self.bctx
+        wm = ctx.window_manager
+        l = len(b.cue_items)
+        log.info(f"About to bake {l} cues")
+        wm.progress_begin(0, l)
+        try:
+            for i, c in enumerate(b.cue_iter()):
+                wm.progress_update(i)
+                if log.isEnabledFor(logging.DEBUG):
+                    log.debug(f"Baking cue {c.cue} ({i}/{l}) ")
+                self.bake_cue()
+            self.report({'INFO'}, f"Baked {l} cues")
+        except Exception as e:
+            self.report({'ERROR'}, str(e))
+            log.exception(e)
+
+            CaptureListProperties.from_context(ctx).last_error = str(e)
+            return {'CANCELLED'}
+        finally:
+            del self.bctx
+            ui_utils.redraw_3dviews(ctx)
+
         return {'FINISHED'}
 
     def draw_error_inbox(self, l: UILayout, text: str) -> None:
@@ -216,6 +274,14 @@ class BakeToNLA(bpy.types.Operator):
 
     def draw_info(self) -> None:
         b = self.bctx
+
+        # Redundant validations to allow collapsing this sub-panel while still indicating any errors
+        selected_objects = list(b.mprefs.object_selection(b.ctx))
+
+        errors = not b.cprops or not b.cue_items or not selected_objects or not b.objects
+        if not ui_utils.draw_expandable_header(b.prefs, "bake_info_panel_expanded", "Info", self.layout, errors):
+            return
+
         box = self.layout.box().column(align=True)
         line = box.split()
         if b.cprops:
@@ -233,7 +299,7 @@ class BakeToNLA(bpy.types.Operator):
 
         line = box.split()
         line.label(text="Objects selected")
-        selected_objects = list(b.mprefs.object_selection(b.ctx))
+
         if selected_objects:
             line.label(text=f"{len(selected_objects)}")
         else:
@@ -249,11 +315,15 @@ class BakeToNLA(bpy.types.Operator):
 
     def draw_validation(self) -> None:
         b = self.bctx
-        box = self.layout.box().column(align=True)
+        if not b.objects:
+            return
+        box = None
         for o in b.object_iter():
             errs = b.validate_current_object()
 
             if errs:
+                if not box:
+                    box = self.layout.box().column(align=True)
                 box.separator()
                 row = box.row()
                 row.label(text=o.name)
@@ -269,6 +339,7 @@ class BakeToNLA(bpy.types.Operator):
         row.prop(self.bctx.cprops, "start_frame")
         if self.bctx.last_cue:
             row.label(text=f"End frame: {self.bctx.last_cue.end_frame_str(ctx)}")
+        layout.prop(ctx.scene, "show_subframe", text="Use subframes")
         layout.prop(self.bctx.mprefs, "object_selection_type")
         self.draw_info()
         self.draw_validation()

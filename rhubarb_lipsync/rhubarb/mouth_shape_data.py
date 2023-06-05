@@ -1,5 +1,5 @@
 import math
-from functools import cache
+from functools import cache, cached_property
 from typing import Any, Callable, Optional, cast, Type
 from enum import Enum
 import textwrap
@@ -135,6 +135,21 @@ class MouthShapeInfos(Enum):
     def extended() -> list[MouthShapeInfo]:
         return [mi for mi in MouthShapeInfos.all() if mi.extended]
 
+    @staticmethod
+    def key2index(key: str) -> int:
+        i = ord(key) - ord('A')
+        all = MouthShapeInfos.all()
+        if i < 0 or i >= len(all):
+            return len(all) - 1  # Return the last ('X') for unknown keys
+        return i
+
+    @staticmethod
+    def index2Info(index: int) -> MouthShapeInfo:
+        all = MouthShapeInfos.all()
+        if index >= len(all) or index < 0:
+            return all[-1]  # Return 'X' for out-of-range indices
+        return all[index]
+
 
 class MouthCue:
     """Instance of a mouth shape at specific time-interval."""
@@ -148,9 +163,13 @@ class MouthCue:
     def of_json(cue_json: dict) -> 'MouthCue':
         return MouthCue(cue_json["value"], cue_json["start"], cue_json["end"])
 
-    @property
+    @cached_property
     def info(self) -> MouthShapeInfo:
         return MouthShapeInfos[self.key].value
+
+    @cached_property
+    def key_index(self) -> int:
+        return MouthShapeInfos.key2index(self.key)
 
     def start_frame(self, fps: int, fps_base=1.0, offset=0) -> int:
         """Whole frame number of the cue start time"""

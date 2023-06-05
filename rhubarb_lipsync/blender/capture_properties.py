@@ -287,6 +287,7 @@ class CaptureProperties(PropertyGroup):
 class CaptureListProperties(PropertyGroup):
     """List of captures (setup and cues). Hooked to Blender scene"""
 
+    last_error: StringProperty("Last Error", description="Last error message. When baking failed.")  # type: ignore
     items: CollectionProperty(type=CaptureProperties, name="Captures")  # type: ignore
     index: IntProperty(name="Selected capture index", default=-1)  # type: ignore
 

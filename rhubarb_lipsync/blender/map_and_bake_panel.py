@@ -108,6 +108,9 @@ class MappingAndBakingPanel(bpy.types.Panel):
             self.draw_nla_setup()
 
             layout.operator(baking_operators.BakeToNLA.bl_idname, icon="LONGDISPLAY")
+            err = CaptureListProperties.from_context(context).last_error
+            if err:
+                ui_utils.draw_error(self.layout, f"Last bake failed:\n {err}")
             # op.star
 
         except Exception as e:

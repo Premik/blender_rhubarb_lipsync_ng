@@ -175,6 +175,12 @@ def remove_handler(handlers: list[Callable], fn: Callable) -> bool:
         return False
 
 
+def redraw_3dviews(ctx: Context) -> None:
+    for area in ctx.screen.areas:
+        if area.type == 'VIEW_3D':
+            area.tag_redraw()
+
+
 class DropdownHelper:
     """Helper for building dropdowns for non-ID items of an collection. Item is referenced
     by index and a (search-)name. Index is further encoded as number prefix of the name separated by space.
