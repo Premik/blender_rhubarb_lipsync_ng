@@ -190,8 +190,8 @@ class DropdownHelper:
         self.nameNotFoundHandling = nameNotFoundHandling
         # if nameNotFoundHandling == DropdownHelper.NameNotFoundHandling.UNSELECT:
         # self.index = -1
-        # else:
-        self.ensure_index_bounds()
+        # else
+        # self.ensure_index_bounds()
 
     @property
     def index(self) -> int:
@@ -257,6 +257,7 @@ class DropdownHelper:
             self.index2name()
         if self.index < 0:
             if self.name:
+                # index_from_name = DropdownHelper.index_from_name(self.name)
                 self.name = ""
             return
 

@@ -54,6 +54,7 @@ class DrowpdownHelperSelectAnyTest(unittest.TestCase):
     def testIndex2Name(self) -> None:
         lst: list[str] = ["0 aa", "1 bb", "2 cc"]
         d = DropdownHelper(MockDropdown(), lst, DropdownHelper.NameNotFoundHandling.SELECT_ANY)
+        d.ensure_index_bounds()
         self.assertEqual(d.index, 0)
         self.assertEqual(d.name, "0 aa")
         d.index = 10
@@ -64,8 +65,6 @@ class DrowpdownHelperSelectAnyTest(unittest.TestCase):
     def testUnselecting(self) -> None:
         lst: list[str] = ["aa", "bb", "cc"]
         d = DropdownHelper(MockDropdown(), lst, DropdownHelper.NameNotFoundHandling.SELECT_ANY)
-        self.assertEqual(d.index, 0)
-        self.assertEqual(d.name, "aa")
         d.index = -1
         d.index2name()
         self.assertEqual(d.name, "")
@@ -89,7 +88,6 @@ class DrowpdownHelperSelectAnyTest(unittest.TestCase):
     def testName2indexDeletion(self) -> None:
         lst: list[str] = ["000 aa"]
         d = DropdownHelper(MockDropdown(), lst, DropdownHelper.NameNotFoundHandling.SELECT_ANY)
-        self.assertEqual(d.index, 0)
         lst.clear()
         d.name2index()
         self.assertEqual(d.name, "")
