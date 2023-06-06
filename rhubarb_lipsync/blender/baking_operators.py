@@ -22,7 +22,7 @@ from rhubarb_lipsync.blender.ui_utils import IconsManager
 log = logging.getLogger(__name__)
 
 
-def objects_with_mapping(objects: Iterator[Object]) -> Generator[Object | Any, Any, None]:
+def objects_with_mapping(objects: Iterator[Object]) -> Iterator[Object]:
     """Filter all objects which non-blank mapping properties"""
     for o in objects or []:
         mp = MappingProperties.from_object(o)
@@ -84,7 +84,7 @@ class BakingContext:
         return self.current_object
 
     @cached_property
-    def cprops(self) -> CaptureListProperties:
+    def cprops(self) -> CaptureProperties:
         return CaptureListProperties.capture_from_context(self.ctx)
 
     @cached_property
@@ -119,6 +119,12 @@ class BakingContext:
         if not self.cue_items:
             return None
         return self.cue_items[-1]
+
+    @cached_property
+    def frame_range(self) -> Optional[tuple[int, int]]:
+        if not self.last_cue:
+            return None
+        return self.cprops.start_frame, self.last_cue.end_frame(self.ctx)
 
     @property
     def mprops(self) -> MappingProperties:
@@ -160,6 +166,31 @@ class BakingContext:
             self.track_index += 1  # Try the other one. If None too then both are None
         return self.current_track
 
+    def strips_on_current_track(self) -> Iterator[NlaStrip]:
+        t = self.current_track
+        if not t or not self.cprops:
+            return
+        start, end = self.frame_range
+        for strip in t.strips:
+            s: NlaStrip = strip
+            if s.frame_end < start or s.frame_start > end:
+                continue  # Strip is not in the capture frame range
+            yield s
+
+    def validate_track(self) -> list[str]:
+        self.next_track()
+        if not self.current_track:
+            return [f"no NLA track selected"]
+        strips = 0
+        for t in self.tracks:
+            if not t:
+                continue
+            strips += len(list(self.strips_on_current_track()))
+            self.next_track()
+        if strips > 0:
+            return [f"{strips} existing strips will be removed"]
+        return []
+
     def validate_current_object(self) -> list[str]:
         """Return validation errors of `self.object`."""
         if not self.current_object:
@@ -185,9 +216,7 @@ class BakingContext:
             if lst:
                 ret += [f"{lst} has no shape-action mapped"]
 
-        self.next_track()
-        if not self.current_track:
-            ret += [f"no NLA track selected"]
+        ret += self.validate_track()
         return ret
 
 
@@ -234,6 +263,7 @@ class BakeToNLA(bpy.types.Operator):
         strip = track.strips.new(f"{c.cue}", c.frame(b.ctx), m.action)
         if b.ctx.scene.show_subframe:  # Set start frame again as float (ctor takes only int)
             strip.frame_start = c.frame_float(b.ctx)
+
         # strip.frame_end = c.end_frame_float(b.ctx)
 
     def bake_cue(self) -> None:
