@@ -30,6 +30,16 @@ def objects_with_mapping(objects: Iterator[Object]) -> Iterator[Object]:
             yield o
 
 
+def strips_on_track(track: NlaTrack, start: int, end: int) -> Iterator[NlaStrip]:
+    if not track:
+        return
+    for strip in track.strips:
+        s: NlaStrip = strip
+        if s.frame_end < start or s.frame_start > end:
+            continue  # Strip is not in frame range
+        yield s
+
+
 class BakingContext:
     """Ease navigation and iteration over various stuff needed for baking"""
 
@@ -141,12 +151,12 @@ class BakingContext:
     @property
     def track1(self) -> Optional[NlaTrack]:
         trackRef: NlaTrackRef = self.mprops and self.mprops.nla_track1
-        return trackRef and trackRef.selected_item(self.ctx)
+        return trackRef and trackRef.selected_item
 
     @property
     def track2(self) -> Optional[NlaTrack]:
         trackRef: NlaTrackRef = self.mprops and self.mprops.nla_track2
-        return trackRef and trackRef.selected_item(self.ctx)
+        return trackRef and trackRef.selected_item
 
     @property
     def tracks(self) -> List[NlaTrack]:
@@ -167,15 +177,9 @@ class BakingContext:
         return self.current_track
 
     def strips_on_current_track(self) -> Iterator[NlaStrip]:
-        t = self.current_track
-        if not t or not self.cprops:
-            return
         start, end = self.frame_range
-        for strip in t.strips:
-            s: NlaStrip = strip
-            if s.frame_end < start or s.frame_start > end:
-                continue  # Strip is not in the capture frame range
-            yield s
+        t = self.current_track
+        yield from strips_on_track(t, start, end)
 
     def validate_track(self) -> list[str]:
         self.next_track()
@@ -188,7 +192,7 @@ class BakingContext:
             strips += len(list(self.strips_on_current_track()))
             self.next_track()
         if strips > 0:
-            return [f"{strips} existing strips will be removed"]
+            return [f"Clash with {strips} existing strips"]
         return []
 
     def validate_current_object(self) -> list[str]:
@@ -218,6 +222,45 @@ class BakingContext:
 
         ret += self.validate_track()
         return ret
+
+
+class RemoveNlaStrips(bpy.types.Operator):
+    """Remove NLA Strips on a given NLA Track on a given frame range"""
+
+    bl_idname = "rhubarb.remove_nla_strips"
+    bl_label = "Remove strips"
+    bl_options = {'UNDO', 'REGISTER'}
+
+    start_frame: IntProperty(name="Start Frame", default=1)  # type: ignore
+    end_frame: IntProperty(name="Start Frame", default=1)  # type: ignore
+    # track: PointerProperty(type=NlaTrack, name="NLA Track")  # type: ignore
+    track_ref: PointerProperty(type=NlaTrackRef, name="Track")  # type: ignore
+
+    # @classmethod
+    # def disabled_reason(cls, context: Context, limit=0) -> str:
+    #     start: int = self.start_frame
+    #     props = CaptureListProperties.capture_from_context(context)
+    #     mporps: MappingList = props.mapping
+    #     if len(mporps.items) > 0:
+    #         return f"Cue mapping info is already populated"
+    #     return ""
+
+    # @classmethod
+    # def poll(cls, context: Context) -> bool:
+    #     return ui_utils.validation_poll(cls, context)
+
+    def execute(self, context: Context) -> set[str]:
+        start: int = self.start_frame
+        end: int = self.end_frame
+        tref: NlaTrackRef = self.track_ref
+        if end - start <= 0:
+            msg = f"No frames between {start} and {end}."
+            self.report({'ERROR'}, msg)
+            log.error(msg)
+            return {'CANCELLED'}
+        track: NlaTrack = tref.selected_item()
+
+        return {'FINISHED'}
 
 
 class BakeToNLA(bpy.types.Operator):
@@ -373,4 +416,5 @@ class BakeToNLA(bpy.types.Operator):
         layout.prop(self.bctx.mprefs, "object_selection_type")
         self.draw_info()
         self.draw_validation()
+        layout.operator(RemoveNlaStrips.bl_idname)
         # ui_utils.draw_prop_with_label(m, "rate", "Rate", layout)

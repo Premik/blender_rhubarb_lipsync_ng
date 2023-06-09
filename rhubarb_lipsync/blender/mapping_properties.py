@@ -22,28 +22,32 @@ log = logging.getLogger(__name__)
 class NlaTrackRef(PropertyGroup):
     """Reference to an nla track. By name and index since NLA track is a non-ID object"""
 
-    def name_updated(self, ctx: Context) -> None:
-        self.dropdown_helper(ctx).name2index()
+    object: PointerProperty(type=bpy.types.Object, name="Object the NLA tracks belong to")  # type: ignore
 
-    def items(self, ctx: Context) -> Generator[NlaTrack | Any, Any, None]:
-        obj = ctx.active_object
-        if not obj or not obj.animation_data or not obj.animation_data.nla_tracks:
+    def name_updated(self, ctx: Context) -> None:
+        self.dropdown_helper.name2index()
+
+    def items(self) -> Generator[NlaTrack | Any, Any, None]:
+        o = self.object
+        if not o or not o.animation_data or not o.animation_data.nla_tracks:
             return
-        for t in obj.animation_data.nla_tracks:
+        for t in o.animation_data.nla_tracks:
             yield t
 
     def search_names(self, ctx: Context, edit_text) -> Generator[str | Any, Any, None]:
-        for i, t in enumerate(self.items(ctx)):
+        for i, t in enumerate(self.items()):
             yield f"{str(i).zfill(3)} {t.name}"
 
-    def dropdown_helper(self, ctx: Context) -> DropdownHelper:
-        return DropdownHelper(self, list(self.search_names(ctx, "")), DropdownHelper.NameNotFoundHandling.UNSELECT)
+    @cached_property
+    def dropdown_helper(self) -> DropdownHelper:
+        return DropdownHelper(self, list(self.search_names(None, "")), DropdownHelper.NameNotFoundHandling.UNSELECT)
 
     name: StringProperty(name="NLA Track", description="NLA track to add actions to", search=search_names, update=name_updated)  # type: ignore
     index: IntProperty(name="Index of the selected track", default=-1)  # type: ignore
 
-    def selected_item(self, ctx: Context) -> Optional[NlaTrack]:
-        items = list(self.items(ctx))
+    @property
+    def selected_item(self) -> Optional[NlaTrack]:
+        items = list(self.items())
         if self.index < 0 or self.index >= len(items):
             return None
         # self.dropdown_helper(ctx).index2name()
@@ -89,11 +93,15 @@ class MappingProperties(PropertyGroup):
     nla_map_action: BoolProperty(default=True, name="Action", description="Map cues to regular Action", update=on_nla_map_action_update)  # type: ignore
     nla_map_shapekey: BoolProperty(default=False, name="Shape key", description="Map cues to shape-key Action", update=on_nla_map_shapekey_update)  # type: ignore
 
-    def build_items(self) -> None:
+    def build_items(self, obj: bpy.types.Object) -> None:
         # log.trace("Already buil")  # type: ignore
         if len(self.items) > 0:
             return  # Already built (assume)
         log.trace("Building mapping list")  # type: ignore
+        t1: NlaTrackRef = self.nla_track1
+        t2: NlaTrackRef = self.nla_track2
+        t1.object = obj
+        t2.object = obj
         for msi in MouthShapeInfos.all():
             item: MappingItem = self.items.add()
             item.key = msi.key

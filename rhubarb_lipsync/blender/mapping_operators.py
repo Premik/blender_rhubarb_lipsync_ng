@@ -22,7 +22,7 @@ log = logging.getLogger(__name__)
 
 
 class BuildCueInfoUIList(bpy.types.Operator):
-    """Populate the cue mapping list with the know cue types."""
+    """Populate the cue mapping liston the active object with the know cue types."""
 
     bl_idname = "rhubarb.build_cueinfo_uilist"
     bl_label = "Initialize mapping list"
@@ -42,7 +42,7 @@ class BuildCueInfoUIList(bpy.types.Operator):
     def execute(self, context: Context) -> set[str]:
         mprops: MappingProperties = MappingProperties.from_context(context)
         mprops.items.clear()
-        mprops.build_items()
+        mprops.build_items(context.active_object)
 
         return {'FINISHED'}
 
