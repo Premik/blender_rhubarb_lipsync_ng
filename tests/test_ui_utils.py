@@ -12,7 +12,7 @@ import rhubarb_lipsync
 import rhubarb_lipsync.blender.auto_load
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 from rhubarb_lipsync.blender.ui_utils import DropdownHelper
-import test_data
+import sample_data
 from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences
 from rhubarb_lipsync.blender.capture_properties import CaptureProperties
 

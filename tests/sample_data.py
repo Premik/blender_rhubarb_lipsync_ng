@@ -8,26 +8,26 @@ from bpy.types import Context, Sound, SoundSequence
 from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue
 from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandWrapper, RhubarbParser
 
-test_data_path = Path(__file__).parent / "data"
+sample_data_path = Path(__file__).parent / "data"
 
-assert test_data_path.exists()
-assert test_data_path.is_dir()
+assert sample_data_path.exists()
+assert sample_data_path.is_dir()
 
 
 class SampleData:
     """Test data. Links to a sound file and additional data"""
 
-    def __init__(self, name: str, test_data_path=test_data_path) -> None:
+    def __init__(self, name: str, sample_data_path=sample_data_path) -> None:
         self.name = name
-        self.test_data_path = test_data_path
+        self.sample_data_path = sample_data_path
 
     @cached_property
     def snd_file_path(self) -> Path:
-        return self.test_data_path / f"{self.name}.ogg"
+        return self.sample_data_path / f"{self.name}.ogg"
 
     @cached_property
     def expected_json_path(self) -> Path:
-        return self.test_data_path / f"{self.name}-expected.json"
+        return self.sample_data_path / f"{self.name}-expected.json"
 
     @cached_property
     def expected_json(self) -> list[dict]:

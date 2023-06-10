@@ -7,7 +7,7 @@ from bpy.props import PointerProperty
 
 import rhubarb_lipsync
 import rhubarb_lipsync.blender.auto_load
-import test_data
+import sample_data
 from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences
 from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, MouthCueList, JobProperties
 from rhubarb_lipsync.blender.mapping_properties import MappingProperties
@@ -31,7 +31,7 @@ class PropertiesTest(unittest.TestCase):
 
     def testSoundFilePath(self) -> None:
         props = self.props
-        props.sound = test_data.snd_en_male_watchingtv.to_sound(bpy.context)
+        props.sound = sample_data.snd_en_male_watchingtv.to_sound(bpy.context)
 
         self.assertEqual(props.sound_file_extension, 'ogg')
         self.assertEqual(props.sound_file_basename, 'en_male_watchingtv')
