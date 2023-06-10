@@ -22,42 +22,58 @@ from rhubarb_lipsync.blender.ui_utils import IconsManager
 log = logging.getLogger(__name__)
 
 
-class RemoveNlaStrips(bpy.types.Operator):
-    """Remove NLA Strips on a given NLA Track on a given frame range"""
+class RemoveCapturedNlaStrips(bpy.types.Operator):
+    """Remove NLA Strips on bake-selected NLA Tracks on a given frame range. Making room for another bake."""
 
-    bl_idname = "rhubarb.remove_nla_strips"
+    bl_idname = "rhubarb.remove_captured_nla_strips"
     bl_label = "Remove strips"
     bl_options = {'UNDO', 'REGISTER'}
 
-    start_frame: IntProperty(name="Start Frame", default=1)  # type: ignore
-    end_frame: IntProperty(name="Start Frame", default=1)  # type: ignore
-    # track: PointerProperty(type=NlaTrack, name="NLA Track")  # type: ignore
-    track_ref: PointerProperty(type=NlaTrackRef, name="Track")  # type: ignore
-
     # @classmethod
-    # def disabled_reason(cls, context: Context, limit=0) -> str:
-    #     start: int = self.start_frame
-    #     props = CaptureListProperties.capture_from_context(context)
-    #     mporps: MappingList = props.mapping
-    #     if len(mporps.items) > 0:
-    #         return f"Cue mapping info is already populated"
-    #     return ""
+    # def disabled_reason(cls, ctx: Context) -> str:
+    #     b = baking_utils.BakingContext(ctx)
+    #     b.next_object()  # Only validate there is mapping for at least object
+    #     print(b.current_object)
+    #     return b.validate_selection()
 
     # @classmethod
     # def poll(cls, context: Context) -> bool:
     #     return ui_utils.validation_poll(cls, context)
 
-    def execute(self, context: Context) -> set[str]:
-        start: int = self.start_frame
-        end: int = self.end_frame
-        tref: NlaTrackRef = self.track_ref
-        if end - start <= 0:
-            msg = f"No frames between {start} and {end}."
-            self.report({'ERROR'}, msg)
-            log.error(msg)
-            return {'CANCELLED'}
-        track: NlaTrack = tref.selected_item()
+    def on_track(self, bctx: baking_utils.BakingContext) -> None:
+        track = bctx.current_track
+        if not track:
+            return
+        self.tracks_cleaned += 1
+        strips = list(bctx.strips_on_current_track())
+        log.debug(f"Going to remove {len(strips)}")
+        for strip in strips:
+            track.strips.remove(strip)
+            self.strips_removed += 1
 
+    def on_object(self, bctx: baking_utils.BakingContext) -> None:
+        log.debug(f"Removing strips from {bctx.current_object}")
+        t = bctx.next_track()
+        self.on_track(bctx)
+        if bctx.next_track() != t:  # More than one track used
+            self.on_track(bctx)
+
+    def execute(self, ctx: Context) -> set[str]:
+        b = baking_utils.BakingContext(ctx)
+        self.strips_removed = 0
+        self.tracks_cleaned = 0
+        if not b.objects:
+            self.report({'ERROR'}, f"No matching object in selection")
+            return {'CANCELLED'}
+        try:
+            for o in b.object_iter():
+                self.on_object(b)
+
+        except Exception as e:
+            self.report({'ERROR'}, str(e))
+            log.exception(e)
+            return {'CANCELLED'}
+        self.report({'INFO'}, f"Removed {self.strips_removed} strips from {self.tracks_cleaned} tracks")
         return {'FINISHED'}
 
 
@@ -94,7 +110,8 @@ class BakeToNLA(bpy.types.Operator):
 
         track = b.current_track
         if not track:
-            log.error(f"{object} has no NLA track selected. Ignoring")
+            if b.cue_index <= 0:  # Only log the error 1x
+                log.error(f"{object} has no NLA track selected. Ignoring")
             return
         c = b.current_cue
         m = b.current_mapping_item
@@ -102,6 +119,7 @@ class BakeToNLA(bpy.types.Operator):
             log.error(f"There is no mapping for the cue {c} in the capture. Ignoring")
             return
         strip = track.strips.new(f"{c.cue}", c.frame(b.ctx), m.action)
+        self.strips_added += 1
         if b.ctx.scene.show_subframe:  # Set start frame again as float (ctor takes only int)
             strip.frame_start = c.frame_float(b.ctx)
 
@@ -109,12 +127,14 @@ class BakeToNLA(bpy.types.Operator):
 
     def bake_cue(self) -> None:
         for o in self.bctx.object_iter():
+            # print(self.bctx.cue_index)
             if log.isEnabledFor(logging.TRACE):  # type: ignore
                 log.trace(f"Baking on object {o} ")  # type: ignore
             self.bake_cue_on(o)
 
     def execute(self, ctx: Context) -> set[str]:
         self.bctx = baking_utils.BakingContext(ctx)
+        self.strips_added = 0
         b = self.bctx
         wm = ctx.window_manager
         l = len(b.cue_items)
@@ -122,11 +142,12 @@ class BakeToNLA(bpy.types.Operator):
         wm.progress_begin(0, l)
         try:
             for i, c in enumerate(b.cue_iter()):
+                # print(b.cue_index)
                 wm.progress_update(i)
                 if log.isEnabledFor(logging.DEBUG):
                     log.debug(f"Baking cue {c.cue} ({i}/{l}) ")
                 self.bake_cue()
-            self.report({'INFO'}, f"Baked {l} cues")
+            self.report({'INFO'}, f"Baked {l} cues to {self.strips_added} action strips")
         except Exception as e:
             self.report({'ERROR'}, str(e))
             log.exception(e)
@@ -214,5 +235,5 @@ class BakeToNLA(bpy.types.Operator):
         layout.prop(self.bctx.mprefs, "object_selection_type")
         self.draw_info()
         self.draw_validation()
-        layout.operator(RemoveNlaStrips.bl_idname)
+        layout.operator(RemoveCapturedNlaStrips.bl_idname)
         # ui_utils.draw_prop_with_label(m, "rate", "Rate", layout)

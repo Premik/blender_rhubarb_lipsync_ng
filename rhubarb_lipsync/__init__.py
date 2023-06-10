@@ -1,7 +1,7 @@
 bl_info = {
     'name': 'Rhubarb Lipsync',
     'author': 'Addon rewritten by Premysl S. base on the original version by Andrew Charlton. Includes Rhubarb Lip Sync by Daniel S. Wolf',
-    'version': (4, 0, 0),
+    'version': (4, 1, 0),
     'blender': (3, 40, 0),
     'location': 'Properties > Armature',
     'description': 'Integrate Rhubarb Lipsync into Blender',

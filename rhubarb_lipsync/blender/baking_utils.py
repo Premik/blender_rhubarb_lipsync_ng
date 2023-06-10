@@ -186,24 +186,31 @@ class BakingContext:
         if not self.current_track:
             return [f"no NLA track selected"]
         strips = 0
-        for t in self.tracks:
-            if not t:
-                continue
+        t = self.next_track()
+        strips += len(list(self.strips_on_current_track()))
+        if self.next_track() != t:
             strips += len(list(self.strips_on_current_track()))
-            self.next_track()
+
         if strips > 0:
             return [f"Clash with {strips} existing strips"]
         return []
 
-    def validate_current_object(self) -> list[str]:
+    def validate_selection(self) -> str:
         """Return validation errors of `self.object`."""
         if not self.current_object:
-            return ["No object provided for validation"]
+            return "No object provided for validation"
         if not self.mprops:
-            return ["Object has no mapping properties"]
+            return "Object has no mapping properties"
         if not self.mprops.has_any_mapping:
-            return ["Object has no mapping"]
+            return "Object has no mapping"
+        return ""
 
+    def validate_current_object(self) -> list[str]:
+        """Return validation errors of `self.object`."""
+
+        sel_errors = self.validate_selection()
+        if sel_errors:
+            return [sel_errors]
         ret: list[str] = []
         if not self.cue_items:
             ret += ["No cues in the capture"]
