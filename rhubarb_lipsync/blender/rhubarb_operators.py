@@ -179,7 +179,7 @@ class ProcessSoundFile(bpy.types.Operator):
         if self.running_props(context):
             jprops: JobProperties = self.running_props(context).job
             jprops.update_from_async_job(self.job)
-        context.area.tag_redraw()  # Force redraw
+        ui_utils.redraw_3dviews(context)
 
     def finished(self, context: Context) -> None:
         log.info("Operator finished")

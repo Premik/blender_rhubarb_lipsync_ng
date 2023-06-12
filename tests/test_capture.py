@@ -16,20 +16,16 @@ import rhubarb_lipsync.blender.ui_utils as ui_utils
 import sample_data, sample_project
 
 
-class BakingContextTest(unittest.TestCase):
+class CaptureTest(unittest.TestCase):
     def setUp(self) -> None:
         self.project = sample_project.SampleProject()
         self.project.create_capture()
         assert self.project.cprops
-        self.i = 0
-        ret = bpy.ops.rhubarb.process_sound_file()
-        assert 'RUNNING_MODAL' in ret
-        jprops = self.project.jprops
-        assert jprops
-        print(jprops.progress)
 
     def testCaputre(self) -> None:
-        pass
+        self.project.trigger_capture()
+        self.project.wait_for_capture_finish()
+        print("done")
 
 
 if __name__ == '__main__':

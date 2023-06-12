@@ -176,7 +176,9 @@ def remove_handler(handlers: list[Callable], fn: Callable) -> bool:
 
 
 def redraw_3dviews(ctx: Context) -> None:
-    for area in ctx.screen.areas:
+    if ctx.area:
+        ctx.area.tag_redraw()
+    for area in ctx.screen and ctx.screen.areas or []:
         if area.type == 'VIEW_3D':
             area.tag_redraw()
 
