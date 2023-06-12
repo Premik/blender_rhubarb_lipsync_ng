@@ -25,6 +25,7 @@ class CaptureTest(unittest.TestCase):
     def testCaputre(self) -> None:
         self.project.trigger_capture()
         self.project.wait_for_capture_finish()
+        self.project.assert_cues_matches_sample()
         print("done")
 
 

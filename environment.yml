@@ -1,7 +1,7 @@
 name: rhubarb
 channels:
   - defaults
-  - kitsune.one # For belnder as module
+  - kitsune.one # For blender as module
   - conda-forge
 dependencies:
   - python=3.10

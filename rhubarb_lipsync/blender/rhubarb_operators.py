@@ -33,7 +33,8 @@ class ProcessSoundFile(bpy.types.Operator):
     bl_idname = "rhubarb.process_sound_file"
     bl_label = "Capture"
 
-    last_op: 'ProcessSoundFile' = None  # To support unit tests. No good way to find running ops in Blender API
+    # last_op: 'ProcessSoundFile' = None  # To support unit tests. No good way to find running ops in Blender API
+    last_op = None  # To support unit tests. No good way to find running ops in Blender API
 
     @classmethod
     def disabled_reason(cls, context: Context) -> str:
@@ -135,7 +136,7 @@ class ProcessSoundFile(bpy.types.Operator):
             return {'FINISHED'}
 
         jprops: JobProperties = self.running_props(context).job
-        if event.type in {'ESC'} or jprops.cancel_request:
+        if event and event.type in {'ESC'} or jprops.cancel_request:
             jprops.cancel_request = False
             self.cancel_on_next = True
             log.info("Received cancel request. Will cancel on next update")
