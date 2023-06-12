@@ -33,6 +33,8 @@ class ProcessSoundFile(bpy.types.Operator):
     bl_idname = "rhubarb.process_sound_file"
     bl_label = "Capture"
 
+    last_op: 'ProcessSoundFile' = None  # To support unit tests. No good way to find running ops in Blender API
+
     @classmethod
     def disabled_reason(cls, context: Context) -> str:
         props = CaptureListProperties.capture_from_context(context)
@@ -68,6 +70,7 @@ class ProcessSoundFile(bpy.types.Operator):
         return self.execute(context)
 
     def execute(self, context: Context) -> set[str]:
+        ProcessSoundFile.last_op = self  # type: ignore
         prefs = RhubarbAddonPreferences.from_context(context)
         rootProps = CaptureListProperties.from_context(context)
         props = CaptureListProperties.capture_from_context(context)
@@ -188,6 +191,7 @@ class ProcessSoundFile(bpy.types.Operator):
         wm.event_timer_remove(self.timer)
 
         del self.timer
+        ProcessSoundFile.last_op = None
         if self.job:
             self.job.last_progress = 100
             self.update_progress(context)

@@ -48,6 +48,8 @@ class SampleProject:
     def trigger_capture(self) -> None:
         ret = bpy.ops.rhubarb.process_sound_file()
         assert 'RUNNING_MODAL' in ret
+        op = rhubarb_operators.ProcessSoundFile.last_op
+        assert op
 
     def wait_for_capture_finish(self) -> None:
         assert self.jprops
@@ -56,7 +58,7 @@ class SampleProject:
         while self.jprops.status == "Running":
             sleep(0.1)
             op: rhubarb_operators.ProcessSoundFile = self.jprops.cmd.last_operator
-            op.modal(bpy.context, {'type': ""})
+
             if self.jprops.progress > last:
                 loops = 0
             loops += 1
