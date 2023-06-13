@@ -22,7 +22,7 @@ log = logging.getLogger(__name__)
 
 
 class BuildCueInfoUIList(bpy.types.Operator):
-    """Populate the cue mapping liston the active object with the know cue types."""
+    """Populate the cue mapping list on the active object with the know cue types."""
 
     bl_idname = "rhubarb.build_cueinfo_uilist"
     bl_label = "Initialize mapping list"

@@ -57,6 +57,7 @@ class BakingContext:
         return self.prefs.mapping_prefs
 
     def clear_obj_cache(self) -> None:
+        log.debug("Clearing obj cache")
         self._objs: List[Object] = None
         self.object_index = -1
         self.track_index = 0
@@ -90,6 +91,9 @@ class BakingContext:
         return self.objects[self.object_index]
 
     def next_object(self) -> Object:
+        if not self.objects:
+            self.object_index = -1
+            return None
         self.object_index += 1
         return self.current_object
 

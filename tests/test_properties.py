@@ -24,12 +24,12 @@ class PropertiesTest(unittest.TestCase):
         props = self.project.cprops
 
         self.assertEqual(props.sound_file_extension, 'ogg')
-        self.assertEqual(props.sound_file_basename, 'en_male_watchingtv')
+        self.assertEqual(props.sound_file_basename, 'en_male_electricity')
         self.assertIn('data', props.sound_file_folder)
         self.assertTrue(props.is_sound_format_supported())
 
         newName = self.project.cprops.get_sound_name_with_new_extension("wav")
-        self.assertEqual(newName, 'en_male_watchingtv.wav')
+        self.assertEqual(newName, 'en_male_electricity.wav')
 
 
 if __name__ == '__main__':

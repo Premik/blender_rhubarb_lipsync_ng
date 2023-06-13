@@ -16,7 +16,7 @@ import sample_data
 import rhubarb_lipsync.blender.rhubarb_operators as rhubarb_operators
 from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences
 from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, MouthCueList, JobProperties, MouthCueListItem
-from rhubarb_lipsync.blender.mapping_properties import MappingProperties
+from rhubarb_lipsync.blender.mapping_properties import MappingProperties, MappingItem, NlaTrackRef
 from rhubarb_lipsync.rhubarb.log_manager import logManager
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 import sample_data
@@ -82,6 +82,11 @@ class SampleProject:
         return CaptureListProperties.capture_from_context(bpy.context)
 
     @property
+    def mprops(self) -> MappingProperties:
+        """Mapping properties of the active object"""
+        return MappingProperties.from_context(bpy.context)
+
+    @property
     def jprops(self) -> JobProperties:
         return self.cprops and self.cprops.job
 
@@ -138,3 +143,29 @@ class SampleProject:
         ret = bpy.context.active_object
         assert ret.name == 'Sphere'
         return ret
+
+    def initialize_mapping(self, obj: bpy.types.Object) -> None:
+        bpy.context.view_layer.objects.active = obj  # Make the obj active
+        assert self.mprops
+        bpy.ops.rhubarb.build_cueinfo_uilist()  # Populate the cue-type list
+
+    def create_mapping(self, actions: list[bpy.types.Action]) -> None:
+        '''Populate all the cue mappings using the actions from the list. Looping the list from the start if needed.'''
+        assert actions
+        assert self.mprops
+        alen = len(actions)
+        for i, _item in enumerate(self.mprops.items):
+            mi: MappingItem = _item
+            mi.action = actions[i % alen]
+
+    def add_track(self, t: NlaTrackRef) -> NlaTrackRef:
+        ui_utils.assert_op_ret(bpy.ops.rhubarb.new_nla_track())
+        assert len(list(t.items())) > 0
+        t.index += 1
+        return t
+
+    def add_track1(self) -> NlaTrackRef:
+        return self.add_track(self.mprops.nla_track1)
+
+    def add_track2(self) -> NlaTrackRef:
+        return self.add_track(self.mprops.nla_track2)
