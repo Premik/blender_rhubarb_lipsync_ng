@@ -20,21 +20,16 @@ import sample_data, sample_project
 class BakingContextTest(unittest.TestCase):
     def setUp(self) -> None:
         self.project = sample_project.SampleProject()
-        p = self.project
-        p.capture()
-        p.initialize_mapping(p.sphere1)  # Sphere becomes active
-        p.create_mapping([p.action_single])  # Single frame action for all cues on the sphere
-        self.bc = baking_utils.BakingContext(bpy.context)
-        # assert len(self.bc.objects) > 0
-        self.bc.next_object()
-        assert self.bc.current_object, f"No object selected from the {self.bc.objects}"
+        self.project.capture()
 
     def testBasic(self) -> None:
+        self.bc = self.project.create_mapping_single_sphere1()
         assert len(self.bc.objects) == 1, "No active object"
         assert len(self.bc.cue_items) > 1, "No cues in the capture"
         assert self.bc.frame_range == (1, 26)
 
     def testTrackValidation(self) -> None:
+        self.bc = self.project.create_mapping_single_sphere1()
         errs = self.bc.validate_track()
         assert len(errs) > 0
         assert not self.bc.current_track
@@ -44,6 +39,17 @@ class BakingContextTest(unittest.TestCase):
         assert self.bc.current_track
         errs = self.bc.validate_track()
         assert len(errs) == 0, errs[0]
+
+    def testBakeTwoTracks(self) -> None:
+        self.bc = self.project.create_mapping_single_sphere1()
+        self.project.add_track1()
+        self.project.add_track2()
+        assert self.bc.has_two_tracks
+        for o in self.bc.object_iter():
+            errs = self.bc.validate_selection()
+            assert len(errs) == 0, errs[0]
+        ui_utils.assert_op_ret(bpy.ops.rhubarb.bake_to_nla())
+        assert not self.project.clist_props.last_error, self.project.clist_props.last_error
 
 
 if __name__ == '__main__':

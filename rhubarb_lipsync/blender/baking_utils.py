@@ -168,6 +168,10 @@ class BakingContext:
         return [self.track1, self.track2]
 
     @property
+    def has_two_tracks(self) -> bool:
+        return self.track1 and self.track2
+
+    @property
     def current_track(self) -> NlaTrack:
         if self.track_index < 0:
             return None

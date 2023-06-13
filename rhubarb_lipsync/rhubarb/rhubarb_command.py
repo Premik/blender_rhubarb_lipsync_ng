@@ -21,7 +21,7 @@ log = logging.getLogger(__name__)
 class RhubarbParser:
     version_info_rx = re.compile(r"version\s+(?P<ver>\d+\.\d+\.\d+)")
 
-    LOG_LEVELS_MAP: dict[str, int] = defaultdict(lambda: logging.DEBUG)
+    LOG_LEVELS_MAP: dict[str, int] = defaultdict(lambda: logging.TRACE)  # type: ignore
     LOG_LEVELS_MAP.update(
         {
             "Fatal": logging.CRITICAL,  # TODO Verify

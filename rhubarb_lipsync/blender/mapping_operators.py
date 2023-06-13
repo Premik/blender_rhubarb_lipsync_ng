@@ -115,6 +115,7 @@ class CreateNLATrack(bpy.types.Operator):
         self.report({'INFO'}, msg)
         if self.track_field_name:  # Select the newly created track
             trackRef: NlaTrackRef = getattr(mprops, self.track_field_name)
+            trackRef.object = ctx.object
             trackRef.dropdown_helper.select_last()
 
         return {'FINISHED'}

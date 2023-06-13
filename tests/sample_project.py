@@ -21,6 +21,7 @@ from rhubarb_lipsync.rhubarb.log_manager import logManager
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 import sample_data
 import addon_utils
+import rhubarb_lipsync.blender.baking_utils as baking_utils
 
 
 class SampleProject:
@@ -76,6 +77,10 @@ class SampleProject:
 
     def add_objects(self) -> None:
         ui_utils.assert_op_ret(bpy.ops.mesh.primitive_cylinder_add())
+
+    @property
+    def clist_props(self) -> CaptureListProperties:
+        return CaptureListProperties.from_context(bpy.context)
 
     @property
     def cprops(self) -> CaptureProperties:
@@ -158,9 +163,18 @@ class SampleProject:
             mi: MappingItem = _item
             mi.action = actions[i % alen]
 
+    def create_mapping_single_sphere1(self) -> baking_utils.BakingContext:
+        self.initialize_mapping(self.sphere1)  # Sphere becomes active
+        self.create_mapping([self.action_single])
+        bc = baking_utils.BakingContext(bpy.context)
+        assert len(bc.objects) > 0, f"No object with mapping in the selection {bc.objects}"
+        bc.next_object()
+        assert bc.current_object, f"No object selected from the {bc.objects}"
+        return bc
+
     def add_track(self, t: NlaTrackRef) -> NlaTrackRef:
         ui_utils.assert_op_ret(bpy.ops.rhubarb.new_nla_track())
-        assert len(list(t.items())) > 0
+        assert len(list(t.items())) > 0, "After track was created there is still no eligible track. "
         t.index += 1
         return t
 

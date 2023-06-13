@@ -40,6 +40,12 @@ addopts = ["--import-mode=importlib"]
 pythonpath = [".", "tests"] 
 # https://docs.pytest.org/en/7.1.x/explanation/goodpractices.html
 
+# https://stackoverflow.com/questions/4673373/logging-within-pytest-tests
+log_cli = true
+log_cli_level = "DEBUG"
+#log_cli_format = "%(asctime)s [%(levelname)8s] %(message)s (%(filename)s:%(lineno)s)"
+#log_cli_date_format = "%Y-%m-%d %H:%M:%S"
+
 [tool.black]
 line-length = 160
 skip-string-normalization = true

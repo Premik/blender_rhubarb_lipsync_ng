@@ -53,9 +53,10 @@ class RemoveCapturedNlaStrips(bpy.types.Operator):
 
     def on_object(self, bctx: baking_utils.BakingContext) -> None:
         log.debug(f"Removing strips from {bctx.current_object}")
-        t = bctx.next_track()
+        bctx.next_track()
         self.on_track(bctx)
-        if bctx.next_track() != t:  # More than one track used
+        if bctx.has_two_tracks:
+            bctx.next_track()
             self.on_track(bctx)
 
     def execute(self, ctx: Context) -> set[str]:
