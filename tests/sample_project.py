@@ -24,6 +24,8 @@ import addon_utils
 
 
 class SampleProject:
+    """Manages Blender test project"""
+
     registered = False
 
     def __init__(self) -> None:
@@ -97,3 +99,42 @@ class SampleProject:
         for i, c in enumerate(self.cue_items):
             c_exp = cues[i]
             assert c.cue == c_exp, f"Got {c.cue} at position {i} while {c_exp} was expected"
+
+    def capture(self) -> None:
+        self.create_capture()
+        self.trigger_capture()
+        self.wait_for_capture_finish()
+        self.assert_cues_matches_sample()
+
+    def ensure_action(self, name: str) -> bpy.types.Action:
+        if name in bpy.data.actions.keys():
+            return bpy.data.actions[name]
+        a = bpy.data.actions.new(name)
+        assert a.name == name, f"Name clash. Got '{a.name}' name instead of '{name}'"
+        fc = a.fcurves.new('location', index=1)
+        fc.keyframe_points.insert(1, 1)
+        return a
+
+    @property
+    def action_single(self) -> bpy.types.Action:
+        """Action with singe keyframe `location.x@1=1`"""
+        return self.ensure_action('action_signle')
+
+    @property
+    def action_10(self) -> bpy.types.Action:
+        """Action with two keyframes: `location.x@1=1` `location.x@10=10`"""
+        if 'action_10' in bpy.data.actions.keys():
+            return  # Already created
+        a = self.ensure_action('action_10')
+        a.fcurves[0].keyframe_points.insert(10, 10)
+        return a
+
+    @property
+    def sphere1(self) -> bpy.types.Object:
+        if 'Sphere' in bpy.data.objects.keys():
+            return bpy.data.objects['Sphere']
+
+        ui_utils.assert_op_ret(bpy.ops.mesh.primitive_uv_sphere_add())
+        ret = bpy.context.active_object
+        assert ret.name == 'Sphere'
+        return ret
