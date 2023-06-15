@@ -150,22 +150,23 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 
 ### High
 * Set the panel tab name in the preferences
-* Add create button to NLA track selector
-* Bake button- dialog with "bake only active", "bake all registered" etc
+* Baking:
+    * Finish unit test for baking
+    * Add strip options: (auto)interleaving, min/max stretch % to allow short action plays faster, 
+    * Autotrim strips, so they won't clash failing the bake
+* Add license files
+* Create github build-job, running unit tests/integration tests?
 
 ### Normal
-* Add license files
-* Limit possible selection to armature and mesh-object only? (and not obj.library). Or hook the properties to the Collection instead of Object?
-* add sub-frames tickbox
+* Add some simply blender sample file
 * extended shapes- seems they are generated even when disabled -check
-* Cleanup - remove old files
 * Doc - new readme.md
 * Capture doesn't work for long sound files. Rhubarb finishes but the list is empty.
 
 ### Low
+* Limit possible selection to armature and mesh-object only? (and not obj.library). Or hook the properties to the Collection instead of Object?
 * Add [speaker](https://docs.blender.org/manual/en/latest/render/output/audio/speaker.html) as an alternative to Sequencer audio clip
 * Rename capture_panel to something better? (sound setup?)
-* Create github build-job, running unit tests/integration tests?
 * The scaled down icons (32x32) still hard to see. Pre-scale different set icons?
 * autoload - complete type-hints
 * Capture panel, optimize, store pref, props etc. directy on the self (same like self.ctx)
