@@ -9,7 +9,7 @@ dependencies:
 #  - pytest>=7.2.0
   - pytest-xdist 
   - mypy
-  - python-blender~=3.4.0 - #Blender as module ()
+  - python-blender~=3.4.0 #Blender as module ()
   - tomli
   - requests
   - debugpy

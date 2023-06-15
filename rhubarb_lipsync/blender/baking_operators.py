@@ -10,7 +10,7 @@ from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty, Po
 from bpy.types import Context, Object, UILayout, NlaTrack, NlaStrip
 from typing import Any, Callable, Optional, cast, Generator, Iterator
 
-from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, MouthCueList, MouthCueListItem
+from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, ResultLogListProperties
 from rhubarb_lipsync.blender.mapping_properties import MappingProperties, MappingItem, NlaTrackRef
 from rhubarb_lipsync.blender.preferences import CueListPreferences, RhubarbAddonPreferences, MappingPreferences
 from rhubarb_lipsync.rhubarb.log_manager import logManager
@@ -102,7 +102,8 @@ class BakeToNLA(bpy.types.Operator):
     def invoke(self, context: Context, event: bpy.types.Event) -> set[int] | set[str]:
         # Open dialog
 
-        CaptureListProperties.from_context(context).last_error = ""
+        rll: ResultLogListProperties = CaptureListProperties.from_context(context).last_resut_log
+        rll.clear()  # Clear log entries from last bake
         wm = context.window_manager
         return wm.invoke_props_dialog(self, width=340)
 
@@ -112,12 +113,12 @@ class BakeToNLA(bpy.types.Operator):
         track = b.current_track
         if not track:
             if b.cue_index <= 0:  # Only log the error 1x
-                log.error(f"{object} has no NLA track selected. Ignoring")
+                b.rlog.warning(f"{object} has no NLA track selected. Ignoring")
             return
         c = b.current_cue
         m = b.current_mapping_item
         if not m or not m.action:
-            log.error(f"There is no mapping for the cue {c} in the capture. Ignoring")
+            b.rlog.warning(f"There is no mapping for the cue {c} in the capture. Ignoring")
             return
         strip = track.strips.new(f"{c.cue}", c.frame(b.ctx), m.action)
         self.strips_added += 1
@@ -152,8 +153,7 @@ class BakeToNLA(bpy.types.Operator):
         except Exception as e:
             self.report({'ERROR'}, str(e))
             log.exception(e)
-
-            CaptureListProperties.from_context(ctx).last_error = str(e)
+            self.bctx.rlog.error(str(e))
             return {'CANCELLED'}
         finally:
             del self.bctx

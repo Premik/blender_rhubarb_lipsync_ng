@@ -10,7 +10,7 @@ from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty, Po
 from bpy.types import Context, Object, UILayout, NlaTrack, NlaStrip
 from typing import Any, Callable, Optional, cast, Generator, Iterator
 
-from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, MouthCueList, MouthCueListItem
+from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, MouthCueList, MouthCueListItem, ResultLogListProperties
 from rhubarb_lipsync.blender.mapping_properties import MappingProperties, MappingItem, NlaTrackRef
 from rhubarb_lipsync.blender.preferences import CueListPreferences, RhubarbAddonPreferences, MappingPreferences
 from rhubarb_lipsync.rhubarb.log_manager import logManager
@@ -100,6 +100,14 @@ class BakingContext:
     @cached_property
     def cprops(self) -> CaptureProperties:
         return CaptureListProperties.capture_from_context(self.ctx)
+
+    @property
+    def clist_props(self) -> CaptureListProperties:
+        return CaptureListProperties.from_context(self.ctx)
+
+    @property
+    def rlog(self) -> ResultLogListProperties:
+        return self.clist_props and self.clist_props.last_resut_log
 
     @cached_property
     def cue_items(self) -> list[MouthCueListItem]:

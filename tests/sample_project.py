@@ -5,7 +5,6 @@ from typing import Iterable
 import unittest
 from functools import cached_property
 from pathlib import Path
-from bl_ui import register
 
 import bpy
 from bpy.props import PointerProperty
@@ -15,7 +14,14 @@ import rhubarb_lipsync.blender.auto_load
 import sample_data
 import rhubarb_lipsync.blender.rhubarb_operators as rhubarb_operators
 from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences
-from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, MouthCueList, JobProperties, MouthCueListItem
+from rhubarb_lipsync.blender.capture_properties import (
+    CaptureListProperties,
+    CaptureProperties,
+    MouthCueList,
+    JobProperties,
+    MouthCueListItem,
+    ResultLogListProperties,
+)
 from rhubarb_lipsync.blender.mapping_properties import MappingProperties, MappingItem, NlaTrackRef
 from rhubarb_lipsync.rhubarb.log_manager import logManager
 import rhubarb_lipsync.blender.ui_utils as ui_utils
@@ -35,6 +41,9 @@ class SampleProject:
     @staticmethod
     def ensure_registered() -> None:
         if SampleProject.registered:
+            # print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+            # print("Already registered")
+            # print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             return
         rhubarb_lipsync.register()  # Simulate blender register call
         logManager.set_debug()
@@ -81,6 +90,10 @@ class SampleProject:
     @property
     def clist_props(self) -> CaptureListProperties:
         return CaptureListProperties.from_context(bpy.context)
+
+    @property
+    def last_result(self) -> ResultLogListProperties:
+        return self.clist_props and self.clist_props.last_resut_log
 
     @property
     def cprops(self) -> CaptureProperties:
