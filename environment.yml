@@ -1,0 +1,23 @@
+name: rhubarb
+channels:
+  - defaults
+  - kitsune.one # For blender as module
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pip
+#  - pytest>=7.2.0
+  - pytest-xdist 
+  - mypy
+  - python-blender~=3.4.0 - #Blender as module ()
+  - tomli
+  - requests
+  - debugpy
+  - flask
+  - numpy
+  - black
+  - pip:
+    - -e .
+    #- bpy>=3.2 # Official blender-as-module, only since 3.4 (no Audaspace)
+    #- fake-bpy-module-3.4
+    #- fake-bpy-module-latest
