@@ -5,7 +5,6 @@ from typing import Iterable
 import unittest
 from functools import cached_property
 from pathlib import Path
-from bl_ui import register
 
 import bpy
 from bpy.props import PointerProperty

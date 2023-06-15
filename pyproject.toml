@@ -65,5 +65,5 @@ check_untyped_defs = true
 pretty = true
 
 [[tool.mypy.overrides]]
-module = ["bpy.*", "bgl", "blf", "aud"]
+module = ["bpy.*", "bgl", "blf", "aud", "addon_utils"]
 ignore_missing_imports = true

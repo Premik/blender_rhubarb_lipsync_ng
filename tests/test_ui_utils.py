@@ -3,7 +3,6 @@ import unittest
 from functools import cached_property
 from pathlib import Path
 
-from colorama import init
 
 import bpy
 from bpy.props import PointerProperty
