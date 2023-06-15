@@ -163,14 +163,22 @@ class SampleProject:
             mi: MappingItem = _item
             mi.action = actions[i % alen]
 
-    def create_mapping_single_sphere1(self) -> baking_utils.BakingContext:
-        self.initialize_mapping(self.sphere1)  # Sphere becomes active
-        self.create_mapping([self.action_single])
+    def create_baking_context(self) -> baking_utils.BakingContext:
         bc = baking_utils.BakingContext(bpy.context)
         assert len(bc.objects) > 0, f"No object with mapping in the selection {bc.objects}"
         bc.next_object()
         assert bc.current_object, f"No object selected from the {bc.objects}"
         return bc
+
+    def create_mapping_single_sphere1(self) -> baking_utils.BakingContext:
+        self.initialize_mapping(self.sphere1)  # Sphere becomes active
+        self.create_mapping([self.action_single])
+        return self.create_baking_context()
+
+    def create_mapping_2actions_sphere1(self) -> baking_utils.BakingContext:
+        self.initialize_mapping(self.sphere1)  # Sphere becomes active
+        self.create_mapping([self.action_single, self.action_10])
+        return self.create_baking_context()
 
     def add_track(self, t: NlaTrackRef) -> NlaTrackRef:
         ui_utils.assert_op_ret(bpy.ops.rhubarb.new_nla_track())
