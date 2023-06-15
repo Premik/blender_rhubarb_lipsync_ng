@@ -4,7 +4,8 @@ import math
 from operator import attrgetter, index
 import pathlib
 from functools import cached_property
-from typing import Any, Callable, Optional, Sequence, cast, Generator
+from pydoc import describe
+from typing import Any, Callable, Iterable, Optional, Sequence, cast, Generator
 
 import bpy
 import bpy.utils.previews
@@ -284,10 +285,58 @@ class CaptureProperties(PropertyGroup):
         return f"{str(indx).zfill(3)} {fn}"
 
 
+class ResultLogItemProperties(PropertyGroup):
+    msg: StringProperty("Message", description="Result log message")  # type: ignore
+    level: EnumProperty(  # type: ignore
+        name="Severity of the message",
+        items=[
+            ('ERROR', 'FATAL', ""),
+            ('WARNING', 'FATAL', ""),
+        ],
+        default='ERROR',
+    )
+    frame: FloatProperty("frame", description="Frame where the log event occured")  # type: ignore
+
+
+class ResultLogListProperties(PropertyGroup):
+    """List of log-messages (errors/warnings) related to baking. So they can be shown and inspect afterwards"""
+
+    items: CollectionProperty(type=ResultLogItemProperties, name="Log entries")  # type: ignore
+
+    def items_by_level(self, level: str) -> Iterable[ResultLogItemProperties]:
+        return (m for m in self.items if m.level == level)
+
+    @property
+    def errors(self) -> Iterable[ResultLogItemProperties]:
+        return self.items_by_level("ERROR")
+
+    @property
+    def warnings(self) -> Iterable[ResultLogItemProperties]:
+        return self.items_by_level("WARNING")
+
+    def log(self, msg: str, level: str, frame: float = 0) -> ResultLogItemProperties:
+        ret = self.items.new()
+        ret.msg = msg
+        ret.level = level
+        ret.frame = frame
+        return ret
+
+    def error(self, msg: str, frame: float = 0) -> None:
+        self.log(msg, "ERROR", frame)
+        log.error(msg)
+
+    def warning(self, msg: str, frame: float = 0) -> None:
+        self.log(msg, "WARNING", frame)
+        log.warning(msg)
+
+    def clear(self) -> None:
+        self.items.clear()
+
+
 class CaptureListProperties(PropertyGroup):
     """List of captures (setup and cues). Hooked to Blender scene"""
 
-    last_error: StringProperty("Last Error", description="Last error message. When baking failed.")  # type: ignore
+    last_resut_log: PointerProperty(type=ResultLogListProperties, name="Last result", description="Log messages of the last bake")  # type: ignore
     items: CollectionProperty(type=CaptureProperties, name="Captures")  # type: ignore
     index: IntProperty(name="Selected capture index", default=-1)  # type: ignore
 

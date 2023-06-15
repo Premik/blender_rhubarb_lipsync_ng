@@ -38,7 +38,7 @@ class BakingContextTest(unittest.TestCase):
 
     def trackValidation(self) -> None:
         errs = self.bc.validate_track()
-        assert len(errs) > 0, f"Expected validation since a track is not selected {errs}"
+        assert len(errs) > 0, f"Expected validation error since a track is not selected {errs}"
         print(self.bc.tracks)
         assert not self.bc.current_track
         self.project.add_track1()
@@ -61,7 +61,7 @@ class BakingContextTest(unittest.TestCase):
             errs = self.bc.validate_selection()
             assert len(errs) == 0, errs[0]
         ui_utils.assert_op_ret(bpy.ops.rhubarb.bake_to_nla())
-        assert not self.project.clist_props.last_error, self.project.clist_props.last_error
+        assert not self.project.last_result.errors, self.project.last_result.errors
 
     def bakeTwoTracks(self) -> None:
         self.project.add_track1()
