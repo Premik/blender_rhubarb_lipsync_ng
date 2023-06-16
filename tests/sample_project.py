@@ -28,10 +28,14 @@ import rhubarb_lipsync.blender.ui_utils as ui_utils
 import sample_data
 import addon_utils
 import rhubarb_lipsync.blender.baking_utils as baking_utils
+import re
 
 
 class SampleProject:
     """Manages Blender test project"""
+
+    # INFO:Baked 8 cues to 8 action strips
+    bake_result_info_line = re.compile(r".*(?P<cues>\d+) cues.*(?P<strips>\d+) action strips.*")
 
     registered = False
 
@@ -41,9 +45,9 @@ class SampleProject:
     @staticmethod
     def ensure_registered() -> None:
         if SampleProject.registered:
-            # print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-            # print("Already registered")
-            # print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+            print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+            print("Already registered")
+            print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             return
         rhubarb_lipsync.register()  # Simulate blender register call
         logManager.set_debug()
@@ -94,6 +98,18 @@ class SampleProject:
     @property
     def last_result(self) -> ResultLogListProperties:
         return self.clist_props and self.clist_props.last_resut_log
+
+    def parse_last_bake_result_details(self) -> tuple[int, int]:
+        if not self.last_result or not list(self.last_result.infos):
+            return 0, 0
+        infos = list(self.last_result.infos)
+        assert len(infos) == 1, infos
+        info = infos[0]
+        m = SampleProject.bake_result_info_line.search(info.msg)
+        assert m is not None, f"{info} not matching {SampleProject.last_bake_result_details}"
+        cues = int(m.groupdict()["cues"])
+        strips = int(m.groupdict()["strips"])
+        return cues, strips
 
     @property
     def cprops(self) -> CaptureProperties:

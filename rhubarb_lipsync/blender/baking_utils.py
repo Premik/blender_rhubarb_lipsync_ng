@@ -47,6 +47,7 @@ class BakingContext:
         assert ctx
         self.ctx = ctx
         self.clear_obj_cache()
+        self.cue_index = -1
 
     @cached_property
     def prefs(self) -> RhubarbAddonPreferences:
@@ -61,7 +62,6 @@ class BakingContext:
         self._objs: List[Object] = None
         self.object_index = -1
         self.track_index = 0
-        self.cue_index = -1
         self.last_object_selection_type = ""
 
     @property

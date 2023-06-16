@@ -129,6 +129,7 @@ class BakeToNLA(bpy.types.Operator):
 
     def bake_cue(self) -> None:
         for o in self.bctx.object_iter():
+            assert self.bctx.current_cue, "No cue selected"
             # print(self.bctx.cue_index)
             if log.isEnabledFor(logging.TRACE):  # type: ignore
                 log.trace(f"Baking on object {o} ")  # type: ignore
@@ -149,7 +150,9 @@ class BakeToNLA(bpy.types.Operator):
                 if log.isEnabledFor(logging.DEBUG):
                     log.debug(f"Baking cue {c.cue} ({i}/{l}) ")
                 self.bake_cue()
-            self.report({'INFO'}, f"Baked {l} cues to {self.strips_added} action strips")
+            msg = f"Baked {l} cues to {self.strips_added} action strips"
+            self.bctx.rlog.info(msg, self.bctx.current_trace)
+            self.report({'INFO'}, msg)
         except Exception as e:
             self.report({'ERROR'}, str(e))
             log.exception(e)
