@@ -113,12 +113,12 @@ class BakeToNLA(bpy.types.Operator):
         track = b.current_track
         if not track:
             if b.cue_index <= 0:  # Only log the error 1x
-                b.rlog.warning(f"{object} has no NLA track selected. Ignoring")
+                b.rlog.warning(f"{object} has no NLA track selected. Ignoring", self.bctx.current_trace)
             return
         c = b.current_cue
         m = b.current_mapping_item
         if not m or not m.action:
-            b.rlog.warning(f"There is no mapping for the cue {c} in the capture. Ignoring")
+            b.rlog.warning(f"There is no mapping for the cue {c and c.cue} in the capture. Ignoring", self.bctx.current_trace)
             return
         strip = track.strips.new(f"{c.cue}", c.frame(b.ctx), m.action)
         self.strips_added += 1
@@ -153,7 +153,7 @@ class BakeToNLA(bpy.types.Operator):
         except Exception as e:
             self.report({'ERROR'}, str(e))
             log.exception(e)
-            self.bctx.rlog.error(str(e))
+            self.bctx.rlog.error(str(e), self.bctx.current_trace)
             return {'CANCELLED'}
         finally:
             del self.bctx

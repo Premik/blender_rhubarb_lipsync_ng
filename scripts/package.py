@@ -78,7 +78,7 @@ class PackagePlugin:
         d = clean_temp_files_at(self.project_dir)
         print(f"Deleted {d} temp/cache files/dirs from the {self.project_dir}")
 
-    def zip_dist(self, platform: str):
+    def zip_dist(self, platform: str) -> None:
         """Creates the zip for distribution. Assumes the correct binaries are already deployed in the bin_dir subfolder"""
         zip = self.dist_dir / dist_zip_name(platform, self.version_str)
         # https://stackoverflow.com/questions/1855095/how-to-create-a-zip-archive-of-a-directory#

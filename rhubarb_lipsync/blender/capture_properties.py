@@ -295,7 +295,7 @@ class ResultLogItemProperties(PropertyGroup):
         ],
         default='ERROR',
     )
-    frame: FloatProperty("frame", description="Frame where the log event occured")  # type: ignore
+    trace: StringProperty("trace", description="Where to log even happend (object, frame..)")  # type: ignore
 
 
 class ResultLogListProperties(PropertyGroup):
@@ -314,20 +314,20 @@ class ResultLogListProperties(PropertyGroup):
     def warnings(self) -> Iterable[ResultLogItemProperties]:
         return self.items_by_level("WARNING")
 
-    def log(self, msg: str, level: str, frame: float = 0) -> ResultLogItemProperties:
-        ret = self.items.new()
+    def log(self, msg: str, level: str, trace: str = "") -> ResultLogItemProperties:
+        ret = self.items.add()
         ret.msg = msg
         ret.level = level
-        ret.frame = frame
+        ret.trace = trace
         return ret
 
-    def error(self, msg: str, frame: float = 0) -> None:
-        self.log(msg, "ERROR", frame)
-        log.error(msg)
+    def error(self, msg: str, trace: str = "") -> None:
+        self.log(msg, "ERROR", trace)
+        log.error(f"{trace}: {msg}")
 
-    def warning(self, msg: str, frame: float = 0) -> None:
-        self.log(msg, "WARNING", frame)
-        log.warning(msg)
+    def warning(self, msg: str, trace: str = "") -> None:
+        self.log(msg, "WARNING", trace)
+        log.warning(f"{trace}: {msg}")
 
     def clear(self) -> None:
         self.items.clear()

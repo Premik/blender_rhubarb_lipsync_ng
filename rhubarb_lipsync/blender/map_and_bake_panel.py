@@ -14,11 +14,12 @@ import rhubarb_lipsync.blender.sound_operators as sound_operators
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 from rhubarb_lipsync.blender.mapping_list import MappingUIList
 from rhubarb_lipsync.blender.preferences import CueListPreferences, RhubarbAddonPreferences, MappingPreferences
-from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, MouthCueList, JobProperties
+from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, MouthCueList, JobProperties, ResultLogListProperties
 from rhubarb_lipsync.blender.mapping_properties import MappingProperties, NlaTrackRef
 from rhubarb_lipsync.blender.ui_utils import IconsManager
 from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue, MouthShapeInfo, MouthShapeInfos
 from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandAsyncJob
+from rhubarb_lipsync.blender.misc_operators import ShowResultLogDetails
 
 log = logging.getLogger(__name__)
 
@@ -108,9 +109,19 @@ class MappingAndBakingPanel(bpy.types.Panel):
             self.draw_nla_setup()
 
             layout.operator(baking_operators.BakeToNLA.bl_idname, icon="LONGDISPLAY")
-            err = CaptureListProperties.from_context(context).last_error
-            if err:
-                ui_utils.draw_error(self.layout, f"Last bake failed:\n {err}")
+            rll: ResultLogListProperties = CaptureListProperties.from_context(context).last_resut_log
+            if rll.items or 1:
+                box = layout.box()
+                row = box.row()
+                row.label(text="Last bake:")
+                row = box.row()
+                if rll.errors:
+                    row.alert = True
+                    row.label(text=f"{len(list(rll.errors))} errors", icon="ERROR")
+                if rll.warning:
+                    row.alert = False
+                    row.label(text=f"{len(list(rll.warnings))} warnings", icon="ERROR")
+                row.operator(ShowResultLogDetails.bl_idname, text="", icon="ZOOM_PREVIOUS")
             # op.star
 
         except Exception as e:

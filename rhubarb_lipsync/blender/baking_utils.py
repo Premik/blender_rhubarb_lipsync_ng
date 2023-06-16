@@ -132,6 +132,20 @@ class BakingContext:
             return None
         return self.cue_items[self.cue_index]
 
+    @property
+    def current_trace(self) -> str:
+        """A string describing the "location" of baking state. `Cue`, `Object`, `Track` (where applicable).
+        To help identify where warning/error occured"""
+        trace = ""
+        cc = self.current_cue
+        if cc:
+            trace = f"{cc.frame_str(self.ctx)} {cc.cue.info.key_displ}"
+        if self.current_object:
+            trace = f"{trace} '{self.current_object.name}'"
+        if self.current_track:
+            trace = f"{trace}-{self.current_track.name}"
+        return trace
+
     def next_cue(self) -> MouthCueListItem:
         self.cue_index += 1
         return self.current_cue
