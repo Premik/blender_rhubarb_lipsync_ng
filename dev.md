@@ -151,11 +151,10 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 ### High
 * Set the panel tab name in the preferences
 * Baking:
-    * Finish unit test for baking
     * Add strip options: (auto)interleaving, min/max stretch % to allow short action plays faster, 
     * Autotrim strips, so they won't clash failing the bake
-* Add license files
-* Create github build-job, running unit tests/integration tests?
+    * Shape-key actions are not baked
+
 
 ### Normal
 * Add some simply blender sample file
@@ -164,7 +163,7 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 * Capture doesn't work for long sound files. Rhubarb finishes but the list is empty.
 
 ### Low
-* Limit possible selection to armature and mesh-object only? (and not obj.library). Or hook the properties to the Collection instead of Object?
+* Limit possible selection to armature and mesh-object only? (and not obj.library).
 * Add [speaker](https://docs.blender.org/manual/en/latest/render/output/audio/speaker.html) as an alternative to Sequencer audio clip
 * Rename capture_panel to something better? (sound setup?)
 * The scaled down icons (32x32) still hard to see. Pre-scale different set icons?
@@ -173,6 +172,7 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 * Verify the Dialog file is working
 * Add "null" cue type to indicate un-detected cues (those red longer than the limit)
 * `layout.prop(mlp, "actions_multiline_view") ` doesn't currently work. Should show regular action and shape-key action on two lines
+* Not possible to un-select NLA track in the bake-panel
 
 ## Action selector
 - only from the selected object?

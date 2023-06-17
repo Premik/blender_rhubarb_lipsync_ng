@@ -50,7 +50,9 @@ jobs:
           environment-file: environment.yml
           use-only-tar-bz2: true # IMPORTANT: This needs to be set for caching to work properly!
       
-      - run: |
+      - name: Download rhubard binaries
+        run: |
          cd scripts
          python rhubarb_bin.py
-      - run: pytest --boxed
+      - name: Run pytest
+        run: pytest --boxed
