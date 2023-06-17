@@ -22,6 +22,9 @@ class CaptureTest(unittest.TestCase):
         self.project.create_capture()
         assert self.project.cprops
 
+    def testGetVer(self) -> None:
+        ui_utils.assert_op_ret(bpy.ops.rhubarb.get_executable_version())
+
     def testCaputre(self) -> None:
         self.project.trigger_capture()
         self.project.wait_for_capture_finish()

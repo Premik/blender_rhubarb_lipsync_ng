@@ -7,7 +7,8 @@ dependencies:
   - python=3.10
   - pip
 #  - pytest>=7.2.0
-  - pytest-xdist 
+  - pytest-xdist  # For test parallel execution
+  - pytest-forked # For test isolation. bpy has global context
   - mypy
   - python-blender~=3.4.0 #Blender as module ()
   - tomli

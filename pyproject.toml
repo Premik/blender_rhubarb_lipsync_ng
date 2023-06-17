@@ -35,7 +35,7 @@ executable_name="rhubarb.exe"
 packages = ["rhubarb_lipsync"]
 
 [tool.pytest.ini_options]
-addopts = ["--import-mode=importlib"]
+addopts = ["--import-mode=importlib", "--forked", "--numprocesses=auto"]
 # https://stackoverflow.com/questions/10253826/path-issue-with-pytest-importerror-no-module-named-yadayadayada/50610630#answer-50610630
 pythonpath = [".", "tests"] 
 # https://docs.pytest.org/en/7.1.x/explanation/goodpractices.html

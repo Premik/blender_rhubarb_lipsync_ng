@@ -14,6 +14,7 @@ import rhubarb_lipsync.blender.auto_load
 import sample_data
 import rhubarb_lipsync.blender.rhubarb_operators as rhubarb_operators
 from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences
+from rhubarb_lipsync.blender.preferences import local_executable_path
 from rhubarb_lipsync.blender.capture_properties import (
     CaptureListProperties,
     CaptureProperties,
@@ -46,7 +47,7 @@ class SampleProject:
     def ensure_registered() -> None:
         if SampleProject.registered:
             print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-            print("Already registered")
+            print("Already registered. There could be unresired side effects")
             print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             return
         rhubarb_lipsync.register()  # Simulate blender register call
@@ -65,6 +66,11 @@ class SampleProject:
         bpy.ops.rhubarb.create_capture_props()  # Create new capture item
         props = self.cprops
         assert props
+        p1 = self.prefs.executable_path
+        if not p1.exists():
+            p2 = local_executable_path()
+            print(f"The {p1} doesn't exist. Changed to {p2} ")
+            self.prefs.executable_path_string = str(p2)
         props.sound = self.sample.to_sound(bpy.context)
 
     def trigger_capture(self) -> None:
@@ -119,6 +125,10 @@ class SampleProject:
     def mprops(self) -> MappingProperties:
         """Mapping properties of the active object"""
         return MappingProperties.from_context(bpy.context)
+
+    @property
+    def prefs(self) -> RhubarbAddonPreferences:
+        return RhubarbAddonPreferences.from_context(bpy.context)
 
     @property
     def jprops(self) -> JobProperties:
