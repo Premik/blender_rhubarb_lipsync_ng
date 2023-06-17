@@ -11,7 +11,8 @@ jobs:
         shell: bash -el {0}
     strategy:
       matrix:
-        os: ["ubuntu-latest", "macos-latest", "windows-latest"]
+      # "macos-latest" - No python module in conda https://anaconda.org/kitsune.ONE/python-blender/files
+        os: ["ubuntu-latest", "windows-latest"]
         python-version: ["3.10"]
     steps:
       - name: Get Date
@@ -55,4 +56,4 @@ jobs:
          cd scripts
          python rhubarb_bin.py
       - name: Run pytest
-        run: pytest --boxed
+        run: pytest --forked
