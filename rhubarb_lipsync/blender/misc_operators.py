@@ -65,11 +65,14 @@ class ShowResultLogDetails(bpy.types.Operator):
             row = box.row()
             row = row.split(factor=0.3)
             row.label(text=log.trace)
+            icon = 'ERROR'
             if log.level == "ERROR":
                 row.alert = True
             else:
                 box.alert = False
-            row.label(text=log.msg, icon="ERROR")
+            if log.level == "INFO":
+                icon = "INFO"
+            row.label(text=log.msg, icon=icon)
 
     def invoke(self, context: Context, event: bpy.types.Event) -> set[int] | set[str]:
         return context.window_manager.invoke_props_dialog(self, width=1000)

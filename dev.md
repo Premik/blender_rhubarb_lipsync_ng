@@ -150,17 +150,21 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 
 ### High
 * Set the panel tab name in the preferences
-* Baking:
-    * Add strip options: (auto)interleaving, min/max stretch % to allow short action plays faster, 
-    * Autotrim strips, so they won't clash failing the bake
-    * Shape-key actions are not baked
 
+### Baking
+* Add strip options: 
+ - strips overlap start/end frames count
+ - min/max stretch % to. Allow too short actions play faster and visa versa
+ - (auto)interleaving,
+* Autotrim strips, so they won't clash failing the bake
+* Shape-key actions are not baked
+* Doc - new readme.md
 
 ### Normal
 * Add some simply blender sample file
 * extended shapes- seems they are generated even when disabled -check
-* Doc - new readme.md
 * Capture doesn't work for long sound files. Rhubarb finishes but the list is empty.
+* limit number of lines in the result log dialog, to something like 100 (don't show more)
 
 ### Low
 * Limit possible selection to armature and mesh-object only? (and not obj.library).
@@ -173,6 +177,7 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 * Add "null" cue type to indicate un-detected cues (those red longer than the limit)
 * `layout.prop(mlp, "actions_multiline_view") ` doesn't currently work. Should show regular action and shape-key action on two lines
 * Not possible to un-select NLA track in the bake-panel
+
 
 ## Action selector
 - only from the selected object?

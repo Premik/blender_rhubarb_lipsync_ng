@@ -113,7 +113,7 @@ class BakeToNLA(bpy.types.Operator):
         track = b.current_track
         if not track:
             if b.cue_index <= 0:  # Only log the error 1x
-                b.rlog.warning(f"{object} has no NLA track selected. Ignoring", self.bctx.current_trace)
+                b.rlog.warning(f"{object and object.name} has no NLA track selected. Ignoring", self.bctx.current_trace)
             return
         c = b.current_cue
         m = b.current_mapping_item
@@ -128,8 +128,9 @@ class BakeToNLA(bpy.types.Operator):
         # strip.frame_end = c.end_frame_float(b.ctx)
 
     def bake_cue(self) -> None:
-        for o in self.bctx.object_iter():
+        for i, o in enumerate(self.bctx.object_iter()):
             assert self.bctx.current_cue, "No cue selected"
+            self.bctx.next_track()  # Alternate tracks for each cue change of the current object
             # print(self.bctx.cue_index)
             if log.isEnabledFor(logging.TRACE):  # type: ignore
                 log.trace(f"Baking on object {o} ")  # type: ignore
@@ -149,6 +150,7 @@ class BakeToNLA(bpy.types.Operator):
                 wm.progress_update(i)
                 if log.isEnabledFor(logging.DEBUG):
                     log.debug(f"Baking cue {c.cue} ({i}/{l}) ")
+                self.bctx.next_track()  # Swap tracks on each cue
                 self.bake_cue()
             msg = f"Baked {l} cues to {self.strips_added} action strips"
             self.bctx.rlog.info(msg, self.bctx.current_trace)

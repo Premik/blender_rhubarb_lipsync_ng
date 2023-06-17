@@ -30,11 +30,11 @@ class BakingContextTest(unittest.TestCase):
         assert len(self.bc.cue_items) > 1, "No cues in the capture"
         assert self.bc.frame_range == (1, 26)
 
-    def testBasic1(self) -> None:
+    def testBasicSingleAction(self) -> None:
         self.bc = self.project.create_mapping_single_sphere1()
         self.basic()
 
-    def testBasic2(self) -> None:
+    def testBasicTwoActions(self) -> None:
         self.bc = self.project.create_mapping_2actions_sphere1()
         self.basic()
 
@@ -50,11 +50,11 @@ class BakingContextTest(unittest.TestCase):
         errs = self.bc.validate_track()
         assert len(errs) == 0, errs[0]
 
-    def testTrackValidation1(self) -> None:
+    def testTrackValidation_signle_action(self) -> None:
         self.bc = self.project.create_mapping_single_sphere1()
         self.trackValidation()
 
-    def testTrackValidation2(self) -> None:
+    def testTrackValidation_two_actions(self) -> None:
         self.bc = self.project.create_mapping_2actions_sphere1()
         self.trackValidation()
 
@@ -66,8 +66,8 @@ class BakingContextTest(unittest.TestCase):
         assert not list(self.project.last_result.errors), list(self.project.last_result.items)
         assert not list(self.project.last_result.warnings), list(self.project.last_result.items)
         cues, strips = self.project.parse_last_bake_result_details()
-        assert cues == strips, f"Number of strips ({strips}) created doesn't match number of captured cues ({cues})"
-        assert len(self.project.cue_items) == cues, "Number of baked cues ({cues}) doesn'tmatch number of cues in the capture ({self.project.cue_items})"
+        assert cues == strips, f"Number of strips ({strips}) created doesn't match the number of captured cues ({cues})"
+        assert len(self.project.cue_items) == cues, "Number of baked cues ({cues}) doesn't match the number of cues in the capture ({self.project.cue_items})"
 
     def bakeTwoTracks(self) -> None:
         self.project.add_track1()
@@ -75,17 +75,22 @@ class BakingContextTest(unittest.TestCase):
         assert self.bc.has_two_tracks
         self.bake()
 
-    def testBakeTwoTracks1(self) -> None:
+    def testBakeTwoTracksSingleAction(self) -> None:
         self.bc = self.project.create_mapping_single_sphere1()
         self.bakeTwoTracks()
 
+    def testBakeOnlyTrack2SingleAction(self) -> None:
+        self.bc = self.project.create_mapping_single_sphere1()
+        self.project.add_track2()
+        self.bake()
+
     @unittest.skip("Scrip trimming, TBD")
-    def testBakeTwoTracks2(self) -> None:
+    def testBakeTwoTracksTwoActions(self) -> None:
         self.bc = self.project.create_mapping_2actions_sphere1()
         self.bakeTwoTracks()
 
     @unittest.skip("Scrip trimming, TBD")
-    def testBakeSingleTracks2(self) -> None:
+    def testBakeSingleTracksTwoActions(self) -> None:
         self.bc = self.project.create_mapping_2actions_sphere1()
         self.project.add_track1()
         assert not self.bc.has_two_tracks

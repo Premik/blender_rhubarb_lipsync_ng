@@ -61,7 +61,7 @@ class BakingContext:
         log.debug("Clearing obj cache")
         self._objs: List[Object] = None
         self.object_index = -1
-        self.track_index = 0
+        self.track_index = -1
         self.last_object_selection_type = ""
 
     @property
@@ -141,9 +141,9 @@ class BakingContext:
         if cc:
             trace = f"{cc.frame_str(self.ctx)} {cc.cue.info.key_displ}"
         if self.current_object:
-            trace = f"{trace} '{self.current_object.name}'"
+            trace = f"{trace} {self.current_object.name}"
         if self.current_track:
-            trace = f"{trace}-{self.current_track.name}"
+            trace = f"{trace}.{self.current_track.name}"
         return trace
 
     def next_cue(self) -> MouthCueListItem:
@@ -200,9 +200,9 @@ class BakingContext:
         return self.tracks[self.track_index % 2]
 
     def next_track(self) -> Object:
-        """Alternates between non-null tracks. If only one track is non-null it would always the current track"""
+        """Alternates between non-null tracks. If only one track is non-null it would always be the current track"""
         self.track_index += 1
-        if not self.current_track:  # Next one is None
+        if not self.current_track:  # Next one was None
             self.track_index += 1  # Try the other one. If None too then both are None
         return self.current_track
 

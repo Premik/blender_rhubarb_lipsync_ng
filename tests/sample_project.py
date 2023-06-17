@@ -222,7 +222,7 @@ class SampleProject:
     def add_track(self, t: NlaTrackRef) -> NlaTrackRef:
         ui_utils.assert_op_ret(bpy.ops.rhubarb.new_nla_track())
         assert len(list(t.items())) > 0, "After track was created there is still no eligible track. "
-        t.index += 1
+        t.index += 1  # Select the newly created track
         return t
 
     def add_track1(self) -> NlaTrackRef:

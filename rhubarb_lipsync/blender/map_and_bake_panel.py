@@ -75,8 +75,9 @@ class MappingAndBakingPanel(bpy.types.Panel):
         row.prop(track, 'name', text=text)
         # row.prop(track, 'index')
         op: mapping_operators.CreateNLATrack = row.operator(mapping_operators.CreateNLATrack.bl_idname, text="", icon="DUPLICATE")
-        obj_name = self.ctx.object and self.ctx.object.name or ''
-        op.name = f"RLPS {obj_name} {text}"
+        # obj_name = self.ctx.object and self.ctx.object.name or ''
+        # op.name = f"RLPS {obj_name} {text}" # Include object name
+        op.name = f"RLPS {text}"
         op.track_field_name = track_field_name
         # op.trackRef=track
 
