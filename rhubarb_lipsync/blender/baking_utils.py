@@ -11,7 +11,7 @@ from bpy.types import Context, Object, UILayout, NlaTrack, NlaStrip
 from typing import Any, Callable, Optional, cast, Generator, Iterator
 
 from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, MouthCueList, MouthCueListItem, ResultLogListProperties
-from rhubarb_lipsync.blender.mapping_properties import MappingProperties, MappingItem, NlaTrackRef
+from rhubarb_lipsync.blender.mapping_properties import MappingProperties, MappingItem, NlaTrackRef, StripFitProperties
 from rhubarb_lipsync.blender.preferences import CueListPreferences, RhubarbAddonPreferences, MappingPreferences
 from rhubarb_lipsync.rhubarb.log_manager import logManager
 from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue, MouthShapeInfos, MouthShapeInfo
@@ -119,7 +119,6 @@ class BakingContext:
     def cue_iter(self) -> Iterator[MouthCueListItem]:
         for i, c in enumerate(self.cue_items):
             self.cue_index = i
-            self.next_track()  # Alternate tracks for each cue change
             yield c
         self.cue_index = -1
 
@@ -161,6 +160,10 @@ class BakingContext:
         if not self.last_cue:
             return None
         return self.cprops.start_frame, self.last_cue.end_frame(self.ctx)
+
+    @property
+    def fit_props(self) -> StripFitProperties:
+        return self.mprops and self.mprops.fit
 
     @property
     def mprops(self) -> MappingProperties:
@@ -215,6 +218,9 @@ class BakingContext:
         self.next_track()
         if not self.current_track:
             return [f"no NLA track selected"]
+        ret: list[str] = []
+        if self.track1 == self.track2:
+            ret += ["Track1 and Track2 are the same"]
         strips = 0
         t = self.next_track()
         strips += len(list(self.strips_on_current_track()))
@@ -222,8 +228,8 @@ class BakingContext:
             strips += len(list(self.strips_on_current_track()))
 
         if strips > 0:
-            return [f"Clash with {strips} existing strips"]
-        return []
+            ret += [f"Clash with {strips} existing strips"]
+        return ret
 
     def validate_selection(self) -> str:
         """Return validation errors of `self.object`."""

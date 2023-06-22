@@ -1,3 +1,4 @@
+from lib2to3.fixes.fix_input import context
 import logging
 from functools import cached_property
 from pydoc import describe
@@ -107,6 +108,33 @@ class BakeToNLA(bpy.types.Operator):
         wm = context.window_manager
         return wm.invoke_props_dialog(self, width=340)
 
+    def to_strip(self) -> None:
+        b = self.bctx
+        cue = b.current_cue
+        mitem = b.current_mapping_item
+
+        if not mitem or not mitem.action:
+            b.rlog.warning(f"There is no mapping for the cue {cue and cue.cue} in the capture. Ignoring", self.bctx.current_trace)
+            return
+        name = f"{cue.cue.info.key_displ}.{str(b.cue_index).zfill(3)}"
+        start = cue.frame_float(b.ctx) + b.fit_props.blend_start  # Start frame can be shifted
+        # The blend start frame changes the length so it won't affect the end frame won't change.
+        strip_duration = cue.duration_frames(b.ctx) - b.fit_props.blend_start + b.fit_props.blend_end
+        scale = b.fit_props.action_scale(mitem.action, strip_duration)  # Try to scale to fit the cue duration with the blendings included.
+        end = cue.end_frame_float(b.ctx) * scale
+        strip = b.current_track.strips.new(name, int(start), mitem.action)
+        strip.scale = scale
+        # if b.ctx.scene.show_subframe:  # Set start frame again as float (ctor takes only int)
+        strip.frame_start = start
+        strip.frame_end = end
+        self.strips_added += 1
+
+        strip.name = name
+        strip.blend_type = "COMBINE"
+        strip.use_auto_blend = True
+
+        # strip.frame_end = c.end_frame_float(b.ctx)
+
     def bake_cue_on(self, object: Object) -> None:
         b = self.bctx
 
@@ -115,20 +143,10 @@ class BakeToNLA(bpy.types.Operator):
             if b.cue_index <= 0:  # Only log the error 1x
                 b.rlog.warning(f"{object and object.name} has no NLA track selected. Ignoring", self.bctx.current_trace)
             return
-        c = b.current_cue
-        m = b.current_mapping_item
-        if not m or not m.action:
-            b.rlog.warning(f"There is no mapping for the cue {c and c.cue} in the capture. Ignoring", self.bctx.current_trace)
-            return
-        strip = track.strips.new(f"{c.cue}", c.frame(b.ctx), m.action)
-        self.strips_added += 1
-        if b.ctx.scene.show_subframe:  # Set start frame again as float (ctor takes only int)
-            strip.frame_start = c.frame_float(b.ctx)
-
-        # strip.frame_end = c.end_frame_float(b.ctx)
+        self.to_strip()
 
     def bake_cue(self) -> None:
-        for i, o in enumerate(self.bctx.object_iter()):
+        for o in self.bctx.object_iter():
             assert self.bctx.current_cue, "No cue selected"
             self.bctx.next_track()  # Alternate tracks for each cue change of the current object
             # print(self.bctx.cue_index)

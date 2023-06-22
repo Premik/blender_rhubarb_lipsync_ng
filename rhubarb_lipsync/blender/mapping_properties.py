@@ -11,7 +11,7 @@ import bpy.utils.previews
 from bpy.props import BoolProperty, CollectionProperty, EnumProperty, FloatProperty, IntProperty, PointerProperty, StringProperty
 from bpy.types import Action, AddonPreferences, Context, PropertyGroup, Sound, UILayout, NlaTrack
 
-from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue, MouthShapeInfo, MouthShapeInfos
+from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue, MouthShapeInfo, MouthShapeInfos, duration_scale
 from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandAsyncJob, RhubarbCommandWrapper, RhubarbParser
 from rhubarb_lipsync.blender import ui_utils
 from rhubarb_lipsync.blender.ui_utils import DropdownHelper
@@ -69,6 +69,43 @@ class MappingItem(PropertyGroup):
         return MouthShapeInfos[self.key].value
 
 
+class StripFitProperties(PropertyGroup):
+    """Defines how to fit an action to the action strip constrained by the cue start and cue length"""
+
+    scale_min: FloatProperty(  # type: ignore
+        "Scale min",
+        description="Scaled down (slow down) the strip/clip up to this fraction when the action is too short. Set to 1 disable",
+        default=0.5,
+    )
+    scale_max: FloatProperty(  # type: ignore
+        "Scale max",
+        description="Scale up (speed up) the strip/clip up to this fraction when the action is too long. Set to 1 disable",
+        default=1.5,
+    )
+    blend_start: IntProperty(  # type: ignore
+        "Blend start",
+        description="The final start frame of the strip is shifted by this amount making it blend with the previous strip.",
+        default=-1,
+    )
+    blend_end: IntProperty(  # type: ignore
+        "Blend end",
+        description="The final end frame of the strip is shifted by this amount making it blend with the following strip.",
+        default=2,
+    )
+    min_strip_len: IntProperty(  # type: ignore
+        "Min strip length",
+        description="""If there is room on the track any strip shorter than this amount of frames will be prolonged. 
+                       This is mainly to improve visibility of the strips labels.  """,
+        default=3,
+    )
+
+    def action_scale(self, action: bpy.types.Action, desired_len_frames: float) -> float:
+        """Returns scale factor for the provided `action`. So the `action.end-frame*scale` would match the `desired_len_frames` as close as possible."""
+        range = action.frame_range
+        l = range[1] - range[0]
+        return duration_scale(l, desired_len_frames, self.scale_min, self.scale_max)
+
+
 class MappingProperties(PropertyGroup):
     """Mapping of all the mouth shape types to action(s)"""
 
@@ -77,6 +114,7 @@ class MappingProperties(PropertyGroup):
     # nla_track1: PointerProperty(type=bpy.types.NlaTrack, name="Tract 1")  # type: ignore
     nla_track1: PointerProperty(type=NlaTrackRef, name="Track 1")  # type: ignore
     nla_track2: PointerProperty(type=NlaTrackRef, name="Track 2")  # type: ignore
+    fit: PointerProperty(type=StripFitProperties, name="Strip Fit properties")  # type: ignore
 
     def on_nla_map_action_update(self, ctx: Context) -> None:
         if self.nla_map_shapekey or self.nla_map_action:

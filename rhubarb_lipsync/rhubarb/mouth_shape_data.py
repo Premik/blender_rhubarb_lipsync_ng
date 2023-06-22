@@ -19,6 +19,14 @@ def frame2time(frame: float, fps: int, fps_base=1.0) -> float:
     return frame * fps_base / fps
 
 
+def duration_scale(current_len: float, desired_len: float, scale_min: float, scale_max: float) -> float:
+    """Returns the scale factor so the `current_len` matches the `desired_len` as close as possible."""
+    assert current_len != 0, "Can't scale zero length duration"
+    scale = desired_len / current_len
+    scale = max(scale_min, min(scale, scale_max))
+    return scale
+
+
 class MouthShapeInfo:
     """Description of a mouth shape. Metadata."""
 
@@ -191,6 +199,13 @@ class MouthCue:
         """Whole frame (without rounding) + decimal part (between 0.0 and 1.0) of the exact frame number."""
         f, i = math.modf(self.start_frame_float(fps, fps_base, offset))
         return int(i), f
+
+    @property
+    def duration(self) -> float:
+        return self.end - self.start
+
+    def duration_frames(self, fps: int, fps_base=1.0) -> float:
+        return time2frame_float(self.duration, fps, fps_base)
 
     def __eq__(self, other) -> bool:
         if not isinstance(other, MouthCue):
