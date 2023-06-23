@@ -18,6 +18,7 @@ from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue, MouthShapeInfos, 
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 import traceback
 from rhubarb_lipsync.blender.ui_utils import IconsManager
+from bisect import bisect_left
 
 log = logging.getLogger(__name__)
 
@@ -28,6 +29,32 @@ def objects_with_mapping(objects: Iterator[Object]) -> Iterator[Object]:
         mp = MappingProperties.from_object(o)
         if mp and mp.has_any_mapping:
             yield o
+
+
+def find_strip_at(track: NlaTrack, at_frame: float) -> tuple[int, NlaStrip]:
+    """Finds the strip at the given frame. Effectivelly utilizing the fact the strips are always ordered and can't overlap"""
+    if not track or not track.strips:
+        return -1, None
+    index = bisect_left(track.strips, at_frame, key=lambda strip: strip.frame_start)
+    if index > 0:  # After the first
+        index -= 1
+    assert index < len(track.strips) and index >= 0
+    strip = track.strips[index]
+    # strip is now the one which starts just before (or at) the `at_frame`
+    if at_frame < strip.frame_start or at_frame >= strip.frame_end:
+        return -1, None  # But it ends/start before/after the `at_frame` (frame_end is exclusive/opened interval)
+    return index, strip
+
+
+def trim_strip_end_at(track: NlaTrack, at_frame: float) -> bool:
+    """Finds if there is a strip on the provided `track` at the given `at_frame` frame.
+    If so it woudl trim the strip end up to the `at_frame` point.
+    """
+    index, strip = find_strip_at(track, at_frame)
+    if not strip:
+        return False  # No matching strip found, no op
+    strip.frame_end = at_frame  # Trim the end
+    return True
 
 
 def strips_on_track(track: NlaTrack, start: int, end: int) -> Iterator[NlaStrip]:
@@ -176,6 +203,10 @@ class BakingContext:
             return None
         cue_index = self.current_cue.cue.key_index
         return self.mprops.items[cue_index]
+
+    @property
+    def current_mapping_action(self) -> bpy.types.Action:
+        return self.current_mapping_item and self.current_mapping_item.action
 
     @property
     def track1(self) -> Optional[NlaTrack]:

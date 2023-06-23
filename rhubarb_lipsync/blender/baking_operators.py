@@ -111,21 +111,29 @@ class BakeToNLA(bpy.types.Operator):
     def to_strip(self) -> None:
         b = self.bctx
         cue = b.current_cue
-        mitem = b.current_mapping_item
 
-        if not mitem or not mitem.action:
+        if not b.current_mapping_action:
             b.rlog.warning(f"There is no mapping for the cue {cue and cue.cue} in the capture. Ignoring", self.bctx.current_trace)
             return
         name = f"{cue.cue.info.key_displ}.{str(b.cue_index).zfill(3)}"
-        start = cue.frame_float(b.ctx) + b.fit_props.blend_start  # Start frame can be shifted
-        # The blend start frame changes the length so it won't affect the end frame won't change.
-        strip_duration = cue.duration_frames(b.ctx) - b.fit_props.blend_start + b.fit_props.blend_end
-        scale = b.fit_props.action_scale(mitem.action, strip_duration)  # Try to scale to fit the cue duration with the blendings included.
-        end = cue.end_frame_float(b.ctx) * scale
-        strip = b.current_track.strips.new(name, int(start), mitem.action)
+
+        # Shift the start frame
+        start = cue.frame_float(b.ctx) + b.fit_props.blend_start
+        # Calculate the desired strip length based on cue length and include the blending
+        strip_duration = cue.duration_frames_float(b.ctx) - b.fit_props.blend_start + b.fit_props.blend_end
+        # Try to scale the strip to fit the cue duration with the blendings included.
+        scale = b.fit_props.action_scale(b.current_mapping_action, strip_duration)
+        # Calculate the end frame based from the scale and the start
+        end = start + strip_duration * scale
+        # Crop the previous strip-end to make a room for the current strip start (if needed)
+        if baking_utils.trim_strip_end_at(b.current_track, start):
+            b.rlog.warning("Had to trim previous strip to make room for this one", self.bctx.current_trace)
+
+        # Create new strip. Start frame is mandatory but int only, so round up to avoid clashing with previous one
+        strip = b.current_track.strips.new(name, int(start + 1), b.current_mapping_action)
+        strip.frame_start = start  # Set start frame again as float (ctor takes only int)
         strip.scale = scale
-        # if b.ctx.scene.show_subframe:  # Set start frame again as float (ctor takes only int)
-        strip.frame_start = start
+        # if b.ctx.scene.show_subframe:
         strip.frame_end = end
         self.strips_added += 1
 

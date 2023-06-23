@@ -19,12 +19,16 @@ def frame2time(frame: float, fps: int, fps_base=1.0) -> float:
     return frame * fps_base / fps
 
 
-def duration_scale(current_len: float, desired_len: float, scale_min: float, scale_max: float) -> float:
+def duration_scale_rate(current_len: float, desired_len: float, scale_min: float, scale_max: float) -> float:
     """Returns the scale factor so the `current_len` matches the `desired_len` as close as possible."""
     assert current_len != 0, "Can't scale zero length duration"
     scale = desired_len / current_len
     scale = max(scale_min, min(scale, scale_max))
     return scale
+
+
+def duration_scale(current_len: float, desired_len: float, scale_min: float, scale_max: float) -> float:
+    return current_len * duration_scale_rate(current_len, desired_len, scale_min, scale_max)
 
 
 class MouthShapeInfo:

@@ -11,7 +11,7 @@ import bpy.utils.previews
 from bpy.props import BoolProperty, CollectionProperty, EnumProperty, FloatProperty, IntProperty, PointerProperty, StringProperty
 from bpy.types import Action, AddonPreferences, Context, PropertyGroup, Sound, UILayout, NlaTrack
 
-from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue, MouthShapeInfo, MouthShapeInfos, duration_scale
+from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue, MouthShapeInfo, MouthShapeInfos, duration_scale_rate
 from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandAsyncJob, RhubarbCommandWrapper, RhubarbParser
 from rhubarb_lipsync.blender import ui_utils
 from rhubarb_lipsync.blender.ui_utils import DropdownHelper
@@ -82,28 +82,28 @@ class StripFitProperties(PropertyGroup):
         description="Scale up (speed up) the strip/clip up to this fraction when the action is too long. Set to 1 disable",
         default=1.5,
     )
-    blend_start: IntProperty(  # type: ignore
+    blend_start: FloatProperty(  # type: ignore
         "Blend start",
         description="The final start frame of the strip is shifted by this amount making it blend with the previous strip.",
         default=-1,
     )
-    blend_end: IntProperty(  # type: ignore
+    blend_end: FloatProperty(  # type: ignore
         "Blend end",
         description="The final end frame of the strip is shifted by this amount making it blend with the following strip.",
         default=2,
     )
-    min_strip_len: IntProperty(  # type: ignore
-        "Min strip length",
-        description="""If there is room on the track any strip shorter than this amount of frames will be prolonged. 
-                       This is mainly to improve visibility of the strips labels.  """,
-        default=3,
-    )
+    # min_strip_len: IntProperty(  # type: ignore
+    #     "Min strip length",
+    #     description="""If there is room on the track any strip shorter than this amount of frames will be prolonged.
+    #                    This is mainly to improve visibility of the strips labels.  """,
+    #     default=3,
+    # )
 
     def action_scale(self, action: bpy.types.Action, desired_len_frames: float) -> float:
         """Returns scale factor for the provided `action`. So the `action.end-frame*scale` would match the `desired_len_frames` as close as possible."""
         range = action.frame_range
         l = range[1] - range[0]
-        return duration_scale(l, desired_len_frames, self.scale_min, self.scale_max)
+        return duration_scale_rate(l, desired_len_frames, self.scale_min, self.scale_max)
 
 
 class MappingProperties(PropertyGroup):

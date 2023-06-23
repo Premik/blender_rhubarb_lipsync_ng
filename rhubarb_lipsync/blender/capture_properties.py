@@ -91,6 +91,9 @@ class MouthCueListItem(PropertyGroup):
     def duration_frames(self, ctx: Context) -> int:
         return int(math.ceil(self.end_frame_float(ctx) - self.frame_float(ctx)))
 
+    def duration_frames_float(self, ctx: Context) -> float:
+        return self.end_frame_float(ctx) - self.frame_float(ctx)
+
     def time_str(self, ctx: Context) -> str:
         return f"{self.start+self.offset_seconds(ctx):0.2f}"
 
@@ -308,6 +311,8 @@ class ResultLogItemProperties(PropertyGroup):
 class ResultLogListProperties(PropertyGroup):
     """List of log-messages (errors/warnings) related to baking. So they can be shown and inspect afterwards"""
 
+    max_entries = 40
+
     items: CollectionProperty(type=ResultLogItemProperties, name="Log entries")  # type: ignore
 
     def items_by_level(self, level: str) -> Iterable[ResultLogItemProperties]:
@@ -318,6 +323,10 @@ class ResultLogListProperties(PropertyGroup):
         return self.items_by_level("ERROR")
 
     @property
+    def has_any_errors_or_warnings(self) -> bool:
+        return any(self.warnings) or any(self.errors)
+
+    @property
     def warnings(self) -> Iterable[ResultLogItemProperties]:
         return self.items_by_level("WARNING")
 
@@ -326,6 +335,15 @@ class ResultLogListProperties(PropertyGroup):
         return self.items_by_level("INFO")
 
     def log(self, msg: str, level: str, trace: str = "") -> ResultLogItemProperties:
+        l = len(self.items)
+        mx = ResultLogListProperties.max_entries
+        if l > mx:  # Drop messages if the limit has been reached
+            return None
+        if l == mx:  # Add warning as the limit is about the be reached
+            msg = f"There were more log messages but they were dropped since the limit ({mx}) has been reached."
+            level = "WARNING"
+            trace = ""
+
         ret = self.items.add()
         ret.msg = msg
         ret.level = level

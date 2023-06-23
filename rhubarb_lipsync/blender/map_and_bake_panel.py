@@ -111,7 +111,7 @@ class MappingAndBakingPanel(bpy.types.Panel):
 
             layout.operator(baking_operators.BakeToNLA.bl_idname, icon="LONGDISPLAY")
             rll: ResultLogListProperties = CaptureListProperties.from_context(context).last_resut_log
-            if rll.items:
+            if rll.has_any_errors_or_warnings:
                 box = layout.box()
                 row = box.row()
                 row.label(text="Last bake:")

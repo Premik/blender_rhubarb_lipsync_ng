@@ -17,6 +17,37 @@ from rhubarb_lipsync.rhubarb.log_manager import logManager
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 import rhubarb_lipsync.blender.baking_utils as baking_utils
 import sample_data, sample_project
+from dataclasses import dataclass
+
+
+@dataclass
+class MockStrip:
+    frame_start: float
+    frame_end: float
+
+
+@dataclass
+class MockTrack:
+    strips: list[MockStrip]
+
+
+class BakingUtilsTest(unittest.TestCase):
+    s0 = MockStrip(1, 10)
+    s1 = MockStrip(10, 20)
+    s2 = MockStrip(30, 100)
+
+    t1 = MockTrack([s0, s1, s2])
+
+    def testFindStrips(self) -> None:
+        self.assertEqual(baking_utils.find_strip_at(BakingUtilsTest.t1, 0)[0], -1)
+        self.assertEqual(baking_utils.find_strip_at(BakingUtilsTest.t1, 1.1)[0], 0)
+        self.assertEqual(baking_utils.find_strip_at(BakingUtilsTest.t1, 1)[0], 0)
+        self.assertEqual(baking_utils.find_strip_at(BakingUtilsTest.t1, 5)[0], 0)
+        self.assertEqual(baking_utils.find_strip_at(BakingUtilsTest.t1, 19)[0], 1)
+        self.assertEqual(baking_utils.find_strip_at(BakingUtilsTest.t1, 25)[0], -1)
+        self.assertEqual(baking_utils.find_strip_at(BakingUtilsTest.t1, 20)[0], -1)
+        self.assertEqual(baking_utils.find_strip_at(BakingUtilsTest.t1, 40)[0], 2)
+        self.assertEqual(baking_utils.find_strip_at(BakingUtilsTest.t1, 200)[0], -1)
 
 
 class BakingContextTest(unittest.TestCase):
