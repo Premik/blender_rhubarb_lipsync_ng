@@ -15,6 +15,7 @@ from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue, MouthShapeInfo, M
 from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandAsyncJob, RhubarbCommandWrapper, RhubarbParser
 from rhubarb_lipsync.blender import ui_utils
 from rhubarb_lipsync.blender.ui_utils import DropdownHelper
+import textwrap
 
 log = logging.getLogger(__name__)
 
@@ -74,22 +75,33 @@ class StripFitProperties(PropertyGroup):
 
     scale_min: FloatProperty(  # type: ignore
         "Scale min",
-        description="Scaled down (slow down) the strip/clip up to this fraction when the action is too short. Set to 1 disable",
+        description="Scale down (slow down) the strip/clip up to this fraction when the action is too short. Has no effect when set to 1",
         default=0.5,
     )
     scale_max: FloatProperty(  # type: ignore
         "Scale max",
-        description="Scale up (speed up) the strip/clip up to this fraction when the action is too long. Set to 1 disable",
+        description="Scale up (speed up) the strip/clip up to this fraction when the action is too long. Has no effect when set to 1",
         default=1.5,
     )
-    blend_start: FloatProperty(  # type: ignore
-        "Blend start",
-        description="The final start frame of the strip is shifted by this amount making it blend with the previous strip.",
+    offset_start: FloatProperty(  # type: ignore
+        "Offset start",
+        description=textwrap.dedent(
+            """\
+            The start frame of the strip is shifted by this number of frames. 
+            The strip can for example start earlier (negative value) than the actual cue-start
+            making the action fully visible at the correct time when the strip is blended with the previous strip. 
+            """
+        ),
         default=-1,
     )
-    blend_end: FloatProperty(  # type: ignore
-        "Blend end",
-        description="The final end frame of the strip is shifted by this amount making it blend with the following strip.",
+    offset_end: FloatProperty(  # type: ignore
+        "Offset end",
+        description=textwrap.dedent(
+            """\
+            The end frame of the strip is shifted by this number of frames. 
+            The strip can for example end after (positive value) the following cue-start.
+            """
+        ),
         default=2,
     )
     # min_strip_len: IntProperty(  # type: ignore

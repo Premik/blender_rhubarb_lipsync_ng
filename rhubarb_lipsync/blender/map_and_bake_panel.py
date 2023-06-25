@@ -15,7 +15,7 @@ import rhubarb_lipsync.blender.ui_utils as ui_utils
 from rhubarb_lipsync.blender.mapping_list import MappingUIList
 from rhubarb_lipsync.blender.preferences import CueListPreferences, RhubarbAddonPreferences, MappingPreferences
 from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, MouthCueList, JobProperties, ResultLogListProperties
-from rhubarb_lipsync.blender.mapping_properties import MappingProperties, NlaTrackRef
+from rhubarb_lipsync.blender.mapping_properties import MappingProperties, NlaTrackRef, StripFitProperties
 from rhubarb_lipsync.blender.ui_utils import IconsManager
 from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue, MouthShapeInfo, MouthShapeInfos
 from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandAsyncJob
@@ -59,14 +59,17 @@ class MappingAndBakingPanel(bpy.types.Panel):
         row.prop(mprops, 'nla_map_shapekey', toggle=True)
         row.popover(panel=MappingListOptionsPanel.bl_idname, text="", icon="VIS_SEL_11")
 
-    def draw_mapping_list(self) -> None:
+    def draw_mapping_list(self) -> bool:
         prefs = RhubarbAddonPreferences.from_context(self.ctx)
         mprops: MappingProperties = MappingProperties.from_context(self.ctx)
+        if not ui_utils.draw_expandable_header(prefs, "mapping_list_panel_expanded", "Mapping", self.layout):
+            return False
 
         layout = self.layout
 
         row = layout.row(align=True)
         layout.template_list(MappingUIList.bl_idname, "Mapping", mprops, "items", mprops, "index")
+        return True
 
     def draw_nla_track_picker(self, ctx: Context, track_field_name: str, text: str) -> None:
         row = self.layout.row(align=True)
@@ -90,6 +93,20 @@ class MappingAndBakingPanel(bpy.types.Panel):
         self.draw_nla_track_picker(self.ctx, "nla_track1", "Track 1")
         self.draw_nla_track_picker(self.ctx, "nla_track2", "Track 2")
 
+    def draw_fit_settings(self) -> None:
+        mprops: MappingProperties = MappingProperties.from_context(self.ctx)
+        prefs = RhubarbAddonPreferences.from_context(self.ctx)
+        fit: StripFitProperties = mprops.fit
+        if not ui_utils.draw_expandable_header(prefs, "fit_setting_panel_expanded", "Strip fit settings", self.layout):
+            return
+
+        row = self.layout.row(align=True)
+        row.prop(fit, 'offset_start', text="Offset start")
+        row.prop(fit, 'offset_end', text="end")
+        row = self.layout.row(align=True)
+        row.prop(fit, 'scale_min', text="Scale min")
+        row.prop(fit, 'scale_max', text="max")
+
     def draw(self, context: Context) -> None:
         try:
             self.ctx = context
@@ -106,8 +123,9 @@ class MappingAndBakingPanel(bpy.types.Panel):
                 layout.operator(mapping_operators.BuildCueInfoUIList.bl_idname)
                 return
             self.draw_config()
-            self.draw_mapping_list()
-            self.draw_nla_setup()
+            if self.draw_mapping_list():
+                self.draw_nla_setup()
+            self.draw_fit_settings()
 
             layout.operator(baking_operators.BakeToNLA.bl_idname, icon="LONGDISPLAY")
             rll: ResultLogListProperties = CaptureListProperties.from_context(context).last_resut_log
