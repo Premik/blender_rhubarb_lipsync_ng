@@ -15,7 +15,7 @@ import rhubarb_lipsync.blender.ui_utils as ui_utils
 from rhubarb_lipsync.blender.mapping_list import MappingUIList
 from rhubarb_lipsync.blender.preferences import CueListPreferences, RhubarbAddonPreferences, MappingPreferences
 from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, MouthCueList, JobProperties, ResultLogListProperties
-from rhubarb_lipsync.blender.mapping_properties import MappingProperties, NlaTrackRef, StripFitProperties
+from rhubarb_lipsync.blender.mapping_properties import MappingProperties, NlaTrackRef, StripTimingProperties
 from rhubarb_lipsync.blender.ui_utils import IconsManager
 from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue, MouthShapeInfo, MouthShapeInfos
 from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandAsyncJob
@@ -93,19 +93,19 @@ class MappingAndBakingPanel(bpy.types.Panel):
         self.draw_nla_track_picker(self.ctx, "nla_track1", "Track 1")
         self.draw_nla_track_picker(self.ctx, "nla_track2", "Track 2")
 
-    def draw_fit_settings(self) -> None:
+    def draw_strip_timing_settings(self) -> None:
         mprops: MappingProperties = MappingProperties.from_context(self.ctx)
         prefs = RhubarbAddonPreferences.from_context(self.ctx)
-        fit: StripFitProperties = mprops.fit
-        if not ui_utils.draw_expandable_header(prefs, "fit_setting_panel_expanded", "Strip fit settings", self.layout):
+        strip_timing: StripTimingProperties = mprops.strip_timing
+        if not ui_utils.draw_expandable_header(prefs, "strip_timing_setting_panel_expanded", "Strip strip_timing settings", self.layout):
             return
 
         row = self.layout.row(align=True)
-        row.prop(fit, 'offset_start', text="Offset start")
-        row.prop(fit, 'offset_end', text="end")
+        row.prop(strip_timing, 'offset_start', text="Offset start")
+        row.prop(strip_timing, 'offset_end', text="end")
         row = self.layout.row(align=True)
-        row.prop(fit, 'scale_min', text="Scale min")
-        row.prop(fit, 'scale_max', text="max")
+        row.prop(strip_timing, 'scale_min', text="Scale min")
+        row.prop(strip_timing, 'scale_max', text="max")
 
     def draw(self, context: Context) -> None:
         try:
@@ -125,7 +125,7 @@ class MappingAndBakingPanel(bpy.types.Panel):
             self.draw_config()
             if self.draw_mapping_list():
                 self.draw_nla_setup()
-            self.draw_fit_settings()
+            self.draw_strip_timing_settings()
 
             layout.operator(baking_operators.BakeToNLA.bl_idname, icon="LONGDISPLAY")
             rll: ResultLogListProperties = CaptureListProperties.from_context(context).last_resut_log

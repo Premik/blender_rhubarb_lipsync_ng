@@ -118,11 +118,11 @@ class BakeToNLA(bpy.types.Operator):
         name = f"{cue.cue.info.key_displ}.{str(b.cue_index).zfill(3)}"
 
         # Shift the start frame
-        start = cue.frame_float(b.ctx) + b.fit_props.offset_start
+        start = cue.frame_float(b.ctx) + b.strip_timing_props.offset_start
         # Calculate the desired strip length based on cue length and include the blending
-        strip_duration = cue.duration_frames_float(b.ctx) - b.fit_props.offset_start + b.fit_props.offset_end
-        # Try to scale the strip to fit the cue duration with the blendings included.
-        scale = b.fit_props.action_scale(b.current_mapping_action, strip_duration)
+        strip_duration = cue.duration_frames_float(b.ctx) - b.strip_timing_props.offset_start + b.strip_timing_props.offset_end
+        # Try to scale the strip to strip_timing the cue duration with the blendings included.
+        scale = b.strip_timing_props.action_scale(b.current_mapping_action, strip_duration)
         # Calculate the end frame based on the scale and the start
         end = start + strip_duration * scale
         # Crop the previous strip-end to make a room for the current strip start (if needed)
