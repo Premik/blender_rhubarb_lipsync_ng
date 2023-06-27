@@ -97,7 +97,7 @@ class MappingAndBakingPanel(bpy.types.Panel):
         mprops: MappingProperties = MappingProperties.from_context(self.ctx)
         prefs = RhubarbAddonPreferences.from_context(self.ctx)
         strip_timing: StripTimingProperties = mprops.strip_timing
-        if not ui_utils.draw_expandable_header(prefs, "strip_timing_setting_panel_expanded", "Strip strip_timing settings", self.layout):
+        if not ui_utils.draw_expandable_header(prefs, "strip_timing_setting_panel_expanded", "Strip timing settings", self.layout):
             return
 
         row = self.layout.row(align=True)

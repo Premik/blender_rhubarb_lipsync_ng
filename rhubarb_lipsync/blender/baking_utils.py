@@ -14,7 +14,7 @@ from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, Ca
 from rhubarb_lipsync.blender.mapping_properties import MappingProperties, MappingItem, NlaTrackRef, StripTimingProperties
 from rhubarb_lipsync.blender.preferences import CueListPreferences, RhubarbAddonPreferences, MappingPreferences
 from rhubarb_lipsync.rhubarb.log_manager import logManager
-from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue, MouthShapeInfos, MouthShapeInfo
+from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue, MouthShapeInfos, MouthShapeInfo, duration_scale_rate
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 import traceback
 from rhubarb_lipsync.blender.ui_utils import IconsManager
@@ -206,7 +206,24 @@ class BakingContext:
 
     @property
     def current_mapping_action(self) -> bpy.types.Action:
+        """Action of the current mapping item"""
         return self.current_mapping_item and self.current_mapping_item.action
+
+    @property
+    def current_mapping_action_length_frames(self) -> float:
+        """Length (in frames) of the current mapping item's action"""
+        a = self.current_mapping_item.action
+        if not a:
+            return 0
+        range = a.frame_range
+        return range[1] - range[0]
+
+    def current_mapping_action_scale(self, desired_len_frames: float, scale_min: float, scale_max: float) -> float:
+        """Scale factor to use on the strip so it's length matches the  current mapping item action's length."""
+        l = self.current_mapping_action_length_frames
+        if l <= 0:  # No mapping item selected or the action has no frames
+            return 1
+        return duration_scale_rate(l, desired_len_frames, scale_min, scale_max)
 
     @property
     def track1(self) -> Optional[NlaTrack]:

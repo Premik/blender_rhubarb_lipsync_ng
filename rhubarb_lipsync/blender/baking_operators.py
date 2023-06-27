@@ -122,9 +122,13 @@ class BakeToNLA(bpy.types.Operator):
         # Calculate the desired strip length based on cue length and include the blending
         strip_duration = cue.duration_frames_float(b.ctx) - b.strip_timing_props.offset_start + b.strip_timing_props.offset_end
         # Try to scale the strip to strip_timing the cue duration with the blendings included.
-        scale = b.strip_timing_props.action_scale(b.current_mapping_action, strip_duration)
-        # Calculate the end frame based on the scale and the start
-        end = start + strip_duration * scale
+        scale = b.current_mapping_action_scale(strip_duration, b.strip_timing_props.scale_min, b.strip_timing_props.scale_max)
+
+        # Calculate the end frame based on the scale and the start. This is where the action ends after scaling (with offsets)
+        # end = start + b.current_mapping_action_length_frames * scale
+        # Set the strip end to the cue end (plus offset) no matter where the actual action ends.
+        end = cue.end_frame_float(b.ctx) + b.strip_timing_props.offset_end
+
         # Crop the previous strip-end to make a room for the current strip start (if needed)
         if baking_utils.trim_strip_end_at(b.current_track, start):
             b.rlog.warning("Had to trim previous strip to make room for this one", self.bctx.current_trace)
@@ -138,8 +142,12 @@ class BakeToNLA(bpy.types.Operator):
         self.strips_added += 1
 
         strip.name = name
-        strip.blend_type = "COMBINE"
-        strip.use_auto_blend = True
+        strip.blend_type = "REPLACE"
+        strip.extrapolation = "NOTHING"
+        strip.use_sync_length = False
+        strip.use_auto_blend = False
+        strip.blend_in = -b.strip_timing_props.offset_start
+        strip.blend_out = b.strip_timing_props.offset_end
 
         # strip.frame_end = c.end_frame_float(b.ctx)
 

@@ -76,12 +76,20 @@ class StripTimingProperties(PropertyGroup):
     scale_min: FloatProperty(  # type: ignore
         "Scale min",
         description="Scale down (slow down) the strip/clip up to this fraction when the action is too short. Has no effect when set to 1",
-        default=0.5,
+        min=0.01,
+        soft_min=0.4,
+        max=1,
+        soft_max=1,
+        default=0.8,
     )
     scale_max: FloatProperty(  # type: ignore
         "Scale max",
         description="Scale up (speed up) the strip/clip up to this fraction when the action is too long. Has no effect when set to 1",
-        default=1.5,
+        min=1,
+        soft_min=1,
+        max=3,
+        soft_max=2,
+        default=1.4,
     )
     offset_start: FloatProperty(  # type: ignore
         "Offset start",
@@ -111,12 +119,6 @@ class StripTimingProperties(PropertyGroup):
     #     default=3,
     # )
 
-    def action_scale(self, action: bpy.types.Action, desired_len_frames: float) -> float:
-        """Returns scale factor for the provided `action`. So the `action.end-frame*scale` would match the `desired_len_frames` as close as possible."""
-        range = action.frame_range
-        l = range[1] - range[0]
-        return duration_scale_rate(l, desired_len_frames, self.scale_min, self.scale_max)
-
 
 class MappingProperties(PropertyGroup):
     """Mapping of all the mouth shape types to action(s)"""
@@ -126,7 +128,7 @@ class MappingProperties(PropertyGroup):
     # nla_track1: PointerProperty(type=bpy.types.NlaTrack, name="Tract 1")  # type: ignore
     nla_track1: PointerProperty(type=NlaTrackRef, name="Track 1")  # type: ignore
     nla_track2: PointerProperty(type=NlaTrackRef, name="Track 2")  # type: ignore
-    strip_timing: PointerProperty(type=StripTimingProperties, name="Strip strip_timing properties")  # type: ignore
+    strip_timing: PointerProperty(type=StripTimingProperties, name="Strip timing properties")  # type: ignore
 
     def on_nla_map_action_update(self, ctx: Context) -> None:
         if self.nla_map_shapekey or self.nla_map_action:

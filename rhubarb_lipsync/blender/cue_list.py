@@ -85,10 +85,16 @@ class MouthCueUIList(UIList):
             row.label(text=f"{item.frame_str(context)}")
         if clp.show_col_start_time:
             row.label(text=f"{item.time_str(context)}s")
+
         if clp.show_col_len_frame:
-            row.label(text=f"{item.duration_frames(context)}")
+            row.label(text=f"{item.duration_frames_str(context)}")
         if clp.show_col_len_time:
             row.label(text=f"{item.duration_str}s")
+
+        if clp.show_col_end_frame:
+            row.label(text=f"{item.end_frame_str(context)}")
+        if clp.show_col_end_time:
+            row.label(text=f"{item.end_time_str(context)}s")
 
         if clp.show_col_play:
             row = subs.row()  # Operator (0.15)

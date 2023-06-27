@@ -62,17 +62,23 @@ class MouthCueListItem(PropertyGroup):
     def frame(self, ctx: Context) -> int:
         return self.cue.start_frame(ctx.scene.render.fps, ctx.scene.render.fps_base, self.offset(ctx))
 
-    def end_frame(self, ctx: Context) -> int:
-        return self.cue.end_frame(ctx.scene.render.fps, ctx.scene.render.fps_base, self.offset(ctx))
-
     def frame_float(self, ctx: Context) -> float:
         return self.cue.start_frame_float(ctx.scene.render.fps, ctx.scene.render.fps_base, self.offset(ctx))
+
+    def end_frame(self, ctx: Context) -> int:
+        return self.cue.end_frame(ctx.scene.render.fps, ctx.scene.render.fps_base, self.offset(ctx))
 
     def end_frame_float(self, ctx: Context) -> float:
         return self.cue.end_frame_float(ctx.scene.render.fps, ctx.scene.render.fps_base, self.offset(ctx))
 
     def subframe(self, ctx: Context) -> tuple[int, float]:
         return self.cue.start_subframe(ctx.scene.render.fps, ctx.scene.render.fps_base, self.offset(ctx))
+
+    def time_str(self, ctx: Context) -> str:
+        return f"{self.start+self.offset_seconds(ctx):0.2f}"
+
+    def end_time_str(self, ctx: Context) -> str:
+        return f"{self.end+self.offset_seconds(ctx):0.2f}"
 
     def frame_str(self, ctx: Context) -> str:
         if ctx.scene.show_subframe:
@@ -94,8 +100,10 @@ class MouthCueListItem(PropertyGroup):
     def duration_frames_float(self, ctx: Context) -> float:
         return self.end_frame_float(ctx) - self.frame_float(ctx)
 
-    def time_str(self, ctx: Context) -> str:
-        return f"{self.start+self.offset_seconds(ctx):0.2f}"
+    def duration_frames_str(self, ctx: Context) -> str:
+        if ctx.scene.show_subframe:
+            return f"{self.duration_frames_float(ctx):0.2f}"
+        return f"{self.duration_frames(ctx)}"
 
     @property
     def duration_str(self) -> str:

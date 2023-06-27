@@ -49,6 +49,8 @@ class CueListPreferences(PropertyGroup):
     show_col_start_time: BoolProperty(default=False, name="Start (time)")  # type: ignore
     show_col_len_frame: BoolProperty(default=False, name="Duration (frames)")  # type: ignore
     show_col_len_time: BoolProperty(default=True, name="Duration (seconds)")  # type: ignore
+    show_col_end_frame: BoolProperty(default=False, name="End (frames)")  # type: ignore
+    show_col_end_time: BoolProperty(default=False, name="End (seconds)")  # type: ignore
     show_col_play: BoolProperty(default=True, name="Play button")  # type: ignore
 
     as_grid: BoolProperty(default=False, name="As gird", description="Display the list in the grid mode")  # type: ignore
@@ -71,6 +73,8 @@ class CueListPreferences(PropertyGroup):
             self.show_col_start_time,
             self.show_col_len_frame,
             self.show_col_len_time,
+            self.show_col_end_frame,
+            self.show_col_end_time,
         ]
 
     def visible_timecols_count(self) -> int:
