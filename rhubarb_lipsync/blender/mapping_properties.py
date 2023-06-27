@@ -70,7 +70,7 @@ class MappingItem(PropertyGroup):
         return MouthShapeInfos[self.key].value
 
 
-class StripTimingProperties(PropertyGroup):
+class StripPlacementProperties(PropertyGroup):
     """Defines how to fit an action strip to the track constrained by the cue start and cue length"""
 
     scale_min: FloatProperty(  # type: ignore
@@ -128,7 +128,7 @@ class MappingProperties(PropertyGroup):
     # nla_track1: PointerProperty(type=bpy.types.NlaTrack, name="Tract 1")  # type: ignore
     nla_track1: PointerProperty(type=NlaTrackRef, name="Track 1")  # type: ignore
     nla_track2: PointerProperty(type=NlaTrackRef, name="Track 2")  # type: ignore
-    strip_timing: PointerProperty(type=StripTimingProperties, name="Strip timing properties")  # type: ignore
+    strip_placement: PointerProperty(type=StripPlacementProperties, name="Strip timing properties")  # type: ignore
 
     def on_nla_map_action_update(self, ctx: Context) -> None:
         if self.nla_map_shapekey or self.nla_map_action:

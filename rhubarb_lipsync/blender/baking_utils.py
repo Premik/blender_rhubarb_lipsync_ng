@@ -11,7 +11,7 @@ from bpy.types import Context, Object, UILayout, NlaTrack, NlaStrip
 from typing import Any, Callable, Optional, cast, Generator, Iterator
 
 from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, MouthCueList, MouthCueListItem, ResultLogListProperties
-from rhubarb_lipsync.blender.mapping_properties import MappingProperties, MappingItem, NlaTrackRef, StripTimingProperties
+from rhubarb_lipsync.blender.mapping_properties import MappingProperties, MappingItem, NlaTrackRef, StripPlacementProperties
 from rhubarb_lipsync.blender.preferences import CueListPreferences, RhubarbAddonPreferences, MappingPreferences
 from rhubarb_lipsync.rhubarb.log_manager import logManager
 from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue, MouthShapeInfos, MouthShapeInfo, duration_scale_rate
@@ -189,8 +189,8 @@ class BakingContext:
         return self.cprops.start_frame, self.last_cue.end_frame(self.ctx)
 
     @property
-    def strip_timing_props(self) -> StripTimingProperties:
-        return self.mprops and self.mprops.strip_timing
+    def strip_placement_props(self) -> StripPlacementProperties:
+        return self.mprops and self.mprops.strip_placement
 
     @property
     def mprops(self) -> MappingProperties:

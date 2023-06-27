@@ -118,16 +118,16 @@ class BakeToNLA(bpy.types.Operator):
         name = f"{cue.cue.info.key_displ}.{str(b.cue_index).zfill(3)}"
 
         # Shift the start frame
-        start = cue.frame_float(b.ctx) + b.strip_timing_props.offset_start
+        start = cue.frame_float(b.ctx) + b.strip_placement_props.offset_start
         # Calculate the desired strip length based on cue length and include the blending
-        strip_duration = cue.duration_frames_float(b.ctx) - b.strip_timing_props.offset_start + b.strip_timing_props.offset_end
-        # Try to scale the strip to strip_timing the cue duration with the blendings included.
-        scale = b.current_mapping_action_scale(strip_duration, b.strip_timing_props.scale_min, b.strip_timing_props.scale_max)
+        strip_duration = cue.duration_frames_float(b.ctx) - b.strip_placement_props.offset_start + b.strip_placement_props.offset_end
+        # Try to scale the strip to strip_placement the cue duration with the blendings included.
+        scale = b.current_mapping_action_scale(strip_duration, b.strip_placement_props.scale_min, b.strip_placement_props.scale_max)
 
         # Calculate the end frame based on the scale and the start. This is where the action ends after scaling (with offsets)
         # end = start + b.current_mapping_action_length_frames * scale
         # Set the strip end to the cue end (plus offset) no matter where the actual action ends.
-        end = cue.end_frame_float(b.ctx) + b.strip_timing_props.offset_end
+        end = cue.end_frame_float(b.ctx) + b.strip_placement_props.offset_end
 
         # Crop the previous strip-end to make a room for the current strip start (if needed)
         if baking_utils.trim_strip_end_at(b.current_track, start):
@@ -146,8 +146,8 @@ class BakeToNLA(bpy.types.Operator):
         strip.extrapolation = "NOTHING"
         strip.use_sync_length = False
         strip.use_auto_blend = False
-        strip.blend_in = -b.strip_timing_props.offset_start
-        strip.blend_out = b.strip_timing_props.offset_end
+        strip.blend_in = -b.strip_placement_props.offset_start
+        strip.blend_out = b.strip_placement_props.offset_end
 
         # strip.frame_end = c.end_frame_float(b.ctx)
 
