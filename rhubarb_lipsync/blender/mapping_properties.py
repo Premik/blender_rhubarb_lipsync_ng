@@ -14,6 +14,7 @@ from bpy.types import Action, AddonPreferences, Context, PropertyGroup, Sound, U
 from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue, MouthShapeInfo, MouthShapeInfos, duration_scale_rate
 from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandAsyncJob, RhubarbCommandWrapper, RhubarbParser
 from rhubarb_lipsync.blender import ui_utils
+from rhubarb_lipsync.blender.strip_placement_properties import StripPlacementProperties
 from rhubarb_lipsync.blender.ui_utils import DropdownHelper
 import textwrap
 
@@ -68,56 +69,6 @@ class MappingItem(PropertyGroup):
         if not self.key:
             return None
         return MouthShapeInfos[self.key].value
-
-
-class StripPlacementProperties(PropertyGroup):
-    """Defines how to fit an action strip to the track constrained by the cue start and cue length"""
-
-    scale_min: FloatProperty(  # type: ignore
-        "Scale min",
-        description="Scale down (slow down) the strip/clip up to this fraction when the action is too short. Has no effect when set to 1",
-        min=0.01,
-        soft_min=0.4,
-        max=1,
-        soft_max=1,
-        default=0.8,
-    )
-    scale_max: FloatProperty(  # type: ignore
-        "Scale max",
-        description="Scale up (speed up) the strip/clip up to this fraction when the action is too long. Has no effect when set to 1",
-        min=1,
-        soft_min=1,
-        max=3,
-        soft_max=2,
-        default=1.4,
-    )
-    offset_start: FloatProperty(  # type: ignore
-        "Offset start",
-        description=textwrap.dedent(
-            """\
-            The start frame of the strip is shifted by this number of frames. 
-            The strip can for example start earlier (negative value) than the actual cue-start
-            making the action fully visible at the correct time when the strip is blended with the previous strip. 
-            """
-        ),
-        default=-1,
-    )
-    offset_end: FloatProperty(  # type: ignore
-        "Offset end",
-        description=textwrap.dedent(
-            """\
-            The end frame of the strip is shifted by this number of frames. 
-            The strip can for example end after (positive value) the following cue-start.
-            """
-        ),
-        default=2,
-    )
-    # min_strip_len: IntProperty(  # type: ignore
-    #     "Min strip length",
-    #     description="""If there is room on the track any strip shorter than this amount of frames will be prolonged.
-    #                    This is mainly to improve visibility of the strips labels.  """,
-    #     default=3,
-    # )
 
 
 class MappingProperties(PropertyGroup):

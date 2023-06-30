@@ -150,28 +150,38 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 
 ### High
 * Set the panel tab name in the preferences
-
-### Baking
-* Add strip options: 
- - strips overlap start/end frames count
- - min/max stretch % to. Allow too short actions play faster and visa versa
- - (auto)interleaving,
-* Autotrim strips, so they won't clash failing the bake
 * Shape-key actions are not baked
 * Doc - new readme.md
+
+### Strip placement reorg
+- Move property group to separate file
+- Extra props:
+  - Blend type: Manual, =Start =End, =Start+End, Auto-blend
+  - Change offset start to negative value, rename the prolong-start, prolong-end?
+  - Blend type - Combine/Replace
+  - Extrapolation - Hold, Nothing
+- Should be possible to set/override on different levels:
+  1. Blender (saved in preferences?)
+  1. Whole bake(scene or capture)
+  1. Selected object (mapping properties),
+  1. Individual cue? (mapping item)
+- Options
+  - Have a drop-down to select a placement from a list? I.e each level only references the props
+  - Copy-from/Copy to. Somehow select from existing props. I.e. each level contains own instance of props, only values are copied
+  - Have some sort for export/import or copy/paste to ease transfer between props?
+
 
 ### Normal
 * Add some simply blender sample file
 * extended shapes- seems they are generated even when disabled -check
 * Capture doesn't work for long sound files. Rhubarb finishes but the list is empty.
-* limit number of lines in the result log dialog, to something like 100 (don't show more)
 
 ### Low
 * Limit possible selection to armature and mesh-object only? (and not obj.library).
 * Add [speaker](https://docs.blender.org/manual/en/latest/render/output/audio/speaker.html) as an alternative to Sequencer audio clip
 * Rename capture_panel to something better? (sound setup?)
 * The scaled down icons (32x32) still hard to see. Pre-scale different set icons?
-* autoload - complete type-hints
+* autoload.py - complete type-hints
 * Capture panel, optimize, store pref, props etc. directy on the self (same like self.ctx)
 * Verify the Dialog file is working
 * Add "null" cue type to indicate un-detected cues (those red longer than the limit)

@@ -75,6 +75,7 @@ class MappingAndBakingPanel(bpy.types.Panel):
         row = self.layout.row(align=True)
         mprops: MappingProperties = MappingProperties.from_context(self.ctx)
         track: NlaTrackRef = getattr(mprops, track_field_name)
+        # row.use_property_split = False
         row.prop(track, 'name', text=text)
         # row.prop(track, 'index')
         op: mapping_operators.CreateNLATrack = row.operator(mapping_operators.CreateNLATrack.bl_idname, text="", icon="DUPLICATE")
@@ -97,7 +98,7 @@ class MappingAndBakingPanel(bpy.types.Panel):
         mprops: MappingProperties = MappingProperties.from_context(self.ctx)
         prefs = RhubarbAddonPreferences.from_context(self.ctx)
         strip_placement: StripPlacementProperties = mprops.strip_placement
-        if not ui_utils.draw_expandable_header(prefs, "strip_placement_setting_panel_expanded", "Strip timing settings", self.layout):
+        if not ui_utils.draw_expandable_header(prefs, "strip_placement_setting_panel_expanded", "Strip placement settings", self.layout):
             return
 
         row = self.layout.row(align=True)
@@ -106,6 +107,11 @@ class MappingAndBakingPanel(bpy.types.Panel):
         row = self.layout.row(align=True)
         row.prop(strip_placement, 'scale_min', text="Scale min")
         row.prop(strip_placement, 'scale_max', text="max")
+        col = self.layout.column(align=False)
+        col.use_property_split = True
+        col.use_property_decorate = False
+        col.prop(strip_placement, 'blend_type')
+        col.prop(strip_placement, 'extrapolation')
 
     def draw(self, context: Context) -> None:
         try:

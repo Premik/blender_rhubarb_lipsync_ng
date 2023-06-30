@@ -119,8 +119,8 @@ class BakeToNLA(bpy.types.Operator):
 
         # Shift the start frame
         start = cue.frame_float(b.ctx) + b.strip_placement_props.offset_start
-        # Calculate the desired strip length based on cue length and include the blending
-        strip_duration = cue.duration_frames_float(b.ctx) - b.strip_placement_props.offset_start + b.strip_placement_props.offset_end
+        # Calculate the desired strip length based on cue length and include the offset
+        strip_duration = cue.duration_frames_float(b.ctx) + b.strip_placement_props.overlap_length
         # Try to scale the strip to strip_placement the cue duration with the blendings included.
         scale = b.current_mapping_action_scale(strip_duration, b.strip_placement_props.scale_min, b.strip_placement_props.scale_max)
 
@@ -133,7 +133,7 @@ class BakeToNLA(bpy.types.Operator):
         if baking_utils.trim_strip_end_at(b.current_track, start):
             b.rlog.warning("Had to trim previous strip to make room for this one", self.bctx.current_trace)
 
-        # Create new strip. Start frame is mandatory but int only, so round up to avoid clashing with previous one
+        # Create new strip. Start frame is mandatory but int only, so round it up to avoid clashing with previous one because of rouding error
         strip = b.current_track.strips.new(name, int(start + 1), b.current_mapping_action)
         strip.frame_start = start  # Set start frame again as float (ctor takes only int)
         strip.scale = scale
@@ -142,8 +142,8 @@ class BakeToNLA(bpy.types.Operator):
         self.strips_added += 1
 
         strip.name = name
-        strip.blend_type = "REPLACE"
-        strip.extrapolation = "NOTHING"
+        strip.blend_type = b.strip_placement_props.blend_type
+        strip.extrapolation = b.strip_placement_props.extrapolation
         strip.use_sync_length = False
         strip.use_auto_blend = False
         strip.blend_in = -b.strip_placement_props.offset_start
