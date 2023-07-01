@@ -175,6 +175,7 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 * Add some simply blender sample file
 * extended shapes- seems they are generated even when disabled -check
 * Capture doesn't work for long sound files. Rhubarb finishes but the list is empty.
+* Changel all labels cases to follow Blender style "Foo in Bar"
 
 ### Low
 * Limit possible selection to armature and mesh-object only? (and not obj.library).

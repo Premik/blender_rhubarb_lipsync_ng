@@ -101,17 +101,28 @@ class MappingAndBakingPanel(bpy.types.Panel):
         if not ui_utils.draw_expandable_header(prefs, "strip_placement_setting_panel_expanded", "Strip placement settings", self.layout):
             return
 
+        self.layout.use_property_decorate = False
         row = self.layout.row(align=True)
-        row.prop(strip_placement, 'offset_start', text="Offset start")
-        row.prop(strip_placement, 'offset_end', text="end")
+        row.prop(strip_placement, 'scale_min', text="Scale Min")
+        row.prop(strip_placement, 'scale_max', text="Max")
         row = self.layout.row(align=True)
-        row.prop(strip_placement, 'scale_min', text="Scale min")
-        row.prop(strip_placement, 'scale_max', text="max")
+        row.prop(strip_placement, 'offset_start', text="Offset Start")
+        row.prop(strip_placement, 'offset_end', text="End")
         col = self.layout.column(align=False)
         col.use_property_split = True
-        col.use_property_decorate = False
-        col.prop(strip_placement, 'blend_type')
         col.prop(strip_placement, 'extrapolation')
+        col.prop(strip_placement, 'blend_type')
+
+        row = self.layout.row(align=True)
+        if strip_placement.use_auto_blend:
+            row.enabled = False
+
+        row.prop(strip_placement, 'blend_in', text="Blend In")
+        row.prop(strip_placement, 'blend_out', text="Out")
+        sync_id = baking_operators.SetPlacementBlendInOutFromOverlap.bl_idname
+        row.operator_menu_enum(sync_id, "sync_type", text="", icon="DOWNARROW_HLT")
+
+        self.layout.prop(strip_placement, 'use_auto_blend')
 
     def draw(self, context: Context) -> None:
         try:

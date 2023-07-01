@@ -24,8 +24,8 @@ class StripPlacementProperties(PropertyGroup):
     """Defines how to fit an action strip to the track constrained by the cue start and cue length"""
 
     scale_min: FloatProperty(  # type: ignore
-        "Scale min",
-        description="Scale down (slow down) the strip/clip up to this fraction when the action is too short. Has no effect when set to 1",
+        "Scale Min",
+        description="Scale down minimal value. Slow down the clip playback speed up to this fraction when the action is too short. Has no effect when set to 1",
         min=0.01,
         soft_min=0.4,
         max=1,
@@ -33,8 +33,8 @@ class StripPlacementProperties(PropertyGroup):
         default=0.8,
     )
     scale_max: FloatProperty(  # type: ignore
-        "Scale max",
-        description="Scale up (speed up) the strip/clip up to this fraction when the action is too long. Has no effect when set to 1",
+        "Scale Max",
+        description="Scale up maximal value. Speed up the clip playback speed up to this fraction when the action is too long. Has no effect when set to 1",
         min=1,
         soft_min=1,
         max=3,
@@ -42,7 +42,7 @@ class StripPlacementProperties(PropertyGroup):
         default=1.4,
     )
     offset_start: FloatProperty(  # type: ignore
-        "Offset start",
+        "Offset Start",
         description=textwrap.dedent(
             """\
             The start frame of the strip is shifted by this number of frames. 
@@ -53,7 +53,7 @@ class StripPlacementProperties(PropertyGroup):
         default=-1,
     )
     offset_end: FloatProperty(  # type: ignore
-        "Offset end",
+        "Offset End",
         description=textwrap.dedent(
             """\
             The end frame of the strip is shifted by this number of frames. 
@@ -64,7 +64,7 @@ class StripPlacementProperties(PropertyGroup):
     )
 
     blend_type: EnumProperty(  # type: ignore
-        name="Blend type",
+        name="Blend Type",
         description=textwrap.dedent(
             """\
             Method used for combining the strip's result with accumulated result.
@@ -73,7 +73,7 @@ class StripPlacementProperties(PropertyGroup):
         items=[
             (
                 "REPLACE",
-                "REPLACE",
+                "Replace",
                 textwrap.dedent(
                     """\
                     
@@ -82,7 +82,7 @@ class StripPlacementProperties(PropertyGroup):
             ),
             (
                 "COMBINE",
-                "COMBINE",
+                "Combine",
                 textwrap.dedent(
                     """\
                      
@@ -104,7 +104,7 @@ class StripPlacementProperties(PropertyGroup):
         items=[
             (
                 "NOTHING",
-                "NOTHING",
+                "Nothing",
                 textwrap.dedent(
                     """\
                     
@@ -113,7 +113,7 @@ class StripPlacementProperties(PropertyGroup):
             ),
             (
                 "HOLD",
-                "HOLD",
+                "Hold",
                 textwrap.dedent(
                     """\
                      
@@ -122,7 +122,7 @@ class StripPlacementProperties(PropertyGroup):
             ),
             (
                 "HOLD_FORWARD",
-                "HOLD_FORWARD",
+                "Hold Forward",
                 textwrap.dedent(
                     """\
                      
@@ -136,7 +136,28 @@ class StripPlacementProperties(PropertyGroup):
     use_sync_length: BoolProperty(  # type: ignore
         default=False,
         description='Update range of frames referenced from action after tweaking strip and its keyframes',
-        name="End (frames)",
+        name="Sync Length",
+    )
+
+    blend_in: FloatProperty(  # type: ignore
+        "Blend In",
+        description="Number of frames at start of strip to fade in influence",
+        min=0,
+        soft_max=10,
+        default=1,
+    )
+    blend_out: FloatProperty(  # type: ignore
+        "Blend Out",
+        description="Number of frames at start of strip to fade out influence",
+        min=0,
+        soft_max=10,
+        default=1,
+    )
+
+    use_auto_blend: BoolProperty(  # type: ignore
+        default=False,
+        description="Number of frames for Blending In/Out is automatically determined from overlapping strips",
+        name="Auto Blend In/Out",
     )
 
     @property

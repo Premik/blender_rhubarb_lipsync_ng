@@ -12,7 +12,7 @@ from bpy.types import Context, Object, UILayout, NlaTrack, NlaStrip
 from typing import Any, Callable, Optional, cast, Generator, Iterator
 
 from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, ResultLogListProperties
-from rhubarb_lipsync.blender.mapping_properties import MappingProperties, MappingItem, NlaTrackRef
+from rhubarb_lipsync.blender.mapping_properties import MappingProperties, MappingItem, NlaTrackRef, StripPlacementProperties
 from rhubarb_lipsync.blender.preferences import CueListPreferences, RhubarbAddonPreferences, MappingPreferences
 from rhubarb_lipsync.rhubarb.log_manager import logManager
 from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue, MouthShapeInfos, MouthShapeInfo
@@ -76,6 +76,54 @@ class RemoveCapturedNlaStrips(bpy.types.Operator):
             log.exception(e)
             return {'CANCELLED'}
         self.report({'INFO'}, f"Removed {self.strips_removed} strips from {self.tracks_cleaned} tracks")
+        return {'FINISHED'}
+
+
+class SetPlacementBlendInOutFromOverlap(bpy.types.Operator):
+    """Set the the Blend In/Out value based on the strip Placement offsets"""
+
+    bl_idname = "rhubarb.placement_set_blendinout"
+    bl_label = "Set Blend In/Out from Offsets"
+    bl_options = {'UNDO', 'REGISTER'}
+
+    sync_type: EnumProperty(  # type: ignore
+        name="Set blend in/out base on",
+        items=[
+            ('START_END', 'In=Offset Start/End', "Based on offset start and offset end"),
+            ('OVERLAP', 'Overlap', ""),
+        ],
+        default='START_END',
+    )
+
+    # @classmethod
+    # def description(csl, context: Context, self: 'ToggleRelativePath') -> str:
+    #    return f"Change "
+
+    # @classmethod
+    # def disabled_reason(cls, ctx: Context) -> str:
+    #     b = baking_utils.BakingContext(ctx)
+    #     b.next_object()  # Only validate there is mapping for at least object
+    #     print(b.current_object)
+    #     return b.validate_selection()
+
+    # @classmethod
+    # def poll(cls, context: Context) -> bool:
+    #     return ui_utils.validation_poll(cls, context)
+
+    # def invoke(self, context: Context, event: bpy.types.Event) -> set[int] | set[str]:
+    #     wm = context.window_manager
+    #     return wm.invoke_props_dialog(self, width=340)
+
+    def execute(self, ctx: Context) -> set[str]:
+        mprops: MappingProperties = MappingProperties.from_context(ctx)
+        sprops: StripPlacementProperties = mprops.strip_placement
+        if self.sync_type == "START_END":
+            sprops.blend_in = -sprops.offset_start
+            sprops.blend_out = sprops.offset_end
+        if self.sync_type == "OVERLAP":
+            sprops.blend_in = sprops.overlap_length
+            sprops.blend_out = sprops.overlap_length
+
         return {'FINISHED'}
 
 
@@ -144,10 +192,10 @@ class BakeToNLA(bpy.types.Operator):
         strip.name = name
         strip.blend_type = b.strip_placement_props.blend_type
         strip.extrapolation = b.strip_placement_props.extrapolation
-        strip.use_sync_length = False
-        strip.use_auto_blend = False
-        strip.blend_in = -b.strip_placement_props.offset_start
-        strip.blend_out = b.strip_placement_props.offset_end
+        strip.use_sync_length = b.strip_placement_props.use_sync_length
+        strip.use_auto_blend = b.strip_placement_props.use_auto_blend
+        strip.blend_in = -b.strip_placement_props.blend_in
+        strip.blend_out = b.strip_placement_props.blend_out
 
         # strip.frame_end = c.end_frame_float(b.ctx)
 
