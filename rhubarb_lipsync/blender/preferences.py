@@ -179,12 +179,6 @@ class RhubarbAddonPreferences(AddonPreferences):
         default=False,
     )
 
-    sound_mem_cache_default: BoolProperty(  # type: ignore
-        name="Cache sound by default",
-        description="Cache the newly created sound in memory by default. Enabling cache greatly improves the sound playback synchronization precision. Especially noticable for ogg files.",
-        default=True,
-    )
-
     log_level: IntProperty(default=0)  # type: ignore
     info_panel_expanded: BoolProperty(default=False)  # type: ignore
     sound_source_panel_expanded: BoolProperty(default=True)  # type: ignore
@@ -230,7 +224,6 @@ class RhubarbAddonPreferences(AddonPreferences):
         layout.separator()
         layout.prop(self, 'default_converted_output_folder')
         layout.prop(self, 'always_show_conver')
-        layout.prop(self, 'sound_mem_cache_default')
 
         from rhubarb_lipsync.blender.misc_operators import SetLogLevel
         from rhubarb_lipsync.rhubarb.log_manager import logManager

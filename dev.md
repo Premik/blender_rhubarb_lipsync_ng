@@ -152,32 +152,18 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 * Set the panel tab name in the preferences
 * Shape-key actions are not baked
 * Doc - new readme.md
-
-### Strip placement reorg
-- Move property group to separate file
-- Extra props:
-  - Blend type: Manual, =Start =End, =Start+End, Auto-blend
-  - Change offset start to negative value, rename the prolong-start, prolong-end?
-  - Blend type - Combine/Replace
-  - Extrapolation - Hold, Nothing
-- Should be possible to set/override on different levels:
-  1. Blender (saved in preferences?)
-  1. Whole bake(scene or capture)
-  1. Selected object (mapping properties),
-  1. Individual cue? (mapping item)
-- Options
-  - Have a drop-down to select a placement from a list? I.e each level only references the props
-  - Copy-from/Copy to. Somehow select from existing props. I.e. each level contains own instance of props, only values are copied
-  - Have some sort for export/import or copy/paste to ease transfer between props?
-
+* Baking - round to whole frames when not sub-frames visible
 
 ### Normal
 * Add some simply blender sample file
 * extended shapes- seems they are generated even when disabled -check
 * Capture doesn't work for long sound files. Rhubarb finishes but the list is empty.
 * Changel all labels cases to follow Blender style "Foo in Bar"
-
+* Bake warning, 'G,H,X` not mapped even when use-extended shapes is disabled
 ### Low
+
+- Strip placement reorg should be possible to set/override on different levelson Individual cue? (mapping item)
+- Strip placement -add preset? Similar like the Render Properties / Light paths (button on the group)
 * Limit possible selection to armature and mesh-object only? (and not obj.library).
 * Add [speaker](https://docs.blender.org/manual/en/latest/render/output/audio/speaker.html) as an alternative to Sequencer audio clip
 * Rename capture_panel to something better? (sound setup?)
@@ -188,7 +174,8 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 * Add "null" cue type to indicate un-detected cues (those red longer than the limit)
 * `layout.prop(mlp, "actions_multiline_view") ` doesn't currently work. Should show regular action and shape-key action on two lines
 * Not possible to un-select NLA track in the bake-panel
-
+* Capture panel - add `crop` button to replace to crop too long cues and add x shape instead of them
+* Mapping - integration with FaceIt - auto-populate mapping from rig expressions or shapekeys
 
 ## Action selector
 - only from the selected object?

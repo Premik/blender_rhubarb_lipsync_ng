@@ -5,7 +5,7 @@ from pydoc import describe
 from types import ModuleType
 from typing import Dict, List, Optional, cast
 import math
-
+import re
 import bpy
 from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty, PointerProperty, StringProperty, BoolProperty
 from bpy.types import Context, Object, UILayout, NlaTrack, NlaStrip
@@ -79,8 +79,38 @@ class RemoveCapturedNlaStrips(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class SetPlacementBlendInOutFromOverlap(bpy.types.Operator):
-    """Set the the Blend In/Out value based on the strip Placement offsets"""
+class PlacementScaleFromPreset(bpy.types.Operator):
+    """Set the Blend In/Out value based on the strip Placement offsets"""
+
+    bl_idname = "rhubarb.placement_set_scale"
+    bl_label = "Set scale ranges from predefined value"
+    bl_options = {'UNDO', 'REGISTER'}
+
+    scale_type: EnumProperty(  # type: ignore
+        name="Scale preset",
+        items=[
+            ('1', 'No scale', ""),
+            ('1.1', 'Up to 10% difference', ""),
+            ('1.25', 'Up to 25% difference', ""),
+            ('1.50', 'Up to 50% difference', ""),
+            ('1.75', 'Up to 75% difference', ""),
+            ('2', 'Up to 100% difference', ""),
+        ],
+        default='1.25',
+    )
+
+    def execute(self, ctx: Context) -> set[str]:
+        mprops: MappingProperties = MappingProperties.from_context(ctx)
+        sprops: StripPlacementProperties = mprops.strip_placement
+        rate = float(self.scale_type)
+        # sprops.scale_min = 2 - rate
+        sprops.scale_min = 1 / rate
+        sprops.scale_max = rate
+        return {'FINISHED'}
+
+
+class PlacementBlendInOutFromOverlap(bpy.types.Operator):
+    """Set the placement scale value based on the preconfigured values"""
 
     bl_idname = "rhubarb.placement_set_blendinout"
     bl_label = "Set Blend In/Out from Offsets"
@@ -89,34 +119,19 @@ class SetPlacementBlendInOutFromOverlap(bpy.types.Operator):
     sync_type: EnumProperty(  # type: ignore
         name="Set blend in/out base on",
         items=[
-            ('START_END', 'In=Offset Start/End', "Based on offset start and offset end"),
-            ('OVERLAP', 'Overlap', ""),
+            ('ZERO', 'in=0 out=0', "Zero blend in/out"),
+            ('START_END', 'From Offset: in=start out=end', "Based on offset start and offset end"),
+            ('OVERLAP', 'From Offset in=out=(end-start)', "Based on the overalp"),
         ],
         default='START_END',
     )
 
-    # @classmethod
-    # def description(csl, context: Context, self: 'ToggleRelativePath') -> str:
-    #    return f"Change "
-
-    # @classmethod
-    # def disabled_reason(cls, ctx: Context) -> str:
-    #     b = baking_utils.BakingContext(ctx)
-    #     b.next_object()  # Only validate there is mapping for at least object
-    #     print(b.current_object)
-    #     return b.validate_selection()
-
-    # @classmethod
-    # def poll(cls, context: Context) -> bool:
-    #     return ui_utils.validation_poll(cls, context)
-
-    # def invoke(self, context: Context, event: bpy.types.Event) -> set[int] | set[str]:
-    #     wm = context.window_manager
-    #     return wm.invoke_props_dialog(self, width=340)
-
     def execute(self, ctx: Context) -> set[str]:
         mprops: MappingProperties = MappingProperties.from_context(ctx)
         sprops: StripPlacementProperties = mprops.strip_placement
+        if self.sync_type == "ZERO":
+            sprops.blend_in = 0
+            sprops.blend_out = 0
         if self.sync_type == "START_END":
             sprops.blend_in = -sprops.offset_start
             sprops.blend_out = sprops.offset_end
@@ -124,6 +139,47 @@ class SetPlacementBlendInOutFromOverlap(bpy.types.Operator):
             sprops.blend_in = sprops.overlap_length
             sprops.blend_out = sprops.overlap_length
 
+        return {'FINISHED'}
+
+
+class PlacementOffsetFromPreset(bpy.types.Operator):
+    """Set the Offset  start/end value based on the predefined values"""
+
+    offset_rx = re.compile(r"(?P<start>\d+\.?\d*),(?P<end>\d+\.?\d*)")
+
+    bl_idname = "rhubarb.placement_set_offset"
+    bl_label = "Set offsets from predefined value"
+    bl_options = {'UNDO', 'REGISTER'}
+
+    offset_type: EnumProperty(  # type: ignore
+        name="Offset preset",
+        items=[
+            ('0,0', 'No offset', ""),
+            ('0,1', '0.0 1.0', ""),
+            ('0.5,1', '0.5 1.0', ""),
+            ('0.5,2', '0.5 2.0', ""),
+            ('1,1', '1.0 1.0', ""),
+            ('1,1.5', '1.0 1.5', ""),
+            ('1,2', '1.0 2.0', ""),
+            ('1.5,1.5', '1.5 1.5', ""),
+            ('1.5,2', '1.5 2', ""),
+            ('1.5,2.5', '1.5 2.5', ""),
+            ('1.5,3', '1.5 3', ""),
+            ('2,3', '2 3', ""),
+        ],
+        default='1,2',
+    )
+
+    def execute(self, ctx: Context) -> set[str]:
+        mprops: MappingProperties = MappingProperties.from_context(ctx)
+        sprops: StripPlacementProperties = mprops.strip_placement
+        rx = PlacementOffsetFromPreset.offset_rx
+        m = re.search(rx, self.offset_type)
+        assert m is not None, f"The {self.offset_type} doesn't match {rx}"
+        start = float(m.groupdict()["start"])
+        end = float(m.groupdict()["end"])
+        sprops.offset_start = -start
+        sprops.offset_end = end
         return {'FINISHED'}
 
 
@@ -194,7 +250,7 @@ class BakeToNLA(bpy.types.Operator):
         strip.extrapolation = b.strip_placement_props.extrapolation
         strip.use_sync_length = b.strip_placement_props.use_sync_length
         strip.use_auto_blend = b.strip_placement_props.use_auto_blend
-        strip.blend_in = -b.strip_placement_props.blend_in
+        strip.blend_in = b.strip_placement_props.blend_in
         strip.blend_out = b.strip_placement_props.blend_out
 
         # strip.frame_end = c.end_frame_float(b.ctx)

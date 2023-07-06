@@ -105,9 +105,15 @@ class MappingAndBakingPanel(bpy.types.Panel):
         row = self.layout.row(align=True)
         row.prop(strip_placement, 'scale_min', text="Scale Min")
         row.prop(strip_placement, 'scale_max', text="Max")
+        id = baking_operators.PlacementScaleFromPreset.bl_idname
+        row.operator_menu_enum(id, "scale_type", text="", icon="DOWNARROW_HLT")
+
         row = self.layout.row(align=True)
         row.prop(strip_placement, 'offset_start', text="Offset Start")
         row.prop(strip_placement, 'offset_end', text="End")
+        id = baking_operators.PlacementOffsetFromPreset.bl_idname
+        row.operator_menu_enum(id, "offset_type", text="", icon="DOWNARROW_HLT")
+
         col = self.layout.column(align=False)
         col.use_property_split = True
         col.prop(strip_placement, 'extrapolation')
@@ -119,8 +125,8 @@ class MappingAndBakingPanel(bpy.types.Panel):
 
         row.prop(strip_placement, 'blend_in', text="Blend In")
         row.prop(strip_placement, 'blend_out', text="Out")
-        sync_id = baking_operators.SetPlacementBlendInOutFromOverlap.bl_idname
-        row.operator_menu_enum(sync_id, "sync_type", text="", icon="DOWNARROW_HLT")
+        id = baking_operators.PlacementBlendInOutFromOverlap.bl_idname
+        row.operator_menu_enum(id, "sync_type", text="", icon="DOWNARROW_HLT")
 
         self.layout.prop(strip_placement, 'use_auto_blend')
 

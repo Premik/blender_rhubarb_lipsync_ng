@@ -61,6 +61,11 @@ class CreateSoundStripWithSound(bpy.types.Operator):
     start_frame: IntProperty(name="Start Frame", default=1)  # type: ignore
     channel: IntProperty(name="Channel", default=1)  # type: ignore
     show_waveform: BoolProperty(name="Show Waveform", default=True)  # type: ignore
+    sync_audio: BoolProperty(  # type: ignore
+        name="Sync audio",
+        description="Enable sound caching, audio scrubbing and playback sync with audio. To get the most real-time-like syncing.",
+        default=True,
+    )
 
     @classmethod
     def disabled_reason(cls, context: Context, limit=poll_search_limit) -> str:
@@ -114,7 +119,6 @@ class CreateSoundStripWithSound(bpy.types.Operator):
             self.report({"ERROR"}, f"There is more than one sound strips using the sound with '{sound.filepath}'.")
             return {'CANCELLED'}
 
-        sound.use_memory_cache = prefs.sound_mem_cache_default
         strip = strips[0]
         oldSound = strip.sound
         assert oldSound
@@ -126,6 +130,11 @@ class CreateSoundStripWithSound(bpy.types.Operator):
         # https://blender.stackexchange.com/questions/27234/python-how-to-completely-remove-an-object
         bpy.data.sounds.remove(oldSound, do_unlink=True)
         props.start_frame = self.start_frame
+        if self.sync_audio:
+            context.scene.use_audio_scrub = True
+            context.scene.sync_mode = "AUDIO_SYNC"
+            sound.use_memory_cache = True
+
         return {'FINISHED'}
 
 

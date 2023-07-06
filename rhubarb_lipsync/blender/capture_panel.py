@@ -134,6 +134,9 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
         row.operator(sound_operators.RemoveSoundStripWithSound.bl_idname, icon='MUTE_IPO_OFF')
         layout.prop(props, 'start_frame')
         layout.prop(self.ctx.scene, 'use_audio_scrub')
+        layout.prop(self.ctx.scene, 'sync_mode')
+        # bpy.context.scene.sync_mode = 'AUDIO_SYNC'
+
         if sound:
             layout.prop(sound, "use_memory_cache")
 
