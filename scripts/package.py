@@ -11,7 +11,7 @@ import pathlib
 
 
 def dist_zip_name(platform: str, ver: str) -> str:
-    return f"rhubarb-lipsync-{platform}-{ver}"
+    return f"rhubarb_lipsync_ng-{platform}-{ver}"
 
 
 def clean_temp_files_at(start_path: Path) -> int:

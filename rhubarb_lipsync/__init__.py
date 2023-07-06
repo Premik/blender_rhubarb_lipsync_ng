@@ -1,12 +1,12 @@
 bl_info = {
-    'name': 'Rhubarb Lipsync',
-    'author': 'Addon rewritten by Premysl S. base on the original version by Andrew Charlton. Includes Rhubarb Lip Sync by Daniel S. Wolf',
-    'version': (4, 1, 0),
+    'name': 'Rhubarb Lipsync NG',
+    'author': 'Premysl Srubar. Inspired by the original version by Andrew Charlton. Includes Rhubarb Lip Sync by Daniel S. Wolf',
+    'version': (0, 9, 0),
     'blender': (3, 40, 0),
     'location': 'Properties > Armature',
     'description': 'Integrate Rhubarb Lipsync into Blender',
-    'wiki_url': 'https://github.com/Premik/blender-rhubarb-lipsync',
-    'tracker_url': 'https://github.com/Premik/blender-rhubarb-lipsync/issues',
+    'wiki_url': 'https://github.com/Premik/blender_rhubarb_lipsync_ng',
+    'tracker_url': 'https://github.com/Premik/blender_rhubarb_lipsync_ng/issues',
     'support': 'COMMUNITY',
     'category': 'Animation',
 }

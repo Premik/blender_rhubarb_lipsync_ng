@@ -1,6 +1,6 @@
 [project]
 name = "rhubarb_lipsync"
-version = "4.1.0"
+version = "0.9.0"
 license = { file = "LISENSE" }
 
 

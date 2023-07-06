@@ -21,7 +21,7 @@ def sha256(filename: Path) -> str:
         return sha256_hash.hexdigest()
 
 
-def download(url: str, dest_path: Path):
+def download(url: str, dest_path: Path) -> None:
     """https://stackoverflow.com/questions/7243750/download-file-from-web-in-python-3#"""
     with urllib.request.urlopen(url) as response:
         with open(dest_path, 'wb') as out_file:
