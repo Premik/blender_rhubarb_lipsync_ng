@@ -10,10 +10,12 @@ jobs:
       run:
         shell: bash -el {0}
     strategy:
+      fail-fast: false
       matrix:
       # "macos-latest" - No python module in conda https://anaconda.org/kitsune.ONE/python-blender/files
-        os: ["ubuntu-latest", "windows-latest"]
-        python-version: ["3.10"]
+      # "windows-latest" - No os.fork method. Without forking some of the integration tests are failing.
+        os: ["ubuntu-latest"]
+        python-version: ["3.10", "3.11.3"]
     steps:
       - name: Get Date
         id: get-date
@@ -24,12 +26,10 @@ jobs:
 
       - name: Cache conda # https://github.com/marketplace/actions/setup-miniconda#caching-packages
         uses: actions/cache@v3
-        id: cache-conda
-        env:
-          CACHE_NUMBER: 0 # Increase this value to reset cache
+        id: cache-conda        
         with:
           path: ~/conda_pkgs_dir
-          key: conda-${{runner.os}}-${{env.CACHE_NUMBER}}-${{hashFiles('environment.yml')}}
+          key: conda-${{runner.os}}-${{hashFiles('environment.yml')}}
 
       - name: Cache Downloads
         id: cache-download
