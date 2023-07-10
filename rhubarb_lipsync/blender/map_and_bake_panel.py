@@ -67,7 +67,7 @@ class MappingAndBakingPanel(bpy.types.Panel):
 
         layout = self.layout
 
-        row = layout.row(align=True)
+        layout.row(align=True)
         layout.template_list(MappingUIList.bl_idname, "Mapping", mprops, "items", mprops, "index")
         return True
 
@@ -88,8 +88,6 @@ class MappingAndBakingPanel(bpy.types.Panel):
         # row.operator(capture_operators.DeleteCaptureProps.bl_idname, text="", icon="PANEL_CLOSE")
 
     def draw_nla_setup(self) -> None:
-        prefs = RhubarbAddonPreferences.from_context(self.ctx)
-        mprops: MappingProperties = MappingProperties.from_context(self.ctx)
 
         self.draw_nla_track_picker(self.ctx, "nla_track1", "Track 1")
         self.draw_nla_track_picker(self.ctx, "nla_track2", "Track 2")
@@ -140,7 +138,6 @@ class MappingAndBakingPanel(bpy.types.Panel):
                 ui_utils.draw_error(self.layout, selection_error)
                 return
             mprops: MappingProperties = MappingProperties.from_context(context)
-            cprops = CaptureListProperties.capture_from_context(self.ctx)
             if len(mprops.items) != len(MouthShapeInfos.all()):
                 layout.alert = True
                 layout.operator(mapping_operators.BuildCueInfoUIList.bl_idname)

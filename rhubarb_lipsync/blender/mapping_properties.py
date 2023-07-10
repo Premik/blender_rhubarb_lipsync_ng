@@ -93,8 +93,18 @@ class MappingProperties(PropertyGroup):
         # Neither is selected, meaning this one has been uticked. Check the other one
         self.nla_map_action = True
 
-    nla_map_action: BoolProperty(default=True, name="Action", description="Map cues to regular Action", update=on_nla_map_action_update)  # type: ignore
-    nla_map_shapekey: BoolProperty(default=False, name="Shape key", description="Map cues to shape-key Action", update=on_nla_map_shapekey_update)  # type: ignore
+    nla_map_action: BoolProperty(  # type: ignore
+        default=True,
+        name="Action",
+        description="Map cues to regular Action",
+        update=on_nla_map_action_update,
+    )
+    nla_map_shapekey: BoolProperty(  # type: ignore
+        default=False,
+        name="Shape key",
+        description="Map cues to shape-key Action",
+        update=on_nla_map_shapekey_update,
+    )
 
     def build_items(self, obj: bpy.types.Object) -> None:
         # log.trace("Already buil")  # type: ignore

@@ -86,7 +86,7 @@ class ProcessSoundFile(bpy.types.Operator):
 
         self.job = RhubarbCommandAsyncJob(cmd)
         cmd.lipsync_start(ui_utils.to_abs_path(sound.filepath), props.dialog_file)
-        self.report({'INFO'}, f"Started")
+        self.report({'INFO'}, "Started")
 
         wm = context.window_manager
         wm.modal_handler_add(self)
@@ -117,7 +117,7 @@ class ProcessSoundFile(bpy.types.Operator):
         # print(f"{id(self)}  {id(context.object)}")
 
         if not self.job:
-            self.report({'ERROR'}, f"No job object found registered for the active object")
+            self.report({'ERROR'}, "No job object found registered for the active object")
             self.finished(context)
             return {'CANCELLED'}
 
@@ -140,7 +140,7 @@ class ProcessSoundFile(bpy.types.Operator):
             jprops.cancel_request = False
             self.cancel_on_next = True
             log.info("Received cancel request. Will cancel on next update")
-            self.report({'INFO'}, f"Cancel")
+            self.report({'INFO'}, "Cancel")
             jprops.status = "Cancelling"
             # https://blender.stackexchange.com/questions/157227/how-to-redraw-status-bar-in-blender-2-80
             context.workspace.status_text_set_internal(None)
@@ -171,7 +171,6 @@ class ProcessSoundFile(bpy.types.Operator):
         return {'PASS_THROUGH'}
 
     def update_progress(self, context: Context) -> None:
-        wm = context.window_manager
 
         # Only changes mouse cursor, looks ugly
         # if progress == 0:

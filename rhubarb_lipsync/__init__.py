@@ -1,3 +1,14 @@
+from rhubarb_lipsync.rhubarb.log_manager import logManager
+
+import bpy
+from bpy.props import PointerProperty
+
+import rhubarb_lipsync.blender.auto_load
+from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences
+from rhubarb_lipsync.blender.capture_properties import CaptureListProperties
+from rhubarb_lipsync.blender.mapping_properties import MappingProperties
+from rhubarb_lipsync.blender.ui_utils import IconsManager
+
 bl_info = {
     'name': 'Rhubarb Lipsync NG',
     'author': 'Premysl Srubar. Inspired by the original version by Andrew Charlton. Includes Rhubarb Lip Sync by Daniel S. Wolf',
@@ -10,17 +21,6 @@ bl_info = {
     'support': 'COMMUNITY',
     'category': 'Animation',
 }
-
-from rhubarb_lipsync.rhubarb.log_manager import logManager
-
-import bpy
-from bpy.props import PointerProperty
-
-import rhubarb_lipsync.blender.auto_load
-from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences
-from rhubarb_lipsync.blender.capture_properties import CaptureListProperties
-from rhubarb_lipsync.blender.mapping_properties import MappingProperties
-from rhubarb_lipsync.blender.ui_utils import IconsManager
 
 
 def init_loggers() -> None:

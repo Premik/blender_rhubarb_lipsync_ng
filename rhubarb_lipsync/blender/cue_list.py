@@ -43,7 +43,6 @@ class MouthCueUIList(UIList):
 
     def draw_compact(self, layout: UILayout, item: MouthCueListItem, context: Context) -> None:
         clp = self.cuelist_prefs(context)
-        props = CaptureListProperties.capture_from_context(context)
         # row = layout.row()
         # prefs = RhubarbAddonPreferences.from_context(context)
         if clp.show_col_icon:

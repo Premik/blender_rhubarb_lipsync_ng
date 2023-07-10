@@ -64,7 +64,7 @@ class RemoveCapturedNlaStrips(bpy.types.Operator):
         self.strips_removed = 0
         self.tracks_cleaned = 0
         if not b.objects:
-            self.report({'ERROR'}, f"No matching object in selection")
+            self.report({'ERROR'}, "No matching object in selection")
             return {'CANCELLED'}
         try:
             for o in b.object_iter():
@@ -196,7 +196,7 @@ class BakeToNLA(bpy.types.Operator):
         error_common = MappingProperties.context_selection_validation(context)
         if error_common:
             return error_common
-        props = CaptureListProperties.capture_from_context(context)
+        CaptureListProperties.capture_from_context(context)
         return ""
 
     @classmethod

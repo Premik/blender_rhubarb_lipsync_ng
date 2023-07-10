@@ -90,7 +90,7 @@ class CueListPreferences(PropertyGroup):
 
     @cached_property
     def noncol_props_names(self) -> list[str]:
-        return [k for k in self.props_names if not 'show_col' in k]
+        return [k for k in self.props_names if 'show_col' not in k]
 
 
 class MappingPreferences(PropertyGroup):
@@ -132,7 +132,7 @@ class RhubarbAddonPreferences(AddonPreferences):
     @staticmethod
     def from_context(ctx: Context, require=True) -> Optional['RhubarbAddonPreferences']:
         blid = RhubarbAddonPreferences.bl_idname
-        if not blid in ctx.preferences.addons:
+        if blid not in ctx.preferences.addons:
             if require:  # There is no inbuilt Illegal state or similar exception in python
                 raise RuntimeError(f"The '{blid}' addon preferences not found in the context.")
             return None

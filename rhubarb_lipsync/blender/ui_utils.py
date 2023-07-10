@@ -24,7 +24,7 @@ class IconsManager:
         if IconsManager._previews is None:
             IconsManager._previews = bpy.utils.previews.new()
         prew = IconsManager._previews
-        if not key in IconsManager._loaded:
+        if key not in IconsManager._loaded:
             IconsManager._loaded.add(key)
             fn = key
             if not pathlib.Path(key).suffix:
@@ -242,7 +242,7 @@ class DropdownHelper:
         l = len(self.names)
         if l == 0:
             return -1  # Empty list
-        if index == None:
+        if index is None:
             index = self.index
         if index >= l:  # After the last
             if self.nameNotFoundHandling == DropdownHelper.NameNotFoundHandling.SELECT_ANY:

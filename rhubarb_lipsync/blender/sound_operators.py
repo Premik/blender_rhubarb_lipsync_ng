@@ -72,7 +72,6 @@ class CreateSoundStripWithSound(bpy.types.Operator):
         error_common = CaptureProperties.sound_selection_validation(context, False)
         if error_common:
             return error_common
-        props = CaptureListProperties.capture_from_context(context)
         strip = find_strips_of_sound(context, limit)
         if strip:
             return f"Already placed on a strip on the channel {strip[0].channel} at frame {strip[0].frame_start}."
@@ -94,7 +93,6 @@ class CreateSoundStripWithSound(bpy.types.Operator):
             self.report({"ERROR"}, error)
             return {'CANCELLED'}
         props = CaptureListProperties.capture_from_context(context)
-        prefs = RhubarbAddonPreferences.from_context(context)
         sound: Sound = props.sound
 
         # sctx = ui_utils.get_sequencer_context(context)
@@ -152,7 +150,7 @@ class RemoveSoundStripWithSound(bpy.types.Operator):
             return error_common
         strip = find_strips_of_sound(context, limit)
         if not strip:
-            return f"No strip using the current sound found."
+            return "No strip using the current sound found."
         return ""
 
     @classmethod
@@ -205,7 +203,7 @@ class ToggleRelativePath(bpy.types.Operator):
         old = sound.filepath
         sound.filepath = self.get_converted(sound)
         if old == sound.filepath:
-            self.report({'INFO'}, f"Unchanged")
+            self.report({'INFO'}, "Unchanged")
         return {'FINISHED'}
 
 
@@ -350,7 +348,7 @@ class ConvertSoundFromat(bpy.types.Operator):
             bpy.context.window.cursor_set("DEFAULT")
         # Open the newly created ogg/wav file
         ret = bpy.ops.sound.open(filepath=str(self.target_path_full))
-        if not 'FINISHED' in ret:
+        if "FINISHED" not in ret:
             self.report({'WARNING'}, f"Failed to import and open the new file {self.target_path_full}")
             return {'FINISHED'}
         new_sounds = find_sounds_by_path(str(self.target_path_full))
@@ -382,7 +380,7 @@ class PlayRange(bpy.types.Operator):
             try:
                 bpy.ops.screen.animation_cancel(restore_frame=False)
             except:
-                log.error(f"Failed to stop animation playback")
+                log.error("Failed to stop animation playback")
                 traceback.print_exc()
             if not PlayRange.remove_handlers():
                 log.warn(
@@ -394,11 +392,10 @@ class PlayRange(bpy.types.Operator):
     def remove_handlers() -> bool:
         try:
             # print(list(bpy.app.handlers.frame_change_post))
-            fn = PlayRange.on_frame
             handlers = bpy.app.handlers.frame_change_post
             return ui_utils.remove_handler(handlers, PlayRange.on_frame)
         except:
-            log.error(f"Unexpected error while stopping the animation")
+            log.error("Unexpected error while stopping the animation")
             traceback.print_exc()
             return False
 

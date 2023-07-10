@@ -87,7 +87,6 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
         cp: CueListPreferences = RhubarbAddonPreferences.from_context(ctx).cue_list_prefs
         if not cp.sync_on_select:
             return
-        props = CaptureListProperties.capture_from_context(ctx)
         frame, subframe = item.subframe(ctx)
         ctx.scene.frame_set(frame=frame, subframe=subframe)
 
@@ -301,7 +300,6 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
 
     def draw(self, context: Context) -> None:
         try:
-            props = CaptureListProperties.capture_from_context(context)
             self.ctx = context
             layout = self.layout
             # layout.use_property_split = True

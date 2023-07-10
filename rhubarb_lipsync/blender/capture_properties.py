@@ -282,11 +282,11 @@ class CaptureProperties(PropertyGroup):
         return f"{p}.{new_ext.lower()}"
 
     def short_desc(self, indx: int):
-        jprops: JobProperties = self.job
-        if jprops and jprops.status:
-            status = f" ({jprops.status})"
-        else:
-            status = ""
+        # jprops: JobProperties = self.job
+        # if jprops and jprops.status:
+        #     status = f" ({jprops.status})"
+        # else:
+        #     status = ""
 
         if self.sound:
             fn = f"{self.sound_file_basename}.{self.sound_file_extension}"

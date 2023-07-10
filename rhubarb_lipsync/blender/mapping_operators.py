@@ -76,7 +76,7 @@ class ShowCueInfoHelp(bpy.types.Operator):
         if not self.key:
             si = mprops.selected_item
             if not si:
-                self.report(type={'ERROR'}, message=f"No cue key provided and no mapping item selected.")
+                self.report(type={'ERROR'}, message="No cue key provided and no mapping item selected.")
                 return {'CANCELLED'}
             self.key = si.key
 
