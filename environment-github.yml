@@ -1,4 +1,4 @@
-name: rhubarb
+name: rhubarb-github
 channels:
   - defaults
   - kitsune.one # For blender as module
@@ -6,18 +6,12 @@ channels:
 dependencies:
   - python=3.10
   - pip
-#  - pytest>=7.2.0
   - pytest-xdist  # For test parallel execution
-  - pytest-forked # For test isolation. bpy has global context
-  - mypy
+  - pytest-forked # For test isolation. bpy has global context  
   - python-blender~=3.4.0 #Blender as module ()
-  - tomli
+  #3.2 3.4.0 3.6.0
+ #- tomli
   - requests
-  - debugpy
-  - flask
-  #- numpy
-  - black
-  - ruff
   - pip:
     - -e .
     #- bpy>=3.2 # Official blender-as-module, only since 3.4 (no Audaspace)

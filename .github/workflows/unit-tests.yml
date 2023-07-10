@@ -47,8 +47,8 @@ jobs:
           channels: conda-forge,defaults
           channel-priority: true
           miniforge-version: "latest"
-          activate-environment: rhubarb
-          environment-file: environment.yml
+          activate-environment: rhubarb-github
+          environment-file: environment-github.yml
           use-only-tar-bz2: true # IMPORTANT: This needs to be set for caching to work properly!
       
       - name: Download rhubard binaries
