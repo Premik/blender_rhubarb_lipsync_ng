@@ -56,4 +56,4 @@ jobs:
          cd scripts
          python rhubarb_bin.py
       - name: Run pytest
-        run: pytest --forked
+        run: pytest
