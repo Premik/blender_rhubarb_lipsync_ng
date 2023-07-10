@@ -1,17 +1,11 @@
-from functools import cached_property
-from typing import Any
 
-from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty, PointerProperty, StringProperty
-from bpy.types import AddonPreferences, CollectionProperty, Context, PropertyGroup, UILayout, UIList
+from bpy.types import Context, UILayout, UIList
 from bpy.types import UI_UL_list
 
 import rhubarb_lipsync.blender.mapping_operators as mapping_operators
-from rhubarb_lipsync.blender.sound_operators import PlayRange
 from rhubarb_lipsync.blender.preferences import CueListPreferences, RhubarbAddonPreferences, MappingPreferences
 from rhubarb_lipsync.blender.mapping_properties import MappingProperties, MappingItem
-from rhubarb_lipsync.blender.ui_utils import IconsManager
 
-from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue, MouthShapeInfos, MouthShapeInfo
 
 
 class MappingUIList(UIList):

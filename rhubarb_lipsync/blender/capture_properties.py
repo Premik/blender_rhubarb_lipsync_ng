@@ -1,20 +1,18 @@
 import bisect
 import logging
 import math
-from operator import attrgetter, index
+from operator import attrgetter
 import pathlib
 from functools import cached_property
-from pydoc import describe
-from typing import Any, Callable, Iterable, Optional, Sequence, cast, Generator
+from typing import Any, Callable, Iterable, Optional, Generator
 
 import bpy
 import bpy.utils.previews
 from bpy.props import BoolProperty, CollectionProperty, EnumProperty, FloatProperty, IntProperty, PointerProperty, StringProperty
-from bpy.types import Action, AddonPreferences, Context, PropertyGroup, Sound, UILayout
+from bpy.types import Context, PropertyGroup, Sound
 
-from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue, MouthShapeInfo, MouthShapeInfos, frame2time
-from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandAsyncJob, RhubarbCommandWrapper, RhubarbParser
-from rhubarb_lipsync.blender import ui_utils
+from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue, frame2time
+from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandAsyncJob
 from rhubarb_lipsync.blender.ui_utils import DropdownHelper
 
 log = logging.getLogger(__name__)

@@ -1,20 +1,8 @@
-import bisect
 import logging
-import math
-from operator import attrgetter
-import pathlib
-from functools import cached_property
-from typing import Any, Callable, Optional, cast, Generator
 
-import bpy
-import bpy.utils.previews
-from bpy.props import BoolProperty, CollectionProperty, EnumProperty, FloatProperty, IntProperty, PointerProperty, StringProperty
-from bpy.types import Action, AddonPreferences, Context, PropertyGroup, Sound, UILayout, NlaTrack
+from bpy.props import BoolProperty, EnumProperty, FloatProperty
+from bpy.types import PropertyGroup
 
-from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue, MouthShapeInfo, MouthShapeInfos, duration_scale_rate
-from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandAsyncJob, RhubarbCommandWrapper, RhubarbParser
-from rhubarb_lipsync.blender import ui_utils
-from rhubarb_lipsync.blender.ui_utils import DropdownHelper
 import textwrap
 
 log = logging.getLogger(__name__)
@@ -50,7 +38,7 @@ class StripPlacementProperties(PropertyGroup):
             making the action fully visible at the correct time when the strip is blended with the previous strip. 
             """
         ),
-        default=-1,
+        default=-0.5,
     )
     offset_end: FloatProperty(  # type: ignore
         "Offset End",

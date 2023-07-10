@@ -1,18 +1,12 @@
 import logging
-from functools import cached_property
-from types import ModuleType
-from typing import Dict, List, Optional, cast
-import math
 
 import bpy
-from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty, PointerProperty, StringProperty, BoolProperty
+from bpy.props import EnumProperty
 from bpy.types import Context
 
-import rhubarb_lipsync.blender.auto_load
 from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences
 from rhubarb_lipsync.rhubarb.log_manager import logManager
 import rhubarb_lipsync.blender.ui_utils as ui_utils
-import traceback
 from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, ResultLogListProperties, ResultLogItemProperties
 
 log = logging.getLogger(__name__)

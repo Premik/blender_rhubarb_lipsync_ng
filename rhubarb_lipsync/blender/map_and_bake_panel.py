@@ -1,24 +1,16 @@
 import logging
-import pathlib
-from io import TextIOWrapper
-from typing import Dict, List, Optional, cast
 
 import bpy
-from bpy.props import BoolProperty, FloatProperty, IntProperty, PointerProperty, StringProperty
-from bpy.types import Context, Sound, SoundSequence, UILayout
+from bpy.types import Context
 
 import rhubarb_lipsync.blender.baking_operators as baking_operators
 import rhubarb_lipsync.blender.mapping_operators as mapping_operators
-import rhubarb_lipsync.blender.rhubarb_operators as rhubarb_operators
-import rhubarb_lipsync.blender.sound_operators as sound_operators
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 from rhubarb_lipsync.blender.mapping_list import MappingUIList
 from rhubarb_lipsync.blender.preferences import CueListPreferences, RhubarbAddonPreferences, MappingPreferences
-from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, MouthCueList, JobProperties, ResultLogListProperties
+from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, ResultLogListProperties
 from rhubarb_lipsync.blender.mapping_properties import MappingProperties, NlaTrackRef, StripPlacementProperties
-from rhubarb_lipsync.blender.ui_utils import IconsManager
-from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue, MouthShapeInfo, MouthShapeInfos
-from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandAsyncJob
+from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthShapeInfos
 from rhubarb_lipsync.blender.misc_operators import ShowResultLogDetails
 
 log = logging.getLogger(__name__)

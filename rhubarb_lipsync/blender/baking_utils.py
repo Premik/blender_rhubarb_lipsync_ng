@@ -1,24 +1,16 @@
 import logging
 from functools import cached_property
-from pydoc import describe
-from types import ModuleType
-from typing import Dict, List, Optional, cast
-import math
+from typing import List, Optional, Iterator
 
 import bpy
-from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty, PointerProperty, StringProperty, BoolProperty
-from bpy.types import Context, Object, UILayout, NlaTrack, NlaStrip
-from typing import Any, Callable, Optional, cast, Generator, Iterator
+from bpy.types import Context, Object, NlaTrack, NlaStrip
+
 
 from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, MouthCueList, MouthCueListItem, ResultLogListProperties
 from rhubarb_lipsync.blender.mapping_properties import MappingProperties, MappingItem, NlaTrackRef
 from rhubarb_lipsync.blender.strip_placement_properties import StripPlacementProperties
-from rhubarb_lipsync.blender.preferences import CueListPreferences, RhubarbAddonPreferences, MappingPreferences
-from rhubarb_lipsync.rhubarb.log_manager import logManager
-from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue, MouthShapeInfos, MouthShapeInfo, duration_scale_rate
-import rhubarb_lipsync.blender.ui_utils as ui_utils
-import traceback
-from rhubarb_lipsync.blender.ui_utils import IconsManager
+from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences, MappingPreferences
+from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthShapeInfos, duration_scale_rate
 from bisect import bisect_left
 
 log = logging.getLogger(__name__)

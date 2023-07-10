@@ -1,14 +1,12 @@
 import pathlib
 from functools import cached_property
-from typing import Optional, cast
+from typing import Optional, cast, Iterator
 
-import bpy
-import bpy.utils.previews
+
 from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty, PointerProperty, StringProperty
-from bpy.types import AddonPreferences, Context, PropertyGroup, Sound, UILayout, Object
-from typing import Any, Callable, Optional, cast, Generator, Iterator
+from bpy.types import AddonPreferences, Context, PropertyGroup, UILayout, Object
 import rhubarb_lipsync.blender.ui_utils as ui_utils
-from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandWrapper, RhubarbParser
+from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandWrapper
 
 
 def default_executable_path() -> pathlib.Path:
@@ -201,7 +199,6 @@ class RhubarbAddonPreferences(AddonPreferences):
         row = layout.row().split(factor=0.243)
         # split = layout.row(heading="Label")
         row.label(text="Rhubarb executable version:")
-
         # Hack to circumvent circular imports
         import rhubarb_lipsync.blender.rhubarb_operators as rhubarb_operators
 

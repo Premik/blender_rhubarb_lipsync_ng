@@ -2,9 +2,7 @@
 
 import importlib
 import inspect
-import os
 import pkgutil
-import sys
 from pathlib import Path
 from types import ModuleType
 from typing import Generator, Iterator, get_type_hints, Any, Type

@@ -4,7 +4,9 @@ import re
 from typing import Any, Callable, Iterator, Type, Sequence
 
 import bpy
-from bpy.types import Area, Context, Sound, SoundSequence, UILayout, Window
+from bpy.types import Area, Context, UILayout, Window
+
+import bpy.utils.previews
 
 
 class IconsManager:

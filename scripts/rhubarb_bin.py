@@ -5,9 +5,9 @@ import re
 import shutil
 import urllib.request
 import zipfile
-from functools import cache, cached_property
+from functools import cached_property
 from pathlib import Path
-from typing import Dict, List, Optional, cast
+from typing import Optional
 from config import rhubarb_cfg
 
 

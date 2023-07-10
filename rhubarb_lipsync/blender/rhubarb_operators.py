@@ -1,19 +1,13 @@
 import logging
 import pathlib
-from io import TextIOWrapper
-from typing import Dict, List, Optional, cast
 
 import bpy
-from bpy.props import BoolProperty, FloatProperty, IntProperty, PointerProperty, StringProperty
-from bpy.types import Context, Sound, SoundSequence
+from bpy.types import Context, Sound
 
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences
 from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, MouthCueList, JobProperties
-from rhubarb_lipsync.blender.mapping_properties import MappingProperties
-from rhubarb_lipsync.rhubarb.log_manager import logManager
-from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandAsyncJob, RhubarbCommandWrapper
-from collections import defaultdict
+from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandAsyncJob
 
 log = logging.getLogger(__name__)
 

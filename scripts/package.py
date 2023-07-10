@@ -3,11 +3,8 @@ from functools import cached_property
 from pathlib import Path
 
 from config import project_cfg, rhubarb_cfg
-import os
-import zipfile
 import shutil
 from rhubarb_bin import RhubarbBinary
-import pathlib
 
 
 def dist_zip_name(platform: str, ver: str) -> str:

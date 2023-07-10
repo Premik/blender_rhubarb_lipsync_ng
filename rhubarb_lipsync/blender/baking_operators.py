@@ -1,23 +1,13 @@
 import logging
-from functools import cached_property
-from pydoc import describe
-from types import ModuleType
-from typing import Dict, List, Optional, cast
-import math
 import re
 import bpy
-from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty, PointerProperty, StringProperty
-from bpy.types import Context, Object, UILayout, NlaTrack, NlaStrip
-from typing import Any, Callable, Generator, Iterator
+from bpy.props import EnumProperty
+from bpy.types import Context, Object, UILayout
 
 from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, ResultLogListProperties
-from rhubarb_lipsync.blender.mapping_properties import MappingProperties, MappingItem, NlaTrackRef, StripPlacementProperties
-from rhubarb_lipsync.blender.preferences import CueListPreferences, RhubarbAddonPreferences, MappingPreferences
-from rhubarb_lipsync.rhubarb.log_manager import logManager
-from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue, MouthShapeInfos, MouthShapeInfo
+from rhubarb_lipsync.blender.mapping_properties import MappingProperties, StripPlacementProperties
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 import rhubarb_lipsync.blender.baking_utils as baking_utils
-from rhubarb_lipsync.blender.ui_utils import IconsManager
 
 log = logging.getLogger(__name__)
 
