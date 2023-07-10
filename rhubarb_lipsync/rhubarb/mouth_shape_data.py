@@ -1,6 +1,5 @@
 import math
-from functools import cache, cached_property
-from typing import Any, Callable, Optional, cast, Type
+from functools import cached_property
 from enum import Enum
 import textwrap
 
@@ -215,7 +214,8 @@ class MouthCue:
         if not isinstance(other, MouthCue):
             # https://stackoverflow.com/questions/1227121/compare-object-instances-for-equality-by-their-attributes
             return NotImplemented  # type: ignore
-        c: Callable[[float, float], bool] = lambda a, b: math.isclose(a, b, abs_tol=0.001)
+        def c(a: float, b: float) -> bool:
+            return math.isclose(a, b, abs_tol=0.001)
         o: MouthCue = other
         return self.key == o.key and c(self.start, o.start) and c(self.end, o.end)
 

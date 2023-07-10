@@ -1,13 +1,7 @@
-from ast import List
 from time import sleep
-from concurrent.futures import thread
-from typing import Iterable
-import unittest
 from functools import cached_property
-from pathlib import Path
 
 import bpy
-from bpy.props import PointerProperty
 
 import rhubarb_lipsync
 import rhubarb_lipsync.blender.auto_load
@@ -26,7 +20,6 @@ from rhubarb_lipsync.blender.capture_properties import (
 from rhubarb_lipsync.blender.mapping_properties import MappingProperties, MappingItem, NlaTrackRef
 from rhubarb_lipsync.rhubarb.log_manager import logManager
 import rhubarb_lipsync.blender.ui_utils as ui_utils
-import sample_data
 import addon_utils
 import rhubarb_lipsync.blender.baking_utils as baking_utils
 import re

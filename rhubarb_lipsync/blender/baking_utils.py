@@ -266,7 +266,7 @@ class BakingContext:
     def validate_track(self) -> list[str]:
         self.next_track()
         if not self.current_track:
-            return [f"no NLA track selected"]
+            return ["no NLA track selected"]
         ret: list[str] = []
         if self.track1 == self.track2:
             ret += ["Track1 and Track2 are the same"]

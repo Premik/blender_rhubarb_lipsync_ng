@@ -29,7 +29,7 @@ class CreateCaptureProps(bpy.types.Operator):
         rootProps = CaptureListProperties.from_context(context)
         assert rootProps, "Failed to got root properties from the scene. Registration error?"
         log.trace("Creating new capture properties")  # type: ignore
-        item: CaptureProperties = rootProps.items.add()
+        rootProps.items.add()
         rootProps.index = len(rootProps.items) - 1  # Select the newly created item
         rootProps.dropdown_helper(context).index2name()
 

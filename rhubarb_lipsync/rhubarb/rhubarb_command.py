@@ -6,7 +6,6 @@ import platform
 import re
 import traceback
 from collections import defaultdict
-from io import TextIOWrapper
 from queue import Empty, SimpleQueue
 from subprocess import PIPE, Popen, TimeoutExpired
 from threading import Event, Thread
@@ -144,7 +143,7 @@ class RhubarbCommandWrapper:
             self.process.wait(RhubarbCommandWrapper.thread_wait_timeout)
             # Consume any reminding output, this would also close the process io streams
             self.process.communicate(timeout=5)
-            log.debug(f"Process terminated")
+            log.debug("Process terminated")
         self.process = None
 
     def get_version(self) -> str:
@@ -157,7 +156,7 @@ class RhubarbCommandWrapper:
 
     def log_status_line(self, log_json: dict) -> None:
         # {'log': {'level': 'Info', 'message': 'Msg'}}]
-        if not log_json or not 'log' in log_json:
+        if not log_json or "log" not in log_json:
             return  # Not log key included in the progress line
         level = log_json["log"]["level"]
         msg = log_json["log"]["message"]
@@ -191,7 +190,7 @@ class RhubarbCommandWrapper:
         by_type = {j["type"]: j for j in status_lines if j}
         if "failure" in by_type:
             raise RuntimeError(f"Rhubarb binary failed:\n{by_type['failure']['reason']}")
-        if not "progress" in by_type:
+        if "progress" not in by_type:
             return None
         v = by_type["progress"]["value"]
         return int(v * 100)
@@ -234,8 +233,8 @@ class RhubarbCommandWrapper:
             (stdout, stderr) = self.process.communicate(timeout=1)  # Consume any reminding output
             self.stderr += stderr
             self.stdout += stdout
-        except TimeoutExpired as ex:
-            log.warn(f"Timed out while waiting for process to finalize outputs")
+        except TimeoutExpired:
+            log.warn("Timed out while waiting for process to finalize outputs")
             if not ignore_timeout_error:
                 raise
         self.close_process()
@@ -261,7 +260,7 @@ class RhubarbCommandWrapper:
             n = next(self.process.stderr)  # type: ignore
             self.stderr += n
         except StopIteration:
-            log.debug(f"EOF reached while reading the stderr")  # Process has just terminated
+            log.debug("EOF reached while reading the stderr")  # Process has just terminated
 
 
 class RhubarbCommandAsyncJob:
@@ -317,7 +316,7 @@ class RhubarbCommandAsyncJob:
             if self.thread.is_alive():
                 log.error(f"Failed to join the thread after waiting for {RhubarbCommandWrapper.thread_wait_timeout} seconds.")
         except:
-            log.error(f"Failed to join the thread")
+            log.error("Failed to join the thread")
             traceback.print_exc()
         finally:
             self.queue = SimpleQueue()
@@ -342,7 +341,7 @@ class RhubarbCommandAsyncJob:
             if msg == 'EXCEPTION':
                 raise obj  # Propagate exception from the thread
             assert False, f"Received unknown message {msg}"
-        except Empty as e:
+        except Empty:
             return None
 
     def cancel(self) -> None:

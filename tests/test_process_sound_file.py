@@ -23,7 +23,7 @@ def wait_until_finished(r: RhubarbCommandWrapper) -> None:
         if r.has_finished:
             return
         sleep(0.1)
-        p = r.lipsync_check_progress()
+        r.lipsync_check_progress()
 
         # print(f"{p}%")
         # print(r.stderr)
@@ -36,7 +36,7 @@ def wait_until_finished_async(job: RhubarbCommandAsyncJob, only_loop_times=0) ->
     loops = 0
     for i in range(0, 1000):
         if job.cmd.has_finished:
-            assert loops > 2, f"No progress updates was provided "
+            assert loops > 2, "No progress updates was provided "
             return
         sleep(0.1)
         p = job.lipsync_check_progress_async()

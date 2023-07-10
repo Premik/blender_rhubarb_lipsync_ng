@@ -6,7 +6,7 @@ from typing import cast
 from bpy.types import Context, Sound, SoundSequence
 
 from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue
-from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandWrapper, RhubarbParser
+from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbParser
 
 sample_data_path = Path(__file__).parent / "data"
 

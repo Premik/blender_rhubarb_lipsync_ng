@@ -1,4 +1,3 @@
-from lib2to3.fixes.fix_input import context
 import logging
 from functools import cached_property
 from pydoc import describe
@@ -7,9 +6,9 @@ from typing import Dict, List, Optional, cast
 import math
 import re
 import bpy
-from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty, PointerProperty, StringProperty, BoolProperty
+from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty, PointerProperty, StringProperty
 from bpy.types import Context, Object, UILayout, NlaTrack, NlaStrip
-from typing import Any, Callable, Optional, cast, Generator, Iterator
+from typing import Any, Callable, Generator, Iterator
 
 from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, ResultLogListProperties
 from rhubarb_lipsync.blender.mapping_properties import MappingProperties, MappingItem, NlaTrackRef, StripPlacementProperties

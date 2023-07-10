@@ -1,6 +1,6 @@
 [project]
 name = "rhubarb_lipsync"
-version = "0.9.0"
+version = "0.9.1"
 license = { file = "LISENSE" }
 
 
@@ -55,6 +55,9 @@ profile = "black"
 src_paths = ["rhubarb_lipsync", "tests", "scripts"]
 line_length = 160
 
+[tool.ruff]
+line-length = 160
+ignore = ["E741", "E722", "E731"]
 
 [tool.mypy]
 strict_optional = false

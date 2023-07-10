@@ -1,22 +1,11 @@
 import unittest
-from functools import cached_property
-from pathlib import Path
 
-from pytest import skip
 
 import bpy
-from bpy.props import PointerProperty
 
-import rhubarb_lipsync
-import rhubarb_lipsync.blender.auto_load
-import sample_data
-from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences
-from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, MouthCueList, JobProperties
-from rhubarb_lipsync.blender.mapping_properties import MappingProperties
-from rhubarb_lipsync.rhubarb.log_manager import logManager
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 import rhubarb_lipsync.blender.baking_utils as baking_utils
-import sample_data, sample_project
+import sample_project
 from dataclasses import dataclass
 
 
@@ -95,7 +84,9 @@ class BakingContextTest(unittest.TestCase):
             assert len(errs) == 0, errs[0]
         ui_utils.assert_op_ret(bpy.ops.rhubarb.bake_to_nla())
         assert not list(self.project.last_result.errors), list(self.project.last_result.items)
-        assert not list(self.project.last_result.warnings), list(self.project.last_result.items)
+        # Trimming warning is ok
+        w = [w for w in self.project.last_result.warnings if "Had to trim" not in w.msg]
+        assert not w, list(self.project.last_result.items)
         cues, strips = self.project.parse_last_bake_result_details()
         assert cues == strips, f"Number of strips ({strips}) created doesn't match the number of captured cues ({cues})"
         assert len(self.project.cue_items) == cues, "Number of baked cues ({cues}) doesn't match the number of cues in the capture ({self.project.cue_items})"
@@ -115,12 +106,10 @@ class BakingContextTest(unittest.TestCase):
         self.project.add_track2()
         self.bake()
 
-    @unittest.skip("Scrip trimming, TBD")
     def testBakeTwoTracksTwoActions(self) -> None:
         self.bc = self.project.create_mapping_2actions_sphere1()
         self.bakeTwoTracks()
 
-    @unittest.skip("Scrip trimming, TBD")
     def testBakeSingleTracksTwoActions(self) -> None:
         self.bc = self.project.create_mapping_2actions_sphere1()
         self.project.add_track1()
