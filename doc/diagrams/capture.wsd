@@ -1,0 +1,32 @@
+@startuml
+!include template.iuml
+title Capture components
+
+' component "Apache ActiveMQ Artemis" as jms {    
+'     queue "logging.rawEvent" as rawEventQ
+' }
+
+together {
+class Scene<<Blender>>
+class Sound<<Blender>>
+}
+
+Scene-down[hidden]-Sound
+
+class Cue {
+    shape key : ⒶⒷⒸ ...
+    start time
+    end time
+}
+
+Scene -> "*" Capture : Captures in the scene
+Capture --> Sound
+Capture -> "*" Cue : Captured mouth cues
+
+note top of Capture
+  Capture properties are bound to Blender $q(Scene).
+  There can be multiple $q(Captures) in the $q(Scene).
+  There is list of $q(Cues) captured from the provided $q(Sound).
+end note
+
+@enduml

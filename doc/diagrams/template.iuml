@@ -1,0 +1,23 @@
+@startuml
+skinparam dpi 240
+allowmixing
+hide empty members
+skinparam lineType polyline
+skinparam titleBorderThickness 2
+skinparam titleBorderRoundCorner 15
+
+skinparam class {	
+	BackgroundColor<<Blender>> LightBlue
+	BorderColor<<Blender>> Blue
+}
+
+skinparam class {	
+	BackgroundColor<<TBD>> LightGrey
+	BorderColor<<TBD>> Grey
+}
+skinparam stereotypeCBackgroundColor<<TBD>> DimGray
+
+!unquoted function $q($tx) return '**""' + $tx + '""**'
+
+
+@enduml

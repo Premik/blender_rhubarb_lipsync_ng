@@ -160,6 +160,8 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 * Capture doesn't work for long sound files. Rhubarb finishes but the list is empty.
 * Changel all labels cases to follow Blender style "Foo in Bar"
 * Bake warning, 'G,H,X` not mapped even when use-extended shapes is disabled
+* Add check-for-updates to the preferences,
+
 ### Low
 
 - Strip placement reorg should be possible to set/override on different levelson Individual cue? (mapping item)

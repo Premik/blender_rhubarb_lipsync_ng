@@ -1,0 +1,61 @@
+@startuml
+!include template.iuml
+title Mapping components
+
+
+
+' component "Apache ActiveMQ Artemis" as jms {    
+'     queue "logging.rawEvent" as rawEventQ
+' }
+
+together {
+class Action<<Blender>>
+class Object<<Blender>>
+class NLATrack<<Blender>>
+}
+
+Action-down[hidden]-Object
+Object-down[hidden]-NLATrack
+
+class MapingItem {
+    shape key : ⒶⒷⒸ ...    
+}
+
+class StripPlacement {
+    extrapolation type
+    blending type
+    offset start
+    offset end
+}
+
+
+
+Object -> "0..1" Mapping : Object's Mapping properties
+Mapping -up-> "*" MapingItem : Cue (type) mapping
+Mapping -up-> StripPlacement
+Mapping -down> "1..2" NLATrackRef
+
+NLATrackRef -left-> NLATrack
+MapingItem -left-> "0..2 (ShapeKey)Action" Action
+
+note top of StripPlacement
+  Describes initial properties and how to
+  place the $q(NLAStrips) while baking.
+end note
+
+note top of MapingItem
+  Links single $q(Cue) type to an $q(Action) or $q(ShapeKey Action)
+end note
+
+note left of Mapping
+  Mapping of the $q(Capture) properties 
+  to  $q(Object Actions).
+  Bound to Blender $q(Object).
+end note
+
+note bottom of NLATrackRef
+  One or two $q(NLATracks) to bake the mapped $q(Actions) to.
+end note
+
+
+@enduml
