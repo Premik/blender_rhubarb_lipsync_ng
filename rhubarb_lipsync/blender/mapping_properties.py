@@ -37,8 +37,15 @@ class NlaTrackRef(PropertyGroup):
     def dropdown_helper(self) -> DropdownHelper:
         return DropdownHelper(self, list(self.search_names(None, "")), DropdownHelper.NameNotFoundHandling.UNSELECT)
 
-    name: StringProperty(name="NLA Track", description="NLA track to add actions to", search=search_names, update=name_updated)  # type: ignore
-    index: IntProperty(name="Index of the selected track", default=-1)  # type: ignore
+    name: StringProperty(  # type: ignore
+        name="NLA Track",
+        description="NLA track to add actions to",
+        search=search_names,
+        update=name_updated,
+        options={'LIBRARY_EDITABLE'},
+        override={'LIBRARY_OVERRIDABLE'},
+    )
+    index: IntProperty(name="Index of the selected track", default=-1, options={'LIBRARY_EDITABLE'}, override={'LIBRARY_OVERRIDABLE'})  # type: ignore
 
     @property
     def selected_item(self) -> Optional[NlaTrack]:
@@ -52,10 +59,9 @@ class NlaTrackRef(PropertyGroup):
 class MappingItem(PropertyGroup):
     """Mapping of a single mouth shape type to action(s)"""
 
-    key: StringProperty("key", description="Mouth cue key symbol (A,B,C..)")  # type: ignore
-    action: PointerProperty(type=bpy.types.Action, name="Action")  # type: ignore
-    shapekey_action: PointerProperty(type=bpy.types.Action, name="Shape key")  # type: ignore
-    # action: PointerProperty(type=bpy.types.ShapeKey, name="Action")  # type: ignore
+    key: StringProperty("key", description="Mouth cue key symbol (A,B,C..)", options={'LIBRARY_EDITABLE'}, override={'LIBRARY_OVERRIDABLE'})  # type: ignore
+    action: PointerProperty(type=bpy.types.Action, name="Action", options={'LIBRARY_EDITABLE'}, override={'LIBRARY_OVERRIDABLE'})  # type: ignore
+    shapekey_action: PointerProperty(type=bpy.types.Action, name="Shape key", options={'LIBRARY_EDITABLE'}, override={'LIBRARY_OVERRIDABLE'})  # type: ignore
 
     @cached_property
     def cue_desc(self) -> MouthShapeInfo | None:
@@ -67,12 +73,12 @@ class MappingItem(PropertyGroup):
 class MappingProperties(PropertyGroup):
     """Mapping of all the mouth shape types to action(s)"""
 
-    items: CollectionProperty(
+    items: CollectionProperty(  # type: ignore
         type=MappingItem,
         name="Mapping items",
         options={'LIBRARY_EDITABLE'},
         override={'LIBRARY_OVERRIDABLE', 'USE_INSERTION'},
-    )  # type: ignore
+    )
     index: IntProperty(name="Selected mapping index")  # type: ignore
     # nla_track1: PointerProperty(type=bpy.types.NlaTrack, name="Tract 1")  # type: ignore
     nla_track1: PointerProperty(type=NlaTrackRef, name="Track 1")  # type: ignore
@@ -96,12 +102,16 @@ class MappingProperties(PropertyGroup):
         name="Action",
         description="Map cues to regular Action",
         update=on_nla_map_action_update,
+        options={'LIBRARY_EDITABLE'},
+        override={'LIBRARY_OVERRIDABLE'},
     )
     nla_map_shapekey: BoolProperty(  # type: ignore
         default=False,
         name="Shape key",
         description="Map cues to shape-key Action",
         update=on_nla_map_shapekey_update,
+        options={'LIBRARY_EDITABLE'},
+        override={'LIBRARY_OVERRIDABLE'},
     )
 
     def build_items(self, obj: bpy.types.Object) -> None:

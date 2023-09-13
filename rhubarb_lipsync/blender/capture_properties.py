@@ -29,10 +29,10 @@ class MouthCueListItem(PropertyGroup):
         # set=lambda s, v: setattr(s.cue.key, v),
         # set=lambda s, v: s.gg(v),
     )
-    start: FloatProperty(
+    start: FloatProperty(  # type: ignore
         name="start",
         description="Start time of the cue",
-    )  # type: ignore
+    )
     end: FloatProperty(name="end", description="End time of the cue (usually matches start of the previous cue")  # type: ignore
 
     @cached_property
@@ -219,6 +219,7 @@ class CaptureProperties(PropertyGroup):
     cue_list: PointerProperty(type=MouthCueList, name="Cues")  # type: ignore
     # mapping: PointerProperty(type=MappingList, name="Mapping")  # type: ignore
 
+    @staticmethod
     def sound_selection_validation(context: Context, required_unpack=True) -> str:
         # selection_error = MappingProperties.context_selection_validation(context)
         # if selection_error:
@@ -347,7 +348,7 @@ class ResultLogListProperties(PropertyGroup):
         l = len(self.items)
         mx = ResultLogListProperties.max_entries
         if l > mx:  # Drop messages if the limit has been reached
-            return None
+            return None  # type: ignore
         if l == mx:  # Add warning as the limit is about the be reached
             msg = f"There were more log messages but they were dropped since the limit ({mx}) has been reached."
             level = "WARNING"

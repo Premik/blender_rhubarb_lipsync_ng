@@ -19,7 +19,7 @@ class StripPlacementProperties(PropertyGroup):
         max=1,
         soft_max=1,
         default=0.8,
-        # options={'LIBRARY_EDITABLE'},
+        options={'LIBRARY_EDITABLE'},
         override={'LIBRARY_OVERRIDABLE'},
     )
     scale_max: FloatProperty(  # type: ignore
@@ -30,6 +30,8 @@ class StripPlacementProperties(PropertyGroup):
         max=3,
         soft_max=2,
         default=1.4,
+        options={'LIBRARY_EDITABLE'},
+        override={'LIBRARY_OVERRIDABLE'},
     )
     offset_start: FloatProperty(  # type: ignore
         "Offset Start",
@@ -41,6 +43,8 @@ class StripPlacementProperties(PropertyGroup):
             """
         ),
         default=-0.5,
+        options={'LIBRARY_EDITABLE'},
+        override={'LIBRARY_OVERRIDABLE'},
     )
     offset_end: FloatProperty(  # type: ignore
         "Offset End",
@@ -51,6 +55,8 @@ class StripPlacementProperties(PropertyGroup):
             """
         ),
         default=1,
+        options={'LIBRARY_EDITABLE'},
+        override={'LIBRARY_OVERRIDABLE'},
     )
 
     blend_type: EnumProperty(  # type: ignore
@@ -82,6 +88,8 @@ class StripPlacementProperties(PropertyGroup):
             ),
         ],
         default="REPLACE",
+        options={'LIBRARY_EDITABLE'},
+        override={'LIBRARY_OVERRIDABLE'},
     )
 
     extrapolation: EnumProperty(  # type: ignore
@@ -121,12 +129,16 @@ class StripPlacementProperties(PropertyGroup):
             ),
         ],
         default="NOTHING",
+        options={'LIBRARY_EDITABLE'},
+        override={'LIBRARY_OVERRIDABLE'},
     )
 
     use_sync_length: BoolProperty(  # type: ignore
         default=False,
         description='Update range of frames referenced from action after tweaking strip and its keyframes',
         name="Sync Length",
+        options={'LIBRARY_EDITABLE'},
+        override={'LIBRARY_OVERRIDABLE'},
     )
 
     blend_in: FloatProperty(  # type: ignore
@@ -135,6 +147,8 @@ class StripPlacementProperties(PropertyGroup):
         min=0,
         soft_max=10,
         default=1,
+        options={'LIBRARY_EDITABLE'},
+        override={'LIBRARY_OVERRIDABLE'},
     )
     blend_out: FloatProperty(  # type: ignore
         "Blend Out",
@@ -142,12 +156,16 @@ class StripPlacementProperties(PropertyGroup):
         min=0,
         soft_max=10,
         default=1,
+        options={'LIBRARY_EDITABLE'},
+        override={'LIBRARY_OVERRIDABLE'},
     )
 
     use_auto_blend: BoolProperty(  # type: ignore
         default=False,
         description="Number of frames for Blending In/Out is automatically determined from overlapping strips",
         name="Auto Blend In/Out",
+        options={'LIBRARY_EDITABLE'},
+        override={'LIBRARY_OVERRIDABLE'},
     )
 
     @property
@@ -160,4 +178,6 @@ class StripPlacementProperties(PropertyGroup):
     #     description="""If there is room on the track any strip shorter than this amount of frames will be prolonged.
     #                    This is mainly to improve visibility of the strips labels.  """,
     #     default=3,
+    #    options={'LIBRARY_EDITABLE'},
+    #    override={'LIBRARY_OVERRIDABLE'},
     # )
