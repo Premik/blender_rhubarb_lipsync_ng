@@ -29,7 +29,10 @@ class MouthCueListItem(PropertyGroup):
         # set=lambda s, v: setattr(s.cue.key, v),
         # set=lambda s, v: s.gg(v),
     )
-    start: FloatProperty(name="start", description="Start time of the cue")  # type: ignore
+    start: FloatProperty(
+        name="start",
+        description="Start time of the cue",
+    )  # type: ignore
     end: FloatProperty(name="end", description="End time of the cue (usually matches start of the previous cue")  # type: ignore
 
     @cached_property

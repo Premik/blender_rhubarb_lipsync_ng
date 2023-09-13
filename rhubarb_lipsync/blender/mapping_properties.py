@@ -67,7 +67,12 @@ class MappingItem(PropertyGroup):
 class MappingProperties(PropertyGroup):
     """Mapping of all the mouth shape types to action(s)"""
 
-    items: CollectionProperty(type=MappingItem, name="Mapping items")  # type: ignore
+    items: CollectionProperty(
+        type=MappingItem,
+        name="Mapping items",
+        options={'LIBRARY_EDITABLE'},
+        override={'LIBRARY_OVERRIDABLE', 'USE_INSERTION'},
+    )  # type: ignore
     index: IntProperty(name="Selected mapping index")  # type: ignore
     # nla_track1: PointerProperty(type=bpy.types.NlaTrack, name="Tract 1")  # type: ignore
     nla_track1: PointerProperty(type=NlaTrackRef, name="Track 1")  # type: ignore
@@ -100,7 +105,7 @@ class MappingProperties(PropertyGroup):
     )
 
     def build_items(self, obj: bpy.types.Object) -> None:
-        # log.trace("Already buil")  # type: ignore
+        # log.trace("Already built")  # type: ignore
         if len(self.items) > 0:
             return  # Already built (assume)
         log.trace("Building mapping list")  # type: ignore

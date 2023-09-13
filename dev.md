@@ -225,3 +225,8 @@ NLA shape-key tracks:
 ```python
 [t.name for t in C.object.data.shape_keys.animation_data.nla_tracks]
 ```
+
+
+
+https://docs.blender.org/manual/en/latest/files/data_blocks.html
+https://blenderartists.org/t/how-to-fix-blender-error-disabled-cant-edit-this-property-from-linked-data-block/1239469/3

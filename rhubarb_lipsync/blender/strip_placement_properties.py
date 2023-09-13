@@ -19,6 +19,8 @@ class StripPlacementProperties(PropertyGroup):
         max=1,
         soft_max=1,
         default=0.8,
+        # options={'LIBRARY_EDITABLE'},
+        override={'LIBRARY_OVERRIDABLE'},
     )
     scale_max: FloatProperty(  # type: ignore
         "Scale Max",
