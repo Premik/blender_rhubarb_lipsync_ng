@@ -12,9 +12,9 @@ from rhubarb_lipsync.blender.ui_utils import IconsManager
 bl_info = {
     'name': 'Rhubarb Lipsync NG',
     'author': 'Premysl Srubar. Inspired by the original version by Andrew Charlton. Includes Rhubarb Lip Sync by Daniel S. Wolf',
-    'version': (0, 9, 1),
+    'version': (1, 0, 0),
     'blender': (3, 40, 0),
-    'location': 'Properties > Armature',
+    'location': '3d View > Sidebar',
     'description': 'Integrate Rhubarb Lipsync into Blender',
     'wiki_url': 'https://github.com/Premik/blender_rhubarb_lipsync_ng',
     'tracker_url': 'https://github.com/Premik/blender_rhubarb_lipsync_ng/issues',
@@ -23,9 +23,9 @@ bl_info = {
 }
 
 
-def init_loggers() -> None:
+def init_loggers(prefs: RhubarbAddonPreferences | None) -> None:
     logManager.init(rhubarb_lipsync.blender.auto_load.modules)
-    prefs = RhubarbAddonPreferences.from_context(bpy.context, False)
+
     if hasattr(prefs, 'log_level') and prefs.log_level != 0:  # 0 default level
         logManager.set_level(prefs.log_level)
 
@@ -39,7 +39,11 @@ def register() -> None:
     bpy.types.Scene.rhubarb_lipsync_captures = PointerProperty(type=CaptureListProperties)
     bpy.types.Object.rhubarb_lipsync_mapping = PointerProperty(type=MappingProperties)
 
-    init_loggers()
+    prefs = RhubarbAddonPreferences.from_context(bpy.context, False)
+    init_loggers(prefs)
+    if hasattr(prefs, 'capture_tab_name'):  # Re-set the tab names in case they differ from defaults
+        prefs.capture_tab_name_updated(bpy.context)
+        prefs.map_tab_name_updated(bpy.context)
 
 
 def unregister() -> None:

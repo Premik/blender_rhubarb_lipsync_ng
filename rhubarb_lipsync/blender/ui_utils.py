@@ -7,6 +7,7 @@ import bpy
 from bpy.types import Area, Context, UILayout, Window
 
 import bpy.utils.previews
+import traceback
 
 
 class IconsManager:
@@ -183,6 +184,20 @@ def redraw_3dviews(ctx: Context) -> None:
     for area in ctx.screen and ctx.screen.areas or []:
         if area.type == 'VIEW_3D':
             area.tag_redraw()
+
+
+def set_panel_category(panel, category: str):
+    """Change the bl_category of the Panel by re-registering the class. This would rename the tab the panel is shown in."""
+    try:
+        if "bl_rna" in panel.__dict__:  # Is the class registered?
+            bpy.utils.unregister_class(panel)  # Unregister first if so
+        panel.bl_category = category
+        # label_with_prefix:str=panel.bl_label.split(": ", 1)
+        # panel.bl_label=f"{category}{}"
+        bpy.utils.register_class(panel)
+    except:
+        print("Failed to change panel category")
+        traceback.print_exc()
 
 
 class DropdownHelper:

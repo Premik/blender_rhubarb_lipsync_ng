@@ -53,7 +53,7 @@ Note: Generally, each time you see a button is disabled hover the mouse cursor o
 
 1. Select or create `NLA Tracks`. It is possible to place the mapped Cue actions to a single track. But **two tracks** are preferable. Since it alows the placed `Action strips` to interleave and blend automatically.
 
-1. You can tweak the `Strip placement settings`. Note this section is still very *draft* and would need some redesign.
+1. You can tweak the `Strip placement settings`. Note this section is still very *draft* and would need some redesign:
 
 ![Placement Settings](doc/img/placementSettings.png)
 
@@ -73,7 +73,7 @@ Note: Generally, each time you see a button is disabled hover the mouse cursor o
 
 1. Open the `NLA Editor`. You can tweak the position/length/blending of the `NLA Strips`. Some default Strip properties can be changed in the `Strip placement settings` section. But the `Bake to NLA` would have to be run-again (removing the existing `Strips` first).
 
-1. Optinal. At the end bake the `NLA Tracks` to a single new Action. In the `NLA Editor/main menu/Edit/Bake Action` and remove/disable the RLPS tracks.
+1. If needed the `NLA Tracks` can be baked into single new `Action`. Select `NLA Editor/main menu/Edit/Bake Action`. New action would be created. The two RLPS tracks can now be removed or disabled.
 
 ![Capture](doc/img/BakeNLATracks.png)
 

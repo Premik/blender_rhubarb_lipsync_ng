@@ -177,6 +177,34 @@ class RhubarbAddonPreferences(AddonPreferences):
         default=False,
     )
 
+    def capture_tab_name_updated(self, ctx: Context):
+        # To workaround circular dependency
+        from rhubarb_lipsync.blender.capture_panel import CaptureMouthCuesPanel
+
+        ui_utils.set_panel_category(CaptureMouthCuesPanel, self.capture_tab_name)
+
+    def map_tab_name_updated(self, ctx: Context):
+        # To workaround circular dependency
+        from rhubarb_lipsync.blender.map_and_bake_panel import MappingAndBakingPanel
+
+        ui_utils.set_panel_category(MappingAndBakingPanel, self.capture_tab_name)
+
+    capture_tab_name: StringProperty(  # type: ignore
+        name="Capture tab name",
+        description="Name of the tab in the 3D view sidebar where the 'Sound setup and capture' panel is put into."
+        + " Change this to make the name shorter or more description or to share same tab with other plugins.",
+        default="RLSP",
+        update=capture_tab_name_updated,
+    )
+
+    map_tab_name: StringProperty(  # type: ignore
+        name="Mapping tab name",
+        description="Name of the tab in the 3D view sidebar where the 'Cue mapping and baking' panel is put into."
+        + " Change this to make the name shorter or more description or to share same tab with other plugins.",
+        default="RLSP",
+        update=map_tab_name_updated,
+    )
+
     log_level: IntProperty(default=0)  # type: ignore
     info_panel_expanded: BoolProperty(default=False)  # type: ignore
     sound_source_panel_expanded: BoolProperty(default=True)  # type: ignore
@@ -224,6 +252,10 @@ class RhubarbAddonPreferences(AddonPreferences):
 
         from rhubarb_lipsync.blender.misc_operators import SetLogLevel
         from rhubarb_lipsync.rhubarb.log_manager import logManager
+
+        layout.separator()
+        layout.prop(self, "capture_tab_name")
+        layout.prop(self, "map_tab_name")
 
         row = layout.row().split(factor=0.243)
         row.label(text=f"Log level ({logManager.current_level_name})")
