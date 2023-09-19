@@ -12,7 +12,7 @@ from rhubarb_lipsync.blender.ui_utils import IconsManager
 bl_info = {
     'name': 'Rhubarb Lipsync NG',
     'author': 'Premysl Srubar. Inspired by the original version by Andrew Charlton. Includes Rhubarb Lip Sync by Daniel S. Wolf',
-    'version': (1, 0, 0),
+    'version': (1, 0, 1),
     'blender': (3, 40, 0),
     'location': '3d View > Sidebar',
     'description': 'Integrate Rhubarb Lipsync into Blender',
@@ -37,7 +37,11 @@ rhubarb_lipsync.blender.auto_load.init(__file__)
 def register() -> None:
     rhubarb_lipsync.blender.auto_load.register()
     bpy.types.Scene.rhubarb_lipsync_captures = PointerProperty(type=CaptureListProperties)
-    bpy.types.Object.rhubarb_lipsync_mapping = PointerProperty(type=MappingProperties)
+    bpy.types.Object.rhubarb_lipsync_mapping = PointerProperty(
+        type=MappingProperties,
+        options={'LIBRARY_EDITABLE'},
+        override={'LIBRARY_OVERRIDABLE'},
+    )
 
     prefs = RhubarbAddonPreferences.from_context(bpy.context, False)
     init_loggers(prefs)

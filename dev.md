@@ -150,8 +150,8 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 
 ### High
 * Shape-key actions are not baked
-* Doc - new readme.md
 * Baking - round to whole frames when not sub-frames visible
+
 
 ### Normal
 * Add some simply blender sample file
