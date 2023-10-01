@@ -47,3 +47,4 @@ class SampleData:
 snd_cs_female_o_a = SampleData("cs_female_o_a")
 snd_en_male_watchingtv = SampleData("en_male_watchingtv")
 snd_en_male_electricity = SampleData("en_male_electricity")
+snd_en_femal_3kittens = SampleData("threelittlekittens_01_rountreesmith")

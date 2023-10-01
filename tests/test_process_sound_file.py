@@ -65,9 +65,12 @@ class RhubarbCommandWrapperTest(unittest.TestCase):
         return self.project_dir / "rhubarb_lipsync" / "bin" / RhubarbCommandWrapper.executable_default_filename()
 
     @cached_property
-    def data(self) -> sample_data.SampleData:
+    def data_short(self) -> sample_data.SampleData:
         return sample_data.snd_en_male_electricity
-        # return sample_data.snd_en_femal_3kittens
+
+    @cached_property
+    def data_long(self) -> sample_data.SampleData:
+        return sample_data.snd_en_femal_3kittens
 
     def compare_cues(self, a_cues: list[MouthCue], b_cues: list[MouthCue]) -> None:
         self.assertEqual(len(a_cues), len(b_cues), f"Lengths don't match \n{a_cues}\n{b_cues}")
@@ -77,30 +80,37 @@ class RhubarbCommandWrapperTest(unittest.TestCase):
     def compare_cues_testdata(self, expected: sample_data.SampleData, wrapper: RhubarbCommandWrapper) -> None:
         self.compare_cues(expected.expected_cues, wrapper.get_lipsync_output_cues())
 
-    def compare_testdata_with_current(self) -> None:
-        self.compare_cues_testdata(self.data, self.wrapper)
+    def compare_testdata_with_current(self, data: sample_data.SampleData) -> None:
+        self.compare_cues_testdata(data, self.wrapper)
 
     def testVersion(self) -> None:
         self.assertEqual(self.wrapper.get_version(), "1.13.0")
         self.assertEqual(self.wrapper.get_version(), "1.13.0")
 
     def testLipsync_sync(self) -> None:
-        self.wrapper.lipsync_start(str(self.data.snd_file_path))
+        self.wrapper.lipsync_start(str(self.data_short.snd_file_path))
         wait_until_finished(self.wrapper)
-        self.compare_testdata_with_current()
+        self.compare_testdata_with_current(self.data_short)
 
     def testLipsync_async(self) -> None:
-        self.wrapper.lipsync_start(str(self.data.snd_file_path))
+        self.wrapper.lipsync_start(str(self.data_short.snd_file_path))
         wait_until_finished_async(RhubarbCommandAsyncJob(self.wrapper))
         assert not self.wrapper.was_started
         assert self.wrapper.has_finished
-        self.compare_testdata_with_current()
+        self.compare_testdata_with_current(self.data_short)
+
+    def testLipsync_async_long(self) -> None:
+        self.wrapper.lipsync_start(str(self.data_long.snd_file_path))
+        wait_until_finished_async(RhubarbCommandAsyncJob(self.wrapper))
+        assert not self.wrapper.was_started
+        assert self.wrapper.has_finished
+        self.compare_testdata_with_current(self.data_long)
 
     def testLipsync_cancel(self) -> None:
         job = RhubarbCommandAsyncJob(self.wrapper)
         assert not self.wrapper.was_started
         assert not self.wrapper.has_finished
-        self.wrapper.lipsync_start(str(self.data.snd_file_path))
+        self.wrapper.lipsync_start(str(self.data_short.snd_file_path))
         assert self.wrapper.was_started
         assert not self.wrapper.has_finished
         wait_until_finished_async(job, 4)
@@ -117,17 +127,17 @@ class RhubarbCommandWrapperTest(unittest.TestCase):
     def testLipsync_cancel_restat(self) -> None:
         job = RhubarbCommandAsyncJob(self.wrapper)
         assert job.status == "Stopped"
-        self.wrapper.lipsync_start(str(self.data.snd_file_path))
+        self.wrapper.lipsync_start(str(self.data_short.snd_file_path))
         assert job.status == "Running"
         wait_until_finished_async(job, 4)
         assert job.status == "Running"
         job.cancel()
         assert job.status == "Stopped"
         # Start again resuing same cmd wrapper and job
-        self.wrapper.lipsync_start(str(self.data.snd_file_path))
+        self.wrapper.lipsync_start(str(self.data_short.snd_file_path))
         wait_until_finished(self.wrapper)
         assert job.status == "Done"
-        self.compare_testdata_with_current()
+        self.compare_testdata_with_current(self.data_short)
 
 
 class RhubarbParserTest(unittest.TestCase):
