@@ -5,6 +5,8 @@ import pathlib
 import platform
 import re
 import traceback
+import functools
+
 from collections import defaultdict
 from queue import Empty, SimpleQueue
 from subprocess import PIPE, Popen, TimeoutExpired
@@ -175,10 +177,13 @@ class RhubarbCommandWrapper:
         The rhubarb binary provides the status update few times per seconds typically.
         """
         assert self.was_started, "Process not started. Can't check progress"
-        if self.has_finished:
+        if self.has_finished:  # Has already finished earlier, assume outputs has been collected and release process
             self.close_process()
             return 100
+        if self.check_process_has_finished():
+            return 100  # Has just finished (since last check). Outputs have to be collected now
         self.stderr = ""
+
         self.read_process_stderr_line()
         if not self.stderr:
             return None
@@ -230,7 +235,7 @@ class RhubarbCommandWrapper:
         """
         assert self.was_started
         try:
-            (stdout, stderr) = self.process.communicate(timeout=1)  # Consume any reminding output
+            (stdout, stderr) = self.process.communicate(timeout=timeout)  # Consume any reminding output
             self.stderr += stderr
             self.stdout += stdout
         except TimeoutExpired:
@@ -239,21 +244,19 @@ class RhubarbCommandWrapper:
                 raise
         self.close_process()
 
+    def check_process_has_finished(self) -> bool:
+        exit_code = self.process.poll()
+        if exit_code is None:
+            return False
+        self.last_exit_code = exit_code
+        if exit_code != 0:
+            raise RuntimeError(f"Rhubarb binary exited with a non-zero exit code {exit_code}")
+        return True
+
     def read_process_stderr_line(self) -> None:
         assert self.was_started
         if self.has_finished:
             return
-
-        # (stdout, stderr) = self.process.communicate(timeout=timeout)
-        exit_code = self.process.poll()
-        if exit_code is not None:  # Process has finished
-            # Collect the output just in case
-            self.collect_output_sync(ignore_timeout_error=True)
-            self.last_exit_code = exit_code
-            if exit_code != 0:
-                raise RuntimeError(f"Rhubarb binary exited with a non-zero exit code {exit_code}")
-            return
-
         try:
             # Rhubarb binary is reporting progress on the stderr. Read next line.
             # This would eventually block.
@@ -271,67 +274,76 @@ class RhubarbCommandAsyncJob:
     def __init__(self, cmd: RhubarbCommandWrapper) -> None:
         assert cmd
         self.cmd = cmd
-        self.thread: Optional[Thread] = None
+        self.stderror_thread: Optional[Thread] = None
+        self.stdout_thread: Optional[Thread] = None
         self.queue: SimpleQueue[tuple[str, Any]] = SimpleQueue()
         self.last_progress = 0
         self.last_exception: Optional[Exception] = None
         self.last_cues: list[MouthCue] = []
         self.stop_event = Event()
 
-    def _thread_run(self) -> None:
-        """Runs on a separate threads, pushing progress message via Q"""
-        log.trace("Entered progress check thread")  # type: ignore
-        while True:
-            try:
-                if self.cmd.has_finished:
-                    log.trace("Process finished")  # type: ignore
-                    # print(f"'{self.cmd.stdout}'")
-                    break
-                if self.stop_event.is_set():
-                    log.trace("Stop event received")  # type: ignore
-                    break  # Cancelled
-                progress = self.cmd.lipsync_check_progress()
+    @staticmethod
+    def thread_loop(func):
+        @functools.wraps(func)
+        def wrapper(self):
+            log.trace(f"Entered {func.__name__}  reader thread")  # type: ignore
+            while True:
+                try:
+                    if self.cmd.has_finished:
+                        log.trace("Process finished")  # type: ignore
+                        break
+                    if self.stop_event.is_set():
+                        log.trace("Stop event received")  # type: ignore
+                        break  # Cancelled
+                    func(self)
+                except Exception as e:
+                    log.error(f"Unexpected error in the {func.__name__} thread  {e}")
+                    self.last_exception = e
+                    traceback.print_exc()
+                    self.queue.put(("EXCEPTION", e))
+                    raise
+            log.debug(f"{func.__name__} thread exit")
 
-                if progress is None:
-                    sleep(0.1)
-                else:
-                    self.last_progress = progress
-                    self.queue.put(("PROGRESS", progress))
+        return wrapper
 
-            except Exception as e:
-                log.error(f"Unexpected error while checking the progress status {e}")
-                self.last_exception = e
-                traceback.print_exc()
-                self.queue.put(("EXCEPTION", e))
-                raise
-        log.debug("Progress check thread exit")
+    @thread_loop
+    def _stderror_thread_run(self) -> None:
+        """Stderror reader. Runs on a separate thread, pushing progress message via Q"""
+        progress = self.cmd.lipsync_check_progress()
+
+        if progress is None:
+            sleep(0.1)
+        else:
+            self.last_progress = progress
+            self.queue.put(("PROGRESS", progress))
 
     def join_thread(self) -> None:
-        if not self.thread:
+        if not self.stderror_thread:
             return
 
-        log.debug(f"Joining thread {self.thread}")
+        log.debug(f"Joining thread {self.stderror_thread}")
         try:
-            self.thread.join(RhubarbCommandWrapper.thread_wait_timeout)
-            if self.thread.is_alive():
+            self.stderror_thread.join(RhubarbCommandWrapper.thread_wait_timeout)
+            if self.stderror_thread.is_alive():
                 log.error(f"Failed to join the thread after waiting for {RhubarbCommandWrapper.thread_wait_timeout} seconds.")
         except:
             log.error("Failed to join the thread")
             traceback.print_exc()
         finally:
             self.queue = SimpleQueue()
-            self.thread = None
+            self.stderror_thread = None
 
     def lipsync_check_progress_async(self) -> int | None:
-        if self.cmd.has_finished:  # Finished, do some auto-cleanup
+        if self.cmd.has_finished:  # Finished, do some auto-cleanup a process output
             self.join_thread()
+            self.cmd.collect_output_sync(ignore_timeout_error=True)
             self.cmd.close_process()
             return 100
-        if not self.thread:
+        if not self.stderror_thread:
             log.debug("Creating status-check thread")
             self.stop_event.clear()
-            self.thread = Thread(target=self._thread_run, name="StatusCheck", daemon=True)
-            self.thread.start()
+            self.stderror_thread = Thread(target=self._stderror_thread_run, name="StatusCheck", daemon=True)
+            self.stderror_thread.start()
 
         try:
             (msg, obj) = self.queue.get_nowait()

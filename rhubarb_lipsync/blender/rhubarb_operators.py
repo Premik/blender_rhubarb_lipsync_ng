@@ -123,12 +123,6 @@ class ProcessSoundFile(bpy.types.Operator):
             self.finished(context)
             return {'CANCELLED'}
 
-        if self.job.cmd.has_finished:
-            self.report({'INFO'}, f"Capture @{self.capture_index} Done")
-
-            self.finished(context)
-            return {'FINISHED'}
-
         jprops: JobProperties = self.running_props(context).job
         if event and event.type in {'ESC'} or jprops.cancel_request:
             jprops.cancel_request = False
@@ -143,6 +137,11 @@ class ProcessSoundFile(bpy.types.Operator):
 
         try:
             progress = self.job.lipsync_check_progress_async()
+            if self.job.cmd.has_finished:
+                self.report({'INFO'}, f"Capture @{self.capture_index} Done")
+                self.finished(context)
+                return {'FINISHED'}
+
         except Exception as e:
             self.report({'ERROR'}, str(e))
             log.exception(e)
@@ -165,7 +164,6 @@ class ProcessSoundFile(bpy.types.Operator):
         return {'PASS_THROUGH'}
 
     def update_progress(self, context: Context) -> None:
-
         # Only changes mouse cursor, looks ugly
         # if progress == 0:
         #    # https://blender.stackexchange.com/questions/1050/blender-ui-multithreading-progressbar

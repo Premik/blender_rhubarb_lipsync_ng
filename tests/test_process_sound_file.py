@@ -21,6 +21,7 @@ def wait_until_finished(r: RhubarbCommandWrapper) -> None:
     assert r.was_started
     for i in range(0, 1000):
         if r.has_finished:
+            r.collect_output_sync(ignore_timeout_error=True)
             return
         sleep(0.1)
         r.lipsync_check_progress()
@@ -66,6 +67,7 @@ class RhubarbCommandWrapperTest(unittest.TestCase):
     @cached_property
     def data(self) -> sample_data.SampleData:
         return sample_data.snd_en_male_electricity
+        # return sample_data.snd_en_femal_3kittens
 
     def compare_cues(self, a_cues: list[MouthCue], b_cues: list[MouthCue]) -> None:
         self.assertEqual(len(a_cues), len(b_cues), f"Lengths don't match \n{a_cues}\n{b_cues}")
