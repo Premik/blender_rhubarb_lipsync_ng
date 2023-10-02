@@ -187,7 +187,7 @@ class ProcessSoundFile(bpy.types.Operator):
         if self.job:
             self.job.last_progress = 100
             self.update_progress(context)
-            self.job.join_thread()
+            self.job.join_threads()
             self.job.cmd.close_process()
             props = self.running_props(context)
             if props:

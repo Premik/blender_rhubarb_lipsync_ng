@@ -254,6 +254,7 @@ class RhubarbCommandWrapper:
         return True
 
     def read_process_stderr_line(self) -> None:
+        """Reads one line from the process stderror. This method eventually blocks"""
         assert self.was_started
         if self.has_finished:
             return
@@ -265,6 +266,14 @@ class RhubarbCommandWrapper:
         except StopIteration:
             log.debug("EOF reached while reading the stderr")  # Process has just terminated
 
+    def read_process_stdout(self) -> None:
+        """Reads and collects the process stdout. This method blocks."""
+        assert self.was_started
+        log.trace("About to read stding")  # type: ignore
+        o = self.process.stdout.readlines()
+        self.stdout += '\n'.join(o)
+        log.trace("Finished consuming the stdout")  # type: ignore
+
 
 class RhubarbCommandAsyncJob:
     """Additional wrapper over the RhubarbCommandWrapper which handles asynchronious progress-updates."""
@@ -274,8 +283,8 @@ class RhubarbCommandAsyncJob:
     def __init__(self, cmd: RhubarbCommandWrapper) -> None:
         assert cmd
         self.cmd = cmd
-        self.stderror_thread: Optional[Thread] = None
         self.stdout_thread: Optional[Thread] = None
+        self.stderr_thread: Optional[Thread] = None
         self.queue: SimpleQueue[tuple[str, Any]] = SimpleQueue()
         self.last_progress = 0
         self.last_exception: Optional[Exception] = None
@@ -307,7 +316,7 @@ class RhubarbCommandAsyncJob:
         return wrapper
 
     @thread_loop
-    def _stderror_thread_run(self) -> None:
+    def _stderr_thread_run(self) -> None:
         """Stderror reader. Runs on a separate thread, pushing progress message via Q"""
         progress = self.cmd.lipsync_check_progress()
 
@@ -317,33 +326,47 @@ class RhubarbCommandAsyncJob:
             self.last_progress = progress
             self.queue.put(("PROGRESS", progress))
 
-    def join_thread(self) -> None:
-        if not self.stderror_thread:
+    @thread_loop
+    def _stdout_thread_run(self) -> None:
+        """Stdout reader. Runs on a separate thread to co be able to consume the cli-command output
+        while the command might be still runnig. In case the stdoutput is big (bigger that pipe buffers) the command won't
+        terminate unless the stdout is consumed.
+        """
+        self.cmd.read_process_stdout()
+
+    def _join_thread(self, t: Thread | None) -> None:
+        if not t:
             return
 
-        log.debug(f"Joining thread {self.stderror_thread}")
+        log.debug(f"Joining thread {t}")
         try:
-            self.stderror_thread.join(RhubarbCommandWrapper.thread_wait_timeout)
-            if self.stderror_thread.is_alive():
-                log.error(f"Failed to join the thread after waiting for {RhubarbCommandWrapper.thread_wait_timeout} seconds.")
+            t.join(RhubarbCommandWrapper.thread_wait_timeout)
+            if t.is_alive():
+                log.error(f"Failed to join the {t} thread after waiting for {RhubarbCommandWrapper.thread_wait_timeout} seconds.")
         except:
-            log.error("Failed to join the thread")
+            log.error(f"Failed to join the {t} thread")
             traceback.print_exc()
-        finally:
-            self.queue = SimpleQueue()
-            self.stderror_thread = None
+
+    def join_threads(self) -> None:
+        self._join_thread(self.stdout_thread)
+        self._join_thread(self.stderr_thread)
+        self.queue = SimpleQueue()
+        self.stdout_thread = None
+        self.stderr_thread = None
 
     def lipsync_check_progress_async(self) -> int | None:
         if self.cmd.has_finished:  # Finished, do some auto-cleanup a process output
-            self.join_thread()
+            self.join_threads()
             self.cmd.collect_output_sync(ignore_timeout_error=True)
             self.cmd.close_process()
             return 100
-        if not self.stderror_thread:
-            log.debug("Creating status-check thread")
+        if not self.stderr_thread:
+            log.debug("Creating reader threads")
             self.stop_event.clear()
-            self.stderror_thread = Thread(target=self._stderror_thread_run, name="StatusCheck", daemon=True)
-            self.stderror_thread.start()
+            self.stdout_thread = Thread(target=self._stdout_thread_run, name="StdOut", daemon=True)
+            self.stderr_thread = Thread(target=self._stderr_thread_run, name="StdError-StatusCheck", daemon=True)
+            self.stdout_thread.start()
+            self.stderr_thread.start()
 
         try:
             (msg, obj) = self.queue.get_nowait()
@@ -359,7 +382,7 @@ class RhubarbCommandAsyncJob:
     def cancel(self) -> None:
         log.info("Cancel request. Stopping the process and the status thread.")
         self.stop_event.set()
-        self.join_thread()
+        self.join_threads()
         self.cmd.close_process()
 
     def get_lipsync_output_cues(self) -> list[MouthCue]:
