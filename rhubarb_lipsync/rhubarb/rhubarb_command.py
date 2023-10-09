@@ -269,10 +269,13 @@ class RhubarbCommandWrapper:
     def read_process_stdout(self) -> None:
         """Reads and collects the process stdout. This method blocks."""
         assert self.was_started
-        log.trace("About to read stding")  # type: ignore
+        # log.trace("About to read stding")  # type: ignore
         o = self.process.stdout.readlines()
-        self.stdout += '\n'.join(o)
-        log.trace("Finished consuming the stdout")  # type: ignore
+        if len(o) > 0:
+            self.stdout += ' '.join(o)
+            log.debug(f"Consumed stdout. Read {len(o)} lines.")  # type: ignore
+        # else:
+        #    log.trace("Empty newline in stdout")  # type: ignore
 
 
 class RhubarbCommandAsyncJob:

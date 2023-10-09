@@ -1,6 +1,6 @@
 [project]
 name = "rhubarb_lipsync"
-version = "1.0.2"
+version = "1.0.3"
 license = { file = "LISENSE" }
 
 
@@ -61,6 +61,7 @@ line-length = 160
 ignore = ["E741", "E722", "E731"]
 
 [tool.mypy]
+# https://mypy.readthedocs.io/en/latest/config_file.html
 strict_optional = false
 disallow_untyped_calls = true
 warn_unused_configs = true
@@ -68,6 +69,13 @@ warn_unused_configs = true
 check_untyped_defs = true
 pretty = true
 
+
 [[tool.mypy.overrides]]
 module = ["bpy.*", "bgl", "blf", "aud", "addon_utils"]
 ignore_missing_imports = true
+
+# log.trace fix - below doesn't work. Seems it can't be set per imported module
+#[[tool.mypy.overrides]]
+#module = ["logging"]
+#disable_error_code = ["attr-defined"]
+

@@ -1,7 +1,7 @@
 import pathlib
 from functools import cached_property
 from typing import Optional, cast, Iterator
-
+import traceback
 
 from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty, PointerProperty, StringProperty
 from bpy.types import AddonPreferences, Context, PropertyGroup, UILayout, Object
@@ -205,7 +205,29 @@ class RhubarbAddonPreferences(AddonPreferences):
         update=map_tab_name_updated,
     )
 
+    def log_file_updated(self, ctx: Context):
+        try:
+            from rhubarb_lipsync.rhubarb.log_manager import logManager
+
+            logManager.disable_log_file()
+            if self.log_file:  # Enable
+                logManager.log_file_path = pathlib.Path(self.log_file)
+                logManager.enable_log_file()
+            else:  # Disable
+                logManager.log_file_path = None
+        except:
+            print("Failed to set log file")
+            traceback.print_exc()
+
+    log_file: StringProperty(  # type: ignore
+        name="Log File",
+        description="Target file for the log entries. Set to blank to disable file logging.",
+        default="",
+        update=log_file_updated,
+    )
+
     log_level: IntProperty(default=0)  # type: ignore
+
     info_panel_expanded: BoolProperty(default=False)  # type: ignore
     sound_source_panel_expanded: BoolProperty(default=True)  # type: ignore
     caputre_panel_expanded: BoolProperty(default=True)  # type: ignore
@@ -260,3 +282,10 @@ class RhubarbAddonPreferences(AddonPreferences):
         row = layout.row().split(factor=0.243)
         row.label(text=f"Log level ({logManager.current_level_name})")
         row.operator_menu_enum(SetLogLevel.bl_idname, 'level')
+
+        row = layout.row().split(factor=0.243)
+        row.label(text=f"Log file ({logManager.log_file_status})")
+        row.prop(self, "log_file", text="")
+        lg_errors = logManager.validate_log_file()
+        if lg_errors:
+            layout.label(text=lg_errors)

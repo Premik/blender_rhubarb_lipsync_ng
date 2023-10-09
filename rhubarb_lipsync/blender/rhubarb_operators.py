@@ -192,7 +192,9 @@ class ProcessSoundFile(bpy.types.Operator):
             props = self.running_props(context)
             if props:
                 lst: MouthCueList = props.cue_list
-                lst.add_cues(self.job.get_lipsync_output_cues())
+                cues = self.job.get_lipsync_output_cues()
+                lst.add_cues(cues)
+                log.info(f"Added {len(cues)} cues to the list")
                 # Ensure  the mapping list is initialized. As it would be likely needed anyway
                 # mp: MappingProperties = props.mapping
                 # mp.build_items()

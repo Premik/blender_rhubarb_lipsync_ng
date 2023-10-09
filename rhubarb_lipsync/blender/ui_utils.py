@@ -148,6 +148,7 @@ def to_abs_path(blender_path: str) -> str:
 
 
 def validation_poll(cls: Type, context: Context, disabled_reason: Callable[[Context], str] = None) -> bool:
+    """Helper method to show a validation error of an operator to user in a popup."""
     assert cls
     if not disabled_reason:  # Locate the 'disabled_reason' as the validation fn if no one is provided
         assert hasattr(cls, 'disabled_reason'), f"No validation function provided and the {cls} has no 'disabled_reason' class method"

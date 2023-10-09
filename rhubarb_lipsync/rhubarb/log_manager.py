@@ -1,6 +1,8 @@
 import logging
 from functools import cached_property
 from types import ModuleType
+import pathlib
+from typing import Optional
 
 
 # https://stackoverflow.com/questions/2183233/how-to-add-a-custom-loglevel-to-pythons-logging-facility/35804945#35804945
@@ -62,6 +64,8 @@ class LogManager:
 
     def __init__(self) -> None:
         self.modules: list[ModuleType] = []
+        self.file_handler: Optional[logging.FileHandler] = None
+        self.log_file_path: Optional[pathlib.Path] = None
 
     def init(self, modules: list[ModuleType]) -> None:
         self.modules = modules
@@ -104,6 +108,62 @@ class LogManager:
 
     def set_debug(self) -> None:
         self.set_level(logging.DEBUG)
+
+    def validate_log_file(self) -> str:
+        p = self.log_file_path
+        if not p:
+            # return "Log file not specified"
+            return ""
+        try:
+            p.parent.mkdir(parents=True, exist_ok=True)
+        except Exception as e:
+            msg = f"Failed to create parent folders {p.parents}."
+            print(f"{msg}\n{e}")
+            return msg
+        if p.is_dir():
+            return f"The '{p}' is not a file"
+        return ""
+
+    def enable_log_file(self) -> None:
+        err = self.validate_log_file()
+        if err:
+            raise RuntimeError(f"Invalid log file. {err}")
+        fmt = logging.Formatter(logging.BASIC_FORMAT, None, '%')
+        self.file_handler = logging.FileHandler(self.log_file_path, encoding="UTF-8")  # type: ignore
+        self.file_handler.formatter = fmt
+        self.file_handler.setLevel(1)  # All
+        try:
+            for l in self.logs:
+                l.addHandler(self.file_handler)
+
+        except Exception as e:
+            msg = "Failed to add log file hander"
+            self.file_handler = None
+            print(f"{msg}\n{e}")
+            raise
+        print(f"Set {self.log_file_path} file handler on {len(self.logs)} loggers")
+
+    def disable_log_file(self) -> None:
+        if not self.file_handler:
+            return
+        try:
+            for l in self.logs:
+                l.removeHandler(self.file_handler)
+        except Exception as e:
+            print(f"Failed to remove log file handler\n{e}")
+        finally:
+            self.file_handler = None
+
+    @property
+    def log_file_status(self) -> str:
+        if not self.log_file_path:
+            return "DISABLED"
+        errors = logManager.validate_log_file()
+        if errors:
+            return "ERROR"
+        if self.file_handler is not None:
+            return "ENABLED"
+        return "FAILED"
 
     @staticmethod
     def level2name(level: int) -> str:

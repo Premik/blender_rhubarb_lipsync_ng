@@ -64,10 +64,9 @@ class ClearCueList(bpy.types.Operator):
 
     @classmethod
     def disabled_reason(cls, context: Context) -> str:
-        selection_error = MappingProperties.context_selection_validation(context)
-        if selection_error:
-            return selection_error
         props = CaptureListProperties.capture_from_context(context)
+        if not props:
+            return "No capture selected"
         cl: MouthCueList = props.cue_list
         if len(cl.items) <= 0:
             return "Cue list is empty"
