@@ -6,6 +6,9 @@ Inspired by the [scaredyfish/blender-rhubarb-lipsync](https://github.com/scaredy
 
 ## Quick start
 
+### Video tutorials
+
+[![Start from scratch](https://thumbnails.odycdn.com/optimize/s:0:0/quality:85/plain/https://player.odycdn.com/speech/7e8ad7b0932c9277:0.png)](https://odysee.com/@OwlGear:8/RhubarbLipsyncNGBlenderplugin-fromScratch:7)
 
 ### Installation
 
