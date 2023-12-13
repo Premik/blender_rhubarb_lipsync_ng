@@ -1,6 +1,6 @@
 import logging
 import pathlib
-
+import os
 import bpy
 from bpy.types import Context, Sound
 
@@ -79,7 +79,16 @@ class ProcessSoundFile(bpy.types.Operator):
         cmd = prefs.new_command_handler()
 
         self.job = RhubarbCommandAsyncJob(cmd)
-        cmd.lipsync_start(ui_utils.to_abs_path(sound.filepath), props.dialog_file)
+        snd_path = ui_utils.to_abs_path(sound.filepath)        
+        dialog_file_path = props.dialog_file
+        if not dialog_file_path: # Dialog file not specified, try txt file based on the sound file            
+            dialog_file_path = os.path.splitext(snd_path)[0] + '.txt'
+            if os.path.exists(dialog_file_path):
+                log.info(f"Found dialog file {dialog_file_path}")
+            else:
+                dialog_file_path = None 
+
+        cmd.lipsync_start(snd_path, dialog_file_path)
         self.report({'INFO'}, "Started")
 
         wm = context.window_manager
