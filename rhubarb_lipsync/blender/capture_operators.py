@@ -11,7 +11,7 @@ log = logging.getLogger(__name__)
 
 
 class CreateCaptureProps(bpy.types.Operator):
-    """Create new CaptureProperties item and add it to the caputer list in the current scene"""
+    """Create new CaptureProperties item and add it to the capture list in the current scene"""
 
     bl_idname = "rhubarb.create_capture_props"
     bl_label = "Create new capture"

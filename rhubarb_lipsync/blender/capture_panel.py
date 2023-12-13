@@ -29,8 +29,23 @@ class CaptureExtraOptionsPanel(bpy.types.Panel):
         props = CaptureListProperties.capture_from_context(context)
 
         layout = self.layout
-        layout.prop(props, "dialog_file")
+        row = layout.row()
+        row.label(text="Dialog File:")
+        row = layout.row()
+        row.prop(props, "dialog_file", text="")
+        layout.separator()
+                        
         layout.prop(prefs, "use_extended_shapes")
+        layout.separator()
+
+        row = layout.row()
+        row.label(text="Recognizer:")
+        row = layout.row()
+        row.prop(prefs, "recognizer", text="")
+        
+        
+              
+            
 
 
 class CueListOptionsPanel(bpy.types.Panel):
@@ -117,7 +132,7 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
         blid = sound_operators.ToggleRelativePath.bl_idname
 
         op = row.operator(blid, text="", icon="DOT").relative = True
-        if not props.sound_file_path.exists():
+        if props.sound_file_path and not props.sound_file_path.exists():
             absp = pathlib.Path(ui_utils.to_abs_path(sound.filepath))
             if absp.exists():
                 row.alert = True
