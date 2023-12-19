@@ -154,11 +154,9 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 
 
 ### Normal
-* Add some simply blender sample file
 * extended shapes- seems they are generated even when disabled -check
-* Changel all labels cases to follow Blender style "Foo in Bar"
 * Bake warning, 'G,H,X` not mapped even when use-extended shapes is disabled
-* Add check-for-updates to the preferences,
+* Mapping - integration with FaceIt - auto-populate mapping from rig expressions or shapekeys
 
 ### Low
 
@@ -173,9 +171,12 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 * Verify the Dialog file is working
 * Add "null" cue type to indicate un-detected cues (those red longer than the limit)
 * `layout.prop(mlp, "actions_multiline_view") ` doesn't currently work. Should show regular action and shape-key action on two lines
-* Not possible to un-select NLA track in the bake-panel
 * Capture panel - add `crop` button to replace to crop too long cues and add x shape instead of them
-* Mapping - integration with FaceIt - auto-populate mapping from rig expressions or shapekeys
+* Changel all labels cases to follow Blender style "Foo in Bar"
+* Add some simple blender sample file
+
+##
+- 
 
 ## Action selector
 - only from the selected object?

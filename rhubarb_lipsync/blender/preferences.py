@@ -244,6 +244,17 @@ class RhubarbAddonPreferences(AddonPreferences):
 
     def draw(self, context: Context) -> None:
         layout: UILayout = self.layout
+        row = layout.row().split(factor=0.243)
+        # split = layout.row(heading="Label")
+
+        # Hack to circumvent circular imports
+        import rhubarb_lipsync.blender.misc_operators as misc_operators
+        
+        row.label(text="Check for updates:")
+        if misc_operators.CheckForUpdates.has_checked():
+            row.label(text=misc_operators.CheckForUpdates.cached_status_description())
+        else:
+            row.operator(misc_operators.CheckForUpdates.bl_idname)
 
         layout.prop(self, "executable_path_string")
         row = layout.row().split(factor=0.243)
