@@ -18,7 +18,7 @@ __all__ = (
 blender_version = bpy.app.version
 
 modules: list[ModuleType] = []
-ordered_classes: list = []
+ordered_classes: list[Type] = []
 
 
 def init(root: str = __file__) -> None:
@@ -86,11 +86,11 @@ def iter_submodule_names(path: Path, root="") -> Iterator[str]:
 #################################################
 
 
-def get_ordered_classes_to_register(modules: list[ModuleType]):
+def get_ordered_classes_to_register(modules: list[ModuleType]) -> list[Type]:
     return toposort(get_register_deps_dict(modules))
 
 
-def get_register_deps_dict(modules: list[ModuleType]):
+def get_register_deps_dict(modules: list[ModuleType]) -> dict[Type, set[Type]]:
     my_classes = set(iter_my_classes(modules))
     deps_dict = {}
     for cls in my_classes:
@@ -98,7 +98,7 @@ def get_register_deps_dict(modules: list[ModuleType]):
     return deps_dict
 
 
-def iter_my_register_deps(cls: Type, my_classes: set[Type]):
+def iter_my_register_deps(cls: Type, my_classes: set[Type]) -> Generator[Type, None, None]:
     yield from iter_my_deps_from_annotations(cls, my_classes)
     my_classes_by_idname = {cls.bl_idname: cls for cls in my_classes if hasattr(cls, "bl_idname")}
     yield from iter_my_deps_from_parent_id(cls, my_classes_by_idname)
@@ -123,7 +123,7 @@ def get_dependency_from_annotation(value: Any) -> Type:
     return None
 
 
-def iter_my_deps_from_parent_id(cls: Type, my_classes_by_idname: dict[str, Type]) -> Generator:
+def iter_my_deps_from_parent_id(cls: Type, my_classes_by_idname: dict[str, Type]) -> Generator[Type, None, None]:
     if bpy.types.Panel in cls.__bases__:
         parent_idname = getattr(cls, "bl_parent_id", None)
         if parent_idname is not None:
@@ -140,7 +140,7 @@ def iter_my_classes(modules: list[ModuleType]) -> Generator[Type, None, None]:
                 yield cls
 
 
-def get_classes_in_modules(modules) -> set:
+def get_classes_in_modules(modules: list[ModuleType]) -> set[Type]:
     classes = set()
     for module in modules:
         for cls in iter_classes_in_module(module):
@@ -148,7 +148,7 @@ def get_classes_in_modules(modules) -> set:
     return classes
 
 
-def iter_classes_in_module(module) -> Generator:
+def iter_classes_in_module(module: ModuleType) -> Generator[Type, None, None]:
     for value in module.__dict__.values():
         if inspect.isclass(value):
             yield value
@@ -179,7 +179,7 @@ def get_register_base_types() -> set[Type]:
 #################################################
 
 
-def toposort(deps_dict: dict) -> list:
+def toposort(deps_dict: dict[Type, set[Type]]) -> list[Type]:
     sorted_list = []
     sorted_values = set()
     while len(deps_dict) > 0:

@@ -105,7 +105,7 @@ class SampleProject:
         assert len(infos) == 1, infos
         info = infos[0]
         m = SampleProject.bake_result_info_line.search(info.msg)
-        assert m is not None, f"{info} not matching {SampleProject.last_bake_result_details}"
+        assert m is not None, f"{info} not matching {SampleProject.bake_result_info_line}"
         cues = int(m.groupdict()["cues"])
         strips = int(m.groupdict()["strips"])
         return cues, strips
