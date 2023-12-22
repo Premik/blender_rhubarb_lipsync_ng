@@ -73,7 +73,8 @@ class ShowCueInfoHelp(bpy.types.Operator):
 
         draw = lambda this, ctx: ShowCueInfoHelp.draw_popup(this, self.key, ctx)
         msi: MouthShapeInfo = MouthShapeInfos[self.key].value
-        bpy.context.window_manager.popup_menu(draw, title=f"{msi.short_dest:<25}", icon='INFO')
+        title = f"{msi.key_displ}  {msi.short_dest}"
+        bpy.context.window_manager.popup_menu(draw, title=f"{title:<25}", icon='INFO')
 
         return {'FINISHED'}
 

@@ -6,7 +6,7 @@ from bpy.types import Context
 import rhubarb_lipsync.blender.baking_operators as baking_operators
 import rhubarb_lipsync.blender.mapping_operators as mapping_operators
 import rhubarb_lipsync.blender.ui_utils as ui_utils
-from rhubarb_lipsync.blender.mapping_list import MappingUIList
+import rhubarb_lipsync.blender.mapping_list as mapping_list
 from rhubarb_lipsync.blender.preferences import CueListPreferences, RhubarbAddonPreferences, MappingPreferences
 from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, ResultLogListProperties
 from rhubarb_lipsync.blender.mapping_properties import MappingProperties, NlaTrackRef, StripPlacementProperties
@@ -33,6 +33,7 @@ class MappingListOptionsPanel(bpy.types.Panel):
         # layout.prop(mlp, "actions_multiline_view") # Doesn't work
         layout.prop(mlp, "show_help_button")
         layout.prop(clp, "as_circle")
+        layout.prop(mlp, "actions_multiline_view")
 
 
 class MappingAndBakingPanel(bpy.types.Panel):
@@ -42,6 +43,7 @@ class MappingAndBakingPanel(bpy.types.Panel):
     bl_region_type = "UI"
     bl_category = "RLSP"
     bl_options = {'DEFAULT_CLOSED'}
+    bl_order = 1
 
     def draw_config(self) -> None:
         mprops: MappingProperties = MappingProperties.from_context(self.ctx)
@@ -59,8 +61,11 @@ class MappingAndBakingPanel(bpy.types.Panel):
 
         layout = self.layout
 
-        layout.row(align=True)
-        layout.template_list(MappingUIList.bl_idname, "Mapping", mprops, "items", mprops, "index")
+        
+        layout.row(align=True)        
+        layout.template_list(mapping_list.MappingUIList.bl_idname, "Mapping", mprops, "items", mprops, "index")
+        #i=mprops.index
+        #mapping_list.draw_mapping_item_multiline(self.ctx, layout, mprops, i)
         return True
 
     def draw_nla_track_picker(self, ctx: Context, track_field_name: str, text: str) -> None:
@@ -139,7 +144,7 @@ class MappingAndBakingPanel(bpy.types.Panel):
                 self.draw_nla_setup()
             self.draw_strip_placement_settings()
 
-            layout.operator(baking_operators.BakeToNLA.bl_idname, icon="LONGDISPLAY")
+            layout.operator(baking_operators.BakeToNLA.bl_idname, icon="NLA")
             rll: ResultLogListProperties = CaptureListProperties.from_context(context).last_resut_log
             if rll.has_any_errors_or_warnings:
                 box = layout.box()
@@ -160,3 +165,4 @@ class MappingAndBakingPanel(bpy.types.Panel):
             raise
         finally:
             self.ctx = None
+
