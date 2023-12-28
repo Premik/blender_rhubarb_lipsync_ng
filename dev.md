@@ -149,9 +149,13 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 ## Todo
 
 ### High
-* Shape-key actions are not baked
+* Generally doesn't make sense to have both normal actions and shape-key action in the same mappings. On on armature should be always normal action. On mesh shape-keys (if normal action is still needed perhaps parenting an empty could be used: verify)
 * Baking - round to whole frames when not sub-frames visible
-
+* Add start- end frame properties to the MappingItem. So NLA clips can clip a frame range from a longer action (i.e.to support face-it style)
+* Mapping wizards
+  * Clear - will remove the mapping (delete from the object completly?)
+  * Auto-it 
+  * By name - More instances (alow user defined) - will map action by matching name patterns (should provide some placeholder/expansions in the expression for objectName, etc)
 
 ### Normal
 * extended shapes- seems they are generated even when disabled -check
@@ -162,15 +166,11 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 
 - Strip placement reorg should be possible to set/override on different levelson Individual cue? (mapping item)
 - Strip placement -add preset? Similar like the Render Properties / Light paths (button on the group)
-* Limit possible selection to armature and mesh-object only? (and not obj.library).
 * Add [speaker](https://docs.blender.org/manual/en/latest/render/output/audio/speaker.html) as an alternative to Sequencer audio clip
-* Rename capture_panel to something better? (sound setup?)
 * The scaled down icons (32x32) still hard to see. Pre-scale different set icons?
-* autoload.py - complete type-hints
 * Capture panel, optimize, store pref, props etc. directy on the self (same like self.ctx)
 * Verify the Dialog file is working
 * Add "null" cue type to indicate un-detected cues (those red longer than the limit)
-* `layout.prop(mlp, "actions_multiline_view") ` doesn't currently work. Should show regular action and shape-key action on two lines
 * Capture panel - add `crop` button to replace to crop too long cues and add x shape instead of them
 * Changel all labels cases to follow Blender style "Foo in Bar"
 * Add some simple blender sample file
@@ -178,38 +178,8 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 ##
 - 
 
-## Action selector
-- only from the selected object?
-- asset/nonasset
-- shapekey/action
-- armature actions only?
-- match by name sub-string/regexp
-- match by action group?
-
-
 ## Check
 https://github.com/Hunanbean/Papagayo-NGLipsyncImporterForBlender
-
-## Baking
-
-My current thoughts about the baking is there should eventually be multiple options how to "bake" the captured mouth `Cues`:
-
-1) To a new `Action`. Pretty much what is in the current version. Mapping setup requires creating an `Action` for each `Cue type`. And the result is a new `Action`. With each mouth-shape of the caputred `Cues` baked to key-frames.
-2) To `NLA tracks`. The mouth-shape `Actions` and/or `Shapekey Actions` are put into two `NLA tracks` as `NLA strips` in a zig/zag pattern. With proper `strip` settings they'd get blended automatically by `NLA`. So Mapping setup requires creating `Actions` and/or `Shape-key Actions` (or both).
-3) "Jump to frame" - more like a preview. Clicking on the captured `Cue` from the list would jump to the frame of  that Cue. This is inspired by the `Faceit` plugin. Where Every 10 frames there is different mouth shape (and optionally shape-key) keyframed directly on the timeline.
-
-I also realized it doesn't make sense mark the Mouth-shape Actions as Assets. Like it is currently required in the PR. They can be makred as assets but it should't be required.
-
-So from the use-case perspective, it makes more sense to split the whole process into two stages (two panels):
-1 - **Sound setup and capture**: Select the sound input, run the binary. Captured cues are put into an `UIList` but not "baked" yet.
-2 - **Cues mapping setup and baking**: For each `Cue type` an `Action` or/and `Shapekey Action` or frame number is provided (=the Mapping setup). Then baking is ran. While the baking can be run repeatidly without re-runing the capture.
-
-So these thought led me to start working on this plugin more. But it took me more time than I anticipated and it ended up in a rewrite.
-
-Currently I have the first part "Setup and Capture" is pretty much done on [my branch](https://github.com/Premik/blender-rhubarb-lipsync/tree/rework). But the mapping setup and baking the cues is still WIP.
-
-
-https://blender.stackexchange.com/questions/206231/how-can-i-make-an-object-use-its-animation-action-at-a-specific-frame-in-blende
 
 
 ## NLA
@@ -234,3 +204,34 @@ https://blenderartists.org/t/how-to-fix-blender-error-disabled-cant-edit-this-pr
 Windows system console:
 https://blender.stackexchange.com/questions/145890/where-is-the-system-console
 
+
+```
+class FaceitExpressions(PropertyGroup):
+    '''Properties stored in each expression item'''
+    name: StringProperty(
+        options=set(),
+    )
+    side: StringProperty(
+        options=set(),
+    )
+    frame: IntProperty(
+        options=set(),
+    )
+    index: IntProperty(
+        options=set(),
+    )
+    mirror_name: StringProperty(
+        options=set(),
+    )
+    corr_shape_key: BoolProperty(
+        name='Shape Key',
+        description='Corrective Shape Key active on this expression',
+        default=False
+    )
+    procedural: EnumProperty(
+        name='Procedural Expression',
+        items=PROCEDURAL_EXPRESSION_ITEMS,
+    )
+
+
+```

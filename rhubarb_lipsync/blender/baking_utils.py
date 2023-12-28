@@ -60,6 +60,15 @@ def strips_on_track(track: NlaTrack, start: int, end: int) -> Iterator[NlaStrip]
         yield s
 
 
+
+def is_action_shape_key_action(action: bpy.types.Action) -> bool:
+    """Determine weather an action is a shape-key action or a regular one."""
+    for fcurve in action.fcurves: # There doesn't seems to be a better way that check the data path
+        if fcurve.data_path.startswith("key_blocks["):
+            return True
+    return False
+
+
 class BakingContext:
     """Ease navigation and iteration over various stuff needed for baking"""
 

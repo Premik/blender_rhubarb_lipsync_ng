@@ -8,37 +8,6 @@ from rhubarb_lipsync.blender.mapping_properties import MappingProperties, Mappin
 from rhubarb_lipsync.blender.ui_utils import IconsManager
 
 
-class TestPanel(Panel):
-    bl_idname = "RLPS_PT_TestPanel"
-    bl_label = "Test"
-    bl_parent_id = "RLPS_PT_map_and_bake"                    
-    bl_space_type = "VIEW_3D"
-    bl_region_type = "UI"
-   # bl_category = "RLSP"
-    
-
-    def draw(self, context: Context) -> None:
-        prefs = RhubarbAddonPreferences.from_context(context)
-
-        layout = self.layout
-        row = layout.row()
-        row.label(text="TEST1")
-
-class TestPanel2(Panel):
-    bl_idname = "RLPS_PT_TestPanel2"
-    bl_label = "Test"   
-    bl_parent_id = "RLPS_PT_map_and_bake"   
-    bl_space_type = "VIEW_3D"
-    bl_region_type = "UI"
-    bl_category = "RLSP"
-    
-
-    def draw(self, context: Context) -> None:
-        prefs = RhubarbAddonPreferences.from_context(context)
-
-        layout = self.layout
-        row = layout.row()
-        row.label(text="TEST2")
 
 def draw_mapping_item(ctx: Context, layout: UILayout, mp:MappingProperties, itemIndex:int):
     prefs = RhubarbAddonPreferences.from_context(ctx)

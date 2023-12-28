@@ -194,7 +194,7 @@ class MappingProperties(PropertyGroup):
 
     @staticmethod
     def from_context(ctx: Context) -> Optional['MappingProperties']:
-        """Get the selecrted capture properties from the current scene of the provided context"""
+        """Get the selected capture properties from the current scene of the provided context"""
         # ctx.selected_editable_objects
         return MappingProperties.from_object(ctx.object)
 
