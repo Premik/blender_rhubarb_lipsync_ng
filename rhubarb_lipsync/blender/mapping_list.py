@@ -1,11 +1,10 @@
 
-from bpy.types import Context, SpaceDopeSheetEditor, UILayout, UIList
-from bpy.types import UI_UL_list, Panel
+from bpy.types import Context, UILayout, UIList
+from bpy.types import UI_UL_list
 
 import rhubarb_lipsync.blender.mapping_operators as mapping_operators
 from rhubarb_lipsync.blender.preferences import CueListPreferences, RhubarbAddonPreferences, MappingPreferences
 from rhubarb_lipsync.blender.mapping_properties import MappingProperties, MappingItem
-from rhubarb_lipsync.blender.ui_utils import IconsManager
 
 
 
@@ -57,7 +56,6 @@ def draw_mapping_item(ctx: Context, layout: UILayout, mp:MappingProperties, item
 
 def draw_mapping_item_multiline(ctx: Context, layout: UILayout, mp:MappingProperties, itemIndex:int):
     prefs = RhubarbAddonPreferences.from_context(ctx)
-    mlp: MappingPreferences = prefs.mapping_prefs
     clp: CueListPreferences = prefs.cue_list_prefs
     item = mp.items[itemIndex]
     selected = bool(mp.index == itemIndex)
@@ -110,9 +108,7 @@ class MappingUIList(UIList):
         index: int,
         flt_flag: int,
     ) -> None:
-        prefs = RhubarbAddonPreferences.from_context(context)
-        mlp: MappingPreferences = prefs.mapping_prefs
-        clp: CueListPreferences = prefs.cue_list_prefs
+        RhubarbAddonPreferences.from_context(context)
         draw_mapping_item(context, layout, data, index)
         #draw_mapping_item_multiline(context, layout, data, index)
 

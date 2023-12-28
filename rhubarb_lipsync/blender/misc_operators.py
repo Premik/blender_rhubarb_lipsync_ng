@@ -13,7 +13,6 @@ import json
 from urllib import request
 import traceback
 import re
-import re
 
 log = logging.getLogger(__name__)
 
