@@ -4,7 +4,7 @@ from typing import Any, Optional, Generator
 
 import bpy
 import bpy.utils.previews
-from bpy.props import BoolProperty, CollectionProperty, IntProperty, PointerProperty, StringProperty
+from bpy.props import CollectionProperty, IntProperty, PointerProperty, StringProperty
 from bpy.types import Context, PropertyGroup, NlaTrack
 
 from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthShapeInfo, MouthShapeInfos
@@ -29,7 +29,16 @@ class NlaTrackRef(PropertyGroup):
 
     def items(self) -> Generator[NlaTrack | Any, Any, None]:
         o = self.object
-        if not o or not o.animation_data or not o.animation_data.nla_tracks:
+        if not o:
+            return        
+        if o.type == "MESH": #For mesh only support shape-key actions
+            if not o.data or not o.data.shape_keys or not o.data.shape_keys.animation_data:
+                return
+            for t in o.data.shape_keys.animation_data.nla_tracks:
+                yield t
+            return
+            
+        if not o.animation_data or not o.animation_data.nla_tracks:
             return
         for t in o.animation_data.nla_tracks:
             yield t
@@ -81,13 +90,7 @@ class MappingItem(PropertyGroup):
         options={'LIBRARY_EDITABLE'},
         override={'LIBRARY_OVERRIDABLE'},
     )
-    shapekey_action: PointerProperty(  # type: ignore
-        type=bpy.types.Action,
-        name="Shape key",
-        options={'LIBRARY_EDITABLE'},
-        override={'LIBRARY_OVERRIDABLE'},
-    )
-
+    
     @cached_property
     def cue_desc(self) -> MouthShapeInfo | None:
         if not self.key:
@@ -125,34 +128,7 @@ class MappingProperties(PropertyGroup):
         override={'LIBRARY_OVERRIDABLE'},
     )
 
-    def on_nla_map_action_update(self, ctx: Context) -> None:
-        if self.nla_map_shapekey or self.nla_map_action:
-            return  # Either one tick should be checked
-        # Neither is selected, meaning this one has been uticked. Check the other one
-        self.nla_map_shapekey = True
-
-    def on_nla_map_shapekey_update(self, ctx: Context) -> None:
-        if self.nla_map_shapekey or self.nla_map_action:
-            return  # Either one tick should be checked
-        # Neither is selected, meaning this one has been uticked. Check the other one
-        self.nla_map_action = True
-
-    nla_map_action: BoolProperty(  # type: ignore
-        default=True,
-        name="Action",
-        description="Map cues to regular Action",
-        update=on_nla_map_action_update,
-        options={'LIBRARY_EDITABLE'},
-        override={'LIBRARY_OVERRIDABLE'},
-    )
-    nla_map_shapekey: BoolProperty(  # type: ignore
-        default=False,
-        name="Shape key",
-        description="Map cues to shape-key Action",
-        update=on_nla_map_shapekey_update,
-        options={'LIBRARY_EDITABLE'},
-        override={'LIBRARY_OVERRIDABLE'},
-    )
+    
 
     def build_items(self, obj: bpy.types.Object) -> None:
         # log.trace("Already built")  # type: ignore
@@ -180,17 +156,14 @@ class MappingProperties(PropertyGroup):
             return False
         for i in self.items:
             mi: MappingItem = i
-            if mi.action or mi.shapekey_action:
+            if mi.action:
                 return True
         return False
 
     @property
     def blank_keys(self) -> list[str]:
         return [mi.key for mi in self.items or [] if not mi.action]
-
-    @property
-    def blank_shapekeys(self) -> list[str]:
-        return [mi.key for mi in self.items or [] if not mi.shapekey_action]
+   
 
     @staticmethod
     def from_context(ctx: Context) -> Optional['MappingProperties']:

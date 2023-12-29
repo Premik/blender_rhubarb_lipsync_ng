@@ -30,22 +30,13 @@ def draw_mapping_item(ctx: Context, layout: UILayout, mp:MappingProperties, item
 
     
     #row = split.row()
-    row = split.row()
-    if mp.nla_map_action:
-        row.prop(item, 'action', text="")
+    row = split.row()    
+    row.prop(item, 'action', text="")
         
         #row.template_ID(item, "action")
         #row.template_ID_preview(item, "action")
         #row.template_any_ID(item, "action")
-        
-
-    # TODO: Doesn't work
-    if mlp.actions_multiline_view:
-        row = layout.row()
-    if mp.nla_map_shapekey:
-        row.prop(item, 'shapekey_action', text="")
-
-    
+            
     # row.template_ID(item, "action", new="action.new", unlink="action.unlink")
 
     

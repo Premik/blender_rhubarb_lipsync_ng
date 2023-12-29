@@ -199,7 +199,7 @@ class BakeToNLA(bpy.types.Operator):
         rll: ResultLogListProperties = CaptureListProperties.from_context(context).last_resut_log
         rll.clear()  # Clear log entries from last bake
         wm = context.window_manager
-        return wm.invoke_props_dialog(self, width=340)
+        return wm.invoke_props_dialog(self, width=400)
 
     def to_strip(self) -> None:
         b = self.bctx

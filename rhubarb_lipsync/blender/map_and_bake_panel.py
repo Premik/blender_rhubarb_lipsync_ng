@@ -12,6 +12,7 @@ from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, Re
 from rhubarb_lipsync.blender.mapping_properties import MappingProperties, NlaTrackRef, StripPlacementProperties
 from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthShapeInfos
 from rhubarb_lipsync.blender.misc_operators import ShowResultLogDetails
+import rhubarb_lipsync.blender.baking_utils as baking_utils
 
 log = logging.getLogger(__name__)
 
@@ -33,7 +34,7 @@ class MappingListOptionsPanel(bpy.types.Panel):
         # layout.prop(mlp, "actions_multiline_view") # Doesn't work
         layout.prop(mlp, "show_help_button")
         layout.prop(clp, "as_circle")
-        layout.prop(mlp, "actions_multiline_view")
+        #layout.prop(mlp, "actions_multiline_view")
 
 
 class MappingAndBakingPanel(bpy.types.Panel):
@@ -46,11 +47,9 @@ class MappingAndBakingPanel(bpy.types.Panel):
     bl_order = 1
 
     def draw_config(self) -> None:
-        mprops: MappingProperties = MappingProperties.from_context(self.ctx)
+        MappingProperties.from_context(self.ctx)
         layout = self.layout
-        row = layout.row(align=True)
-        row.prop(mprops, 'nla_map_action', toggle=True)
-        row.prop(mprops, 'nla_map_shapekey', toggle=True)
+        row = layout.row(align=True)        
         row.popover(panel=MappingListOptionsPanel.bl_idname, text="", icon="VIS_SEL_11")
 
     def draw_mapping_list(self) -> bool:
@@ -58,6 +57,7 @@ class MappingAndBakingPanel(bpy.types.Panel):
         mprops: MappingProperties = MappingProperties.from_context(self.ctx)
         if not ui_utils.draw_expandable_header(prefs, "mapping_list_panel_expanded", "Mapping", self.layout):
             return False
+        self.draw_config()
 
         layout = self.layout
 
@@ -78,7 +78,10 @@ class MappingAndBakingPanel(bpy.types.Panel):
         op: mapping_operators.CreateNLATrack = row.operator(mapping_operators.CreateNLATrack.bl_idname, text="", icon="DUPLICATE")
         # obj_name = self.ctx.object and self.ctx.object.name or ''
         # op.name = f"RLPS {obj_name} {text}" # Include object name
-        op.name = f"RLPS {text}"
+        if baking_utils.does_object_support_shapekey_actions(ctx.object):        
+            op.name = f"RLPS Key {text}"
+        else:
+            op.name = f"RLPS {text}"
         op.track_field_name = track_field_name
         # op.trackRef=track
 
@@ -139,7 +142,7 @@ class MappingAndBakingPanel(bpy.types.Panel):
                 layout.alert = True
                 layout.operator(mapping_operators.BuildCueInfoUIList.bl_idname)
                 return
-            self.draw_config()
+            
             if self.draw_mapping_list():
                 self.draw_nla_setup()
             self.draw_strip_placement_settings()

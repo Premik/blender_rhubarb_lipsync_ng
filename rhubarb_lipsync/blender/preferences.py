@@ -3,6 +3,7 @@ from functools import cached_property
 from typing import Optional, cast, Iterator
 import traceback
 
+
 from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty, PointerProperty, StringProperty
 from bpy.types import AddonPreferences, Context, PropertyGroup, UILayout, Object
 import rhubarb_lipsync.blender.ui_utils as ui_utils
@@ -92,6 +93,8 @@ class CueListPreferences(PropertyGroup):
 
 
 class MappingPreferences(PropertyGroup):
+    
+    
     actions_multiline_view: BoolProperty(  # type: ignore
         name="Show actions on two lines",
         description="When both regular action and shape-key action are visible show them on two lines instead of side-by-side.",

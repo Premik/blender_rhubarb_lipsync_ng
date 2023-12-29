@@ -5,7 +5,7 @@ from typing import List, Optional, Iterator
 import bpy
 from bpy.types import Context, Object, NlaTrack, NlaStrip
 
-
+from collections import defaultdict
 from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, MouthCueList, MouthCueListItem, ResultLogListProperties
 from rhubarb_lipsync.blender.mapping_properties import MappingProperties, MappingItem, NlaTrackRef
 from rhubarb_lipsync.blender.strip_placement_properties import StripPlacementProperties
@@ -69,6 +69,16 @@ def is_action_shape_key_action(action: bpy.types.Action) -> bool:
     return False
 
 
+ 
+def does_object_support_shapekey_actions(o: bpy.types.Object) -> bool:
+    """Whether it is currently possible to assigne a shape-key action to the provided object. 
+      Object has to be a Mesh with some shape-keys already created"""
+    if not o:
+        return False
+    if not o.type != "MESH":
+        return False
+    return bool(o.data and o.data.shape_keys)
+
 class BakingContext:
     """Ease navigation and iteration over various stuff needed for baking"""
 
@@ -105,10 +115,19 @@ class BakingContext:
         return self._objs
 
     def object_iter(self) -> Iterator[Object]:
+        """To iterate over all to-be-baked objects with for each loop. 
+        Note this function actually sets the current_object as a side-effect so can't be used for concurent looping. """
         for i, o in enumerate(self.objects):
             self.object_index = i
             yield o
         self.object_index = -1
+
+    def next_object(self) -> Object:
+        if not self.objects:
+            self.object_index = -1
+            return None
+        self.object_index += 1
+        return self.current_object
 
     @property
     def current_object(self) -> Object:
@@ -118,13 +137,18 @@ class BakingContext:
             self.object_index = -1
             return None
         return self.objects[self.object_index]
+    
+    @property
+    def use_shape_keys_for_current_object(self) -> bool:
+        if not self.current_object:
+            return False
+        if not self.current_object.type == "MESH":
+            return False
+        return self.current_object.shape_keys
+    
 
-    def next_object(self) -> Object:
-        if not self.objects:
-            self.object_index = -1
-            return None
-        self.object_index += 1
-        return self.current_object
+
+    
 
     @cached_property
     def cprops(self) -> CaptureProperties:
@@ -278,7 +302,7 @@ class BakingContext:
             strips += len(list(self.strips_on_current_track()))
 
         if strips > 0:
-            ret += [f"Clash with {strips} existing strips"]
+            ret += [f"Clash with {strips} existing strips. Press the (Remove Strips) button"]
         return ret
 
     def validate_selection(self) -> str:
@@ -291,6 +315,28 @@ class BakingContext:
             return "Object has no mapping"
         return ""
 
+    def validate_mapping_item(self, mi:MappingItem)->str:
+        k:str=mi.key
+        is_extended = bool(k in MouthShapeInfos.extended())
+        if not mi.action:
+            # Non-extended cues has to be mapped, as well the extended cues when used
+            if not is_extended or self.prefs.use_extended_shapes:
+                return "{} has no action mapped"
+        else: # There is an Action mapped
+            if not self.prefs.use_extended_shapes:
+                return "Not using extended shapes but {} has mapping"
+        return ""
+            
+    
+    def validate_current_object_mapping(self)-> list[str]:        
+        error_msg: dict[str, list[str]] = defaultdict(list)
+        # Collect mapping error messages and group them by key so there are no too many lines
+        for mi in self.mprops.items:
+            msg = self.validate_mapping_item(mi)
+            if msg:
+                error_msg[msg]+=[mi.key]
+        return [tmpl.format(' '.join(keys)) for tmpl, keys in error_msg.items()]
+    
     def validate_current_object(self) -> list[str]:
         """Return validation errors of `self.object`."""
 
@@ -300,18 +346,7 @@ class BakingContext:
         ret: list[str] = []
         if not self.cue_items:
             ret += ["No cues in the capture"]
-        extended: list[str] = []
-        if self.prefs.use_extended_shapes:
-            extended = [msi.key for msi in MouthShapeInfos.extended()]
-        if self.mprops.nla_map_action:  # Find unmapped cues (regular action). Ignore extended if not used
-            lst = ','.join([k for k in self.mprops.blank_keys if k not in extended])
-            if lst:
-                ret += [f"{lst} has no action mapped"]
-
-        if self.mprops.nla_map_shapekey:
-            lst = ','.join([k for k in self.mprops.blank_shapekeys if k not in extended])
-            if lst:
-                ret += [f"{lst} has no shape-action mapped"]
-
+                
+        ret += self.validate_current_object_mapping()
         ret += self.validate_track()
         return ret
