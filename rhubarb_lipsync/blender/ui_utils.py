@@ -201,6 +201,25 @@ def set_panel_category(panel, category: str):
         traceback.print_exc()
 
 
+
+def is_action_shape_key_action(action: bpy.types.Action) -> bool:
+    """Determine weather an action is a shape-key action or a regular one."""
+    for fcurve in action.fcurves: # There doesn't seems to be a better way that check the data path
+        if fcurve.data_path.startswith("key_blocks["):
+            return True
+    return False
+
+
+ 
+def does_object_support_shapekey_actions(o: bpy.types.Object) -> bool:
+    """Whether it is currently possible to assigne a shape-key action to the provided object. 
+      Object has to be a Mesh with some shape-keys already created"""
+    if not o:
+        return False
+    if o.type != "MESH":
+        return False
+    return bool(o.data and o.data.shape_keys)
+
 class DropdownHelper:
     """Helper for building dropdowns for non-ID items of an collection. Item is referenced
     by index and a (search-)name. Index is further encoded as number prefix of the name separated by space.

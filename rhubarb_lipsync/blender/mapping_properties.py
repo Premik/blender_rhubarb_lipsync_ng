@@ -4,12 +4,13 @@ from typing import Any, Optional, Generator
 
 import bpy
 import bpy.utils.previews
-from bpy.props import CollectionProperty, IntProperty, PointerProperty, StringProperty
+from bpy.props import BoolProperty, CollectionProperty, IntProperty, PointerProperty, StringProperty
 from bpy.types import Context, PropertyGroup, NlaTrack
 
 from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthShapeInfo, MouthShapeInfos
 from rhubarb_lipsync.blender.strip_placement_properties import StripPlacementProperties
 from rhubarb_lipsync.blender.ui_utils import DropdownHelper
+import rhubarb_lipsync.blender.ui_utils as ui_utils
 
 log = logging.getLogger(__name__)
 
@@ -30,8 +31,9 @@ class NlaTrackRef(PropertyGroup):
     def items(self) -> Generator[NlaTrack | Any, Any, None]:
         o = self.object
         if not o:
-            return        
-        if o.type == "MESH": #For mesh only support shape-key actions
+            return
+        #For mesh provide shape-key actions only. But only if the object has any shape-keys created
+        if ui_utils.does_object_support_shapekey_actions(o):        
             if not o.data or not o.data.shape_keys or not o.data.shape_keys.animation_data:
                 return
             for t in o.data.shape_keys.animation_data.nla_tracks:
@@ -163,7 +165,8 @@ class MappingProperties(PropertyGroup):
     @property
     def blank_keys(self) -> list[str]:
         return [mi.key for mi in self.items or [] if not mi.action]
-   
+    
+    
 
     @staticmethod
     def from_context(ctx: Context) -> Optional['MappingProperties']:
