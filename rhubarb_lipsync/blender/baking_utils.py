@@ -299,10 +299,21 @@ class BakingContext:
         if not mi.action:
             # Non-extended cues has to be mapped, as well the extended cues when used
             if not is_extended or self.prefs.use_extended_shapes:
-                return "{} has no action mapped"
+                return "{} {} no Action mapped"
         else:  # There is an Action mapped
             if not self.prefs.use_extended_shapes:
-                return "Not using extended shapes but {} has mapping"
+                return "Not using extended shapes but {} {} mapping"
+        if ui_utils.is_action_shape_key_action(mi.action):
+                if not ui_utils.does_object_support_shapekey_actions(self.current_object):
+                    return "{} {} a shape-key Action mapped while the Object has no shape-keys"
+                if not self.mprops.only_shapekeys:
+                    return "{} {} a shape-key Action while a normal Action is expected"
+        else: # A normal action
+            if self.mprops.only_shapekeys:
+                    return "{} {} a normal Action while a shape-key Action is expected"
+
+        
+            
         return ""
 
     def validate_current_object_mapping(self) -> list[str]:
@@ -312,7 +323,7 @@ class BakingContext:
             msg = self.validate_mapping_item(mi)
             if msg:
                 error_msg[msg] += [mi.key]
-        return [tmpl.format(' '.join(keys)) for tmpl, keys in error_msg.items()]
+        return [tmpl.format(' '.join(keys), 'has' if len(keys)==1 else 'have') for tmpl, keys in error_msg.items()]
 
     def validate_current_object(self) -> list[str]:
         """Return validation errors of `self.object`."""

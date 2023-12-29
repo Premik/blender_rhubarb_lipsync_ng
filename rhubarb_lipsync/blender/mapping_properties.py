@@ -124,9 +124,9 @@ class MappingProperties(PropertyGroup):
         override={'LIBRARY_OVERRIDABLE'},
     )
 
-    only_shapekeys: BoolProperty(
-        name="As gird",
-        description="Display the list in the grid mode",
+    only_shapekeys: BoolProperty( # type: ignore
+        name="Only shape-keys",
+        description="When enabled normal Actions are filtered out and only shape-key Actions are listed",
         default=False,
         options={'LIBRARY_EDITABLE'},
         override={'LIBRARY_OVERRIDABLE'},
@@ -151,6 +151,10 @@ class MappingProperties(PropertyGroup):
         for msi in MouthShapeInfos.all():
             item: MappingItem = self.items.add()
             item.key = msi.key
+        #self.only_shapekeys=ui_utils.does_object_support_shapekey_actions(obj)
+        # Assume any mesh would use shape-keys by default (even when there are no shape-keys created yet)
+        self.only_shapekeys=bool(obj.type=="MESH")
+
 
     @property
     def selected_item(self) -> Optional[MappingItem]:

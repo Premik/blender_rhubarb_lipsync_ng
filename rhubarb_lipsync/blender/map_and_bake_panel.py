@@ -47,9 +47,21 @@ class MappingAndBakingPanel(bpy.types.Panel):
     bl_order = 1
 
     def draw_config(self) -> None:
-        MappingProperties.from_context(self.ctx)
+        mprops: MappingProperties = MappingProperties.from_context(self.ctx)
         layout = self.layout
         row = layout.row(align=True)
+         # EVENT_TAB
+        # DRIVER_DISTANCE
+        # ACTION_TWEAK
+
+        #col1.label(text="", icon="OBJECT_DATAMODE")
+        #col2.prop(item, 'action', text="")
+        #col1.label(text="", icon="SHAPEKEY_DATA")
+        # SEQ_STRIP_DUPLICATE
+        if mprops.only_shapekeys:
+            row.prop(mprops, "only_shapekeys", text="", icon="SHAPEKEY_DATA")
+        else:
+            row.prop(mprops, "only_shapekeys", text="", icon="OBJECT_DATAMODE")
         row.popover(panel=MappingListOptionsPanel.bl_idname, text="", icon="VIS_SEL_11")
 
     def draw_mapping_list(self) -> bool:
