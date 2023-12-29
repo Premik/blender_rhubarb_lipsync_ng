@@ -125,8 +125,24 @@ class MappingProperties(PropertyGroup):
     )
 
     only_shapekeys: BoolProperty( # type: ignore
-        name="Only shape-keys",
+        name="Only shape-key Actions",
         description="When enabled normal Actions are filtered out and only shape-key Actions are listed",
+        default=False,
+        options={'LIBRARY_EDITABLE'},
+        override={'LIBRARY_OVERRIDABLE'},
+    )
+
+    only_valid_actions: BoolProperty( # type: ignore
+        name="Only Valid Actions",
+        description="When enabled Actions with invalid f-curve keys are filtered out",
+        default=True,
+        options={'LIBRARY_EDITABLE'},
+        override={'LIBRARY_OVERRIDABLE'},
+    )
+
+    only_asset_actions: BoolProperty( # type: ignore
+        name="Only Asset Actions",
+        description="When enabled only Action marked as an Asset (aka poses) are listed",
         default=False,
         options={'LIBRARY_EDITABLE'},
         override={'LIBRARY_OVERRIDABLE'},
