@@ -34,7 +34,7 @@ class MappingListOptionsPanel(bpy.types.Panel):
         # layout.prop(mlp, "actions_multiline_view") # Doesn't work
         layout.prop(mlp, "show_help_button")
         layout.prop(clp, "as_circle")
-        #layout.prop(mlp, "actions_multiline_view")
+        # layout.prop(mlp, "actions_multiline_view")
 
 
 class MappingAndBakingPanel(bpy.types.Panel):
@@ -49,7 +49,7 @@ class MappingAndBakingPanel(bpy.types.Panel):
     def draw_config(self) -> None:
         MappingProperties.from_context(self.ctx)
         layout = self.layout
-        row = layout.row(align=True)        
+        row = layout.row(align=True)
         row.popover(panel=MappingListOptionsPanel.bl_idname, text="", icon="VIS_SEL_11")
 
     def draw_mapping_list(self) -> bool:
@@ -61,11 +61,10 @@ class MappingAndBakingPanel(bpy.types.Panel):
 
         layout = self.layout
 
-        
-        layout.row(align=True)        
+        layout.row(align=True)
         layout.template_list(mapping_list.MappingUIList.bl_idname, "Mapping", mprops, "items", mprops, "index")
-        #i=mprops.index
-        #mapping_list.draw_mapping_item_multiline(self.ctx, layout, mprops, i)
+        # i=mprops.index
+        # mapping_list.draw_mapping_item_multiline(self.ctx, layout, mprops, i)
         return True
 
     def draw_nla_track_picker(self, ctx: Context, track_field_name: str, text: str) -> None:
@@ -78,7 +77,7 @@ class MappingAndBakingPanel(bpy.types.Panel):
         op: mapping_operators.CreateNLATrack = row.operator(mapping_operators.CreateNLATrack.bl_idname, text="", icon="DUPLICATE")
         # obj_name = self.ctx.object and self.ctx.object.name or ''
         # op.name = f"RLPS {obj_name} {text}" # Include object name
-        if ui_utils.does_object_support_shapekey_actions(ctx.object):        
+        if ui_utils.does_object_support_shapekey_actions(ctx.object):
             op.name = f"RLPS Key {text}"
         else:
             op.name = f"RLPS {text}"
@@ -88,7 +87,6 @@ class MappingAndBakingPanel(bpy.types.Panel):
         # row.operator(capture_operators.DeleteCaptureProps.bl_idname, text="", icon="PANEL_CLOSE")
 
     def draw_nla_setup(self) -> None:
-
         self.draw_nla_track_picker(self.ctx, "nla_track1", "Track 1")
         self.draw_nla_track_picker(self.ctx, "nla_track2", "Track 2")
 
@@ -142,7 +140,7 @@ class MappingAndBakingPanel(bpy.types.Panel):
                 layout.alert = True
                 layout.operator(mapping_operators.BuildCueInfoUIList.bl_idname)
                 return
-            
+
             if self.draw_mapping_list():
                 self.draw_nla_setup()
             self.draw_strip_placement_settings()
@@ -168,4 +166,3 @@ class MappingAndBakingPanel(bpy.types.Panel):
             raise
         finally:
             self.ctx = None
-

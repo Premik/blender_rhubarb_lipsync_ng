@@ -1,7 +1,6 @@
 import unittest
 
 
-
 from rhubarb_lipsync.blender.ui_utils import DropdownHelper
 
 # def setUpModule():

@@ -32,14 +32,14 @@ class NlaTrackRef(PropertyGroup):
         o = self.object
         if not o:
             return
-        #For mesh provide shape-key actions only. But only if the object has any shape-keys created
-        if ui_utils.does_object_support_shapekey_actions(o):        
+        # For mesh provide shape-key actions only. But only if the object has any shape-keys created
+        if ui_utils.does_object_support_shapekey_actions(o):
             if not o.data or not o.data.shape_keys or not o.data.shape_keys.animation_data:
                 return
             for t in o.data.shape_keys.animation_data.nla_tracks:
                 yield t
             return
-            
+
         if not o.animation_data or not o.animation_data.nla_tracks:
             return
         for t in o.animation_data.nla_tracks:
@@ -92,7 +92,7 @@ class MappingItem(PropertyGroup):
         options={'LIBRARY_EDITABLE'},
         override={'LIBRARY_OVERRIDABLE'},
     )
-    
+
     @cached_property
     def cue_desc(self) -> MouthShapeInfo | None:
         if not self.key:
@@ -123,14 +123,21 @@ class MappingProperties(PropertyGroup):
         options={'LIBRARY_EDITABLE'},
         override={'LIBRARY_OVERRIDABLE'},
     )
+
+    only_shapekeys: BoolProperty(
+        name="As gird",
+        description="Display the list in the grid mode",
+        default=False,
+        options={'LIBRARY_EDITABLE'},
+        override={'LIBRARY_OVERRIDABLE'},
+    )
+
     strip_placement: PointerProperty(  # type: ignore
         type=StripPlacementProperties,
         name="Strip timing properties",
         options={'LIBRARY_EDITABLE'},
         override={'LIBRARY_OVERRIDABLE'},
     )
-
-    
 
     def build_items(self, obj: bpy.types.Object) -> None:
         # log.trace("Already built")  # type: ignore
@@ -165,8 +172,6 @@ class MappingProperties(PropertyGroup):
     @property
     def blank_keys(self) -> list[str]:
         return [mi.key for mi in self.items or [] if not mi.action]
-    
-    
 
     @staticmethod
     def from_context(ctx: Context) -> Optional['MappingProperties']:

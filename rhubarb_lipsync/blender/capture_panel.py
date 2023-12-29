@@ -34,7 +34,7 @@ class CaptureExtraOptionsPanel(bpy.types.Panel):
         row = layout.row()
         row.prop(props, "dialog_file", text="")
         layout.separator()
-                        
+
         layout.prop(prefs, "use_extended_shapes")
         layout.separator()
 
@@ -42,10 +42,6 @@ class CaptureExtraOptionsPanel(bpy.types.Panel):
         row.label(text="Recognizer:")
         row = layout.row()
         row.prop(prefs, "recognizer", text="")
-        
-        
-              
-            
 
 
 class CueListOptionsPanel(bpy.types.Panel):

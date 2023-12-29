@@ -93,8 +93,6 @@ class CueListPreferences(PropertyGroup):
 
 
 class MappingPreferences(PropertyGroup):
-    
-    
     actions_multiline_view: BoolProperty(  # type: ignore
         name="Show actions on two lines",
         description="When both regular action and shape-key action are visible show them on two lines instead of side-by-side.",
@@ -252,7 +250,7 @@ class RhubarbAddonPreferences(AddonPreferences):
 
         # Hack to circumvent circular imports
         import rhubarb_lipsync.blender.misc_operators as misc_operators
-        
+
         row.label(text="Check for updates:")
         if misc_operators.CheckForUpdates.has_checked():
             row.label(text=misc_operators.CheckForUpdates.cached_status_description())

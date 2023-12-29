@@ -1,4 +1,3 @@
-
 from bpy.types import Context, UILayout, UIList
 from bpy.types import UI_UL_list
 

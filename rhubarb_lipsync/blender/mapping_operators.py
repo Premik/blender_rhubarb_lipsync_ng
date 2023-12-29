@@ -96,7 +96,7 @@ class CreateNLATrack(bpy.types.Operator):
     def execute(self, ctx: Context) -> set[str]:
         mprops: MappingProperties = MappingProperties.from_context(ctx)
         o = ctx.object
-        
+
         if ui_utils.does_object_support_shapekey_actions(o):
             ad = o.data.shape_keys.animation_data
             if not ad:  # No shapke-key animation data, create them first

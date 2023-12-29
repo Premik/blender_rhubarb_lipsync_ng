@@ -16,25 +16,26 @@ import re
 
 log = logging.getLogger(__name__)
 
-def current_version()->tuple[int, int, int]:
-    return bl_info['version'] #type: ignore
 
-def version_str(ver:tuple[int, int, int])->str:
+def current_version() -> tuple[int, int, int]:
+    return bl_info['version']  # type: ignore
+
+
+def version_str(ver: tuple[int, int, int]) -> str:
     return f"{ver[0]}.{ver[1]}.{ver[2]}"
-
 
 
 github_tag_pattern = re.compile(r"v(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)")
 
 
 def parse_github_tag(tag: str) -> tuple[int, int, int]:
-    """ Parses a GitHub tag string into a tuple of integers representing the version.    
-        Assumes the tag is in semantic versioning format (e.g., 'v1.0.1'). """
-    
+    """Parses a GitHub tag string into a tuple of integers representing the version.
+    Assumes the tag is in semantic versioning format (e.g., 'v1.0.1')."""
+
     match = github_tag_pattern.match(tag)
     if not match:
         raise ValueError(f"Failed to parse {tag} tag to capture the version number.")
-    
+
     major = int(match.group('major'))
     minor = int(match.group('minor'))
     patch = int(match.group('patch'))
@@ -49,18 +50,16 @@ class CheckForUpdates(bpy.types.Operator):
     github_owner: StringProperty(name="Github repo owner", default="Premik")  # type: ignore
     github_repo: StringProperty(name="Github repo name", default="blender_rhubarb_lipsync_ng")  # type: ignore
 
-    avail_version_cached=(0,0,0)
-    last_error=""
+    avail_version_cached = (0, 0, 0)
+    last_error = ""
 
     @classmethod
-    def has_checked(csl)->bool:
-        return csl.avail_version_cached != (0,0,0) or bool(csl.last_error)
-        
+    def has_checked(csl) -> bool:
+        return csl.avail_version_cached != (0, 0, 0) or bool(csl.last_error)
 
     @classmethod
     def description(csl, context: Context, self: 'CheckForUpdates') -> str:
         return csl.cached_status_description()
-
 
     @classmethod
     def cached_status_description(csl) -> str:
@@ -76,38 +75,34 @@ class CheckForUpdates(bpy.types.Operator):
             return f"Your version {version_str(cv)} is actually newer than the one released {version_str(av)}."
         return f"You are using the latest {version_str(av)} version."
 
-    def get_latest_release_info_from_github(self)->str|None:
+    def get_latest_release_info_from_github(self) -> str | None:
         url = f"https://api.github.com/repos/{self.github_owner}/{self.github_repo}/releases/latest"
         log.info(f"Opening: {url}")
         try:
             with request.urlopen(url) as response:
                 if response.status != 200:
-                    CheckForUpdates.last_error= "Received {response.status} http code."
+                    CheckForUpdates.last_error = "Received {response.status} http code."
                     log.error(f"{CheckForUpdates.last_error} Url: {url}.")
-                    log.debug(str(response))                    
-                    return None 
+                    log.debug(str(response))
+                    return None
                 data = json.loads(response.read().decode())
                 return data['tag_name']
-                    
+
         except Exception as e:
-            CheckForUpdates.last_error=f"Error fetching the release details from github {str(e)}"
+            CheckForUpdates.last_error = f"Error fetching the release details from github {str(e)}"
             log.error(f"{CheckForUpdates.last_error} Url: {url}.")
             log.debug(traceback.format_exc())
             return None
 
-    
-    
     def execute(self, ctx: Context) -> set[str]:
         last_tag = self.get_latest_release_info_from_github()
-        if last_tag is None: 
+        if last_tag is None:
             return {'CANCELLED'}
-        
-        CheckForUpdates.last_error=""
-        CheckForUpdates.avail_version_cached= parse_github_tag(last_tag)
-                
-        
-        return {'FINISHED'}
 
+        CheckForUpdates.last_error = ""
+        CheckForUpdates.avail_version_cached = parse_github_tag(last_tag)
+
+        return {'FINISHED'}
 
 
 class SetLogLevel(bpy.types.Operator):
@@ -174,4 +169,3 @@ class ShowResultLogDetails(bpy.types.Operator):
         rll.items.clear()
         ui_utils.redraw_3dviews(ctx)
         return {'FINISHED'}
-
