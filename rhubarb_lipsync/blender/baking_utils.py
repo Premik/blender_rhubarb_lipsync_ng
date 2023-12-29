@@ -12,7 +12,7 @@ from rhubarb_lipsync.blender.strip_placement_properties import StripPlacementPro
 from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences, MappingPreferences
 from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthShapeInfos, duration_scale_rate
 from bisect import bisect_left
-import rhubarb_lipsync.blender.ui_utils as ui_utils
+import rhubarb_lipsync.blender.mapping_utils as mapping_utils
 
 log = logging.getLogger(__name__)
 
@@ -303,8 +303,8 @@ class BakingContext:
         else:  # There is an Action mapped
             if not self.prefs.use_extended_shapes:
                 return "Not using extended shapes but {} {} mapping"
-        if ui_utils.is_action_shape_key_action(mi.action):
-                if not ui_utils.does_object_support_shapekey_actions(self.current_object):
+        if mapping_utils.is_action_shape_key_action(mi.action):
+                if not mapping_utils.does_object_support_shapekey_actions(self.current_object):
                     return "{} {} a shape-key Action mapped while the Object has no shape-keys"
                 if not self.mprops.only_shapekeys:
                     return "{} {} a shape-key Action while a normal Action is expected"

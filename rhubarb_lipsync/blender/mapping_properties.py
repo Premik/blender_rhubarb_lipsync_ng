@@ -10,7 +10,7 @@ from bpy.types import Context, PropertyGroup, NlaTrack
 from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthShapeInfo, MouthShapeInfos
 from rhubarb_lipsync.blender.strip_placement_properties import StripPlacementProperties
 from rhubarb_lipsync.blender.ui_utils import DropdownHelper
-import rhubarb_lipsync.blender.ui_utils as ui_utils
+import rhubarb_lipsync.blender.mapping_utils as mapping_utils
 
 log = logging.getLogger(__name__)
 
@@ -33,7 +33,7 @@ class NlaTrackRef(PropertyGroup):
         if not o:
             return
         # For mesh provide shape-key actions only. But only if the object has any shape-keys created
-        if ui_utils.does_object_support_shapekey_actions(o):
+        if mapping_utils.does_object_support_shapekey_actions(o):
             if not o.data or not o.data.shape_keys or not o.data.shape_keys.animation_data:
                 return
             for t in o.data.shape_keys.animation_data.nla_tracks:

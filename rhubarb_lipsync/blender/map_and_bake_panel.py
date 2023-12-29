@@ -12,7 +12,7 @@ from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, Re
 from rhubarb_lipsync.blender.mapping_properties import MappingProperties, NlaTrackRef, StripPlacementProperties
 from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthShapeInfos
 from rhubarb_lipsync.blender.misc_operators import ShowResultLogDetails
-import rhubarb_lipsync.blender.ui_utils as ui_utils
+import rhubarb_lipsync.blender.mapping_utils as mapping_utils
 
 log = logging.getLogger(__name__)
 
@@ -89,7 +89,7 @@ class MappingAndBakingPanel(bpy.types.Panel):
         op: mapping_operators.CreateNLATrack = row.operator(mapping_operators.CreateNLATrack.bl_idname, text="", icon="DUPLICATE")
         # obj_name = self.ctx.object and self.ctx.object.name or ''
         # op.name = f"RLPS {obj_name} {text}" # Include object name
-        if ui_utils.does_object_support_shapekey_actions(ctx.object):
+        if mapping_utils.does_object_support_shapekey_actions(ctx.object):
             op.name = f"RLPS Key {text}"
         else:
             op.name = f"RLPS {text}"

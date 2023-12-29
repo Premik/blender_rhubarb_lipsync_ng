@@ -8,7 +8,7 @@ from rhubarb_lipsync.blender.mapping_properties import MappingProperties, NlaTra
 from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthShapeInfos, MouthShapeInfo
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 from rhubarb_lipsync.blender.ui_utils import IconsManager
-import rhubarb_lipsync.blender.baking_utils as baking_utils
+import rhubarb_lipsync.blender.mapping_utils as mapping_utils
 
 log = logging.getLogger(__name__)
 
@@ -97,7 +97,7 @@ class CreateNLATrack(bpy.types.Operator):
         mprops: MappingProperties = MappingProperties.from_context(ctx)
         o = ctx.object
 
-        if ui_utils.does_object_support_shapekey_actions(o):
+        if mapping_utils.does_object_support_shapekey_actions(o):
             ad = o.data.shape_keys.animation_data
             if not ad:  # No shapke-key animation data, create them first
                 o.data.shape_keys.animation_data_create()
@@ -112,7 +112,7 @@ class CreateNLATrack(bpy.types.Operator):
         tracks = ad.nla_tracks
         t = tracks.new()
         t.name = self.name
-        msg = f"Created new NLA track: {self.name}. Shapekey track: {ui_utils.does_object_support_shapekey_actions(o)}"
+        msg = f"Created new NLA track: {self.name}. Shapekey track: {mapping_utils.does_object_support_shapekey_actions(o)}"
         log.debug(msg)
         self.report({'INFO'}, msg)
         if self.track_field_name:  # Select the newly created track
