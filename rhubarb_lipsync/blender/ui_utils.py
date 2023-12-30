@@ -201,8 +201,6 @@ def set_panel_category(panel, category: str):
         traceback.print_exc()
 
 
-
-
 class DropdownHelper:
     """Helper for building dropdowns for non-ID items of an collection. Item is referenced
     by index and a (search-)name. Index is further encoded as number prefix of the name separated by space.

@@ -43,6 +43,18 @@ class SampleData:
         sq = se.sequences.new_sound(self.name, str(self.snd_file_path), 1, 1)
         return cast(SoundSequence, sq).sound
 
+    @staticmethod
+    def compare_cues(a_cues: list[MouthCue], b_cues: list[MouthCue]) -> str:
+        if len(a_cues) != len(b_cues):
+            return f"Lengths don't match \n{a_cues}\n{b_cues}"
+        for i, (a, b) in enumerate(zip(a_cues, b_cues)):
+            if a != b:
+                return f"Cues at position {i} don't match:\n{a}\n{b}"
+        return None
+
+    def compare_cues_with_expected(self, b_cues: list[MouthCue]) -> str:
+        return SampleData.compare_cues(self.expected_cues, b_cues)
+
 
 snd_cs_female_o_a = SampleData("cs_female_o_a")
 snd_en_male_watchingtv = SampleData("en_male_watchingtv")

@@ -50,13 +50,13 @@ class MappingAndBakingPanel(bpy.types.Panel):
         mprops: MappingProperties = MappingProperties.from_context(self.ctx)
         layout = self.layout
         row = layout.row(align=True)
-         # EVENT_TAB
+        # EVENT_TAB
         # DRIVER_DISTANCE
         # ACTION_TWEAK
 
-        #col1.label(text="", icon="OBJECT_DATAMODE")
-        #col2.prop(item, 'action', text="")
-        #col1.label(text="", icon="SHAPEKEY_DATA")
+        # col1.label(text="", icon="OBJECT_DATAMODE")
+        # col2.prop(item, 'action', text="")
+        # col1.label(text="", icon="SHAPEKEY_DATA")
         # SEQ_STRIP_DUPLICATE
         if mprops.only_shapekeys:
             row.prop(mprops, "only_shapekeys", text="", icon="SHAPEKEY_DATA")

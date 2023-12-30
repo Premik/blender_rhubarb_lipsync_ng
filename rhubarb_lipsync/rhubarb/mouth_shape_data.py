@@ -174,6 +174,13 @@ class MouthCue:
     def of_json(cue_json: dict) -> 'MouthCue':
         return MouthCue(cue_json["value"], cue_json["start"], cue_json["end"])
 
+    def to_json(self) -> dict:
+        return {
+            "start": f"{self.start:.2f}",
+            "end": f"{self.end:.2f}",
+            "value": self.key,
+        }
+
     @cached_property
     def info(self) -> MouthShapeInfo:
         return MouthShapeInfos[self.key].value

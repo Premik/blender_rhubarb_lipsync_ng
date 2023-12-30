@@ -78,6 +78,34 @@ class RhubarbParser:
     def lipsync_json2MouthCues(cues_json: List[Dict]) -> List[MouthCue]:
         return [MouthCue.of_json(c_json) for c_json in cues_json]
 
+    @staticmethod
+    def lipsync_json_metadata(sound_file: str, duration: float, version=None) -> Dict[str, Any]:
+        """Generate json-dict for the ruharb metadata section"""
+        ret = {
+            "metadata": {
+                "soundFile": sound_file,
+                "duration": f"{duration:.2f}",
+            }
+        }
+        if version:
+            ret['metadata']['version'] = version
+        return ret
+
+    @staticmethod
+    def mouth_cues2lipsync_json(cues: List[MouthCue], sound_file="export.ogg", version=None) -> Dict[str, Any]:
+        """Unparse the parsed cue list to json-dict"""
+        if not cues:
+            return RhubarbParser.lipsync_json_metadata(sound_file, 0, version)
+        last_cue = cues[-1]
+        ret = RhubarbParser.lipsync_json_metadata(sound_file, last_cue.end, version)
+        ret['mouthCues'] = [c.to_json() for c in cues]
+        return ret
+
+    @staticmethod
+    def unparse_mouth_cues(cues: List[MouthCue], sound_file="export.ogg", version=None) -> str:
+        json_dic = RhubarbParser.mouth_cues2lipsync_json(cues, sound_file, version)
+        return json.dumps(json_dic, indent=2)
+
 
 class RhubarbCommandWrapper:
     """Wraps low level operations related to the lipsync executable."""

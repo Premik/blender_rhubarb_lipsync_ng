@@ -8,7 +8,6 @@ import rhubarb_lipsync.rhubarb.rhubarb_command as rhubarb_command
 
 # import tests.sample_data
 import sample_data
-from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCue
 from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandAsyncJob, RhubarbCommandWrapper, RhubarbParser
 
 
@@ -72,13 +71,9 @@ class RhubarbCommandWrapperTest(unittest.TestCase):
     def data_long(self) -> sample_data.SampleData:
         return sample_data.snd_en_femal_3kittens
 
-    def compare_cues(self, a_cues: list[MouthCue], b_cues: list[MouthCue]) -> None:
-        self.assertEqual(len(a_cues), len(b_cues), f"Lengths don't match \n{a_cues}\n{b_cues}")
-        for i, (a, b) in enumerate(zip(a_cues, b_cues)):
-            self.assertEqual(a, b, f"Cues at position {i} don't match:\n{a}\n{b} ")
-
     def compare_cues_testdata(self, expected: sample_data.SampleData, wrapper: RhubarbCommandWrapper) -> None:
-        self.compare_cues(expected.expected_cues, wrapper.get_lipsync_output_cues())
+        res = expected.compare_cues_with_expected(wrapper.get_lipsync_output_cues())
+        self.assertIsNone(res, res)
 
     def compare_testdata_with_current(self, data: sample_data.SampleData) -> None:
         self.compare_cues_testdata(data, self.wrapper)
@@ -156,6 +151,16 @@ class RhubarbParserTest(unittest.TestCase):
         assert len(sts) == 1
         st = sts[0]
         assert st["type"] == "failure"
+
+    def testParseUnparse(self) -> None:
+        sample = sample_data.snd_en_male_electricity
+        # Serialize the expected capture to json first
+        json = RhubarbParser.unparse_mouth_cues(sample.expected_cues, sample.snd_file_path.name, "test")
+        # Try to parse it back
+        parsed_dict = RhubarbParser.parse_lipsync_json(json)
+        parsed_cues = RhubarbParser.lipsync_json2MouthCues(parsed_dict)
+        res = sample.compare_cues_with_expected(parsed_cues)
+        self.assertIsNone(res, res)
 
 
 if __name__ == '__main__':

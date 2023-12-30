@@ -24,6 +24,8 @@ import addon_utils
 import rhubarb_lipsync.blender.baking_utils as baking_utils
 import re
 
+import rhubarb_lipsync.rhubarb.mouth_shape_data as shape_data
+
 
 class SampleProject:
     """Manages Blender test project"""
@@ -40,7 +42,7 @@ class SampleProject:
     def ensure_registered() -> None:
         if SampleProject.registered:
             print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-            print("Already registered. There could be unresired side effects")
+            print("Already registered. There could be undesired side effects")
             print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             return
         rhubarb_lipsync.register()  # Simulate blender register call
@@ -129,18 +131,20 @@ class SampleProject:
 
     @property
     def cue_list(self) -> MouthCueList:
+        """Captured cues (PropertGroup)"""
         return self.cprops and self.cprops.cue_list
 
     @property
     def cue_items(self) -> list[MouthCueListItem]:
         return self.cue_list and self.cue_list.items or []
 
+    @property
+    def mouth_cues(self) -> list[shape_data.MouthCue]:
+        return [ci.cue for ci in self.cue_items]
+
     def assert_cues_matches_sample(self) -> None:
-        cues = self.sample.expected_cues
-        assert len(cues) == len(self.cue_items), f"Expected {len(cues)} cues, got {self.cue_items} "
-        for i, c in enumerate(self.cue_items):
-            c_exp = cues[i]
-            assert c.cue == c_exp, f"Got {c.cue} at position {i} while {c_exp} was expected"
+        res = self.sample.compare_cues_with_expected(self.mouth_cues)
+        assert res is None, res
 
     def capture(self) -> None:
         self.create_capture()
@@ -149,6 +153,7 @@ class SampleProject:
         self.assert_cues_matches_sample()
 
     def ensure_action(self, name: str) -> bpy.types.Action:
+        """Get or create Action with the given name and adds a simply key frame."""
         if name in bpy.data.actions.keys():
             return bpy.data.actions[name]
         a = bpy.data.actions.new(name)

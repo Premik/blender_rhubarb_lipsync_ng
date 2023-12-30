@@ -9,8 +9,34 @@ from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthShapeInfos, MouthShape
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 from rhubarb_lipsync.blender.ui_utils import IconsManager
 import rhubarb_lipsync.blender.mapping_utils as mapping_utils
+from bpy.props import EnumProperty
 
 log = logging.getLogger(__name__)
+
+
+def filtered_actions_enum(self, ctx: Context) -> list[tuple[str, str, str, str, int]]:
+    return [("testid", "Test name", "descr", "QUESTION", 1), ("testid", "Test name2", "descr")]
+
+
+class ListFilteredActions(bpy.types.Operator):
+    bl_idname = "rhubarb.list_filtered_actions"
+    bl_label = "Initialize mapping list"
+    bl_property = 'action'
+
+    action: EnumProperty(  # type: ignore
+        name='Action',
+        items=filtered_actions_enum,
+    )
+
+    def invoke(self, context: Context, event: bpy.types.Event) -> set[str]:
+        wm = context.window_manager
+        wm.invoke_search_popup(self)
+        return {'FINISHED'}
+
+    def execute(self, context: Context) -> set[str]:
+        MappingProperties.from_context(context)
+
+        return {'FINISHED'}
 
 
 class BuildCueInfoUIList(bpy.types.Operator):

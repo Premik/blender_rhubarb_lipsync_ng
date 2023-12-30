@@ -124,7 +124,7 @@ class MappingProperties(PropertyGroup):
         override={'LIBRARY_OVERRIDABLE'},
     )
 
-    only_shapekeys: BoolProperty( # type: ignore
+    only_shapekeys: BoolProperty(  # type: ignore
         name="Only shape-key Actions",
         description="When enabled normal Actions are filtered out and only shape-key Actions are listed",
         default=False,
@@ -132,7 +132,7 @@ class MappingProperties(PropertyGroup):
         override={'LIBRARY_OVERRIDABLE'},
     )
 
-    only_valid_actions: BoolProperty( # type: ignore
+    only_valid_actions: BoolProperty(  # type: ignore
         name="Only Valid Actions",
         description="When enabled Actions with invalid f-curve keys are filtered out",
         default=True,
@@ -140,7 +140,7 @@ class MappingProperties(PropertyGroup):
         override={'LIBRARY_OVERRIDABLE'},
     )
 
-    only_asset_actions: BoolProperty( # type: ignore
+    only_asset_actions: BoolProperty(  # type: ignore
         name="Only Asset Actions",
         description="When enabled only Action marked as an Asset (aka poses) are listed",
         default=False,
@@ -167,10 +167,9 @@ class MappingProperties(PropertyGroup):
         for msi in MouthShapeInfos.all():
             item: MappingItem = self.items.add()
             item.key = msi.key
-        #self.only_shapekeys=ui_utils.does_object_support_shapekey_actions(obj)
+        # self.only_shapekeys=ui_utils.does_object_support_shapekey_actions(obj)
         # Assume any mesh would use shape-keys by default (even when there are no shape-keys created yet)
-        self.only_shapekeys=bool(obj.type=="MESH")
-
+        self.only_shapekeys = bool(obj.type == "MESH")
 
     @property
     def selected_item(self) -> Optional[MappingItem]:
