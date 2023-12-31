@@ -109,6 +109,7 @@ class BakingContextTest(unittest.TestCase):
     def testBakeTwoTracksTwoActions(self) -> None:
         self.bc = self.project.create_mapping_2actions_sphere1()
         self.bakeTwoTracks()
+        # self.project.save_blend_file("/tmp/work/1.blend")
 
     def testBakeSingleTracksTwoActions(self) -> None:
         self.bc = self.project.create_mapping_2actions_sphere1()
@@ -117,5 +118,5 @@ class BakingContextTest(unittest.TestCase):
         self.bake()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

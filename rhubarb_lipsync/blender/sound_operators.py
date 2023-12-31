@@ -346,7 +346,7 @@ class ConvertSoundFromat(bpy.types.Operator):
             bpy.context.window.cursor_set("DEFAULT")
         # Open the newly created ogg/wav file
         ret = bpy.ops.sound.open(filepath=str(self.target_path_full))
-        if "FINISHED" not in ret:
+        if 'FINISHED' not in ret:
             self.report({'WARNING'}, f"Failed to import and open the new file {self.target_path_full}")
             return {'FINISHED'}
         new_sounds = find_sounds_by_path(str(self.target_path_full))

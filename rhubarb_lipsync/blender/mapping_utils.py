@@ -18,12 +18,17 @@ def objects_with_mapping(objects: Iterator[Object]) -> Iterator[Object]:
             yield o
 
 
+def is_fcurve_for_shapekey(fcurve: bpy.types.FCurve) -> bool:
+    """Determine if an fcurve is for a shape-key action."""
+    return fcurve.data_path.startswith("key_blocks[")  # There doesn't seems to be a better way that check the data path
+
+
 def is_action_shape_key_action(action: bpy.types.Action) -> bool:
-    """Determine weather an action is a shape-key action or a regular one."""
-    for fcurve in action.fcurves:  # There doesn't seems to be a better way that check the data path
-        if fcurve.data_path.startswith("key_blocks["):
-            return True
-    return False
+    """Determine whether an action is a shape-key action or a regular one."""
+    if not action:
+        return False
+    # return any(is_fcurve_for_shapekey(fcurve) for fcurve in action.fcurves)
+    return is_fcurve_for_shapekey(action.fcurves[0])  # Should be enought to check the first one only
 
 
 def does_object_support_shapekey_actions(o: bpy.types.Object) -> bool:
@@ -40,10 +45,15 @@ def does_action_fit_object(o: bpy.types.Object, action: bpy.types.Action) -> boo
     """Check if all action's F-Curves paths are valid for the provided object."""
     for fcurve in action.fcurves:
         try:
-            # Attempt to access the property using the F-Curve's data path.
-            prop = o.path_resolve(fcurve.data_path)
-            if not hasattr(prop, fcurve.array_index):
-                return False
+            if is_fcurve_for_shapekey(fcurve):
+                # fcurve Action paths are based on the shape_keys data block
+                o.data.shape_keys.path_resolve(fcurve.data_path)
+            else:  # Normal action, fcurves are based on the Object
+                o.path_resolve(fcurve.data_path)
+            # Sucessfully accessed the property using the F-Curve's data path.
+            # TODO Check the index too
+            # if not hasattr(prop, fcurve.array_index):
+            #    return False
         except ValueError:
             # The data path does not exist on the object
             return False
@@ -51,10 +61,12 @@ def does_action_fit_object(o: bpy.types.Object, action: bpy.types.Action) -> boo
     return True
 
 
-def filtered_actions(o: bpy.types.Object, mp: 'mapping_properties.MappingProperties') -> Iterator[bpy.types.Action]:
+def filtered_actions(o: bpy.types.Object, mp: "mapping_properties.MappingProperties") -> Iterator[bpy.types.Action]:
     """Yields all Actions of the current Blender project while applying various filters when enabled in the provided mapping properties"""
     for action in bpy.data.actions:
-        if mp.only_shapekeys and not is_action_shape_key_action(action):
+        # if mp.only_shapekeys and not is_action_shape_key_action(action):
+        # The Only-shape-key is a switch
+        if mp.only_shapekeys != is_action_shape_key_action(action):
             continue
         if mp.only_valid_actions and not does_action_fit_object(o, action):
             continue

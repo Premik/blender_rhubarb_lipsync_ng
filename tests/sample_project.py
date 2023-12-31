@@ -152,38 +152,63 @@ class SampleProject:
         self.wait_for_capture_finish()
         self.assert_cues_matches_sample()
 
-    def ensure_action(self, name: str) -> bpy.types.Action:
+    def ensure_action(self, name: str) -> tuple[bool, bpy.types.Action]:
         """Get or create Action with the given name and adds a simply key frame."""
         if name in bpy.data.actions.keys():
-            return bpy.data.actions[name]
+            return False, bpy.data.actions[name]
         a = bpy.data.actions.new(name)
         assert a.name == name, f"Name clash. Got '{a.name}' name instead of '{name}'"
-        fc = a.fcurves.new('location', index=1)
+        return True, a
+
+    @property
+    def action_single(self) -> bpy.types.Action:
+        """Action with single keyframe `location.x@1=1`"""
+        created, a = self.ensure_action("action_single")
+        if not created:
+            return a
+        fc = a.fcurves.new("location", index=1)
         fc.keyframe_points.insert(1, 1)
         return a
 
     @property
-    def action_single(self) -> bpy.types.Action:
-        """Action with singe keyframe `location.x@1=1`"""
-        return self.ensure_action('action_signle')
-
-    @property
     def action_10(self) -> bpy.types.Action:
         """Action with two keyframes: `location.x@1=1` `location.x@10=10`"""
-        if 'action_10' in bpy.data.actions.keys():
-            return  # Already created
-        a = self.ensure_action('action_10')
-        a.fcurves[0].keyframe_points.insert(10, 10)
+        created, a = self.ensure_action("action_10")
+        if not created:
+            return a
+        a.asset_mark()
+        fc = a.fcurves.new("location", index=1)
+        fc.keyframe_points.insert(1, 1)
+        fc.keyframe_points.insert(10, 10)
+        return a
+
+    @property
+    def action_invalid(self) -> bpy.types.Action:
+        """Action with a non-existing key"""
+        created, a = self.ensure_action("action_invalid")
+        if not created:
+            return a
+        fc = a.fcurves.new('pose.bones["InvalidBone"].location', index=0)
+        fc.keyframe_points.insert(1, 1)
+        return a
+
+    @property
+    def action_shapekey1(self) -> bpy.types.Action:
+        created, a = self.ensure_action("action_shapekey1")
+        if not created:
+            return a
+        fc = a.fcurves.new('key_blocks["ShapeKey1"].value', index=0)
+        fc.keyframe_points.insert(1, 1)
         return a
 
     @property
     def sphere1(self) -> bpy.types.Object:
-        if 'Sphere' in bpy.data.objects.keys():
-            return bpy.data.objects['Sphere']
+        if "Sphere" in bpy.data.objects.keys():
+            return bpy.data.objects["Sphere"]
 
         ui_utils.assert_op_ret(bpy.ops.mesh.primitive_uv_sphere_add())
         ret = bpy.context.active_object
-        assert ret.name == 'Sphere'
+        assert ret.name == "Sphere"
         return ret
 
     def initialize_mapping(self, obj: bpy.types.Object) -> None:
@@ -192,7 +217,7 @@ class SampleProject:
         bpy.ops.rhubarb.build_cueinfo_uilist()  # Populate the cue-type list
 
     def create_mapping(self, actions: list[bpy.types.Action]) -> None:
-        '''Populate all the cue mappings using the actions from the list. Looping the list from the start if needed.'''
+        """Populate all the cue mappings using the actions from the list. Looping the list from the start if needed."""
         assert actions
         assert self.mprops
         alen = len(actions)
@@ -228,3 +253,6 @@ class SampleProject:
 
     def add_track2(self) -> NlaTrackRef:
         return self.add_track(self.mprops.nla_track2)
+
+    def save_blend_file(self, trg: str) -> None:
+        bpy.ops.wm.save_as_mainfile(filepath=trg)
