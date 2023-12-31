@@ -25,53 +25,11 @@ def draw_mapping_item(ctx: Context, layout: UILayout, mp: MappingProperties, ite
     else:
         row.label(text=item.key)
 
-    # row = split.row()
     row = split.row()
-    # row.prop(item, 'action', text="")
-    row.operator(mapping_operators.ListFilteredActions.bl_idname, text="test")
-
-    # row.prop(item, 'action2', text="")
-
-    # row.template_ID(item, "action")
-    # row.template_ID_preview(item, "action")
-    # row.template_any_ID(item, "action")
-
-    # row.template_ID(item, "action", new="action.new", unlink="action.unlink")
+    row.operator(mapping_operators.ListFilteredActions.bl_idname, text=str(item.name))
 
     if mlp.show_help_button:
         row.operator(mapping_operators.ShowCueInfoHelp.bl_idname, icon="QUESTION", text="").key = item.key
-
-
-def draw_mapping_item_multiline(ctx: Context, layout: UILayout, mp: MappingProperties, itemIndex: int):
-    prefs = RhubarbAddonPreferences.from_context(ctx)
-    clp: CueListPreferences = prefs.cue_list_prefs
-    item = mp.items[itemIndex]
-    selected = bool(mp.index == itemIndex)
-
-    split1 = layout.split(factor=0.1)
-
-    col1 = split1.column()
-    col2 = split1.column()
-
-    if clp.as_circle:
-        col1.label(text=item.cue_desc.key_displ)
-    else:
-        col1.label(text=item.key)
-
-    if selected:
-        col2.label(text="")
-        col1.label(text="", icon="OBJECT_DATAMODE")
-        col2.prop(item, 'action', text="")
-        col1.label(text="", icon="SHAPEKEY_DATA")
-        col2.prop(item, 'shapekey_action', text="")
-        col1.label(text="", icon="EVENT_TAB")
-
-    # EVENT_TAB
-    # DRIVER_DISTANCE
-    # ACTION_TWEAK
-    # SEQ_STRIP_DUPLICATE
-
-    return
 
 
 class MappingUIList(UIList):

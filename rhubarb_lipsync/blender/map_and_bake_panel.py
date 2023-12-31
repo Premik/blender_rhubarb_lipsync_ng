@@ -17,6 +17,16 @@ import rhubarb_lipsync.blender.mapping_utils as mapping_utils
 log = logging.getLogger(__name__)
 
 
+def draw_action_filters(layout: bpy.types.UILayout, mprops: MappingProperties, icons_only: bool):
+    text = "" if icons_only else None
+    if mprops.only_shapekeys:
+        layout.prop(mprops, "only_shapekeys", text=text, icon="SHAPEKEY_DATA")
+    else:
+        layout.prop(mprops, "only_shapekeys", text=text, icon="OBJECT_DATAMODE")
+    layout.prop(mprops, "only_valid_actions", text=text, icon="ERROR")
+    layout.prop(mprops, "only_asset_actions", text=text, icon="ASSET_MANAGER")
+
+
 class MappingListOptionsPanel(bpy.types.Panel):
     bl_idname = "RLPS_PT_mapping_list_options"
     bl_label = "Mapping list display options"
@@ -29,11 +39,14 @@ class MappingListOptionsPanel(bpy.types.Panel):
         prefs = RhubarbAddonPreferences.from_context(context)
         clp: CueListPreferences = prefs.cue_list_prefs
         mlp: MappingPreferences = prefs.mapping_prefs
+        mprops: MappingProperties = MappingProperties.from_context(context)
         layout = self.layout
         layout.label(text=MappingListOptionsPanel.bl_label)
-        # layout.prop(mlp, "actions_multiline_view") # Doesn't work
         layout.prop(mlp, "show_help_button")
         layout.prop(clp, "as_circle")
+        layout.separator()
+        layout.label(text="Action filters")
+        draw_action_filters(layout, mprops, False)
         # layout.prop(mlp, "actions_multiline_view")
 
 
@@ -50,25 +63,11 @@ class MappingAndBakingPanel(bpy.types.Panel):
         mprops: MappingProperties = MappingProperties.from_context(self.ctx)
         layout = self.layout
         split1 = layout.split(factor=0.9)
-        col1= split1.column().row(align=True)
+        col1 = split1.column().row(align=True)
         col2 = split1.column()
-        
-        # EVENT_TAB
-        # DRIVER_DISTANCE
-        # ACTION_TWEAK
 
-        # col1.label(text="", icon="OBJECT_DATAMODE")
-        # col2.prop(item, 'action', text="")
-        # col1.label(text="", icon="SHAPEKEY_DATA")
-        # SEQ_STRIP_DUPLICATE
-        if mprops.only_shapekeys:
-            col1.prop(mprops, "only_shapekeys", text="", icon="SHAPEKEY_DATA")
-        else:
-            col1.prop(mprops, "only_shapekeys", text="", icon="OBJECT_DATAMODE")
-        col1.prop(mprops, "only_valid_actions", text="", icon="ERROR")
-        col1.prop(mprops, "only_asset_actions", text="", icon="ASSET_MANAGER")
+        draw_action_filters(col1, mprops, True)
         col2.popover(panel=MappingListOptionsPanel.bl_idname, text="", icon="VIS_SEL_11")
-
 
     def draw_mapping_list(self) -> bool:
         prefs = RhubarbAddonPreferences.from_context(self.ctx)

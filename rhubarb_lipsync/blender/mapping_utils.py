@@ -47,7 +47,7 @@ def does_action_fit_object(o: bpy.types.Object, action: bpy.types.Action) -> boo
         try:
             if is_fcurve_for_shapekey(fcurve):
                 if not does_object_support_shapekey_actions(o):
-                    return False # Shape-key action can't fit an object with no shape-key blocks (no-mesh) in the first place
+                    return False  # Shape-key action can't fit an object with no shape-key blocks (no-mesh) in the first place
                 # fcurve Action paths are based on the shape_keys data block
                 o.data.shape_keys.path_resolve(fcurve.data_path)
             else:  # Normal action, fcurves are based on the Object

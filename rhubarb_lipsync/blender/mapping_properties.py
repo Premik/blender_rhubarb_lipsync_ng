@@ -81,7 +81,7 @@ class MappingItem(PropertyGroup):
     """Mapping of a single mouth shape type to action(s)"""
 
     key: StringProperty(  # type: ignore
-        "key",
+        name="key",
         description="Mouth cue key symbol (A,B,C..)",
         options={'LIBRARY_EDITABLE'},
         override={'LIBRARY_OVERRIDABLE'},
@@ -89,6 +89,21 @@ class MappingItem(PropertyGroup):
     action: PointerProperty(  # type: ignore
         type=bpy.types.Action,
         name="Action",
+        options={'LIBRARY_EDITABLE'},
+        override={'LIBRARY_OVERRIDABLE'},
+    )
+
+    frame_start: IntProperty(  # type: ignore
+        name="Frame Start",
+        description="",
+        options={'LIBRARY_EDITABLE'},
+        override={'LIBRARY_OVERRIDABLE'},
+    )
+
+    frame_count: IntProperty(  # type: ignore
+        name="Frames count",
+        description="",
+        default=0,
         options={'LIBRARY_EDITABLE'},
         override={'LIBRARY_OVERRIDABLE'},
     )

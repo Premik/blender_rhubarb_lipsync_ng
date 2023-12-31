@@ -17,19 +17,21 @@ log = logging.getLogger(__name__)
 def filtered_actions_enum(self, ctx: Context) -> list[tuple[str, str, str, str, int]]:
     o: bpy.types.Object = ctx.object
     mprops = MappingProperties.from_object(o)
-    def action2ico(a:bpy.types.Action):
-        if a.asset_data: return "ASSET_MANAGER"
+
+    def action2ico(a: bpy.types.Action):
+        if a.asset_data:
+            return "ASSET_MANAGER"
         if mapping_utils.is_action_shape_key_action(a):
             return "SHAPEKEY_DATA"
         if not mapping_utils.does_action_fit_object(o, a):
             return "ERROR"
         return "OBJECT_DATAMODE"
-    
-    def fields(a:bpy.types.Action)->tuple[str, str, str, str, int]:
+
+    def fields(a: bpy.types.Action) -> tuple[str, str, str, str, int]:
         return (str(a), a.name, a.name_full, action2ico(a), 1)
-    
+
     return list(map(fields, mapping_utils.filtered_actions(o, mprops)))
-    
+
     # return [
     #     ("testid", "Test name", "descr", "QUESTION", 1),
     #     ("testid", "Test name2", "descr"),
