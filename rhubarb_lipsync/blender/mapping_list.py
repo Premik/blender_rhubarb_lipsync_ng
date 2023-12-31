@@ -27,7 +27,10 @@ def draw_mapping_item(ctx: Context, layout: UILayout, mp: MappingProperties, ite
 
     # row = split.row()
     row = split.row()
-    row.prop(item, 'action', text="")
+    # row.prop(item, 'action', text="")
+    row.operator(mapping_operators.ListFilteredActions.bl_idname, text="test")
+
+    # row.prop(item, 'action2', text="")
 
     # row.template_ID(item, "action")
     # row.template_ID_preview(item, "action")

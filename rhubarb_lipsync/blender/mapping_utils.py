@@ -46,6 +46,8 @@ def does_action_fit_object(o: bpy.types.Object, action: bpy.types.Action) -> boo
     for fcurve in action.fcurves:
         try:
             if is_fcurve_for_shapekey(fcurve):
+                if not does_object_support_shapekey_actions(o):
+                    return False # Shape-key action can't fit an object with no shape-key blocks (no-mesh) in the first place
                 # fcurve Action paths are based on the shape_keys data block
                 o.data.shape_keys.path_resolve(fcurve.data_path)
             else:  # Normal action, fcurves are based on the Object
@@ -63,6 +65,8 @@ def does_action_fit_object(o: bpy.types.Object, action: bpy.types.Action) -> boo
 
 def filtered_actions(o: bpy.types.Object, mp: "mapping_properties.MappingProperties") -> Iterator[bpy.types.Action]:
     """Yields all Actions of the current Blender project while applying various filters when enabled in the provided mapping properties"""
+    if not mp:
+        return
     for action in bpy.data.actions:
         # if mp.only_shapekeys and not is_action_shape_key_action(action):
         # The Only-shape-key is a switch
@@ -78,6 +82,4 @@ def filtered_actions(o: bpy.types.Object, mp: "mapping_properties.MappingPropert
 def filtered_actions_for_current_object(ctx: bpy.types.Context) -> Iterator[bpy.types.Action]:
     o: bpy.types.Object = ctx.object
     mprops = mapping_properties.MappingProperties.from_object(o)
-    if not mprops:
-        return
     yield from filtered_actions(o, mprops)

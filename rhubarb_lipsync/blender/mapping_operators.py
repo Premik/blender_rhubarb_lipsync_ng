@@ -15,16 +15,34 @@ log = logging.getLogger(__name__)
 
 
 def filtered_actions_enum(self, ctx: Context) -> list[tuple[str, str, str, str, int]]:
-    return [("testid", "Test name", "descr", "QUESTION", 1), ("testid", "Test name2", "descr")]
+    o: bpy.types.Object = ctx.object
+    mprops = MappingProperties.from_object(o)
+    def action2ico(a:bpy.types.Action):
+        if a.asset_data: return "ASSET_MANAGER"
+        if mapping_utils.is_action_shape_key_action(a):
+            return "SHAPEKEY_DATA"
+        if not mapping_utils.does_action_fit_object(o, a):
+            return "ERROR"
+        return "OBJECT_DATAMODE"
+    
+    def fields(a:bpy.types.Action)->tuple[str, str, str, str, int]:
+        return (str(a), a.name, a.name_full, action2ico(a), 1)
+    
+    return list(map(fields, mapping_utils.filtered_actions(o, mprops)))
+    
+    # return [
+    #     ("testid", "Test name", "descr", "QUESTION", 1),
+    #     ("testid", "Test name2", "descr"),
+    # ]
 
 
 class ListFilteredActions(bpy.types.Operator):
     bl_idname = "rhubarb.list_filtered_actions"
     bl_label = "Initialize mapping list"
-    bl_property = 'action'
+    bl_property = "action"
 
     action: EnumProperty(  # type: ignore
-        name='Action',
+        name="Action",
         items=filtered_actions_enum,
     )
 
@@ -94,14 +112,14 @@ class ShowCueInfoHelp(bpy.types.Operator):
         if not self.key:
             si = mprops.selected_item
             if not si:
-                self.report(type={'ERROR'}, message="No cue key provided and no mapping item selected.")
+                self.report(type={"ERROR"}, message="No cue key provided and no mapping item selected.")
                 return {'CANCELLED'}
             self.key = si.key
 
         draw = lambda this, ctx: ShowCueInfoHelp.draw_popup(this, self.key, ctx)
         msi: MouthShapeInfo = MouthShapeInfos[self.key].value
         title = f"{msi.key_displ}  {msi.short_dest}"
-        bpy.context.window_manager.popup_menu(draw, title=f"{title:<25}", icon='INFO')
+        bpy.context.window_manager.popup_menu(draw, title=f"{title:<25}", icon="INFO")
 
         return {'FINISHED'}
 
@@ -140,7 +158,7 @@ class CreateNLATrack(bpy.types.Operator):
         t.name = self.name
         msg = f"Created new NLA track: {self.name}. Shapekey track: {mapping_utils.does_object_support_shapekey_actions(o)}"
         log.debug(msg)
-        self.report({'INFO'}, msg)
+        self.report({"INFO"}, msg)
         if self.track_field_name:  # Select the newly created track
             trackRef: NlaTrackRef = getattr(mprops, self.track_field_name)
             trackRef.object = o

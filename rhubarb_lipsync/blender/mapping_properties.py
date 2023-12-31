@@ -126,7 +126,7 @@ class MappingProperties(PropertyGroup):
 
     only_shapekeys: BoolProperty(  # type: ignore
         name="Only shape-key Actions",
-        description="When enabled normal Actions are filtered out and only shape-key Actions are listed",
+        description="Switch between normal Actions and shape-key Actions. Use normal Actions for Armature and shape-key Actions for Mesh.",
         default=False,
         options={'LIBRARY_EDITABLE'},
         override={'LIBRARY_OVERRIDABLE'},
@@ -142,7 +142,7 @@ class MappingProperties(PropertyGroup):
 
     only_asset_actions: BoolProperty(  # type: ignore
         name="Only Asset Actions",
-        description="When enabled only Action marked as an Asset (aka poses) are listed",
+        description="When enabled only Actions marked as an Asset (aka poses) are listed",
         default=False,
         options={'LIBRARY_EDITABLE'},
         override={'LIBRARY_OVERRIDABLE'},
@@ -199,7 +199,7 @@ class MappingProperties(PropertyGroup):
         return MappingProperties.from_object(ctx.object)
 
     @staticmethod
-    def from_object(obj: bpy.types.Object) -> Optional['MappingProperties']:
+    def from_object(obj: bpy.types.Object) -> Optional["MappingProperties"]:
         if not obj:
             return None
         ret: MappingProperties = getattr(obj, 'rhubarb_lipsync_mapping')  # type: ignore

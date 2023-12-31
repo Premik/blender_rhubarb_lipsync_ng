@@ -49,7 +49,10 @@ class MappingAndBakingPanel(bpy.types.Panel):
     def draw_config(self) -> None:
         mprops: MappingProperties = MappingProperties.from_context(self.ctx)
         layout = self.layout
-        row = layout.row(align=True)
+        split1 = layout.split(factor=0.9)
+        col1= split1.column().row(align=True)
+        col2 = split1.column()
+        
         # EVENT_TAB
         # DRIVER_DISTANCE
         # ACTION_TWEAK
@@ -59,10 +62,13 @@ class MappingAndBakingPanel(bpy.types.Panel):
         # col1.label(text="", icon="SHAPEKEY_DATA")
         # SEQ_STRIP_DUPLICATE
         if mprops.only_shapekeys:
-            row.prop(mprops, "only_shapekeys", text="", icon="SHAPEKEY_DATA")
+            col1.prop(mprops, "only_shapekeys", text="", icon="SHAPEKEY_DATA")
         else:
-            row.prop(mprops, "only_shapekeys", text="", icon="OBJECT_DATAMODE")
-        row.popover(panel=MappingListOptionsPanel.bl_idname, text="", icon="VIS_SEL_11")
+            col1.prop(mprops, "only_shapekeys", text="", icon="OBJECT_DATAMODE")
+        col1.prop(mprops, "only_valid_actions", text="", icon="ERROR")
+        col1.prop(mprops, "only_asset_actions", text="", icon="ASSET_MANAGER")
+        col2.popover(panel=MappingListOptionsPanel.bl_idname, text="", icon="VIS_SEL_11")
+
 
     def draw_mapping_list(self) -> bool:
         prefs = RhubarbAddonPreferences.from_context(self.ctx)
