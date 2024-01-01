@@ -114,6 +114,12 @@ class MappingItem(PropertyGroup):
             return None
         return MouthShapeInfos[self.key].value
 
+    @property
+    def action_name(self) -> str:
+        if not self.action:
+            return ""
+        return self.action.name
+
 
 class MappingProperties(PropertyGroup):
     """Mapping of all the mouth shape types to action(s)"""

@@ -1,10 +1,11 @@
 import logging
 
 import bpy
-from bpy.props import StringProperty
+from bpy.props import StringProperty, IntProperty
 from bpy.types import Context
+from typing import Any, Optional, Generator
 
-from rhubarb_lipsync.blender.mapping_properties import MappingProperties, NlaTrackRef
+from rhubarb_lipsync.blender.mapping_properties import MappingProperties, NlaTrackRef, MappingItem
 from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthShapeInfos, MouthShapeInfo
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 from rhubarb_lipsync.blender.ui_utils import IconsManager
@@ -27,10 +28,11 @@ def filtered_actions_enum(self, ctx: Context) -> list[tuple[str, str, str, str, 
             return "ERROR"
         return "OBJECT_DATAMODE"
 
-    def fields(a: bpy.types.Action) -> tuple[str, str, str, str, int]:
-        return (str(a), a.name, a.name_full, action2ico(a), 1)
+    def fields(i, a: bpy.types.Action) -> tuple[str, str, str, str, int]:
+        return (a.name, a.name, a.name_full, action2ico(a), i)
+        #return (a.name, a.name, a.name_full)
 
-    return list(map(fields, mapping_utils.filtered_actions(o, mprops)))
+    return [fields(i,a) for  i,a in enumerate(mapping_utils.filtered_actions(o, mprops))]
 
     # return [
     #     ("testid", "Test name", "descr", "QUESTION", 1),
@@ -40,13 +42,45 @@ def filtered_actions_enum(self, ctx: Context) -> list[tuple[str, str, str, str, 
 
 class ListFilteredActions(bpy.types.Operator):
     bl_idname = "rhubarb.list_filtered_actions"
-    bl_label = "Initialize mapping list"
-    bl_property = "action"
+    bl_label = "Select target Action"
+    bl_property = "action_name"
+    bl_options = {'UNDO', 'REGISTER'}
 
-    action: EnumProperty(  # type: ignore
-        name="Action",
-        items=filtered_actions_enum,
-    )
+    action_name: EnumProperty(name="Action", items=filtered_actions_enum)  # type: ignore
+    target_cue_index: IntProperty(name="index", description="Mouth cue key to map the Action for")  # type: ignore
+
+
+    def mapping_item(self,  mprops: MappingProperties)->Optional[MappingItem]:
+        """Maping item based on the target_cue_index """
+        if not mprops: return None
+        if self.target_cue_index < 0 or self.target_cue_index >= len(mprops.items):
+            return None
+        return mprops.items[self.target_cue_index]
+    
+    @property
+    def action(self)->Optional[bpy.types.Action]:
+        return bpy.data.actions.get(self.action_name)
+
+      
+    @classmethod
+    def poll(cls, context: Context) -> bool:
+        return ui_utils.validation_poll(cls, context, MappingProperties.context_selection_validation)
+    
+
+    @classmethod
+    def description(csl, context: Context, self: 'ListFilteredActions') -> str:
+        mprops: MappingProperties = MappingProperties.from_context(context)
+        
+        
+        #mi = self.mapping_item(mprops) # 'self' is dummy, only have properties
+        mi = ListFilteredActions.mapping_item(self, mprops)
+        
+        if mi is None:
+            return "Invalid target cue index selected"
+        if not mi.action:
+            return f"Select Action to animate the '{mi.key}' mouth cue with."
+        return f"Change the {repr(mi.action)} to animate the '{mi.key}' mouth cue with."
+        
 
     def invoke(self, context: Context, event: bpy.types.Event) -> set[str]:
         wm = context.window_manager
@@ -54,7 +88,13 @@ class ListFilteredActions(bpy.types.Operator):
         return {'FINISHED'}
 
     def execute(self, context: Context) -> set[str]:
-        MappingProperties.from_context(context)
+        mprops: MappingProperties = MappingProperties.from_context(context)
+        mi = ListFilteredActions.mapping_item(self, mprops)
+        if not mi:
+            self.report(type={"ERROR"}, message="Invalid target cue index selected.")
+            return {'CANCELLED'}        
+        mi.action=self.action
+        ui_utils.redraw_3dviews(context)
 
         return {'FINISHED'}
 

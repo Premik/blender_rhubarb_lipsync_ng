@@ -14,22 +14,24 @@ def draw_mapping_item(ctx: Context, layout: UILayout, mp: MappingProperties, ite
 
     split = layout.split(factor=0.1)
     # row = split.row()
-    row = split
+    col1 = split.column().row()
+    col2 = split.column().row()
+
     # row.template_icon(icon_value=IconsManager.cue_image(item.key), scale=5)
     # row = split.row()
 
     if not prefs.use_extended_shapes and item.cue_desc.extended:
-        row.enabled = False  # Indicate extended shape not in use
+        col1.enabled = False  # Indicate extended shape not in use
     if clp.as_circle:
-        row.label(text=item.cue_desc.key_displ)
+        col1.label(text=item.cue_desc.key_displ)
     else:
-        row.label(text=item.key)
+        col1.label(text=item.key)
 
-    row = split.row()
-    row.operator(mapping_operators.ListFilteredActions.bl_idname, text=str(item.name))
+    op:mapping_operators.ListFilteredActions=col2.operator(mapping_operators.ListFilteredActions.bl_idname, text=item.action_name)
+    op.target_cue_index=itemIndex
 
     if mlp.show_help_button:
-        row.operator(mapping_operators.ShowCueInfoHelp.bl_idname, icon="QUESTION", text="").key = item.key
+        col2.operator(mapping_operators.ShowCueInfoHelp.bl_idname, icon="QUESTION", text="").key = item.key
 
 
 class MappingUIList(UIList):
