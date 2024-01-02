@@ -149,18 +149,21 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 ## Todo
 
 ### High
-* Generally doesn't make sense to have both normal actions and shape-key action in the same mappings. On on armature should be always normal action. On mesh shape-keys (if normal action is still needed perhaps parenting an empty could be used: verify)
 * Baking - round to whole frames when not sub-frames visible
 * Add start- end frame properties to the MappingItem. So NLA clips can clip a frame range from a longer action (i.e.to support face-it style)
 * Mapping wizards
   * Clear - will remove the mapping (delete from the object completly?)
   * Auto-it 
   * By name - More instances (alow user defined) - will map action by matching name patterns (should provide some placeholder/expansions in the expression for objectName, etc)
+- Add down-arrow icon to Action buttons
+- Test bake normal and shape-key actions at the same time
+
 
 ### Normal
 * extended shapes- seems they are generated even when disabled -check
-* Bake warning, 'G,H,X` not mapped even when use-extended shapes is disabled
 * Mapping - integration with FaceIt - auto-populate mapping from rig expressions or shapekeys
+  - try corrective shape-keys
+  - 
 
 ### Low
 
@@ -204,6 +207,7 @@ https://blenderartists.org/t/how-to-fix-blender-error-disabled-cant-edit-this-pr
 Windows system console:
 https://blender.stackexchange.com/questions/145890/where-is-the-system-console
 
+https://download.blender.org/release/
 
 ```
 class FaceitExpressions(PropertyGroup):
@@ -235,3 +239,5 @@ class FaceitExpressions(PropertyGroup):
 
 
 ```
+
+
