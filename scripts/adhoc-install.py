@@ -6,7 +6,7 @@ import ssl
 import shutil
 
 version_number = "1.0.3"
-platform = 'Linux' #macOs Windows
+platform = 'macOs' #Linux Windows
 zip_name=f"rhubarb_lipsync_ng-{platform}-{version_number}.zip"
 
 # GitHub release URL
