@@ -42,7 +42,7 @@ class MappingListOptionsPanel(bpy.types.Panel):
         mprops: MappingProperties = MappingProperties.from_context(context)
         layout = self.layout
         layout.label(text=MappingListOptionsPanel.bl_label)
-        layout.prop(mlp, "show_help_button")
+        #layout.prop(mlp, "show_help_button")
         layout.prop(clp, "as_circle")
         layout.separator()
         layout.label(text="Action filters")

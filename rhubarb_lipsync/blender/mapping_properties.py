@@ -95,15 +95,21 @@ class MappingItem(PropertyGroup):
 
     frame_start: IntProperty(  # type: ignore
         name="Frame Start",
-        description="",
+        description="TBD",
+        default=0,
+        soft_min=0,
+        soft_max=100,
         options={'LIBRARY_EDITABLE'},
         override={'LIBRARY_OVERRIDABLE'},
     )
 
     frame_count: IntProperty(  # type: ignore
         name="Frames count",
-        description="",
+        description="TBD",
         default=0,
+        min=0,
+        soft_min=1,
+        soft_max=100,
         options={'LIBRARY_EDITABLE'},
         override={'LIBRARY_OVERRIDABLE'},
     )
@@ -117,7 +123,7 @@ class MappingItem(PropertyGroup):
     @property
     def action_name(self) -> str:
         if not self.action:
-            return ""
+            return " "
         return self.action.name
 
 

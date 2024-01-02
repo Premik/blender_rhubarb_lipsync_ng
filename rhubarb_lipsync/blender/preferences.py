@@ -98,13 +98,7 @@ class MappingPreferences(PropertyGroup):
         description="When both regular action and shape-key action are visible show them on two lines instead of side-by-side.",
         default=False,
     )
-
-    show_help_button: BoolProperty(  # type: ignore
-        name="Show help button",
-        description="For each cue-type show the question-mark button with a help popup.",
-        default=True,
-    )
-
+   
     object_selection_type: EnumProperty(  # type: ignore
         name="Objects to bake",
         items=[

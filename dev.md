@@ -155,8 +155,7 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
   * Clear - will remove the mapping (delete from the object completly?)
   * Auto-it 
   * By name - More instances (alow user defined) - will map action by matching name patterns (should provide some placeholder/expansions in the expression for objectName, etc)
-- Add down-arrow icon to Action buttons
-- Test bake normal and shape-key actions at the same time
+
 
 
 ### Normal
