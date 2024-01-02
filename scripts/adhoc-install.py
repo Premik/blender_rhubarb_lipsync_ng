@@ -4,10 +4,21 @@ import urllib.request
 import tempfile
 import ssl
 import shutil
+import platform 
 
 version_number = "1.0.3"
-platform = 'macOs' #Linux Windows
-zip_name=f"rhubarb_lipsync_ng-{platform}-{version_number}.zip"
+#version_number = "1.0.2"
+#version_number = "1.0.1"
+
+if platform.system() == 'Linux':
+    platform_name = 'Linux'
+elif platform.system() == 'Darwin':  # macOS is identified as 'Darwin'
+    platform_name = 'macOS'
+elif platform.system() == 'Windows':
+    platform_name = 'Windows'
+else:
+    raise Exception("Unsupported operating system")
+zip_name=f"rhubarb_lipsync_ng-{platform_name}-{version_number}.zip"
 
 # GitHub release URL
 github_release_url = f"https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v{version_number}/{zip_name}"
@@ -41,4 +52,10 @@ print(bpy.ops.rhubarb.create_capture_props())
 #print(bpy.ops.rhubarb.process_sound_file()) # No sound file selected
 
 # Run:
+
+#wget --no-check-certificate https://raw.githubusercontent.com/Premik/blender_rhubarb_lipsync_ng/master/scripts/adhoc-install.py 
 #blender --background --python adhoc-install.py
+
+# MacOS
+#cd /Applications/Blender.app/Contents/MacOS/blender
+#./Blender --background --python adhoc-install.py
