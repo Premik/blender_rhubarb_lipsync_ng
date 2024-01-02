@@ -3,7 +3,7 @@ import logging
 import bpy
 from bpy.props import StringProperty, IntProperty
 from bpy.types import Context
-from typing import Any, Optional, Generator
+from typing import Optional
 
 from rhubarb_lipsync.blender.mapping_properties import MappingProperties, NlaTrackRef, MappingItem
 from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthShapeInfos, MouthShapeInfo
@@ -79,7 +79,7 @@ class ListFilteredActions(bpy.types.Operator):
             return "Invalid target cue index selected"
         if not mi.action:
             return f"Select Action to animate the '{mi.key}' mouth cue with."
-        return f"Change the {repr(mi.action)} to animate the '{mi.key}' mouth cue with."
+        return f"Change the {mi.action.name} to animate the '{mi.key}' mouth cue with."
         
 
     def invoke(self, context: Context, event: bpy.types.Event) -> set[str]:
