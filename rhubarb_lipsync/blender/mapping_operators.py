@@ -15,29 +15,30 @@ from bpy.props import EnumProperty
 log = logging.getLogger(__name__)
 
 
-def filtered_actions_enum(self, ctx: Context) -> list[tuple[str, str, str, str, int]]:
-    o: bpy.types.Object = ctx.object
-    mprops = MappingProperties.from_object(o)
 
-    def action2ico(a: bpy.types.Action):
-        if a.asset_data:
-            return "ASSET_MANAGER"
-        if mapping_utils.is_action_shape_key_action(a):
-            return "SHAPEKEY_DATA"
-        if not mapping_utils.does_action_fit_object(o, a):
-            return "ERROR"
-        return "OBJECT_DATAMODE"
+def filtered_actions_enum(prop_group:'ListFilteredActions', ctx: Context) -> list[tuple[str, str, str, str, int]]:
+    try:
+        o: bpy.types.Object = ctx.object
+        mprops = MappingProperties.from_object(o)
 
-    def fields(i, a: bpy.types.Action) -> tuple[str, str, str, str, int]:
-        return (a.name, a.name, a.name_full, action2ico(a), i)
-        #return (a.name, a.name, a.name_full)
+        def action2ico(a: bpy.types.Action):
+            if a.asset_data:
+                return "ASSET_MANAGER"
+            if mapping_utils.is_action_shape_key_action(a):
+                return "SHAPEKEY_DATA"
+            if not mapping_utils.does_action_fit_object(o, a):
+                return "ERROR"
+            return "OBJECT_DATAMODE"
 
-    return [fields(i,a) for  i,a in enumerate(mapping_utils.filtered_actions(o, mprops))]
+        def fields(i, a: bpy.types.Action) -> tuple[str, str, str, str, int]:
+            return (a.name, a.name, a.name_full, action2ico(a), i)
+            #return (a.name, a.name, a.name_full)
 
-    # return [
-    #     ("testid", "Test name", "descr", "QUESTION", 1),
-    #     ("testid", "Test name2", "descr"),
-    # ]
+        return [fields(i,a) for  i,a in enumerate(mapping_utils.filtered_actions(o, mprops))]
+    except Exception as e:
+        log.exception(f"Failed to list actions. {e}")
+        return [('error', f"FAILED: {e}", 'error', 'CANCEL', 1)]
+
 
 
 class ListFilteredActions(bpy.types.Operator):

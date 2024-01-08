@@ -240,3 +240,13 @@ class FaceitExpressions(PropertyGroup):
 ```
 
 
+- The dialog file is automatically used if there is `.txt` file beside the wav/ogg file. [#7](https://github.com/Premik/blender_rhubarb_lipsync_ng/issues/7#issuecomment-1868243278
+- )
+- **Up to date** check button in the preferences.
+- Baking **Shape-keys** is now supported.
+  - For Armature use normal Actions
+  - For Mesh use Shape-key Actions
+
+- Mapping section of the panel has been reorganized.
+  - Cue-type help button has been moved to the left (click on the A,B,C symbols)
+  - Action dropdown is now filtered based on the Flags in the "toolbar". Shape/Normal Actions, Assets only, Only Valid/Matching Actions

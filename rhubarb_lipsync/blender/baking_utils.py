@@ -303,6 +303,8 @@ class BakingContext:
         else:  # There is an Action mapped
             if not self.prefs.use_extended_shapes:
                 return "Not using extended shapes but {} {} mapping"
+        if not mi.action.fcurves:
+            return "{} {} Action with no keyframes"
         if mapping_utils.is_action_shape_key_action(mi.action):
             if not mapping_utils.does_object_support_shapekey_actions(self.current_object):
                 return "{} {} a shape-key Action mapped while the Object has no shape-keys"

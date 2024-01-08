@@ -5,7 +5,6 @@ from typing import Any, Callable, Iterator, Type, Sequence
 
 import bpy
 from bpy.types import Area, Context, UILayout, Window
-
 import bpy.utils.previews
 import traceback
 
@@ -187,7 +186,7 @@ def redraw_3dviews(ctx: Context) -> None:
             area.tag_redraw()
 
 
-def set_panel_category(panel, category: str):
+def set_panel_category(panel, category: str) -> None:
     """Change the bl_category of the Panel by re-registering the class. This would rename the tab the panel is shown in."""
     try:
         if "bl_rna" in panel.__dict__:  # Is the class registered?
@@ -199,7 +198,6 @@ def set_panel_category(panel, category: str):
     except:
         print("Failed to change panel category")
         traceback.print_exc()
-
 
 class DropdownHelper:
     """Helper for building dropdowns for non-ID items of an collection. Item is referenced
