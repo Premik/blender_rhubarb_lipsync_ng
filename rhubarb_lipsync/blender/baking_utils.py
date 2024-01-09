@@ -18,7 +18,7 @@ log = logging.getLogger(__name__)
 
 
 def objects_with_mapping(objects: Iterator[Object]) -> Iterator[Object]:
-    """Filter all objects which non-blank mapping properties"""
+    """Filter all objects with non-blank mapping properties"""
     for o in objects or []:
         mp = MappingProperties.from_object(o)
         if mp and mp.has_any_mapping:
