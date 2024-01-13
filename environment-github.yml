@@ -4,19 +4,20 @@
 name: rhubarb-github
 channels:
   - defaults
-  - kitsune.one # For blender as module
+  #- kitsune.one # For blender as module 
   - conda-forge
 dependencies:
   - python=3.10
   - pip
   - pytest-xdist  # For test parallel execution
   - pytest-forked # For test isolation. bpy has global context  
-  #- python-blender~=3.4.0 #Blender as module ()
+  #- python-blender~=3.4.0 #Blender as module () - has been removed/made private
   #3.2 3.4.0 3.6.0
  #- tomli
   - requests
   - pip:
     - -e .
+    - audaspace
     - bpy>=3.2 # Official blender-as-module, only since 3.4 (no Audaspace)
     #- fake-bpy-module-3.4
     #- fake-bpy-module-latest
