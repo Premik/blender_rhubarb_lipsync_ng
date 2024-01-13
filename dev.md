@@ -156,13 +156,13 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
   * Auto-it 
   * By name - More instances (alow user defined) - will map action by matching name patterns (should provide some placeholder/expansions in the expression for objectName, etc)
 
-
-
 ### Normal
 * extended shapes- seems they are generated even when disabled -check
 * Mapping - integration with FaceIt - auto-populate mapping from rig expressions or shapekeys
   - try corrective shape-keys
   - 
+* Integrate with: https://mecabricks.com/en/shop/product/6
+* Create aur package
 
 ### Low
 
@@ -237,16 +237,4 @@ class FaceitExpressions(PropertyGroup):
     )
 
 
-```
 
-
-- The dialog file is automatically used if there is `.txt` file beside the wav/ogg file. [#7](https://github.com/Premik/blender_rhubarb_lipsync_ng/issues/7#issuecomment-1868243278
-- )
-- **Up to date** check button in the preferences.
-- Baking **Shape-keys** is now supported.
-  - For Armature use normal Actions
-  - For Mesh use Shape-key Actions
-
-- Mapping section of the panel has been reorganized.
-  - Cue-type help button has been moved to the left (click on the A,B,C symbols)
-  - Action dropdown is now filtered based on the Flags in the "toolbar". Shape/Normal Actions, Assets only, Only Valid/Matching Actions

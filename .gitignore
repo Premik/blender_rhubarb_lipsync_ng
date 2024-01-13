@@ -6,6 +6,7 @@ copyfiles.bat
 bin/
 bin
 dist/
+support/
 download/
 *.egg*
 settings.json
