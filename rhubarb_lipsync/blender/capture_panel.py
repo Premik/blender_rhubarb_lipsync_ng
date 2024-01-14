@@ -273,6 +273,23 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
         if jprops.error:
             ui_utils.draw_error(layout, jprops.error)
 
+    def draw_capture_toolbar(self) -> None:
+        prefs = RhubarbAddonPreferences.from_context(self.ctx)
+        cpref: CueListPreferences = prefs.cue_list_prefs
+        props = CaptureListProperties.capture_from_context(self.ctx)
+
+        row = self.layout.row()
+
+        toolRow = row.row(align=True)
+        toolRow.prop(cpref, 'preview', icon="UV_SYNC_SELECT", icon_only=True)
+        toolRow.prop(cpref, 'sync_on_select', icon="RESTRICT_SELECT_OFF", icon_only=True)
+
+        actionRow = row.row(align=True)
+        actionRow.label(text="")  # Spacer to force icons alight to the right
+        actionRow.operator(capture_operators.ExportCueList2Json.bl_idname, text="", icon="EXPORT")
+        actionRow.popover(panel=CueListOptionsPanel.bl_idname, text="", icon="VIS_SEL_11")
+        actionRow.operator(capture_operators.ClearCueList.bl_idname, text="", icon="PANEL_CLOSE")
+
     def draw_capture(self) -> None:
         prefs = RhubarbAddonPreferences.from_context(self.ctx)
         cpref: CueListPreferences = prefs.cue_list_prefs
@@ -288,22 +305,11 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
             return
 
         self.draw_job()
-        lst: MouthCueList = props.cue_list
-
-        layout = self.layout
-
-        row = layout.row(align=False)
-        row.alignment = 'RIGHT'
-        toolRow = row.row(align=True)
-        toolRow.prop(cpref, 'preview', icon="UV_SYNC_SELECT", icon_only=True)
-        toolRow.prop(cpref, 'sync_on_select', icon="RESTRICT_SELECT_OFF", icon_only=True)
-
-        toolRow.enabled = bool(lst.items)
-        row.popover(panel=CueListOptionsPanel.bl_idname, text="", icon="VIS_SEL_11")
-        row.operator(capture_operators.ClearCueList.bl_idname, text="", icon="PANEL_CLOSE")
+        self.draw_capture_toolbar()
 
         list_type = 'GRID' if prefs.cue_list_prefs.as_grid else 'DEFAULT'
-        layout.template_list(MouthCueUIList.bl_idname, "Mouth cues", lst, "items", lst, "index", type=list_type)
+        lst: MouthCueList = props.cue_list
+        self.layout.template_list(MouthCueUIList.bl_idname, "Mouth cues", lst, "items", lst, "index", type=list_type)
 
     def draw(self, context: Context) -> None:
         try:

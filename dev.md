@@ -149,7 +149,7 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 ## Todo
 
 ### High
-* Baking - round to whole frames when not sub-frames visible
+* There are still some ogg unsupported format (perhaps stereo?) which are not recognzed and convert button not shown,
 * Add start- end frame properties to the MappingItem. So NLA clips can clip a frame range from a longer action (i.e.to support face-it style)
 * Mapping wizards
   * Clear - will remove the mapping (delete from the object completly?)
@@ -157,6 +157,7 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
   * By name - More instances (alow user defined) - will map action by matching name patterns (should provide some placeholder/expansions in the expression for objectName, etc)
 
 ### Normal
+* Baking - round to whole frames when not sub-frames visible
 * extended shapes- seems they are generated even when disabled -check
 * Mapping - integration with FaceIt - auto-populate mapping from rig expressions or shapekeys
   - try corrective shape-keys

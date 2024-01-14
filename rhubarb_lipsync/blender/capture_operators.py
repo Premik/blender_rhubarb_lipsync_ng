@@ -5,6 +5,7 @@ from bpy.types import Context
 
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, MouthCueList
+from bpy.props import StringProperty
 
 log = logging.getLogger(__name__)
 
@@ -55,7 +56,7 @@ class DeleteCaptureProps(bpy.types.Operator):
 
 
 class ClearCueList(bpy.types.Operator):
-    """Removes all captured cues from the cue list"""
+    """Remove all captured cues from the cue list"""
 
     bl_idname = "rhubarb.clear_cue_list"
     bl_label = "Clear the cue list"
@@ -78,6 +79,44 @@ class ClearCueList(bpy.types.Operator):
     # def invoke(self, context: Context, event) -> set[int] | set[str]:
     #    wm = context.window_manager
     #    return wm.invoke_confirm(self, event)
+
+    def execute(self, context: Context) -> set[str]:
+        props = CaptureListProperties.capture_from_context(context)
+        cl: MouthCueList = props.cue_list
+        cl.items.clear()
+
+        return {'FINISHED'}
+
+
+class ExportCueList2Json(bpy.types.Operator):
+    """Export the current cue list of the selected capture to a json file following the rhubarb-cli format"""
+
+    bl_idname = "rhubarb.export_cue_list2json"
+    bl_label = "Export to JSON"
+
+    filepath: StringProperty(subtype="FILE_PATH", default='json')
+
+    filter_glob: StringProperty(  # type: ignore
+        default='*.json;',
+        options={'HIDDEN'},
+    )
+
+    @classmethod
+    def disabled_reason(cls, context: Context) -> str:
+        props = CaptureListProperties.capture_from_context(context)
+        if not props:
+            return "No capture selected"
+        cl: MouthCueList = props.cue_list
+        return ""
+
+    @classmethod
+    def poll(cls, context: Context) -> bool:
+        return ui_utils.validation_poll(cls, context)
+
+    def invoke(self, context: Context, event) -> set[int] | set[str]:
+        self.filepath = 'capture.json'
+        context.window_manager.fileselect_add(self)
+        return {'RUNNING_MODAL'}
 
     def execute(self, context: Context) -> set[str]:
         props = CaptureListProperties.capture_from_context(context)

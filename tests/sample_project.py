@@ -2,7 +2,7 @@ from time import sleep
 from functools import cached_property
 
 import bpy
-
+from typing import Optional
 import rhubarb_lipsync
 import rhubarb_lipsync.blender.auto_load
 import sample_data
@@ -67,6 +67,11 @@ class SampleProject:
             print(f"The {p1} doesn't exist. Changed to {p2} ")
             self.prefs.executable_path_string = str(p2)
         props.sound = self.sample.to_sound(bpy.context)
+
+    def set_capture_sound(self, sound: Optional[bpy.types.Sound] = None) -> None:
+        if sound is None:
+            sound = self.sample.to_sound(bpy.context)
+        self.cprops.sound = sound
 
     def trigger_capture(self) -> None:
         ret = bpy.ops.rhubarb.process_sound_file()
@@ -148,6 +153,7 @@ class SampleProject:
 
     def capture(self) -> None:
         self.create_capture()
+        self.set_capture_sound()
         self.trigger_capture()
         self.wait_for_capture_finish()
         self.assert_cues_matches_sample()

@@ -42,7 +42,7 @@ class MappingListOptionsPanel(bpy.types.Panel):
         mprops: MappingProperties = MappingProperties.from_context(context)
         layout = self.layout
         layout.label(text=MappingListOptionsPanel.bl_label)
-        #layout.prop(mlp, "show_help_button")
+        # layout.prop(mlp, "show_help_button")
         layout.prop(clp, "as_circle")
         layout.separator()
         layout.label(text="Action filters")
@@ -61,13 +61,14 @@ class MappingAndBakingPanel(bpy.types.Panel):
 
     def draw_config(self) -> None:
         mprops: MappingProperties = MappingProperties.from_context(self.ctx)
-        layout = self.layout
-        split1 = layout.split(factor=0.9)
-        col1 = split1.column().row(align=True)
-        col2 = split1.column()
+        row = self.layout.row()
 
-        draw_action_filters(col1, mprops, True)
-        col2.popover(panel=MappingListOptionsPanel.bl_idname, text="", icon="VIS_SEL_11")
+        filtersRow = row.row(align=True)
+        draw_action_filters(filtersRow, mprops, True)
+
+        actionRow = row.row(align=True)
+        actionRow.label(text="")  # Spacer to force icons alight to the right
+        actionRow.popover(panel=MappingListOptionsPanel.bl_idname, text="", icon="VIS_SEL_11")
 
     def draw_mapping_list(self) -> bool:
         prefs = RhubarbAddonPreferences.from_context(self.ctx)
