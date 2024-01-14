@@ -69,6 +69,9 @@ class RhubarbParser:
             return []
         try:
             j = json.loads(stdout)
+            if not "mouthCues" in j:
+                log.error(f"The json format is unexpected. Missing `mouthCues` key. '{stdout[:200]}...'")
+                return []
             return j["mouthCues"]
         except json.JSONDecodeError:
             log.exception(f"Failed to parse main rhubarb output json. '{stdout[:200]}...'")

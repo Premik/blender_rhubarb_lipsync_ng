@@ -287,6 +287,7 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
         actionRow = row.row(align=True)
         actionRow.label(text="")  # Spacer to force icons alight to the right
         actionRow.operator(capture_operators.ExportCueList2Json.bl_idname, text="", icon="EXPORT")
+        actionRow.operator(capture_operators.ImportJsonCueList.bl_idname, text="", icon="IMPORT")
         actionRow.popover(panel=CueListOptionsPanel.bl_idname, text="", icon="VIS_SEL_11")
         actionRow.operator(capture_operators.ClearCueList.bl_idname, text="", icon="PANEL_CLOSE")
 

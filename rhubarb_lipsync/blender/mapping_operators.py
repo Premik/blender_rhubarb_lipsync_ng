@@ -15,8 +15,7 @@ from bpy.props import EnumProperty
 log = logging.getLogger(__name__)
 
 
-
-def filtered_actions_enum(prop_group:'ListFilteredActions', ctx: Context) -> list[tuple[str, str, str, str, int]]:
+def filtered_actions_enum(prop_group: 'ListFilteredActions', ctx: Context) -> list[tuple[str, str, str, str, int]]:
     try:
         o: bpy.types.Object = ctx.object
         mprops = MappingProperties.from_object(o)
@@ -32,13 +31,12 @@ def filtered_actions_enum(prop_group:'ListFilteredActions', ctx: Context) -> lis
 
         def fields(i, a: bpy.types.Action) -> tuple[str, str, str, str, int]:
             return (a.name, a.name, a.name_full, action2ico(a), i)
-            #return (a.name, a.name, a.name_full)
+            # return (a.name, a.name, a.name_full)
 
-        return [fields(i,a) for  i,a in enumerate(mapping_utils.filtered_actions(o, mprops))]
+        return [fields(i, a) for i, a in enumerate(mapping_utils.filtered_actions(o, mprops))]
     except Exception as e:
         log.exception(f"Failed to list actions. {e}")
         return [('error', f"FAILED: {e}", 'error', 'CANCEL', 1)]
-
 
 
 class ListFilteredActions(bpy.types.Operator):
@@ -50,38 +48,34 @@ class ListFilteredActions(bpy.types.Operator):
     action_name: EnumProperty(name="Action", items=filtered_actions_enum)  # type: ignore
     target_cue_index: IntProperty(name="index", description="Mouth cue index to map the Action for")  # type: ignore
 
-
-    def mapping_item(self,  mprops: MappingProperties)->Optional[MappingItem]:
-        """Maping item based on the target_cue_index """
-        if not mprops: return None
+    def mapping_item(self, mprops: MappingProperties) -> Optional[MappingItem]:
+        """Maping item based on the target_cue_index"""
+        if not mprops:
+            return None
         if self.target_cue_index < 0 or self.target_cue_index >= len(mprops.items):
             return None
         return mprops.items[self.target_cue_index]
-    
+
     @property
-    def action(self)->Optional[bpy.types.Action]:
+    def action(self) -> Optional[bpy.types.Action]:
         return bpy.data.actions.get(self.action_name)
 
-      
     @classmethod
     def poll(cls, context: Context) -> bool:
         return ui_utils.validation_poll(cls, context, MappingProperties.context_selection_validation)
-    
 
     @classmethod
     def description(csl, context: Context, self: 'ListFilteredActions') -> str:
         mprops: MappingProperties = MappingProperties.from_context(context)
-        
-        
-        #mi = self.mapping_item(mprops) # 'self' is dummy, only have properties
+
+        # mi = self.mapping_item(mprops) # 'self' is dummy, only have properties
         mi = ListFilteredActions.mapping_item(self, mprops)
-        
+
         if mi is None:
             return "Invalid target cue index selected"
         if not mi.action:
             return f"Select Action to animate the '{mi.key}' mouth cue with."
         return f"Change the {mi.action.name} to animate the '{mi.key}' mouth cue with."
-        
 
     def invoke(self, context: Context, event: bpy.types.Event) -> set[str]:
         wm = context.window_manager
@@ -93,8 +87,8 @@ class ListFilteredActions(bpy.types.Operator):
         mi = self.mapping_item(mprops)
         if not mi:
             self.report(type={"ERROR"}, message="Invalid target cue index selected.")
-            return {'CANCELLED'}        
-        mi.action=self.action
+            return {'CANCELLED'}
+        mi.action = self.action
         ui_utils.redraw_3dviews(context)
 
         return {'FINISHED'}
@@ -102,35 +96,37 @@ class ListFilteredActions(bpy.types.Operator):
 
 class ClearMappedActions(bpy.types.Operator):
     """Remove the mapped action for this cue index"""
+
     bl_idname = "rhubarb.clear_mapped_action"
-    bl_label = "Clear the mapped action"    
+    bl_label = "Clear the mapped action"
     bl_options = {'UNDO', 'REGISTER'}
 
     target_cue_index: IntProperty(name="index", description="Mouth cue index to remote the Action from")  # type: ignore
 
-
-    def mapping_item(self,  mprops: MappingProperties)->Optional[MappingItem]:
-        """Maping item based on the target_cue_index """
-        if not mprops: return None
+    def mapping_item(self, mprops: MappingProperties) -> Optional[MappingItem]:
+        """Maping item based on the target_cue_index"""
+        if not mprops:
+            return None
         if self.target_cue_index < 0 or self.target_cue_index >= len(mprops.items):
             return None
         return mprops.items[self.target_cue_index]
-          
+
     @classmethod
     def poll(cls, context: Context) -> bool:
         return ui_utils.validation_poll(cls, context, MappingProperties.context_selection_validation)
-    
+
     def execute(self, context: Context) -> set[str]:
         mprops: MappingProperties = MappingProperties.from_context(context)
         mi = ListFilteredActions.mapping_item(self, mprops)
         mi = self.mapping_item(mprops)
         if not mi:
             self.report(type={"INFO"}, message="There is no Action mapped")
-            return {'CANCELLED'}        
-        mi.action=None
+            return {'CANCELLED'}
+        mi.action = None
         ui_utils.redraw_3dviews(context)
 
         return {'FINISHED'}
+
 
 class BuildCueInfoUIList(bpy.types.Operator):
     """Populate the cue mapping list on the active object with the know cue types."""

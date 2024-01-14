@@ -125,9 +125,57 @@ class ExportCueList2Json(bpy.types.Operator):
         cues = [c.cue for c in cl.items]
         json = RhubarbParser.unparse_mouth_cues(cues, f"{cprops.sound_file_basename}.{cprops.sound_file_extension}")
         log.debug(f"Saving {len(json)} char to {self.filepath} ")
-        with open(self.filepath, 'w') as file:
+        with open(self.filepath, 'w', encoding='utf-8') as file:
             file.write(json)
         self.report(type={"INFO"}, message=f"Exported {len(cues)} to {self.filepath}")
+        # cl: MouthCueList = props.cue_list
+
+        return {'FINISHED'}
+
+
+class ImportJsonCueList(bpy.types.Operator):
+    """Import json file in the rhubarb-cli format"""
+
+    bl_idname = "rhubarb.import_json_cue_list"
+    bl_label = "Import from JSON"
+
+    filepath: StringProperty(subtype="FILE_PATH")  # type: ignore
+    filter_glob: StringProperty(default='*.json;', options={'HIDDEN'})  # type: ignore
+
+    @classmethod
+    def disabled_reason(cls, context: Context) -> str:
+        props = CaptureListProperties.capture_from_context(context)
+        if not props:
+            return "No capture selected"
+        cl: MouthCueList = props.cue_list
+        if len(cl.items) > 0:
+            return "There are cues in the list. Clear the list first"
+        return ""
+
+    @classmethod
+    def poll(cls, context: Context) -> bool:
+        return ui_utils.validation_poll(cls, context)
+
+    def invoke(self, context: Context, event) -> set[int] | set[str]:
+        rootProps = CaptureListProperties.from_context(context)
+        context.window_manager.fileselect_add(self)
+        return {'RUNNING_MODAL'}
+
+    def execute(self, context: Context) -> set[str]:
+        if not (self.filepath):
+            return {'CANCELLED'}
+
+        with open(self.filepath, 'r', encoding='utf-8') as file:
+            json = file.read()
+        log.debug(f"Parsing {len(json)} char from {self.filepath} ")
+        json_parsed = RhubarbParser.parse_lipsync_json(json)
+        cues = RhubarbParser.lipsync_json2MouthCues(json_parsed)
+        log.debug(f"Parsed {len(cues)} adding them to the uilist")
+        cprops = CaptureListProperties.capture_from_context(context)
+        cl: MouthCueList = cprops.cue_list
+        cl.add_cues(cues)
+
+        self.report(type={"INFO"}, message=f"Imported {len(cues)} from {self.filepath}")
         # cl: MouthCueList = props.cue_list
 
         return {'FINISHED'}

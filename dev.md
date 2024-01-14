@@ -164,7 +164,7 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
   - 
 * Integrate with: https://mecabricks.com/en/shop/product/6
 * Create aur package
-
+* Detect blender --debug and similar argument and auto-enable debug log level (and same for log file?)
 ### Low
 
 - Strip placement reorg should be possible to set/override on different levelson Individual cue? (mapping item)
