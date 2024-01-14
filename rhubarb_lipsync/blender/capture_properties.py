@@ -262,6 +262,7 @@ class CaptureProperties(PropertyGroup):
 
     @property
     def sound_file_basename(self) -> str:
+        """Name of the current Sound file without extension"""
         p = self.sound_file_path
         if not p:
             return ""
@@ -269,6 +270,7 @@ class CaptureProperties(PropertyGroup):
 
     @property
     def sound_file_folder(self) -> str:
+        """Parent folder of the current Sound file"""
         p = self.sound_file_path
         if not p:
             return ""

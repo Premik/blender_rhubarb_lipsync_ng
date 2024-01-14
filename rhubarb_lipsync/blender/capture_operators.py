@@ -6,6 +6,7 @@ from bpy.types import Context
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, MouthCueList
 from bpy.props import StringProperty
+from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbParser
 
 log = logging.getLogger(__name__)
 
@@ -94,19 +95,14 @@ class ExportCueList2Json(bpy.types.Operator):
     bl_idname = "rhubarb.export_cue_list2json"
     bl_label = "Export to JSON"
 
-    filepath: StringProperty(subtype="FILE_PATH", default='json')
-
-    filter_glob: StringProperty(  # type: ignore
-        default='*.json;',
-        options={'HIDDEN'},
-    )
+    filepath: StringProperty(subtype="FILE_PATH")  # type: ignore
+    filter_glob: StringProperty(default='*.json;', options={'HIDDEN'})  # type: ignore
 
     @classmethod
     def disabled_reason(cls, context: Context) -> str:
         props = CaptureListProperties.capture_from_context(context)
         if not props:
             return "No capture selected"
-        cl: MouthCueList = props.cue_list
         return ""
 
     @classmethod
@@ -114,13 +110,24 @@ class ExportCueList2Json(bpy.types.Operator):
         return ui_utils.validation_poll(cls, context)
 
     def invoke(self, context: Context, event) -> set[int] | set[str]:
-        self.filepath = 'capture.json'
+        rootProps = CaptureListProperties.from_context(context)
+        if not self.filepath:
+            n = rootProps.name
+            if not n:
+                n = "capture"
+            self.filepath = f"{n}.json"
         context.window_manager.fileselect_add(self)
         return {'RUNNING_MODAL'}
 
     def execute(self, context: Context) -> set[str]:
-        props = CaptureListProperties.capture_from_context(context)
-        cl: MouthCueList = props.cue_list
-        cl.items.clear()
+        cprops = CaptureListProperties.capture_from_context(context)
+        cl: MouthCueList = cprops.cue_list
+        cues = [c.cue for c in cl.items]
+        json = RhubarbParser.unparse_mouth_cues(cues, f"{cprops.sound_file_basename}.{cprops.sound_file_extension}")
+        log.debug(f"Saving {len(json)} char to {self.filepath} ")
+        with open(self.filepath, 'w') as file:
+            file.write(json)
+        self.report(type={"INFO"}, message=f"Exported {len(cues)} to {self.filepath}")
+        # cl: MouthCueList = props.cue_list
 
         return {'FINISHED'}
