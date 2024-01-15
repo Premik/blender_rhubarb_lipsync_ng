@@ -220,14 +220,14 @@ class CaptureProperties(PropertyGroup):
     # mapping: PointerProperty(type=MappingList, name="Mapping")  # type: ignore
 
     @staticmethod
-    def sound_selection_validation(context: Context, required_unpack=True) -> str:
+    def sound_selection_validation(context: Context, required_unpack=True, require_sound=True) -> str:
         # selection_error = MappingProperties.context_selection_validation(context)
         # if selection_error:
         #    return selection_error
         props = CaptureListProperties.capture_from_context(context)
         if not props:
             return "No capture selected"
-        if not props.sound:
+        if not props.sound and require_sound:
             return "Capture has no sound selected"
         sound: Sound = props.sound
         if required_unpack and sound.packed_file:

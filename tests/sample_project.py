@@ -151,11 +151,17 @@ class SampleProject:
         assert res is None, res
 
     def capture(self) -> None:
+        """Orchestrate the full capture process from sound to cue list"""
         self.create_capture()
         self.set_capture_sound()
         self.trigger_capture()
         self.wait_for_capture_finish()
         self.assert_cues_matches_sample()
+
+    def capture_load_json(self) -> None:
+        self.create_capture()
+        json_path = str(self.sample.expected_json_path)
+        ui_utils.assert_op_ret(bpy.ops.rhubarb.import_json_cue_list(filepath=json_path))
 
     def ensure_action(self, name: str) -> tuple[bool, bpy.types.Action]:
         """Get or create Action with the given name and adds a simply key frame."""
@@ -219,7 +225,7 @@ class SampleProject:
     def initialize_mapping(self, obj: bpy.types.Object) -> None:
         bpy.context.view_layer.objects.active = obj  # Make the obj active
         assert self.mprops
-        bpy.ops.rhubarb.build_cueinfo_uilist()  # Populate the cue-type list
+        ui_utils.assert_op_ret(bpy.ops.rhubarb.build_cueinfo_uilist())  # Populate the cue-type list
 
     def create_mapping(self, actions: list[bpy.types.Action]) -> None:
         """Populate all the cue mappings using the actions from the list. Looping the list from the start if needed."""

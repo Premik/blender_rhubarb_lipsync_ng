@@ -180,7 +180,7 @@ class BakeToNLA(bpy.types.Operator):
 
     @classmethod
     def disabled_reason(cls, context: Context) -> str:
-        error_common = CaptureProperties.sound_selection_validation(context, False)
+        error_common = CaptureProperties.sound_selection_validation(context, False, False)
         if error_common:
             return error_common
         error_common = MappingProperties.context_selection_validation(context)

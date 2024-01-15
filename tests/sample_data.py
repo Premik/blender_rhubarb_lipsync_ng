@@ -30,13 +30,18 @@ class SampleData:
         return self.sample_data_path / f"{self.name}-expected.json"
 
     @cached_property
-    def expected_json(self) -> list[dict]:
+    def expected_json(self) -> str:
         with open(self.expected_json_path) as f:
-            return json.load(f)
+            return f.read()
+
+    @cached_property
+    def expected_json_dict(self) -> dict:
+        return json.loads(self.expected_json)
 
     @cached_property
     def expected_cues(self) -> list[MouthCue]:
-        return RhubarbParser.lipsync_json2MouthCues(self.expected_json)
+        json_parsed = RhubarbParser.parse_lipsync_json(self.expected_json)
+        return RhubarbParser.lipsync_json2MouthCues(json_parsed)
 
     def to_sound(self, ctx: Context) -> Sound:
         se = ctx.scene.sequence_editor

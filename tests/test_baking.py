@@ -42,7 +42,7 @@ class BakingUtilsTest(unittest.TestCase):
 class BakingContextTest(unittest.TestCase):
     def setUp(self) -> None:
         self.project = sample_project.SampleProject()
-        self.project.capture()
+        self.project.capture_load_json()
 
     def basic(self) -> None:
         self.bc = self.project.create_mapping_single_sphere1()

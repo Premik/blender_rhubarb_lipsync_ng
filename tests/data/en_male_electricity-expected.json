@@ -1,42 +1,48 @@
-[
-    {
-        "start": 0.0,
-        "end": 0.1,
-        "value": "X"
+{
+    "metadata": {
+        "soundFile": "en_male_electricity.ogg",
+        "duration": "1.06"
     },
-    {
-        "start": 0.1,
-        "end": 0.15,
-        "value": "B"
-    },
-    {
-        "start": 0.15,
-        "end": 0.19,
-        "value": "H"
-    },
-    {
-        "start": 0.19,
-        "end": 0.26,
-        "value": "C"
-    },
-    {
-        "start": 0.26,
-        "end": 0.54,
-        "value": "B"
-    },
-    {
-        "start": 0.54,
-        "end": 0.61,
-        "value": "C"
-    },
-    {
-        "start": 0.61,
-        "end": 0.96,
-        "value": "B"
-    },
-    {
-        "start": 0.96,
-        "end": 1.06,
-        "value": "X"
-    }
-]
+    "mouthCues": [
+        {
+            "start": "0.00",
+            "end": "0.10",
+            "value": "X"
+        },
+        {
+            "start": "0.10",
+            "end": "0.15",
+            "value": "B"
+        },
+        {
+            "start": "0.15",
+            "end": "0.19",
+            "value": "H"
+        },
+        {
+            "start": "0.19",
+            "end": "0.26",
+            "value": "C"
+        },
+        {
+            "start": "0.26",
+            "end": "0.54",
+            "value": "B"
+        },
+        {
+            "start": "0.54",
+            "end": "0.61",
+            "value": "C"
+        },
+        {
+            "start": "0.61",
+            "end": "0.96",
+            "value": "B"
+        },
+        {
+            "start": "0.96",
+            "end": "1.06",
+            "value": "X"
+        }
+    ]
+}
