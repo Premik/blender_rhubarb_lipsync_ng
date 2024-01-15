@@ -66,7 +66,6 @@ class SampleProject:
             p2 = local_executable_path()
             print(f"The {p1} doesn't exist. Changed to {p2} ")
             self.prefs.executable_path_string = str(p2)
-        props.sound = self.sample.to_sound(bpy.context)
 
     def set_capture_sound(self, sound: Optional[bpy.types.Sound] = None) -> None:
         if sound is None:

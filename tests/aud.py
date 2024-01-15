@@ -1,6 +1,10 @@
 # aud module is not part of official Blender's as module `bpy` in pip. So this mocks it out
 
-class Sound: pass
+MOCK = True
+
+
+class Sound:
+    pass
 
 
 AP_LOCATION = None

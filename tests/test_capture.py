@@ -4,6 +4,7 @@ import bpy
 
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 import sample_project
+from helper import skip_no_aud
 
 
 class CaptureTest(unittest.TestCase):
@@ -15,6 +16,7 @@ class CaptureTest(unittest.TestCase):
         assert self.project.cprops
         ui_utils.assert_op_ret(bpy.ops.rhubarb.get_executable_version())
 
+    @skip_no_aud
     def testCaputre(self) -> None:
         self.project.capture()
         print("done")

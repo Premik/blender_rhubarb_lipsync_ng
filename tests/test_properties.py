@@ -2,6 +2,7 @@ import unittest
 
 
 import sample_project
+from helper import skip_no_aud
 
 
 class PropertiesTest(unittest.TestCase):
@@ -10,8 +11,10 @@ class PropertiesTest(unittest.TestCase):
         self.project.create_capture()
         assert self.project.cprops
 
+    @skip_no_aud
     def testSoundFilePath(self) -> None:
         props = self.project.cprops
+        self.project.set_capture_sound()
 
         self.assertEqual(props.sound_file_extension, 'ogg')
         self.assertEqual(props.sound_file_basename, 'en_male_electricity')
