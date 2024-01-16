@@ -157,7 +157,8 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
   * By name - More instances (alow user defined) - will map action by matching name patterns (should provide some placeholder/expansions in the expression for objectName, etc)
 
 ### Normal
-* Baking - round to whole frames when not sub-frames visible
+* Add warning (in the baking validation popup?) when any selected object has an active Action (seems to be confusing for NLA newbies when the rig doesn't animate after bake because of that)
+
 * extended shapes- seems they are generated even when disabled -check
 * Mapping - integration with FaceIt - auto-populate mapping from rig expressions or shapekeys
   - try corrective shape-keys
@@ -165,8 +166,9 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 * Integrate with: https://mecabricks.com/en/shop/product/6
 * Create aur package
 * Detect blender --debug and similar argument and auto-enable debug log level (and same for log file?)
-### Low
 
+### Low
+* Baking - round to whole frames when not sub-frames visible
 - Strip placement reorg should be possible to set/override on different levelson Individual cue? (mapping item)
 - Strip placement -add preset? Similar like the Render Properties / Light paths (button on the group)
 * Add [speaker](https://docs.blender.org/manual/en/latest/render/output/audio/speaker.html) as an alternative to Sequencer audio clip
