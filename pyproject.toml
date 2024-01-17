@@ -35,8 +35,8 @@ executable_name="rhubarb.exe"
 packages = ["rhubarb_lipsync"]
 
 [tool.pytest.ini_options]
-# The Blender-as-module dirties global context. Only way to make the integration tests pass is to use `--forked` (but that is not implemented on Windows)
-addopts = ["--import-mode=importlib", "--forked", "--numprocesses=auto"]
+# The tests can run on multiple threads but might not be safe/stable unless --forked is used too. This requires: pytest-xdist pytest-forked 
+#addopts = ["--import-mode=importlib", "--forked", "--numprocesses=auto"]
 #addopts = ["--import-mode=importlib", "--numprocesses=auto"]
 # https://stackoverflow.com/questions/10253826/path-issue-with-pytest-importerror-no-module-named-yadayadayada/50610630#answer-50610630
 pythonpath = [".", "tests"] 

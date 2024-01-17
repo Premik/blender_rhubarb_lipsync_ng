@@ -25,6 +25,7 @@ import rhubarb_lipsync.blender.baking_utils as baking_utils
 import re
 
 import rhubarb_lipsync.rhubarb.mouth_shape_data as shape_data
+import importlib, sys
 
 
 class SampleProject:
@@ -36,7 +37,9 @@ class SampleProject:
     registered = False
 
     def __init__(self) -> None:
+        self.make_project_empty()
         SampleProject.ensure_registered()
+        self.assert_empty_scene()
 
     @staticmethod
     def ensure_registered() -> None:
@@ -44,6 +47,8 @@ class SampleProject:
             print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             print("Already registered. There could be undesired side effects")
             print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+            # assert False
+            addon_utils._addon_ensure(RhubarbAddonPreferences.bl_idname)
             return
         rhubarb_lipsync.register()  # Simulate blender register call
         logManager.set_debug()
@@ -52,6 +57,17 @@ class SampleProject:
         # Make sure the addon gets listed in the ctx.addons preferences. This is probably a hack
         addon_utils._addon_ensure(RhubarbAddonPreferences.bl_idname)
         SampleProject.registered = True
+
+    def assert_empty_scene(self) -> None:
+        non_default_objects = [o for o in bpy.data.objects if o.name not in ["Camera", "Cube", "Light"]]
+        assert not bool(non_default_objects), f"Unexpected objects in the default scene: {non_default_objects}"
+        assert not bool(list(bpy.data.actions)), f"Unexpected actions in the default scene: {list(bpy.data.actions)}"
+        assert not self.cprops, f"There is unexpected Capture already created {self.cprops}.  "
+        if self.mprops:
+            assert not len(self.mprops.items), f"There is unexpected mapping already created on the {bpy.context.object}."
+
+    def make_project_empty(self) -> None:
+        bpy.ops.wm.read_factory_settings(use_empty=True)
 
     @cached_property
     def sample(self) -> sample_data.SampleData:
