@@ -4,7 +4,7 @@ from typing import Any, Optional, Generator
 
 import bpy
 import bpy.utils.previews
-from bpy.props import BoolProperty, CollectionProperty, IntProperty, PointerProperty, StringProperty
+from bpy.props import BoolProperty, CollectionProperty, IntProperty, PointerProperty, StringProperty, FloatProperty
 from bpy.types import Context, PropertyGroup, NlaTrack
 
 from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthShapeInfo, MouthShapeInfos
@@ -93,17 +93,17 @@ class MappingItem(PropertyGroup):
         override={'LIBRARY_OVERRIDABLE'},
     )
 
-    frame_start: IntProperty(  # type: ignore
+    frame_start: FloatProperty(  # type: ignore
         name="Frame Start",
         description="TBD",
-        default=0,
-        soft_min=0,
+        default=1,
+        soft_min=1,
         soft_max=100,
         options={'LIBRARY_EDITABLE'},
         override={'LIBRARY_OVERRIDABLE'},
     )
 
-    frame_count: IntProperty(  # type: ignore
+    frame_count: FloatProperty(  # type: ignore
         name="Frames count",
         description="TBD",
         default=0,
@@ -114,14 +114,53 @@ class MappingItem(PropertyGroup):
         override={'LIBRARY_OVERRIDABLE'},
     )
 
+    custom_frame_ranage: BoolProperty(  # type: ignore
+        name="Custom Frame Range",
+        description="Whether references a custom range of frames from the Action",
+        default=False,
+        options={'LIBRARY_EDITABLE'},
+        override={'LIBRARY_OVERRIDABLE'},
+    )
+
+    @property
+    def frame_end(self) -> float:
+        """Last frame from the Action"""
+        if self.custom_frame_ranage:
+            return self.frame_start + self.frame_count
+        if not self.action:
+            return 0
+        a: bpy.types.Action = self.action
+        return a.frame_end
+
+    @property
+    def frame_range(self) -> tuple[float, float]:
+        if not self.custom_frame_ranage:
+            if not self.action:
+                return 0.0, 0.0
+            a: bpy.types.Action = self.action
+            return tuple(a.frame_range)  # type: ignore
+        return self.frame_start, self.frame_start + self.frame_count
+
+    @property
+    def frame_range_str(self) -> str:
+        def c(f: float) -> str:  # Hide decimal digits when close to whole numbers
+            if abs(f - round(f)) < 0.00001:
+                # return f"{int(round(f)):03d}"
+                return str(int(round(f)))
+            else:
+                # return f"{f:06.2f}"
+                return f"{f:.2f}"
+
+        return f"[{c(self.frame_range[0])}]...[{c(self.frame_range[1])}]"
+
     @cached_property
-    def cue_desc(self) -> MouthShapeInfo | None:
+    def cue_info(self) -> MouthShapeInfo | None:
         if not self.key:
             return None
         return MouthShapeInfos[self.key].value
 
     @property
-    def action_name(self) -> str:
+    def action_str(self) -> str:
         if not self.action:
             return " "
         return self.action.name

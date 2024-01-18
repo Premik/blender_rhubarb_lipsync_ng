@@ -58,7 +58,7 @@ class ListFilteredActions(bpy.types.Operator):
 
     @property
     def action(self) -> Optional[bpy.types.Action]:
-        return bpy.data.actions.get(self.action_name)
+        return bpy.data.actions.get(self.action_str)
 
     @classmethod
     def poll(cls, context: Context) -> bool:
@@ -74,8 +74,8 @@ class ListFilteredActions(bpy.types.Operator):
         if mi is None:
             return "Invalid target cue index selected"
         if not mi.action:
-            return f"Select Action to animate the '{mi.key}' mouth cue with."
-        return f"Change the {mi.action.name} to animate the '{mi.key}' mouth cue with."
+            return f"'Cue: {mi.key}'"
+        return f"Action: {mi.action_str}\nRange: {mi.frame_range_str} \nCue: {mi.key}"
 
     def invoke(self, context: Context, event: bpy.types.Event) -> set[str]:
         wm = context.window_manager
@@ -89,6 +89,58 @@ class ListFilteredActions(bpy.types.Operator):
             self.report(type={"ERROR"}, message="Invalid target cue index selected.")
             return {'CANCELLED'}
         mi.action = self.action
+        ui_utils.redraw_3dviews(context)
+
+        return {'FINISHED'}
+
+
+class SetActionFrameRange(bpy.types.Operator):
+    bl_idname = "rhubarb.set_action_framerange"
+    bl_label = "Set action framerange"
+    bl_options = {'UNDO', 'REGISTER'}
+
+    target_cue_index: IntProperty(name="index", description="Mouth cue index to set the frame range for")  # type: ignore
+
+    def mapping_item(self, mprops: MappingProperties) -> Optional[MappingItem]:
+        """Maping item based on the target_cue_index"""
+        if not mprops:
+            return None
+        if self.target_cue_index < 0 or self.target_cue_index >= len(mprops.items):
+            return None
+        return mprops.items[self.target_cue_index]
+
+    @classmethod
+    def poll(cls, context: Context) -> bool:
+        return ui_utils.validation_poll(cls, context, MappingProperties.context_selection_validation)
+
+    @classmethod
+    def description(csl, context: Context, self: 'ListFilteredActions') -> str:
+        mprops: MappingProperties = MappingProperties.from_context(context)
+
+        # mi = self.mapping_item(mprops) # 'self' is dummy, only have properties
+        mi = SetActionFrameRange.mapping_item(self, mprops)
+
+        if mi is None:
+            return "Invalid target cue index selected"
+        return f"Set frame range of the Action for this mapping\nRange: {mi.frame_range_str}"
+
+    def draw(self, context: Context) -> None:
+        mprops: MappingProperties = MappingProperties.from_context(context)
+        layout = self.layout
+
+        layout.separator()
+        layout.label(text=f"{mprops.index}")
+
+    def invoke(self, context: Context, event: bpy.types.Event) -> set[str]:
+        return context.window_manager.invoke_props_dialog(self, width=500)
+
+    def execute(self, context: Context) -> set[str]:
+        mprops: MappingProperties = MappingProperties.from_context(context)
+        mi = self.mapping_item(mprops)
+        if not mi:
+            self.report(type={"ERROR"}, message="Invalid target cue index selected.")
+            return {'CANCELLED'}
+
         ui_utils.redraw_3dviews(context)
 
         return {'FINISHED'}

@@ -149,7 +149,6 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 ## Todo
 
 ### High
-* There are still some ogg unsupported format (perhaps stereo?) which are not recognzed and convert button not shown,
 * Add start- end frame properties to the MappingItem. So NLA clips can clip a frame range from a longer action (i.e.to support face-it style)
 * Mapping wizards
   * Clear - will remove the mapping (delete from the object completly?)
@@ -179,7 +178,7 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 * Capture panel - add `crop` button to replace to crop too long cues and add x shape instead of them
 * Changel all labels cases to follow Blender style "Foo in Bar"
 * Add some simple blender sample file
-
+* There are still some ogg unsupported format - could have been an user error (ogg file was not really an ogg?)
 ##
 - 
 
