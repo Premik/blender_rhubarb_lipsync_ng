@@ -157,11 +157,8 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 
 ### Normal
 * Add warning (in the baking validation popup?) when any selected object has an active Action (seems to be confusing for NLA newbies when the rig doesn't animate after bake because of that)
-
 * extended shapes- seems they are generated even when disabled -check
 * Mapping - integration with FaceIt - auto-populate mapping from rig expressions or shapekeys
-  - try corrective shape-keys
-  - 
 * Integrate with: https://mecabricks.com/en/shop/product/6
 * Create aur package
 * Detect blender --debug and similar argument and auto-enable debug log level (and same for log file?)

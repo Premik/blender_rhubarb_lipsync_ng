@@ -93,10 +93,10 @@ class CueListPreferences(PropertyGroup):
 
 
 class MappingPreferences(PropertyGroup):
-    actions_multiline_view: BoolProperty(  # type: ignore
-        name="Show actions on two lines",
-        description="When both regular action and shape-key action are visible show them on two lines instead of side-by-side.",
-        default=False,
+    action_buttons_emboss: BoolProperty(  # type: ignore
+        name="Action Buttons Emboss",
+        description="Show the Actions related operators in the mapping UIList as buttons with emboss or as flat text",
+        default=True,
     )
 
     object_selection_type: EnumProperty(  # type: ignore

@@ -78,8 +78,9 @@ class ListFilteredActions(bpy.types.Operator):
         return f"Action: {mi.action_str}\nRange: {mi.frame_range_str} \nCue: {mi.key}"
 
     def invoke(self, context: Context, event: bpy.types.Event) -> set[str]:
-        wm = context.window_manager
-        wm.invoke_search_popup(self)
+        mprops: MappingProperties = MappingProperties.from_context(context)
+        mprops.index = self.target_cue_index
+        context.window_manager.invoke_search_popup(self)
         return {'FINISHED'}
 
     def execute(self, context: Context) -> set[str]:
@@ -96,7 +97,7 @@ class ListFilteredActions(bpy.types.Operator):
 
 class SetActionFrameRange(bpy.types.Operator):
     bl_idname = "rhubarb.set_action_framerange"
-    bl_label = "Set action framerange"
+    bl_label = "Set start/end frames of the Action"
     bl_options = {'UNDO', 'REGISTER'}
 
     target_cue_index: IntProperty(name="index", description="Mouth cue index to set the frame range for")  # type: ignore
@@ -122,17 +123,28 @@ class SetActionFrameRange(bpy.types.Operator):
 
         if mi is None:
             return "Invalid target cue index selected"
-        return f"Set frame range of the Action for this mapping\nRange: {mi.frame_range_str}"
+        if mi.custom_frame_ranage:
+            range_str = "Custom range"
+        else:
+            range_str = "Default range"
+        return f"Set frame range of the Action for this mapping\n{range_str}: {mi.frame_range_str}"
 
     def draw(self, context: Context) -> None:
         mprops: MappingProperties = MappingProperties.from_context(context)
-        layout = self.layout
-
-        layout.separator()
-        layout.label(text=f"{mprops.index}")
+        mi = self.mapping_item(mprops)
+        box = self.layout.box()
+        box.label(text=f"Range: {mi.frame_range_str}")
+        self.layout.prop(mi, "custom_frame_ranage")
+        row = self.layout.row(align=True)
+        row.enabled = mi.custom_frame_ranage
+        row.prop(mi, "frame_start", text="Start")
+        row.prop(mi, "frame_count", text="Count")
+        # row.prop(mi.frame_end, "End")
 
     def invoke(self, context: Context, event: bpy.types.Event) -> set[str]:
-        return context.window_manager.invoke_props_dialog(self, width=500)
+        mprops: MappingProperties = MappingProperties.from_context(context)
+        mprops.index = self.target_cue_index
+        return context.window_manager.invoke_props_dialog(self, width=300)
 
     def execute(self, context: Context) -> set[str]:
         mprops: MappingProperties = MappingProperties.from_context(context)
@@ -171,6 +183,7 @@ class ClearMappedActions(bpy.types.Operator):
         mprops: MappingProperties = MappingProperties.from_context(context)
         mi = ListFilteredActions.mapping_item(self, mprops)
         mi = self.mapping_item(mprops)
+        mprops.index = self.target_cue_index
         if not mi:
             self.report(type={"INFO"}, message="There is no Action mapped")
             return {'CANCELLED'}
@@ -238,7 +251,7 @@ class ShowCueInfoHelp(bpy.types.Operator):
                 self.report(type={"ERROR"}, message="No cue key provided and no mapping item selected.")
                 return {'CANCELLED'}
             self.key = si.key
-
+        mprops.index = MouthShapeInfos.key2index(self.key)
         draw = lambda this, ctx: ShowCueInfoHelp.draw_popup(this, self.key, ctx)
         msi: MouthShapeInfo = MouthShapeInfos[self.key].value
         title = f"{msi.key_displ}  {msi.short_dest}"
