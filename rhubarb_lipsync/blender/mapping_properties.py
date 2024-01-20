@@ -95,7 +95,8 @@ class MappingItem(PropertyGroup):
 
     frame_start: FloatProperty(  # type: ignore
         name="Frame Start",
-        description="TBD",
+        description="Start frame of the Action used to create the Action Clip",
+        step=100,
         default=1,
         soft_min=1,
         soft_max=100,
@@ -105,7 +106,8 @@ class MappingItem(PropertyGroup):
 
     frame_count: FloatProperty(  # type: ignore
         name="Frames count",
-        description="TBD",
+        description="Number of frames of the Action used to create the Action Clip",
+        step=100,
         default=0,
         min=0,
         soft_min=1,
@@ -116,7 +118,7 @@ class MappingItem(PropertyGroup):
 
     custom_frame_ranage: BoolProperty(  # type: ignore
         name="Custom Frame Range",
-        description="Whether references a custom range of frames from the Action",
+        description="Whether use a custom range of frames of the Action or whole frame range when cearing the Action Clip",
         default=False,
         options={'LIBRARY_EDITABLE'},
         override={'LIBRARY_OVERRIDABLE'},
@@ -239,9 +241,12 @@ class MappingProperties(PropertyGroup):
 
     @property
     def selected_item(self) -> Optional[MappingItem]:
-        if self.index < 0 or self.index >= len(self.items):
+        return self[self.index]
+
+    def __getitem__(self, index) -> Optional[MappingItem]:
+        if index < 0 or index >= len(self.items):
             return None
-        return self.items[self.index]
+        return self.items[index]
 
     @property
     def has_any_mapping(self) -> bool:
