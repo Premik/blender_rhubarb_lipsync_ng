@@ -25,7 +25,6 @@ import rhubarb_lipsync.blender.baking_utils as baking_utils
 import re
 
 import rhubarb_lipsync.rhubarb.mouth_shape_data as shape_data
-import importlib, sys
 
 
 class SampleProject:

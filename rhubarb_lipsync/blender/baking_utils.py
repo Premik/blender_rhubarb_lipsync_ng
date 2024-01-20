@@ -13,6 +13,7 @@ from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences, Mapping
 from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthShapeInfos, duration_scale_rate
 from bisect import bisect_left
 import rhubarb_lipsync.blender.mapping_utils as mapping_utils
+import rhubarb_lipsync.blender.ui_utils as ui_utils
 
 log = logging.getLogger(__name__)
 
@@ -273,14 +274,16 @@ class BakingContext:
         ret: list[str] = []
         if self.track1 == self.track2:
             ret += ["Track1 and Track2 are the same"]
+        limit = 5000
         strips = 0
         t = self.next_track()
-        strips += len(list(self.strips_on_current_track()))
-        if self.next_track() != t:
-            strips += len(list(self.strips_on_current_track()))
+        strips += ui_utils.len_limited(self.strips_on_current_track(), limit)
+        if self.next_track() != t and strips < limit:
+            strips += ui_utils.len_limited(self.strips_on_current_track(), limit)
 
         if strips > 0:
-            ret += [f"Clash with {strips} existing strips. Press the (Remove Strips) button"]
+            extra = "+" if strips >= limit else ""
+            ret += [f"Clash with {strips}{extra} existing strips. Press the (Remove Strips) button"]
         return ret
 
     def validate_selection(self) -> str:

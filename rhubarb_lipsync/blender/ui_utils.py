@@ -200,6 +200,16 @@ def set_panel_category(panel, category: str) -> None:
         traceback.print_exc()
 
 
+def len_limited(iterator: Iterator, max_count=1000) -> int:
+    """Count the number of items of an iterator but would break if the limit is reached."""
+    count = 0
+    for _ in iterator:
+        count += 1
+        if count >= max_count:
+            break
+    return count
+
+
 class DropdownHelper:
     """Helper for building dropdowns for non-ID items of an collection. Item is referenced
     by index and a (search-)name. Index is further encoded as number prefix of the name separated by space.

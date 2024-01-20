@@ -169,3 +169,22 @@ class ShowResultLogDetails(bpy.types.Operator):
         rll.items.clear()
         ui_utils.redraw_3dviews(ctx)
         return {'FINISHED'}
+
+
+# class ConfirmOperator(bpy.types.Operator):
+#     """Show a confirmation dialog before"""
+
+#     bl_idname = "rhubarb.confirm_overwrite"
+#     bl_label = "File already exists. Overwrite?"
+#     bl_options = {'INTERNAL'}
+
+#     filepath: StringProperty(subtype="FILE_PATH")  # type: ignore
+#     msg: StringProperty()  # type: ignore
+#     op_id: StringProperty()  # type: ignore
+
+#     def invoke(self, context: Context, event) -> set[int] | set[str]:
+#         ret = context.window_manager.invoke_confirm(self, event)
+#         return ret
+
+#     def execute(self, context: Context) -> set[str]:
+#         return {'FINISHED'}

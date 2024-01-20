@@ -1,4 +1,4 @@
-from bpy.types import Context, UILayout, UIList, Panel, UI_UL_list
+from bpy.types import Context, UILayout, UIList, UI_UL_list
 
 
 import rhubarb_lipsync.blender.mapping_operators as mapping_operators

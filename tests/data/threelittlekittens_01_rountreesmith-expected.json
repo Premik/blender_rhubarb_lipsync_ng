@@ -1,4 +1,9 @@
-[
+{
+    "metadata": {
+        "soundFile": "threelittlekittens_01_rountreesmith.ogg",
+        "duration": "356.57"
+    },
+    "mouthCues": [
     { "start": 0.00, "end": 1.87, "value": "X" },
     { "start": 1.87, "end": 1.98, "value": "B" },
     { "start": 1.98, "end": 2.05, "value": "C" },
@@ -1989,4 +1994,4 @@
     { "start": 350.40, "end": 350.61, "value": "C" },
     { "start": 350.61, "end": 356.57, "value": "X" }
 ]
-
+}

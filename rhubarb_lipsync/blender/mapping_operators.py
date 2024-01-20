@@ -1,11 +1,11 @@
 import logging
 
 import bpy
-from bpy.props import StringProperty, IntProperty
+from bpy.props import StringProperty, IntProperty, FloatProperty
 from bpy.types import Context
 from typing import Optional
 
-from rhubarb_lipsync.blender.mapping_properties import MappingProperties, NlaTrackRef, MappingItem
+from rhubarb_lipsync.blender.mapping_properties import MappingProperties, NlaTrackRef
 from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthShapeInfos, MouthShapeInfo
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 from rhubarb_lipsync.blender.ui_utils import IconsManager
@@ -48,17 +48,9 @@ class ListFilteredActions(bpy.types.Operator):
     action_name: EnumProperty(name="Action", items=filtered_actions_enum)  # type: ignore
     target_cue_index: IntProperty(name="index", description="Mouth cue index to map the Action for")  # type: ignore
 
-    def mapping_item(self, mprops: MappingProperties) -> Optional[MappingItem]:
-        """Maping item based on the target_cue_index"""
-        if not mprops:
-            return None
-        if self.target_cue_index < 0 or self.target_cue_index >= len(mprops.items):
-            return None
-        return mprops.items[self.target_cue_index]
-
     @property
     def action(self) -> Optional[bpy.types.Action]:
-        return bpy.data.actions.get(self.action_str)
+        return bpy.data.actions.get(self.action_name)
 
     @classmethod
     def poll(cls, context: Context) -> bool:
@@ -68,8 +60,7 @@ class ListFilteredActions(bpy.types.Operator):
     def description(csl, context: Context, self: 'ListFilteredActions') -> str:
         mprops: MappingProperties = MappingProperties.from_context(context)
 
-        # mi = self.mapping_item(mprops) # 'self' is dummy, only have properties
-        mi = ListFilteredActions.mapping_item(self, mprops)
+        mi = mprops[self.target_cue_index]
 
         if mi is None:
             return "Invalid target cue index selected"
@@ -85,7 +76,7 @@ class ListFilteredActions(bpy.types.Operator):
 
     def execute(self, context: Context) -> set[str]:
         mprops: MappingProperties = MappingProperties.from_context(context)
-        mi = self.mapping_item(mprops)
+        mi = mprops[self.target_cue_index]
         if not mi:
             self.report(type={"ERROR"}, message="Invalid target cue index selected.")
             return {'CANCELLED'}
@@ -102,14 +93,6 @@ class SetActionFrameRange(bpy.types.Operator):
 
     target_cue_index: IntProperty(name="index", description="Mouth cue index to set the frame range for")  # type: ignore
 
-    def mapping_item(self, mprops: MappingProperties) -> Optional[MappingItem]:
-        """Maping item based on the target_cue_index"""
-        if not mprops:
-            return None
-        if self.target_cue_index < 0 or self.target_cue_index >= len(mprops.items):
-            return None
-        return mprops.items[self.target_cue_index]
-
     @classmethod
     def poll(cls, context: Context) -> bool:
         return ui_utils.validation_poll(cls, context, MappingProperties.context_selection_validation)
@@ -118,8 +101,7 @@ class SetActionFrameRange(bpy.types.Operator):
     def description(csl, context: Context, self: 'ListFilteredActions') -> str:
         mprops: MappingProperties = MappingProperties.from_context(context)
 
-        # mi = self.mapping_item(mprops) # 'self' is dummy, only have properties
-        mi = SetActionFrameRange.mapping_item(self, mprops)
+        mi = mprops[self.target_cue_index]
 
         if mi is None:
             return "Invalid target cue index selected"
@@ -131,7 +113,7 @@ class SetActionFrameRange(bpy.types.Operator):
 
     def draw(self, context: Context) -> None:
         mprops: MappingProperties = MappingProperties.from_context(context)
-        mi = self.mapping_item(mprops)
+        mi = mprops[self.target_cue_index]
         box = self.layout.box()
         box.label(text=f"Range: {mi.frame_range_str}")
         self.layout.prop(mi, "custom_frame_ranage")
@@ -139,6 +121,18 @@ class SetActionFrameRange(bpy.types.Operator):
         row.enabled = mi.custom_frame_ranage
         row.prop(mi, "frame_start", text="Start")
         row.prop(mi, "frame_count", text="Count")
+        row = self.layout.row(align=True)
+        row.enabled = mi.custom_frame_ranage
+
+        def shift_op(sign: str, delta: float, icon: str):
+            blid = SetShiftActionFrameRangeStart.bl_idname
+            op: SetShiftActionFrameRangeStart = row.operator(blid, text=f"{sign}{mi.frame_count:.2f}", icon=icon)
+            op.delta = delta
+            op.target_cue_index = self.target_cue_index
+
+        shift_op("-", -mi.frame_count, icon="PLAY_REVERSE")
+        shift_op("+", +mi.frame_count, icon="PLAY")
+
         # row.prop(mi.frame_end, "End")
 
     def invoke(self, context: Context, event: bpy.types.Event) -> set[str]:
@@ -148,12 +142,39 @@ class SetActionFrameRange(bpy.types.Operator):
 
     def execute(self, context: Context) -> set[str]:
         mprops: MappingProperties = MappingProperties.from_context(context)
-        mi = self.mapping_item(mprops)
+        mi = mprops[self.target_cue_index]
         if not mi:
             self.report(type={"ERROR"}, message="Invalid target cue index selected.")
             return {'CANCELLED'}
 
         ui_utils.redraw_3dviews(context)
+
+        return {'FINISHED'}
+
+
+class SetShiftActionFrameRangeStart(bpy.types.Operator):
+    bl_idname = "rhubarb.shift_action_framerange_start"
+    bl_label = "Offset start by"
+    bl_options = {'UNDO', 'REGISTER'}
+
+    target_cue_index: IntProperty(name="index", description="Mouth cue index to set the frame range for")  # type: ignore
+    delta: FloatProperty(name="delta", description="How many frames to shift the start frame by")  # type: ignore
+
+    @classmethod
+    def poll(cls, context: Context) -> bool:
+        return ui_utils.validation_poll(cls, context, MappingProperties.context_selection_validation)
+
+    @classmethod
+    def description(csl, context: Context, self: 'ListFilteredActions') -> str:
+        return f"Shift the start frame of the custom subrange by {self.delta} frames"
+
+    def execute(self, context: Context) -> set[str]:
+        mprops: MappingProperties = MappingProperties.from_context(context)
+        mi = mprops[self.target_cue_index]
+        if not mi:
+            self.report(type={"ERROR"}, message="Invalid target cue index selected.")
+            return {'CANCELLED'}
+        mi.frame_start += self.delta
 
         return {'FINISHED'}
 
@@ -167,22 +188,13 @@ class ClearMappedActions(bpy.types.Operator):
 
     target_cue_index: IntProperty(name="index", description="Mouth cue index to remote the Action from")  # type: ignore
 
-    def mapping_item(self, mprops: MappingProperties) -> Optional[MappingItem]:
-        """Maping item based on the target_cue_index"""
-        if not mprops:
-            return None
-        if self.target_cue_index < 0 or self.target_cue_index >= len(mprops.items):
-            return None
-        return mprops.items[self.target_cue_index]
-
     @classmethod
     def poll(cls, context: Context) -> bool:
         return ui_utils.validation_poll(cls, context, MappingProperties.context_selection_validation)
 
     def execute(self, context: Context) -> set[str]:
         mprops: MappingProperties = MappingProperties.from_context(context)
-        mi = ListFilteredActions.mapping_item(self, mprops)
-        mi = self.mapping_item(mprops)
+        mi = mprops[self.target_cue_index]
         mprops.index = self.target_cue_index
         if not mi:
             self.report(type={"INFO"}, message="There is no Action mapped")
