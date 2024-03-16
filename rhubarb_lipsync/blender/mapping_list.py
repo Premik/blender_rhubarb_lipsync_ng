@@ -17,7 +17,7 @@ def draw_mapping_item(ctx: Context, layout: UILayout, mp: MappingProperties, ite
     col1 = split.column().row()
     col2 = split.column().row(align=True)
 
-    # row.template_icon(icon_value=IconsManager.cue_image(item.key), scale=5)
+    # row.template_icon(icon_value=IconsManager.cue_icon(item.key), scale=5)
     # row = split.row()
 
     emboss = mlp.action_buttons_emboss

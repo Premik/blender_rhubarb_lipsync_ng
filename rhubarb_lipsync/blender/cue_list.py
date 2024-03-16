@@ -51,7 +51,7 @@ class MouthCueUIList(UIList):
         row = split.row()  # Icon(0.1) and shape key (0.1)
 
         if clp.show_col_icon:
-            row.label(icon_value=IconsManager.cue_image(item.cue.key))
+            row.label(icon_value=IconsManager.cue_icon(item.cue.key))
         if clp.as_circle:
             row.label(text=item.cue.info.key_displ)
         else:

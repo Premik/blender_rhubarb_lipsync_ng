@@ -112,9 +112,14 @@ class MappingAndBakingPanel(bpy.types.Panel):
     def draw_strip_placement_settings(self) -> None:
         mprops: MappingProperties = MappingProperties.from_context(self.ctx)
         prefs = RhubarbAddonPreferences.from_context(self.ctx)
+        row = self.layout.row(align=True)
         strip_placement: StripPlacementProperties = mprops.strip_placement
-        if not ui_utils.draw_expandable_header(prefs, "strip_placement_setting_panel_expanded", "Strip placement settings", self.layout):
+        if not ui_utils.draw_expandable_header(prefs, "strip_placement_setting_panel_expanded", "Strip placement settings", row):
             return
+        sideRow = row.row(align=True)
+        sideRow.label(text="")  # Spacer to force icons alight to the right
+        sideRow.operator(baking_operators.ShowPlacementHelp.bl_idname, text="", icon="QUESTION")
+        # sideRow.operator(capture_operators.DeleteCaptureProps.bl_idname, text="", icon="PANEL_CLOSE")
 
         self.layout.use_property_decorate = False
         row = self.layout.row(align=True)

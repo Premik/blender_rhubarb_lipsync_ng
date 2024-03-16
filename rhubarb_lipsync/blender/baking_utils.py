@@ -43,9 +43,9 @@ def find_strip_at(track: NlaTrack, at_frame: float) -> tuple[int, NlaStrip]:
 
 def trim_strip_end_at(track: NlaTrack, at_frame: float) -> bool:
     """Finds if there is a strip on the provided `track` at the given `at_frame` frame.
-    If so it woudl trim the strip end up to the `at_frame` point.
+    If so it would trim the strip end up to the `at_frame` point.
     """
-    index, strip = find_strip_at(track, at_frame)
+    _, strip = find_strip_at(track, at_frame)
     if not strip:
         return False  # No matching strip found, no op
     strip.frame_end = at_frame  # Trim the end

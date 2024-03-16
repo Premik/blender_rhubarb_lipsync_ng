@@ -22,7 +22,7 @@ class IconsManager:
             IconsManager._loaded = set()
 
     @staticmethod
-    def get(key: str) -> int:
+    def get_icon(key: str) -> int:
         if IconsManager._previews is None:
             IconsManager._previews = bpy.utils.previews.new()
         prew = IconsManager._previews
@@ -35,17 +35,33 @@ class IconsManager:
         return prew[key].icon_id
 
     @staticmethod
+    def get_image(image_name: str) -> tuple[bpy.types.Image, bpy.types.Texture]:
+        """Loads an image into Blender's data blocks."""
+        if not image_name.endswith(".png"):
+            image_name = f"{image_name}.png"
+        image_path = resources_path() / image_name
+        # if not image_path.exists():
+        #     raise RuntimeError(f"Image not found: {image_path}")
+        img = bpy.data.images.load(str(image_path), check_existing=True)
+        # Create a new texture and assign the loaded image to it
+        tex = bpy.data.textures.new(name=image_name, type='IMAGE')
+        tex.extension = 'CLIP'
+        tex.image = img
+        return img, tex
+
+    @staticmethod
     def logo_icon() -> int:
-        return IconsManager.get('rhubarb64x64')
+        return IconsManager.get_icon('rhubarb64x64')
         # return IconsManager.get('1.dat')
 
     @staticmethod
-    def cue_image(key: str) -> int:
-        return IconsManager.get(f"lisa-{key}")
+    def placement_help_image() -> tuple[bpy.types.Image, bpy.types.Texture]:
+        return IconsManager.get_image('placementSettings')
+        # return IconsManager.get('1.dat')
 
     @staticmethod
     def cue_icon(key: str) -> int:
-        return IconsManager.get(f"lisa-{key}")
+        return IconsManager.get_icon(f"lisa-{key}")
 
 
 def addons_path() -> pathlib.Path:
@@ -109,6 +125,7 @@ def draw_expandable_header(props: Any, property_name: str, label: str, layout: U
 
 
 def draw_prop_with_label(props: Any, property_name: str, label, layout: UILayout) -> None:
+    # TODO This could probably be done better using columns layout
     col = layout.column()
     split = col.split(factor=0.229)
     split.alignment = 'LEFT'

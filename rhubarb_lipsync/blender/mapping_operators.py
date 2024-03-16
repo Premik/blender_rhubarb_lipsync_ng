@@ -245,7 +245,7 @@ class ShowCueInfoHelp(bpy.types.Operator):
         msi: MouthShapeInfo = MouthShapeInfos[key].value
         # split = layout.split(factor=0.2)
         row = layout.row()
-        row.template_icon(icon_value=IconsManager.cue_image(key), scale=6)
+        row.template_icon(icon_value=IconsManager.cue_icon(key), scale=6)
         col = row.column(align=False)
         lines = msi.description.splitlines()
         for l in lines:
