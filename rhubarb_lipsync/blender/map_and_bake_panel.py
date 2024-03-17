@@ -118,8 +118,16 @@ class MappingAndBakingPanel(bpy.types.Panel):
             return
         sideRow = row.row(align=True)
         sideRow.label(text="")  # Spacer to force icons alight to the right
-        sideRow.operator(baking_operators.ShowPlacementHelp.bl_idname, text="", icon="QUESTION")
+
+        # Too low-res, disabled for now
+        # sideRow.operator(baking_operators.ShowPlacementHelp.bl_idname, text="", icon="QUESTION")
+
         # sideRow.operator(capture_operators.DeleteCaptureProps.bl_idname, text="", icon="PANEL_CLOSE")
+        # img, tex = ui_utils.IconsManager.placement_help_image()
+        # row = self.layout.row(align=True)
+        # row.template_preview(tex, show_buttons=True)
+        # row.operator("tex.preview_update")
+        # row.template_image(tex, "image", tex.image_user)
 
         self.layout.use_property_decorate = False
         row = self.layout.row(align=True)

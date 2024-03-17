@@ -43,10 +43,18 @@ class IconsManager:
         # if not image_path.exists():
         #     raise RuntimeError(f"Image not found: {image_path}")
         img = bpy.data.images.load(str(image_path), check_existing=True)
+        # img.preview_ensure()
         # Create a new texture and assign the loaded image to it
-        tex = bpy.data.textures.new(name=image_name, type='IMAGE')
-        tex.extension = 'CLIP'
-        tex.image = img
+        text_name = image_name
+        if not text_name in bpy.data.textures.keys():
+            tex = bpy.data.textures.new(name=image_name, type='IMAGE')
+            tex.extension = 'EXTEND'
+            tex.image = img
+            print(img)
+            print(tex.image)
+        else:
+            tex = bpy.data.textures[text_name]
+
         return img, tex
 
     @staticmethod

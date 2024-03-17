@@ -2,7 +2,7 @@ import logging
 import re
 import bpy
 from bpy.props import EnumProperty
-from bpy.types import Context, ImageUser, Object,  UILayout
+from bpy.types import AlphaUnderSequence, Context, ImageUser, Object, UILayout
 
 from rhubarb_lipsync.blender.ui_utils import IconsManager
 from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, ResultLogListProperties
@@ -10,6 +10,7 @@ from rhubarb_lipsync.blender.mapping_properties import MappingProperties, StripP
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 import rhubarb_lipsync.blender.baking_utils as baking_utils
 from bpy.props import BoolProperty, CollectionProperty, EnumProperty, FloatProperty, IntProperty, PointerProperty, StringProperty
+
 log = logging.getLogger(__name__)
 
 
@@ -178,24 +179,29 @@ class ShowPlacementHelp(bpy.types.Operator):
 
     bl_idname = "rhubarb.show_placement_help"
     bl_label = "Strip placement help"
-    tex: PointerProperty(type=bpy.types.Texture, name="tex")  # type: ignore
+    # tex: PointerProperty(type=bpy.types.Texture, name="tex")  # type: ignore
 
     @staticmethod
     def draw_popup(this: bpy.types.UIPopupMenu, context: Context) -> None:
         row = this.layout.row()
-        img=ShowPlacementHelp.this.img        
-        row.template_image(img, "pixels", tex.image_user)
-        #row.template_preview(tex)
-        #row.template_icon(icon_value=IconsManager.placement_help_image(), scale=30)
+
+        img, tex = IconsManager.placement_help_image()
+        # img=ShowPlacementHelp.this.img
+        # row.template_image(img, "pixels", tex.image_user)
+        # row.template_preview(tex, show_buttons=False)
+        row.scale_y = 2
+        row.scale_x = 3
+        # row.template_icon(img.preview.icon_id, scale=20)
+        # row = this.layout.row()
+        row.template_image(tex, "image", tex.image_user)
+        # row.label(text=f"{tex.image}")
 
     def execute(self, context: Context) -> set[str]:
-        img, tex=IconsManager.placement_help_image()        
-        self.tex=tex
-        sp = '-' * 100
-        ShowPlacementHelp.this=self
-
-        bpy.context.window_manager.popup_menu(ShowPlacementHelp.draw_popup, title=f"String placement settings help{sp}", icon="QUESTION")
-
+        # self.tex=tex
+        img, tex = IconsManager.placement_help_image()
+        img.preview_ensure()
+        sp = ' ' * 200
+        context.window_manager.popup_menu(ShowPlacementHelp.draw_popup, title=f"String placement settings help{sp}", icon="QUESTION")
         return {'FINISHED'}
 
 
