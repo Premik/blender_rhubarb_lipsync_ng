@@ -29,14 +29,14 @@ def local_executable_path(verify=True) -> pathlib.Path:
 
 class CueListPreferences(PropertyGroup):
     highlight_long_cues: FloatProperty(  # type: ignore
-        name="Flag long cues time",
+        name="Long cue duration (s)",
         description="If a captured cue is longer that this given time (in second) the cue is drawn in red in the list. Set to -1 to disable.",
-        default=0.3,
-        soft_min=0.2,
+        default=0.25,
+        soft_min=0.1,
         soft_max=2,
     )
     highlight_short_cues: FloatProperty(  # type: ignore
-        name="Flag short cues time",
+        name="Short cue duration (s)",
         description="If a captured cue is shorter that this given time (in second) the cue is drawn in red in the list. Set to -1 to disable.",
         default=0.01,
         soft_min=0.005,

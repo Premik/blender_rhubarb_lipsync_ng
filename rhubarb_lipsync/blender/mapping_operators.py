@@ -43,7 +43,7 @@ class ListFilteredActions(bpy.types.Operator):
     bl_idname = "rhubarb.list_filtered_actions"
     bl_label = "Select target Action"
     bl_property = "action_name"
-    bl_options = {'UNDO', 'REGISTER'}
+    bl_options = {'UNDO'}
 
     action_name: EnumProperty(name="Action", items=filtered_actions_enum)  # type: ignore
     target_cue_index: IntProperty(name="index", description="Mouth cue index to map the Action for")  # type: ignore
@@ -89,7 +89,7 @@ class ListFilteredActions(bpy.types.Operator):
 class SetActionFrameRange(bpy.types.Operator):
     bl_idname = "rhubarb.set_action_framerange"
     bl_label = "Set start/end frames of the Action"
-    bl_options = {'UNDO', 'REGISTER'}
+    bl_options = {'UNDO'}
 
     target_cue_index: IntProperty(name="index", description="Mouth cue index to set the frame range for")  # type: ignore
 
@@ -155,7 +155,7 @@ class SetActionFrameRange(bpy.types.Operator):
 class SetShiftActionFrameRangeStart(bpy.types.Operator):
     bl_idname = "rhubarb.shift_action_framerange_start"
     bl_label = "Offset start by"
-    bl_options = {'UNDO', 'REGISTER'}
+    bl_options = {'UNDO'}
 
     target_cue_index: IntProperty(name="index", description="Mouth cue index to set the frame range for")  # type: ignore
     delta: FloatProperty(name="delta", description="How many frames to shift the start frame by")  # type: ignore
@@ -184,7 +184,7 @@ class ClearMappedActions(bpy.types.Operator):
 
     bl_idname = "rhubarb.clear_mapped_action"
     bl_label = "Clear the mapped action"
-    bl_options = {'UNDO', 'REGISTER'}
+    bl_options = {'UNDO'}
 
     target_cue_index: IntProperty(name="index", description="Mouth cue index to remote the Action from")  # type: ignore
 

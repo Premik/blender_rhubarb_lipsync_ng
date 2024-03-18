@@ -4,6 +4,7 @@ import bpy
 from bpy.props import EnumProperty
 from bpy.types import AlphaUnderSequence, Context, ImageUser, Object, UILayout
 
+from rhubarb_lipsync.blender.preferences import CueListPreferences
 from rhubarb_lipsync.blender.ui_utils import IconsManager
 from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, ResultLogListProperties
 from rhubarb_lipsync.blender.mapping_properties import MappingProperties, StripPlacementProperties
@@ -19,7 +20,7 @@ class RemoveCapturedNlaStrips(bpy.types.Operator):
 
     bl_idname = "rhubarb.remove_captured_nla_strips"
     bl_label = "Remove strips"
-    bl_options = {'UNDO', 'REGISTER'}
+    bl_options = {'UNDO'}
 
     # @classmethod
     # def disabled_reason(cls, ctx: Context) -> str:
@@ -75,7 +76,7 @@ class PlacementScaleFromPreset(bpy.types.Operator):
 
     bl_idname = "rhubarb.placement_set_scale"
     bl_label = "Set scale ranges from predefined value"
-    bl_options = {'UNDO', 'REGISTER'}
+    bl_options = {'UNDO'}
 
     scale_type: EnumProperty(  # type: ignore
         name="Scale preset",
@@ -105,7 +106,7 @@ class PlacementBlendInOutFromOverlap(bpy.types.Operator):
 
     bl_idname = "rhubarb.placement_set_blendinout"
     bl_label = "Set Blend In/Out from Offsets"
-    bl_options = {'UNDO', 'REGISTER'}
+    bl_options = {'UNDO'}
 
     sync_type: EnumProperty(  # type: ignore
         name="Set blend in/out base on",
@@ -140,7 +141,7 @@ class PlacementOffsetFromPreset(bpy.types.Operator):
 
     bl_idname = "rhubarb.placement_set_offset"
     bl_label = "Set offsets from predefined value"
-    bl_options = {'UNDO', 'REGISTER'}
+    bl_options = {'UNDO'}
 
     offset_type: EnumProperty(  # type: ignore
         name="Offset preset",
@@ -210,6 +211,11 @@ class BakeToNLA(bpy.types.Operator):
 
     bl_idname = "rhubarb.bake_to_nla"
     bl_label = "Bake to NLA"
+    trim_cue_excess: BoolProperty(  # type: ignore
+        name="Trim excess Cue length",
+        description="For detected Cues which are longer that the max Cue duration from preferences trim the excess length.",
+        default=True,
+    )
 
     @classmethod
     def disabled_reason(cls, context: Context) -> str:
@@ -301,6 +307,11 @@ class BakeToNLA(bpy.types.Operator):
         self.bctx = baking_utils.BakingContext(ctx)
         self.strips_added = 0
         b = self.bctx
+        if self.trim_cue_excess:
+            trimmed = b.trim_long_cues()
+            if trimmed > 0:
+                log.info(f"Trimmed {trimmed} Cues as they were too long.")
+
         wm = ctx.window_manager
         l = len(b.cue_items)
         log.info(f"About to bake {l} cues")
@@ -392,6 +403,7 @@ class BakeToNLA(bpy.types.Operator):
 
     def draw(self, ctx: Context) -> None:
         self.bctx = baking_utils.BakingContext(ctx)
+        clp: CueListPreferences = self.bctx.prefs.cue_list_prefs
 
         layout = self.layout
         row = layout.row(align=False)
@@ -399,6 +411,12 @@ class BakeToNLA(bpy.types.Operator):
         if self.bctx.the_last_cue:
             row.label(text=f"End frame: {self.bctx.the_last_cue.end_frame_str(ctx)}")
         layout.prop(ctx.scene, "show_subframe", text="Use subframes")
+        row = layout.row(align=False)
+        row.prop(self, "trim_cue_excess", text=f"Trim cues longer than")
+        row = row.row()
+        if not self.trim_cue_excess:
+            row.enabled = False
+        row.prop(clp, "highlight_long_cues")
         layout.prop(self.bctx.mprefs, "object_selection_type")
         self.draw_info()
         self.draw_validation()

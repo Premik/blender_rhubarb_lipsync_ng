@@ -166,12 +166,17 @@ class BakingContext:
             return None
         return self.cue_items[self.cue_index]
 
-    # l = range[1] - range[0]
-    #     clp: CueListPreferences = self.prefs.cue_list_prefs
-    #     if l <= clp.highlight_long_cues:
-    #         return range
-    #     # Too long, trim the excess
-    #     return range[0], range[0] + clp.highlight_long_cues
+    def trim_long_cues(self) -> int:
+        clp: CueListPreferences = self.prefs.cue_list_prefs
+        max_dur = clp.highlight_long_cues
+        trimmed = 0
+        for ci in self.cue_items:
+            d = ci.duration
+            if d <= max_dur:
+                continue
+            trimmed += 1
+            ci.end = ci.start + max_dur
+        return trimmed
 
     @property
     def current_traceback(self) -> str:
