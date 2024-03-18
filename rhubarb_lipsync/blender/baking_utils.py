@@ -9,7 +9,7 @@ from collections import defaultdict
 from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, MouthCueList, MouthCueListItem, ResultLogListProperties
 from rhubarb_lipsync.blender.mapping_properties import MappingProperties, MappingItem, NlaTrackRef
 from rhubarb_lipsync.blender.strip_placement_properties import StripPlacementProperties
-from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences, MappingPreferences
+from rhubarb_lipsync.blender.preferences import CueListPreferences, RhubarbAddonPreferences, MappingPreferences
 from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthShapeInfos, duration_scale_rate
 from bisect import bisect_left
 import rhubarb_lipsync.blender.mapping_utils as mapping_utils
@@ -166,9 +166,15 @@ class BakingContext:
             return None
         return self.cue_items[self.cue_index]
 
-    
+    # l = range[1] - range[0]
+    #     clp: CueListPreferences = self.prefs.cue_list_prefs
+    #     if l <= clp.highlight_long_cues:
+    #         return range
+    #     # Too long, trim the excess
+    #     return range[0], range[0] + clp.highlight_long_cues
+
     @property
-    def current_trace(self) -> str:
+    def current_traceback(self) -> str:
         """A string describing the "location" of baking state. `Cue`, `Object`, `Track` (where applicable).
         To help identify where warning/error occured"""
         trace = ""
@@ -186,7 +192,7 @@ class BakingContext:
         return self.current_cue
 
     @property
-    def last_cue(self) -> Optional[MouthCueListItem]:
+    def the_last_cue(self) -> Optional[MouthCueListItem]:
         if not self.cue_items:
             return None
         return self.cue_items[-1]
@@ -194,9 +200,9 @@ class BakingContext:
     @cached_property
     def total_frame_range(self) -> Optional[tuple[int, int]]:
         """Frame range of the final output after all the Actions are placed"""
-        if not self.last_cue:
+        if not self.the_last_cue:
             return None
-        return self.cprops.start_frame, self.last_cue.end_frame(self.ctx)
+        return self.cprops.start_frame, self.the_last_cue.end_frame(self.ctx)
 
     @property
     def strip_placement_props(self) -> StripPlacementProperties:
@@ -222,27 +228,28 @@ class BakingContext:
         return self.current_mapping_item and self.current_mapping_item.action
 
     @property
+    def current_mapping_action_frame_range(self) -> tuple[float, float]:
+        mi = self.current_mapping_item
+        if not mi:
+            return 0.0, 0.0
+        return mi.frame_range
+
+    @property
     def current_mapping_action_length_frames(self) -> float:
         """Length (in frames) of the current mapping item's action"""
-        a = self.current_mapping_item.action
-        if not a:
-            return 0
-        range = a.frame_range
+        range = self.current_mapping_action_frame_range
         return range[1] - range[0]
 
-    def current_mapping_action_scale(self, desired_len_frames: float, scale_min: float, scale_max: float) -> float:
+    def current_mapping_action_scale(self, desired_len_frames: float, scale_min: float = -1, scale_max: float = -1) -> float:
         """Scale factor to use on the strip so it's length matches the  current mapping item action's length."""
+        if scale_min < 0:
+            scale_min = self.strip_placement_props.scale_min
+        if scale_max < 0:
+            scale_max = self.strip_placement_props.scale_max
         l = self.current_mapping_action_length_frames
         if l <= 0:  # No mapping item selected or the action has no frames
             return 1
         return duration_scale_rate(l, desired_len_frames, scale_min, scale_max)
-    
-    @property
-    def current_mapping_action_frame_range(self) -> tuple[float, float]:
-        if not self.current_cue:
-            return None
-        return self.current_cue.frame_range
-
 
     @property
     def track1(self) -> Optional[NlaTrack]:

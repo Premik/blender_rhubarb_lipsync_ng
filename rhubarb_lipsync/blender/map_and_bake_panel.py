@@ -145,6 +145,11 @@ class MappingAndBakingPanel(bpy.types.Panel):
         col = self.layout.column(align=False)
         col.use_property_split = True
         col.prop(strip_placement, 'extrapolation')
+
+        if not ui_utils.draw_expandable_header(prefs, "strip_blending_panel_expanded", "Strip in/out blending", self.layout):
+            return
+        col = self.layout.column(align=False)
+        col.use_property_split = True
         col.prop(strip_placement, 'blend_type')
 
         row = self.layout.row(align=True)
@@ -179,6 +184,7 @@ class MappingAndBakingPanel(bpy.types.Panel):
                 self.draw_nla_setup()
             self.draw_strip_placement_settings()
 
+            layout.separator()
             layout.operator(baking_operators.BakeToNLA.bl_idname, icon="NLA")
             rll: ResultLogListProperties = CaptureListProperties.from_context(context).last_resut_log
             if rll.has_any_errors_or_warnings:

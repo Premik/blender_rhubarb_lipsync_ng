@@ -227,6 +227,7 @@ class RhubarbAddonPreferences(AddonPreferences):
     sound_source_panel_expanded: BoolProperty(default=True)  # type: ignore
     caputre_panel_expanded: BoolProperty(default=True)  # type: ignore
     strip_placement_setting_panel_expanded: BoolProperty(default=True)  # type: ignore
+    strip_blending_panel_expanded: BoolProperty(default=True)  # type: ignore
     mapping_list_panel_expanded: BoolProperty(default=True)  # type: ignore
     bake_info_panel_expanded: BoolProperty(default=True)  # type: ignore
     bake_errors_panel_expanded: BoolProperty(default=True)  # type: ignore

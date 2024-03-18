@@ -50,8 +50,6 @@ class IconsManager:
             tex = bpy.data.textures.new(name=image_name, type='IMAGE')
             tex.extension = 'EXTEND'
             tex.image = img
-            print(img)
-            print(tex.image)
         else:
             tex = bpy.data.textures[text_name]
 

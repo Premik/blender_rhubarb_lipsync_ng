@@ -239,7 +239,7 @@ class BakeToNLA(bpy.types.Operator):
         cue = b.current_cue
 
         if not b.current_mapping_action:
-            b.rlog.warning(f"There is no mapping for the cue {cue and cue.cue} in the capture. Ignoring", self.bctx.current_trace)
+            b.rlog.warning(f"There is no mapping for the cue {cue and cue.cue} in the capture. Ignoring", self.bctx.current_traceback)
             return
         name = f"{cue.cue.info.key_displ}.{str(b.cue_index).zfill(3)}"
 
@@ -248,16 +248,16 @@ class BakeToNLA(bpy.types.Operator):
         # Calculate the desired strip length based on cue length and include the offset
         desired_strip_duration = cue.duration_frames_float(b.ctx) + b.strip_placement_props.overlap_length
         # Try to scale the strip to the cue duration with the blendings included.
-        scale = b.current_mapping_action_scale(desired_strip_duration, b.strip_placement_props.scale_min, b.strip_placement_props.scale_max)
+        scale = b.current_mapping_action_scale(desired_strip_duration)
 
-        # Calculate the end frame based on the scale and the start. This is where the action ends after scaling (with offsets)
+        # Calculate the end frame based on the scale and the start. This is where the Action ends after the scaling (with offsets)
         # end = start + b.current_mapping_action_length_frames * scale
         # Set the strip end to the cue end (plus offset) no matter where the actual action ends.
         end = cue.end_frame_float(b.ctx) + b.strip_placement_props.offset_end
 
         # Crop the previous strip-end to make a room for the current strip start (if needed)
         if baking_utils.trim_strip_end_at(b.current_track, start):
-            b.rlog.warning("Had to trim previous strip to make room for this one", self.bctx.current_trace)
+            b.rlog.warning("Had to trim previous strip to make room for this one", self.bctx.current_traceback)
 
         # Create new strip. Start frame is mandatory but int only, so round it up to avoid clashing with previous one because of rouding error
         strip = b.current_track.strips.new(name, int(start + 1), b.current_mapping_action)
@@ -284,7 +284,7 @@ class BakeToNLA(bpy.types.Operator):
         track = b.current_track
         if not track:
             if b.cue_index <= 0:  # Only log the error 1x
-                b.rlog.warning(f"{object and object.name} has no NLA track selected. Ignoring", self.bctx.current_trace)
+                b.rlog.warning(f"{object and object.name} has no NLA track selected. Ignoring", self.bctx.current_traceback)
             return
         self.to_strip()
 
@@ -314,12 +314,12 @@ class BakeToNLA(bpy.types.Operator):
                 self.bctx.next_track()  # Swap tracks on each cue
                 self.bake_cue()
             msg = f"Baked {l} cues to {self.strips_added} action strips"
-            self.bctx.rlog.info(msg, self.bctx.current_trace)
+            self.bctx.rlog.info(msg, self.bctx.current_traceback)
             self.report({'INFO'}, msg)
         except Exception as e:
             self.report({'ERROR'}, str(e))
             log.exception(e)
-            self.bctx.rlog.error(str(e), self.bctx.current_trace)
+            self.bctx.rlog.error(str(e), self.bctx.current_traceback)
             return {'CANCELLED'}
         finally:
             del self.bctx
@@ -396,8 +396,8 @@ class BakeToNLA(bpy.types.Operator):
         layout = self.layout
         row = layout.row(align=False)
         row.prop(self.bctx.cprops, "start_frame")
-        if self.bctx.last_cue:
-            row.label(text=f"End frame: {self.bctx.last_cue.end_frame_str(ctx)}")
+        if self.bctx.the_last_cue:
+            row.label(text=f"End frame: {self.bctx.the_last_cue.end_frame_str(ctx)}")
         layout.prop(ctx.scene, "show_subframe", text="Use subframes")
         layout.prop(self.bctx.mprefs, "object_selection_type")
         self.draw_info()
