@@ -118,7 +118,7 @@ class MappingItem(PropertyGroup):
 
     custom_frame_ranage: BoolProperty(  # type: ignore
         name="Custom Frame Range",
-        description="Whether use a custom range of frames of the Action or whole frame range when cearing the Action Clip",
+        description="Whether use a custom (sub)range of frames of the Action or whole frame range when cearing the Action Clip",
         default=False,
         options={'LIBRARY_EDITABLE'},
         override={'LIBRARY_OVERRIDABLE'},
@@ -136,7 +136,7 @@ class MappingItem(PropertyGroup):
 
     @property
     def frame_range(self) -> tuple[float, float]:
-        if not self.custom_frame_ranage:
+        if not self.custom_frame_ranage:  # When not custom (sub)range, take range from the Action
             if not self.action:
                 return 0.0, 0.0
             a: bpy.types.Action = self.action

@@ -246,9 +246,9 @@ class BakeToNLA(bpy.types.Operator):
         # Shift the start frame
         start = cue.frame_float(b.ctx) + b.strip_placement_props.offset_start
         # Calculate the desired strip length based on cue length and include the offset
-        strip_duration = cue.duration_frames_float(b.ctx) + b.strip_placement_props.overlap_length
-        # Try to scale the strip to strip_placement the cue duration with the blendings included.
-        scale = b.current_mapping_action_scale(strip_duration, b.strip_placement_props.scale_min, b.strip_placement_props.scale_max)
+        desired_strip_duration = cue.duration_frames_float(b.ctx) + b.strip_placement_props.overlap_length
+        # Try to scale the strip to the cue duration with the blendings included.
+        scale = b.current_mapping_action_scale(desired_strip_duration, b.strip_placement_props.scale_min, b.strip_placement_props.scale_max)
 
         # Calculate the end frame based on the scale and the start. This is where the action ends after scaling (with offsets)
         # end = start + b.current_mapping_action_length_frames * scale
@@ -272,7 +272,7 @@ class BakeToNLA(bpy.types.Operator):
         strip.blend_type = b.strip_placement_props.blend_type
         strip.extrapolation = b.strip_placement_props.extrapolation
         strip.use_sync_length = b.strip_placement_props.use_sync_length
-        strip.use_auto_blend = b.strip_placement_props.use_auto_blend
+        strip.use_auto_blend = bool(b.strip_placement_props.blend_mode == "AUTOBLEND")
         strip.blend_in = b.strip_placement_props.blend_in
         strip.blend_out = b.strip_placement_props.blend_out
 

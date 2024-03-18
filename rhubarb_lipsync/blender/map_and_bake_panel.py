@@ -148,15 +148,17 @@ class MappingAndBakingPanel(bpy.types.Panel):
         col.prop(strip_placement, 'blend_type')
 
         row = self.layout.row(align=True)
-        if strip_placement.use_auto_blend:
-            row.enabled = False
+        row.prop(strip_placement, 'blend_mode', expand=True)
 
-        row.prop(strip_placement, 'blend_in', text="Blend In")
-        row.prop(strip_placement, 'blend_out', text="Out")
-        id = baking_operators.PlacementBlendInOutFromOverlap.bl_idname
-        row.operator_menu_enum(id, "sync_type", text="", icon="DOWNARROW_HLT")
+        blend_mode: str = strip_placement.blend_mode
+        if blend_mode == "FIXED":
+            row = self.layout.row(align=True)
+            row.prop(strip_placement, 'blend_in', text="Blend In")
+            row.prop(strip_placement, 'blend_out', text="Out")
+            id = baking_operators.PlacementBlendInOutFromOverlap.bl_idname
+            row.operator_menu_enum(id, "sync_type", text="", icon="DOWNARROW_HLT")
 
-        self.layout.prop(strip_placement, 'use_auto_blend')
+        # self.layout.prop(strip_placement, 'use_auto_blend')
 
     def draw(self, context: Context) -> None:
         try:

@@ -114,6 +114,7 @@ class BakingContext:
 
     @property
     def current_object(self) -> Object:
+        """Current Blender Object with the mappings. It is changed as a side-effect of the `object_iter`"""
         if self.object_index < 0:
             return None
         if self.object_index >= len(self.objects):
@@ -123,6 +124,7 @@ class BakingContext:
 
     @property
     def use_shape_keys_for_current_object(self) -> bool:
+        """Whether ShapeKey-Actions should be used or just normal Actions."""
         if not self.current_object:
             return False
         if not self.current_object.type == "MESH":
@@ -156,6 +158,7 @@ class BakingContext:
 
     @property
     def current_cue(self) -> MouthCueListItem:
+        """Currnet mouth cue - source side of the mapping"""
         if self.cue_index < 0:
             return None
         if self.cue_index >= len(self.cue_items):
@@ -163,6 +166,7 @@ class BakingContext:
             return None
         return self.cue_items[self.cue_index]
 
+    
     @property
     def current_trace(self) -> str:
         """A string describing the "location" of baking state. `Cue`, `Object`, `Track` (where applicable).
@@ -188,7 +192,8 @@ class BakingContext:
         return self.cue_items[-1]
 
     @cached_property
-    def frame_range(self) -> Optional[tuple[int, int]]:
+    def total_frame_range(self) -> Optional[tuple[int, int]]:
+        """Frame range of the final output after all the Actions are placed"""
         if not self.last_cue:
             return None
         return self.cprops.start_frame, self.last_cue.end_frame(self.ctx)
@@ -199,11 +204,12 @@ class BakingContext:
 
     @property
     def mprops(self) -> MappingProperties:
-        """Mapping properties of the current object"""
+        """Mapping properties of the current Object"""
         return MappingProperties.from_object(self.current_object)
 
     @property
     def current_mapping_item(self) -> MappingItem:
+        """Mapping item corresponding to the current Cue"""
         if not self.mprops or not self.current_cue:
             return None
         cue_index = self.current_cue.cue.key_index
@@ -211,7 +217,8 @@ class BakingContext:
 
     @property
     def current_mapping_action(self) -> bpy.types.Action:
-        """Action of the current mapping item"""
+        """Action of the current Mapping item.
+        This is the destination part of the mapping (together with the current track)."""
         return self.current_mapping_item and self.current_mapping_item.action
 
     @property
@@ -229,6 +236,13 @@ class BakingContext:
         if l <= 0:  # No mapping item selected or the action has no frames
             return 1
         return duration_scale_rate(l, desired_len_frames, scale_min, scale_max)
+    
+    @property
+    def current_mapping_action_frame_range(self) -> tuple[float, float]:
+        if not self.current_cue:
+            return None
+        return self.current_cue.frame_range
+
 
     @property
     def track1(self) -> Optional[NlaTrack]:
@@ -263,7 +277,7 @@ class BakingContext:
         return self.current_track
 
     def strips_on_current_track(self) -> Iterator[NlaStrip]:
-        start, end = self.frame_range
+        start, end = self.total_frame_range
         t = self.current_track
         yield from strips_on_track(t, start, end)
 

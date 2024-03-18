@@ -48,7 +48,7 @@ class BakingContextTest(unittest.TestCase):
         self.bc = self.project.create_mapping_single_sphere1()
         assert len(self.bc.objects) == 1, "No active object"
         assert len(self.bc.cue_items) > 1, "No cues in the capture"
-        assert self.bc.frame_range == (1, 26)
+        assert self.bc.total_frame_range == (1, 26)
 
     def testBasicSingleAction(self) -> None:
         self.bc = self.project.create_mapping_single_sphere1()
