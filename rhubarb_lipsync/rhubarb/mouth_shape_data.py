@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 import math
 from functools import cached_property
 from enum import Enum
@@ -162,6 +163,15 @@ class MouthShapeInfos(Enum):
         return all[index]
 
 
+@dataclass
+class FrameConfig:
+    """Wraps fields needed to map time (of a cue) to frames"""
+
+    fps: int
+    fps_base: float = 1.0
+    offset: int = 0
+
+
 class MouthCue:
     """Instance of a mouth shape at specific time-interval."""
 
@@ -189,32 +199,32 @@ class MouthCue:
     def key_index(self) -> int:
         return MouthShapeInfos.key2index(self.key)
 
-    def start_frame(self, fps: int, fps_base=1.0, offset=0) -> int:
+    def get_start_frame(self, fps: int, fps_base=1.0, offset=0) -> int:
         """Whole frame number of the cue start time"""
         return time2frame(self.start, fps, fps_base) + offset
 
-    def start_frame_float(self, fps: int, fps_base=1.0, offset=0) -> float:
+    def get_start_frame_float(self, fps: int, fps_base=1.0, offset=0) -> float:
         """Exact decimal frame number of the cue start time"""
         return time2frame_float(self.start, fps, fps_base) + offset
 
-    def end_frame(self, fps: int, fps_base=1.0, offset=0) -> int:
+    def get_end_frame(self, fps: int, fps_base=1.0, offset=0) -> int:
         """Whole frame number of the cue end time"""
         return time2frame(self.end, fps, fps_base) + offset
 
-    def end_frame_float(self, fps: int, fps_base=1.0, offset=0) -> float:
+    def get_end_frame_float(self, fps: int, fps_base=1.0, offset=0) -> float:
         """Exact decimal frame number of the cue stop time"""
         return time2frame_float(self.end, fps, fps_base) + offset
 
-    def start_subframe(self, fps: int, fps_base=1.0, offset=0) -> tuple[int, float]:
+    def get_start_subframe(self, fps: int, fps_base=1.0, offset=0) -> tuple[int, float]:
         """Whole frame (without rounding) + decimal part (between 0.0 and 1.0) of the exact frame number."""
-        f, i = math.modf(self.start_frame_float(fps, fps_base, offset))
+        f, i = math.modf(self.get_start_frame_float(fps, fps_base, offset))
         return int(i), f
 
     @property
     def duration(self) -> float:
         return self.end - self.start
 
-    def duration_frames(self, fps: int, fps_base=1.0) -> float:
+    def get_duration_frames(self, fps: int, fps_base=1.0) -> float:
         return time2frame_float(self.duration, fps, fps_base)
 
     def __eq__(self, other) -> bool:

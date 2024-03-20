@@ -143,29 +143,6 @@ class BakingContext:
     def rlog(self) -> ResultLogListProperties:
         return self.clist_props and self.clist_props.last_resut_log
 
-    @cached_property
-    def cue_items(self) -> list[MouthCueListItem]:
-        if not self.cprops or not self.cprops.cue_list:
-            return []
-        cl: MouthCueList = self.cprops.cue_list
-        return cl.items
-
-    def cue_iter(self) -> Iterator[MouthCueListItem]:
-        for i, c in enumerate(self.cue_items):
-            self.cue_index = i
-            yield c
-        self.cue_index = -1
-
-    @property
-    def current_cue(self) -> MouthCueListItem:
-        """Currnet mouth cue - source side of the mapping"""
-        if self.cue_index < 0:
-            return None
-        if self.cue_index >= len(self.cue_items):
-            self.cue_index = -1
-            return None
-        return self.cue_items[self.cue_index]
-
     def trim_long_cues(self) -> int:
         clp: CueListPreferences = self.prefs.cue_list_prefs
         max_dur = clp.highlight_long_cues
@@ -183,7 +160,7 @@ class BakingContext:
         """A string describing the "location" of baking state. `Cue`, `Object`, `Track` (where applicable).
         To help identify where warning/error occured"""
         trace = ""
-        cc = self.current_cue
+        cc = self.current_cue_item
         if cc:
             trace = f"{cc.frame_str(self.ctx)} {cc.cue.info.key_displ}"
         if self.current_object:
@@ -192,12 +169,35 @@ class BakingContext:
             trace = f"{trace}.{self.current_track.name}"
         return trace
 
-    def next_cue(self) -> MouthCueListItem:
-        self.cue_index += 1
-        return self.current_cue
+    @cached_property
+    def cue_items(self) -> list[MouthCueListItem]:
+        if not self.cprops or not self.cprops.cue_list:
+            return []
+        cl: MouthCueList = self.cprops.cue_list
+        return cl.items
+
+    def cue_iter(self) -> Iterator[MouthCueListItem]:
+        for i, c in enumerate(self.cue_items):
+            self.cue_index = i
+            yield c
+        self.cue_index = -1
 
     @property
-    def the_last_cue(self) -> Optional[MouthCueListItem]:
+    def current_cue_item(self) -> MouthCueListItem:
+        """Currnet mouth cue - source side of the mapping"""
+        if self.cue_index < 0:
+            return None
+        if self.cue_index >= len(self.cue_items):
+            self.cue_index = -1
+            return None
+        return self.cue_items[self.cue_index]
+
+    def next_cue_item(self) -> MouthCueListItem:
+        self.cue_index += 1
+        return self.current_cue_item
+
+    @property
+    def the_last_cue_item(self) -> Optional[MouthCueListItem]:
         if not self.cue_items:
             return None
         return self.cue_items[-1]
@@ -205,9 +205,9 @@ class BakingContext:
     @cached_property
     def total_frame_range(self) -> Optional[tuple[int, int]]:
         """Frame range of the final output after all the Actions are placed"""
-        if not self.the_last_cue:
+        if not self.the_last_cue_item:
             return None
-        return self.cprops.start_frame, self.the_last_cue.end_frame(self.ctx)
+        return self.cprops.start_frame, self.the_last_cue_item.end_frame(self.ctx)
 
     @property
     def strip_placement_props(self) -> StripPlacementProperties:
@@ -221,9 +221,9 @@ class BakingContext:
     @property
     def current_mapping_item(self) -> MappingItem:
         """Mapping item corresponding to the current Cue"""
-        if not self.mprops or not self.current_cue:
+        if not self.mprops or not self.current_cue_item:
             return None
-        cue_index = self.current_cue.cue.key_index
+        cue_index = self.current_cue_item.cue.key_index
         return self.mprops.items[cue_index]
 
     @property

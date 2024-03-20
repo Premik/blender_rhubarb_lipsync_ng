@@ -242,24 +242,24 @@ class BakeToNLA(bpy.types.Operator):
 
     def to_strip(self) -> None:
         b = self.bctx
-        cue = b.current_cue
+        cue_item = b.current_cue_item
 
         if not b.current_mapping_action:
-            b.rlog.warning(f"There is no mapping for the cue {cue and cue.cue} in the capture. Ignoring", self.bctx.current_traceback)
+            b.rlog.warning(f"There is no mapping for the cue {cue_item and cue_item.cue} in the capture. Ignoring", self.bctx.current_traceback)
             return
-        name = f"{cue.cue.info.key_displ}.{str(b.cue_index).zfill(3)}"
+        name = f"{cue_item.cue.info.key_displ}.{str(b.cue_index).zfill(3)}"
 
         # Shift the start frame
-        start = cue.frame_float(b.ctx) + b.strip_placement_props.offset_start
+        start = cue_item.frame_float(b.ctx) + b.strip_placement_props.offset_start
         # Calculate the desired strip length based on cue length and include the offset
-        desired_strip_duration = cue.duration_frames_float(b.ctx) + b.strip_placement_props.overlap_length
+        desired_strip_duration = cue_item.duration_frames_float(b.ctx) + b.strip_placement_props.overlap_length
         # Try to scale the strip to the cue duration with the blendings included.
         scale = b.current_mapping_action_scale(desired_strip_duration)
 
         # Calculate the end frame based on the scale and the start. This is where the Action ends after the scaling (with offsets)
         # end = start + b.current_mapping_action_length_frames * scale
         # Set the strip end to the cue end (plus offset) no matter where the actual action ends.
-        end = cue.end_frame_float(b.ctx) + b.strip_placement_props.offset_end
+        end = cue_item.end_frame_float(b.ctx) + b.strip_placement_props.offset_end
 
         # Crop the previous strip-end to make a room for the current strip start (if needed)
         if baking_utils.trim_strip_end_at(b.current_track, start):
@@ -296,7 +296,7 @@ class BakeToNLA(bpy.types.Operator):
 
     def bake_cue(self) -> None:
         for o in self.bctx.object_iter():
-            assert self.bctx.current_cue, "No cue selected"
+            assert self.bctx.current_cue_item, "No cue selected"
             self.bctx.next_track()  # Alternate tracks for each cue change of the current object
             # print(self.bctx.cue_index)
             if log.isEnabledFor(logging.TRACE):  # type: ignore
@@ -408,8 +408,8 @@ class BakeToNLA(bpy.types.Operator):
         layout = self.layout
         row = layout.row(align=False)
         row.prop(self.bctx.cprops, "start_frame")
-        if self.bctx.the_last_cue:
-            row.label(text=f"End frame: {self.bctx.the_last_cue.end_frame_str(ctx)}")
+        if self.bctx.the_last_cue_item:
+            row.label(text=f"End frame: {self.bctx.the_last_cue_item.end_frame_str(ctx)}")
         layout.prop(ctx.scene, "show_subframe", text="Use subframes")
         row = layout.row(align=False)
         row.prop(self, "trim_cue_excess", text=f"Trim cues longer than")
