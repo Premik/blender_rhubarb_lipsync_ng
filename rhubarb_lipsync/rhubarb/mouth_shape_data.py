@@ -3,6 +3,7 @@ import math
 from functools import cached_property
 from enum import Enum
 import textwrap
+from typing import Any, Callable, ParamSpec, TypeAlias, TypeVar
 
 
 def time2frame_float(time: float, fps: int, fps_base=1.0) -> float:
@@ -29,6 +30,21 @@ def duration_scale_rate(current_len: float, desired_len: float, scale_min: float
 
 def duration_scale(current_len: float, desired_len: float, scale_min: float, scale_max: float) -> float:
     return current_len * duration_scale_rate(current_len, desired_len, scale_min, scale_max)
+
+
+T = TypeVar('T')
+P = ParamSpec('P')
+WrappedFuncDeco: TypeAlias = Callable[[Callable[P, T]], Callable[P, T]]
+
+
+def docstring_from(copy_func: Callable[..., Any]) -> WrappedFuncDeco[P, T]:
+    """Copies the doc string of the given function to another."""
+
+    def wrapped(func: Callable[P, T]) -> Callable[P, T]:
+        func.__doc__ = copy_func.__doc__
+        return func
+
+    return wrapped
 
 
 class MouthShapeInfo:
@@ -171,6 +187,10 @@ class FrameConfig:
     fps_base: float = 1.0
     offset: int = 0
 
+    @property
+    def fps_base_offset(self) -> tuple[int, float, int]:
+        return (self.fps, self.fps_base, self.offset)
+
 
 class MouthCue:
     """Instance of a mouth shape at specific time-interval."""
@@ -242,10 +262,62 @@ class MouthCue:
         return f"'{self.key}' {self.start:0.2f}-{self.end:0.2f}"
 
 
+@dataclass
+class MouthCueFrames:
+    """Additional wrapper on top of Cues which handles frame related calculations"""
+
+    cue: MouthCue
+    frame_cfg: FrameConfig
+
+    @docstring_from(MouthCue.get_start_frame_float)  # type: ignore[misc]
+    @property
+    def start_frame(self) -> int:
+        return self.cue.get_start_frame(*self.frame_cfg.fps_base_offset)
+
+    @docstring_from(MouthCue.get_start_frame_float)  # type: ignore[misc]
+    @property
+    def start_frame_float(self) -> float:
+        return self.cue.get_start_frame_float(*self.frame_cfg.fps_base_offset)
+
+    @docstring_from(MouthCue.get_end_frame)  # type: ignore[misc]
+    @property
+    def end_frame(self) -> int:
+        return self.cue.get_end_frame(*self.frame_cfg.fps_base_offset)
+
+    @docstring_from(MouthCue.get_end_frame_float)  # type: ignore[misc]
+    @property
+    def end_frame_float(self) -> float:
+        return self.cue.get_end_frame_float(*self.frame_cfg.fps_base_offset)
+
+    @docstring_from(MouthCue.get_start_subframe)  # type: ignore[misc]
+    @property
+    def start_subframe(self) -> tuple[int, float]:
+        return self.cue.get_start_subframe(*self.frame_cfg.fps_base_offset)
+
+    @property
+    def offset_seconds(self) -> float:
+        c = self.frame_cfg
+        return frame2time(c.offset, c.fps, c.fps_base)
+
+    @property
+    def duration_frames(self) -> int:
+        return int(math.ceil(self.end_frame_float - self.start_frame_float))
+
+    @property
+    def duration_frames_float(self) -> float:
+        return self.end_frame_float - self.start_frame_float
+
+
 if __name__ == '__main__':
-    for a in MouthShapeInfos.__members__.values():
-        print(a.value)
-        print(a.value.description)
-    print(MouthCue('A', 1, 2).info.description)
+    c = MouthCue("A", 1, 2)
+    cfg = FrameConfig(60)
+    cue_frames = MouthCueFrames(c, cfg)
+    help(cue_frames)
+    cue_frames
+
+    # for a in MouthShapeInfos.__members__.values():
+    #     print(a.value)
+    #     print(a.value.description)
+    # print(MouthCue('A', 1, 2).info.description)
 
     print("Done")

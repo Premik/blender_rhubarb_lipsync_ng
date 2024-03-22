@@ -207,7 +207,8 @@ class BakingContext:
         """Frame range of the final output after all the Actions are placed"""
         if not self.the_last_cue_item:
             return None
-        return self.cprops.start_frame, self.the_last_cue_item.end_frame(self.ctx)
+        cf = self.the_last_cue_item.cue_frames(self.ctx)
+        return self.cprops.start_frame, cf.end_frame
 
     @property
     def strip_placement_props(self) -> StripPlacementProperties:

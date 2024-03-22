@@ -94,7 +94,7 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
         cp: CueListPreferences = RhubarbAddonPreferences.from_context(ctx).cue_list_prefs
         if not cp.sync_on_select:
             return
-        frame, subframe = item.subframe(ctx)
+        frame, subframe = item.cue_frames(ctx).start_subframe
         ctx.scene.frame_set(frame=frame, subframe=subframe)
 
     MouthCueList.index_changed = on_cuelist_index_changed  # Register callback

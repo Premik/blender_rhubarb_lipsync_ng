@@ -11,6 +11,7 @@ from rhubarb_lipsync.blender.mapping_properties import MappingProperties, StripP
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 import rhubarb_lipsync.blender.baking_utils as baking_utils
 from bpy.props import BoolProperty, CollectionProperty, EnumProperty, FloatProperty, IntProperty, PointerProperty, StringProperty
+from rhubarb_lipsync.rhubarb.rhubarb_command import MouthCue
 
 log = logging.getLogger(__name__)
 
@@ -243,23 +244,24 @@ class BakeToNLA(bpy.types.Operator):
     def to_strip(self) -> None:
         b = self.bctx
         cue_item = b.current_cue_item
-
+        cue: MouthCue = cue_item and cue_item.cue or None
         if not b.current_mapping_action:
-            b.rlog.warning(f"There is no mapping for the cue {cue_item and cue_item.cue} in the capture. Ignoring", self.bctx.current_traceback)
+            b.rlog.warning(f"There is no mapping for the cue {cue} in the capture. Ignoring", self.bctx.current_traceback)
             return
-        name = f"{cue_item.cue.info.key_displ}.{str(b.cue_index).zfill(3)}"
+        cue_frames = cue_item.cue_frames(b.ctx)
+        name = f"{cue.info.key_displ}.{str(b.cue_index).zfill(3)}"
 
         # Shift the start frame
-        start = cue_item.frame_float(b.ctx) + b.strip_placement_props.offset_start
+        start = cue_frames.start_frame_float + b.strip_placement_props.offset_start
         # Calculate the desired strip length based on cue length and include the offset
-        desired_strip_duration = cue_item.duration_frames_float(b.ctx) + b.strip_placement_props.overlap_length
+        desired_strip_duration = cue_frames.duration_frames_float + b.strip_placement_props.overlap_length
         # Try to scale the strip to the cue duration with the blendings included.
         scale = b.current_mapping_action_scale(desired_strip_duration)
 
         # Calculate the end frame based on the scale and the start. This is where the Action ends after the scaling (with offsets)
         # end = start + b.current_mapping_action_length_frames * scale
         # Set the strip end to the cue end (plus offset) no matter where the actual action ends.
-        end = cue_item.end_frame_float(b.ctx) + b.strip_placement_props.offset_end
+        end = cue_frames.end_frame_float + b.strip_placement_props.offset_end
 
         # Crop the previous strip-end to make a room for the current strip start (if needed)
         if baking_utils.trim_strip_end_at(b.current_track, start):
@@ -281,8 +283,6 @@ class BakeToNLA(bpy.types.Operator):
         strip.use_auto_blend = bool(b.strip_placement_props.blend_mode == "AUTOBLEND")
         strip.blend_in = b.strip_placement_props.blend_in
         strip.blend_out = b.strip_placement_props.blend_out
-
-        # strip.frame_end = c.end_frame_float(b.ctx)
 
     def bake_cue_on(self, object: Object) -> None:
         b = self.bctx

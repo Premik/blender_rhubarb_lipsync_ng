@@ -5,6 +5,7 @@ from rhubarb_lipsync.blender.sound_operators import PlayRange
 from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences, CueListPreferences
 from rhubarb_lipsync.blender.capture_properties import MouthCueList, MouthCueListItem
 from rhubarb_lipsync.blender.ui_utils import IconsManager
+from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCueFrames
 
 
 class MouthCueUIList(UIList):
@@ -94,8 +95,9 @@ class MouthCueUIList(UIList):
             row = subs.row()  # Operator (0.15)
             op = row.operator(PlayRange.bl_idname, text="", icon="TRIA_RIGHT_BAR")
 
-            op.start_frame = int(item.frame_float(context))
-            op.play_frames = item.duration_frames(context)
+            cf: MouthCueFrames = item.cue_frames
+            op.start_frame = int(cf.start_frame_float)  # Nearest whole frame before the exact time
+            op.play_frames = cf.duration_frames
 
     def draw_grid(self, layout: UILayout, item: MouthCueListItem, context: Context) -> None:
         layout.alignment = 'CENTER'

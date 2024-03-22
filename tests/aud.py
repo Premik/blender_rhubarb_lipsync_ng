@@ -4,7 +4,11 @@ MOCK = True
 
 
 class Sound:
-    pass
+    def __init__(self, *args) -> None:
+        pass
+
+    def write(self, *args) -> None:
+        pass
 
 
 AP_LOCATION = None
