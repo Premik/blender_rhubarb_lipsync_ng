@@ -1,16 +1,16 @@
 import logging
 import re
+
 import bpy
-from bpy.props import EnumProperty
+from bpy.props import BoolProperty, CollectionProperty, EnumProperty, FloatProperty, IntProperty, PointerProperty, StringProperty
 from bpy.types import AlphaUnderSequence, Context, ImageUser, Object, UILayout
 
-from rhubarb_lipsync.blender.preferences import CueListPreferences
-from rhubarb_lipsync.blender.ui_utils import IconsManager
+import rhubarb_lipsync.blender.baking_utils as baking_utils
+import rhubarb_lipsync.blender.ui_utils as ui_utils
 from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, ResultLogListProperties
 from rhubarb_lipsync.blender.mapping_properties import MappingProperties, StripPlacementProperties
-import rhubarb_lipsync.blender.ui_utils as ui_utils
-import rhubarb_lipsync.blender.baking_utils as baking_utils
-from bpy.props import BoolProperty, CollectionProperty, EnumProperty, FloatProperty, IntProperty, PointerProperty, StringProperty
+from rhubarb_lipsync.blender.preferences import CueListPreferences
+from rhubarb_lipsync.blender.ui_utils import IconsManager
 from rhubarb_lipsync.rhubarb.rhubarb_command import MouthCue
 
 log = logging.getLogger(__name__)

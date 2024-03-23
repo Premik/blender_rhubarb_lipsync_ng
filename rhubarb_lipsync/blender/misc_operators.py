@@ -1,18 +1,18 @@
+import json
 import logging
+import re
+import traceback
+from urllib import request
 
 import bpy
 from bpy.props import EnumProperty, StringProperty
 from bpy.types import Context
 
+import rhubarb_lipsync.blender.ui_utils as ui_utils
+from rhubarb_lipsync import bl_info
+from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, ResultLogItemProperties, ResultLogListProperties
 from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences
 from rhubarb_lipsync.rhubarb.log_manager import logManager
-import rhubarb_lipsync.blender.ui_utils as ui_utils
-from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, ResultLogListProperties, ResultLogItemProperties
-from rhubarb_lipsync import bl_info
-import json
-from urllib import request
-import traceback
-import re
 
 log = logging.getLogger(__name__)
 

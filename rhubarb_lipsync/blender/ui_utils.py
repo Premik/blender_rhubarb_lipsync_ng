@@ -1,12 +1,12 @@
-from enum import Enum
 import pathlib
 import re
-from typing import Any, Callable, Iterator, Type, Sequence
+import traceback
+from enum import Enum
+from typing import Any, Callable, Iterator, Sequence, Type
 
 import bpy
-from bpy.types import Area, Context, UILayout, Window
 import bpy.utils.previews
-import traceback
+from bpy.types import Area, Context, UILayout, Window
 
 
 class IconsManager:

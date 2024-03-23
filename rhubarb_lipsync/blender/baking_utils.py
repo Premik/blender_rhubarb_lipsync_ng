@@ -1,19 +1,20 @@
+from dataclasses import dataclass, field
 import logging
+from bisect import bisect_left
+from collections import defaultdict
 from functools import cached_property
-from typing import List, Optional, Iterator
+from typing import Iterator, List, Optional
 
 import bpy
-from bpy.types import Context, Object, NlaTrack, NlaStrip
+from bpy.types import Context, NlaStrip, NlaTrack, Object
 
-from collections import defaultdict
-from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, MouthCueList, MouthCueListItem, ResultLogListProperties
-from rhubarb_lipsync.blender.mapping_properties import MappingProperties, MappingItem, NlaTrackRef
-from rhubarb_lipsync.blender.strip_placement_properties import StripPlacementProperties
-from rhubarb_lipsync.blender.preferences import CueListPreferences, RhubarbAddonPreferences, MappingPreferences
-from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthShapeInfos, duration_scale_rate
-from bisect import bisect_left
 import rhubarb_lipsync.blender.mapping_utils as mapping_utils
 import rhubarb_lipsync.blender.ui_utils as ui_utils
+from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, MouthCueList, MouthCueListItem, ResultLogListProperties
+from rhubarb_lipsync.blender.mapping_properties import MappingItem, MappingProperties, NlaTrackRef
+from rhubarb_lipsync.blender.preferences import CueListPreferences, MappingPreferences, RhubarbAddonPreferences
+from rhubarb_lipsync.blender.strip_placement_properties import StripPlacementProperties
+from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthShapeInfos, duration_scale_rate
 
 log = logging.getLogger(__name__)
 
@@ -27,7 +28,7 @@ def objects_with_mapping(objects: Iterator[Object]) -> Iterator[Object]:
 
 
 def find_strip_at(track: NlaTrack, at_frame: float) -> tuple[int, NlaStrip]:
-    """Finds the strip at the given frame. Effectivelly utilizing the fact the strips are always ordered and can't overlap"""
+    """Finds the strip at the given frame. Effectively utilizing the fact the strips are always ordered and can't overlap"""
     if not track or not track.strips:
         return -1, None
     index = bisect_left(track.strips, at_frame, key=lambda strip: strip.frame_start)
@@ -62,14 +63,19 @@ def strips_on_track(track: NlaTrack, start: int, end: int) -> Iterator[NlaStrip]
         yield s
 
 
+@dataclass
 class BakingContext:
     """Ease navigation and iteration over various stuff needed for baking"""
 
-    def __init__(self, ctx: Context) -> None:
-        assert ctx
-        self.ctx = ctx
-        self.clear_obj_cache()
-        self.cue_index = -1
+    ctx: Context
+    cue_index: int = -1
+    _objs: List[Object] = None
+    object_index: int = -1
+    track_index: int = -1
+    last_object_selection_type: str = ""
+
+    # def __post_init__(self) -> None:
+    #     self.clear_obj_cache()
 
     @cached_property
     def prefs(self) -> RhubarbAddonPreferences:
@@ -99,7 +105,7 @@ class BakingContext:
 
     def object_iter(self) -> Iterator[Object]:
         """To iterate over all to-be-baked objects with for each loop.
-        Note this function actually sets the current_object as a side-effect so can't be used for concurent looping."""
+        Note this function actually sets the current_object as a side effect so can't be used for concurrent looping."""
         for i, o in enumerate(self.objects):
             self.object_index = i
             yield o

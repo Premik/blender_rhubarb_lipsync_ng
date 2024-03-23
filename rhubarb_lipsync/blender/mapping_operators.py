@@ -1,16 +1,15 @@
 import logging
-
-import bpy
-from bpy.props import StringProperty, IntProperty, FloatProperty
-from bpy.types import Context
 from typing import Optional
 
-from rhubarb_lipsync.blender.mapping_properties import MappingProperties, NlaTrackRef
-from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthShapeInfos, MouthShapeInfo
-import rhubarb_lipsync.blender.ui_utils as ui_utils
-from rhubarb_lipsync.blender.ui_utils import IconsManager
+import bpy
+from bpy.props import EnumProperty, FloatProperty, IntProperty, StringProperty
+from bpy.types import Context
+
 import rhubarb_lipsync.blender.mapping_utils as mapping_utils
-from bpy.props import EnumProperty
+import rhubarb_lipsync.blender.ui_utils as ui_utils
+from rhubarb_lipsync.blender.mapping_properties import MappingProperties, NlaTrackRef
+from rhubarb_lipsync.blender.ui_utils import IconsManager
+from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthShapeInfo, MouthShapeInfos
 
 log = logging.getLogger(__name__)
 

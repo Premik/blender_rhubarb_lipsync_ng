@@ -1,10 +1,11 @@
-import bpy
 import os
-import urllib.request
-import tempfile
-import ssl
-import shutil
 import platform
+import shutil
+import ssl
+import tempfile
+import urllib.request
+
+import bpy
 
 version_number = "1.0.3"
 # version_number = "1.0.2"

@@ -1,6 +1,5 @@
 import unittest
 
-
 import sample_project
 from helper import skip_no_aud
 

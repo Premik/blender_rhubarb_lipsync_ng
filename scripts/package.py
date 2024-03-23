@@ -1,9 +1,9 @@
 import re
+import shutil
 from functools import cached_property
 from pathlib import Path
 
 from config import project_cfg, rhubarb_cfg
-import shutil
 from rhubarb_bin import RhubarbBinary
 
 

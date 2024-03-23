@@ -1,16 +1,16 @@
 import logging
 from functools import cached_property
-from typing import Any, Optional, Generator
+from typing import Any, Generator, Optional
 
 import bpy
 import bpy.utils.previews
-from bpy.props import BoolProperty, CollectionProperty, IntProperty, PointerProperty, StringProperty, FloatProperty
-from bpy.types import Context, PropertyGroup, NlaTrack
+from bpy.props import BoolProperty, CollectionProperty, FloatProperty, IntProperty, PointerProperty, StringProperty
+from bpy.types import Context, NlaTrack, PropertyGroup
 
-from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthShapeInfo, MouthShapeInfos
+import rhubarb_lipsync.blender.mapping_utils as mapping_utils
 from rhubarb_lipsync.blender.strip_placement_properties import StripPlacementProperties
 from rhubarb_lipsync.blender.ui_utils import DropdownHelper
-import rhubarb_lipsync.blender.mapping_utils as mapping_utils
+from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthShapeInfo, MouthShapeInfos
 
 log = logging.getLogger(__name__)
 

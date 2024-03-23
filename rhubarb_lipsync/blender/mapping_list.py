@@ -1,9 +1,8 @@
-from bpy.types import Context, UILayout, UIList, UI_UL_list
-
+from bpy.types import Context, UI_UL_list, UILayout, UIList
 
 import rhubarb_lipsync.blender.mapping_operators as mapping_operators
-from rhubarb_lipsync.blender.preferences import CueListPreferences, RhubarbAddonPreferences, MappingPreferences
-from rhubarb_lipsync.blender.mapping_properties import MappingProperties, MappingItem
+from rhubarb_lipsync.blender.mapping_properties import MappingItem, MappingProperties
+from rhubarb_lipsync.blender.preferences import CueListPreferences, MappingPreferences, RhubarbAddonPreferences
 
 
 def draw_mapping_item(ctx: Context, layout: UILayout, mp: MappingProperties, itemIndex: int) -> None:

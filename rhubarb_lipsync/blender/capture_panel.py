@@ -4,15 +4,15 @@ import pathlib
 import bpy
 from bpy.types import Context, Sound
 
+import rhubarb_lipsync.blender.capture_operators as capture_operators
 import rhubarb_lipsync.blender.rhubarb_operators as rhubarb_operators
 import rhubarb_lipsync.blender.sound_operators as sound_operators
-import rhubarb_lipsync.blender.capture_operators as capture_operators
 import rhubarb_lipsync.blender.ui_utils as ui_utils
-from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences, CueListPreferences
-from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, MouthCueList, MouthCueListItem, JobProperties
-from rhubarb_lipsync.blender.ui_utils import IconsManager
-from rhubarb_lipsync.blender.cue_list import MouthCueUIList
 import rhubarb_lipsync.rhubarb.mouth_shape_data as shape_data
+from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, JobProperties, MouthCueList, MouthCueListItem
+from rhubarb_lipsync.blender.cue_list import MouthCueUIList
+from rhubarb_lipsync.blender.preferences import CueListPreferences, RhubarbAddonPreferences
+from rhubarb_lipsync.blender.ui_utils import IconsManager
 
 log = logging.getLogger(__name__)
 

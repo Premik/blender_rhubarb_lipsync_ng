@@ -5,7 +5,7 @@ import inspect
 import pkgutil
 from pathlib import Path
 from types import ModuleType
-from typing import Generator, Iterator, get_type_hints, Any, Type
+from typing import Any, Generator, Iterator, Type, get_type_hints
 
 import bpy
 

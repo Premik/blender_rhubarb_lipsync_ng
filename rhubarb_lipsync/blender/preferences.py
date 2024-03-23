@@ -1,11 +1,11 @@
 import pathlib
-from functools import cached_property
-from typing import Optional, cast, Iterator
 import traceback
-
+from functools import cached_property
+from typing import Iterator, Optional, cast
 
 from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty, PointerProperty, StringProperty
-from bpy.types import AddonPreferences, Context, PropertyGroup, UILayout, Object
+from bpy.types import AddonPreferences, Context, Object, PropertyGroup, UILayout
+
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandWrapper
 

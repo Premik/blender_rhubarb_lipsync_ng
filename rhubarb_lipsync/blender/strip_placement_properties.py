@@ -1,9 +1,8 @@
 import logging
+import textwrap
 
 from bpy.props import BoolProperty, EnumProperty, FloatProperty
 from bpy.types import PropertyGroup
-
-import textwrap
 
 log = logging.getLogger(__name__)
 

@@ -1,30 +1,29 @@
-from time import sleep
+import re
 from functools import cached_property
-
-import bpy
+from time import sleep
 from typing import Optional
+
+import addon_utils
+import bpy
+
 import rhubarb_lipsync
 import rhubarb_lipsync.blender.auto_load
-import sample_data
+import rhubarb_lipsync.blender.baking_utils as baking_utils
 import rhubarb_lipsync.blender.rhubarb_operators as rhubarb_operators
-from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences
-from rhubarb_lipsync.blender.preferences import local_executable_path
+import rhubarb_lipsync.blender.ui_utils as ui_utils
+import rhubarb_lipsync.rhubarb.mouth_shape_data as shape_data
+import sample_data
 from rhubarb_lipsync.blender.capture_properties import (
     CaptureListProperties,
     CaptureProperties,
-    MouthCueList,
     JobProperties,
+    MouthCueList,
     MouthCueListItem,
     ResultLogListProperties,
 )
-from rhubarb_lipsync.blender.mapping_properties import MappingProperties, MappingItem, NlaTrackRef
+from rhubarb_lipsync.blender.mapping_properties import MappingItem, MappingProperties, NlaTrackRef
+from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences, local_executable_path
 from rhubarb_lipsync.rhubarb.log_manager import logManager
-import rhubarb_lipsync.blender.ui_utils as ui_utils
-import addon_utils
-import rhubarb_lipsync.blender.baking_utils as baking_utils
-import re
-
-import rhubarb_lipsync.rhubarb.mouth_shape_data as shape_data
 
 
 class SampleProject:

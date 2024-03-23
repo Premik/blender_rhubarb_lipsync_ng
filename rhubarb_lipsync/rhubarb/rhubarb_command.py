@@ -1,3 +1,4 @@
+import functools
 import json
 import logging
 import os
@@ -5,8 +6,6 @@ import pathlib
 import platform
 import re
 import traceback
-import functools
-
 from collections import defaultdict
 from queue import Empty, SimpleQueue
 from subprocess import PIPE, Popen, TimeoutExpired

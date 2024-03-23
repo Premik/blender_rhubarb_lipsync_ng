@@ -3,14 +3,14 @@ import pathlib
 import traceback
 from typing import cast
 
-import aud
 import bpy
 from bpy.props import BoolProperty, EnumProperty, IntProperty, StringProperty
 from bpy.types import Context, Sound, SoundSequence
 
+import aud
 import rhubarb_lipsync.blender.ui_utils as ui_utils
-from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences
 from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties
+from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences
 
 log = logging.getLogger(__name__)
 

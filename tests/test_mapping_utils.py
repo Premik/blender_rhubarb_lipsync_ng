@@ -1,10 +1,9 @@
 import unittest
 
-
 import bpy
 
-import sample_project
 import rhubarb_lipsync.blender.mapping_utils as mapping_utils
+import sample_project
 
 
 class BakingContextTest(unittest.TestCase):

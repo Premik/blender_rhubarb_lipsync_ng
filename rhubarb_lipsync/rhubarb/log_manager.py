@@ -1,7 +1,7 @@
 import logging
+import pathlib
 from functools import cached_property
 from types import ModuleType
-import pathlib
 from typing import Optional
 
 

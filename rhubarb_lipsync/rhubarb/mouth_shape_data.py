@@ -1,8 +1,8 @@
-from dataclasses import dataclass
 import math
-from functools import cached_property
-from enum import Enum
 import textwrap
+from dataclasses import dataclass
+from enum import Enum
+from functools import cached_property
 from typing import Any, Callable, ParamSpec, TypeAlias, TypeVar
 
 
@@ -241,7 +241,6 @@ class MouthCue:
         f, i = math.modf(self.get_start_frame_float(fps, fps_base, offset))
         return int(i), f
 
-
     @property
     def duration(self) -> float:
         return self.end - self.start
@@ -312,7 +311,6 @@ class MouthCueFrames:
     @property
     def start_time_str(self) -> str:
         return f"{self.start_frame+self.offset_seconds:0.2f}"
-
 
     @property
     def start_frame_str(self) -> str:
