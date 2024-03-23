@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 import logging
 from bisect import bisect_left
 from collections import defaultdict
@@ -34,7 +34,7 @@ def find_strip_at(track: NlaTrack, at_frame: float) -> tuple[int, NlaStrip]:
     index = bisect_left(track.strips, at_frame, key=lambda strip: strip.frame_start)
     if index > 0:  # After the first
         index -= 1
-    assert index < len(track.strips) and index >= 0
+    assert len(track.strips) > index >= 0
     strip = track.strips[index]
     # strip is now the one which starts just before (or at) the `at_frame`
     if at_frame < strip.frame_start or at_frame >= strip.frame_end:
@@ -120,7 +120,7 @@ class BakingContext:
 
     @property
     def current_object(self) -> Object:
-        """Current Blender Object with the mappings. It is changed as a side-effect of the `object_iter`"""
+        """Current Blender Object with the mappings. It is changed as a side effect of the `object_iter`"""
         if self.object_index < 0:
             return None
         if self.object_index >= len(self.objects):
@@ -135,7 +135,7 @@ class BakingContext:
             return False
         if not self.current_object.type == "MESH":
             return False
-        return self.current_object.shape_keys
+        return bool(self.current_object.data.shape_keys)
 
     @cached_property
     def cprops(self) -> CaptureProperties:
@@ -249,7 +249,7 @@ class BakingContext:
         return range[1] - range[0]
 
     def current_mapping_action_scale(self, desired_len_frames: float, scale_min: float = -1, scale_max: float = -1) -> float:
-        """Scale factor to use on the strip so it's length matches the  current mapping item action's length."""
+        """Scale factor to use on the strip so it's length matches the current mapping item action's length."""
         if scale_min < 0:
             scale_min = self.strip_placement_props.scale_min
         if scale_max < 0:
@@ -261,13 +261,13 @@ class BakingContext:
 
     @property
     def track1(self) -> Optional[NlaTrack]:
-        trackRef: NlaTrackRef = self.mprops and self.mprops.nla_track1
-        return trackRef and trackRef.selected_item
+        track_ref: NlaTrackRef = self.mprops and self.mprops.nla_track1
+        return track_ref and track_ref.selected_item
 
     @property
     def track2(self) -> Optional[NlaTrack]:
-        trackRef: NlaTrackRef = self.mprops and self.mprops.nla_track2
-        return trackRef and trackRef.selected_item
+        track_ref: NlaTrackRef = self.mprops and self.mprops.nla_track2
+        return track_ref and track_ref.selected_item
 
     @property
     def tracks(self) -> List[NlaTrack]:
