@@ -186,6 +186,7 @@ class FrameConfig:
     fps: int
     fps_base: float = 1.0
     offset: int = 0
+    subframes: bool = True
 
     @property
     def fps_base_offset(self) -> tuple[int, float, int]:
@@ -239,6 +240,7 @@ class MouthCue:
         """Whole frame (without rounding) + decimal part (between 0.0 and 1.0) of the exact frame number."""
         f, i = math.modf(self.get_start_frame_float(fps, fps_base, offset))
         return int(i), f
+
 
     @property
     def duration(self) -> float:
@@ -306,6 +308,37 @@ class MouthCueFrames:
     @property
     def duration_frames_float(self) -> float:
         return self.end_frame_float - self.start_frame_float
+
+    @property
+    def start_time_str(self) -> str:
+        return f"{self.start_frame+self.offset_seconds:0.2f}"
+
+
+    @property
+    def start_frame_str(self) -> str:
+        if self.frame_cfg.subframes:
+            return f"{self.start_frame_float:0.2f}"
+        return f"{self.start_frame}"
+
+    @property
+    def end_time_str(self) -> str:
+        return f"{self.end_frame+self.offset_seconds:0.2f}"
+
+    @property
+    def end_frame_str(self) -> str:
+        if self.frame_cfg.subframes:
+            return f"{self.end_frame_float:0.2f}"
+        return f"{self.end_frame}"
+
+    @property
+    def duration_frames_str(self) -> str:
+        if self.frame_cfg.subframes:
+            return f"{self.duration_frames_float:0.2f}"
+        return f"{self.duration_frames}"
+
+    @property
+    def duration_str(self) -> str:
+        return f"{self.cue.duration:0.2f}"
 
 
 if __name__ == '__main__':

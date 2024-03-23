@@ -284,24 +284,24 @@ class BakeToNLA(bpy.types.Operator):
         strip.blend_in = b.strip_placement_props.blend_in
         strip.blend_out = b.strip_placement_props.blend_out
 
-    def bake_cue_on(self, object: Object) -> None:
+    def bake_cue_on(self, obj: Object) -> None:
         b = self.bctx
 
         track = b.current_track
         if not track:
             if b.cue_index <= 0:  # Only log the error 1x
-                b.rlog.warning(f"{object and object.name} has no NLA track selected. Ignoring", self.bctx.current_traceback)
+                b.rlog.warning(f"{obj and obj.name} has no NLA track selected. Ignoring", self.bctx.current_traceback)
             return
         self.to_strip()
 
     def bake_cue(self) -> None:
-        for o in self.bctx.object_iter():
+        for obj in self.bctx.object_iter():
             assert self.bctx.current_cue_item, "No cue selected"
             self.bctx.next_track()  # Alternate tracks for each cue change of the current object
             # print(self.bctx.cue_index)
             if log.isEnabledFor(logging.TRACE):  # type: ignore
-                log.trace(f"Baking on object {o} ")  # type: ignore
-            self.bake_cue_on(o)
+                log.trace(f"Baking on object {obj} ")  # type: ignore
+            self.bake_cue_on(obj)
 
     def execute(self, ctx: Context) -> set[str]:
         self.bctx = baking_utils.BakingContext(ctx)
@@ -313,15 +313,15 @@ class BakeToNLA(bpy.types.Operator):
                 log.info(f"Trimmed {trimmed} Cues as they were too long.")
 
         wm = ctx.window_manager
-        l = len(b.cue_items)
+        l = len(b.mouth_cue_items)
         log.info(f"About to bake {l} cues")
         wm.progress_begin(0, l)
         try:
-            for i, c in enumerate(b.cue_iter()):
+            for i, cue_item in enumerate(b.cue_iter()):
                 # print(b.cue_index)
                 wm.progress_update(i)
                 if log.isEnabledFor(logging.DEBUG):
-                    log.debug(f"Baking cue {c.cue} ({i}/{l}) ")
+                    log.debug(f"Baking cue {cue_item.cue} ({i}/{l}) ")
                 self.bctx.next_track()  # Swap tracks on each cue
                 self.bake_cue()
             msg = f"Baked {l} cues to {self.strips_added} action strips"
@@ -348,7 +348,7 @@ class BakeToNLA(bpy.types.Operator):
         # Redundant validations to allow collapsing this sub-panel while still indicating any errors
         selected_objects = list(b.mprefs.object_selection(b.ctx))
 
-        errors = not b.cprops or not b.cue_items or not selected_objects or not b.objects
+        errors = not b.cprops or not b.mouth_cue_items or not selected_objects or not b.objects
         if not ui_utils.draw_expandable_header(b.prefs, "bake_info_panel_expanded", "Info", self.layout, errors):
             return
 
@@ -362,8 +362,8 @@ class BakeToNLA(bpy.types.Operator):
 
         line = box.split()
         line.label(text="Mouth cues")
-        if b.cue_items:
-            line.label(text=str(len(b.cue_items)))
+        if b.mouth_cue_items:
+            line.label(text=str(len(b.mouth_cue_items)))
         else:
             self.draw_error_inbox(line, "No cues")
 

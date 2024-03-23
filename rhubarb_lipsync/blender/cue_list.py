@@ -73,29 +73,29 @@ class MouthCueUIList(UIList):
         else:
             long = clp.highlight_long_cues
             short = clp.highlight_short_cues
-            if (long > 0 and item.duration > long) or (short >= 0 and item.duration <= short):
+            if (long > 0 and item.cue.duration > long) or (short >= 0 and item.cue.duration <= short):
                 row.alert = True  # Too long/short cue is suspisous, unless it is silence
 
+        cf = item.cue_frames(context)
         if clp.show_col_start_frame:
-            row.label(text=f"{item.frame_str(context)}")
+            row.label(text=f"{cf.start_frame_str}")
         if clp.show_col_start_time:
-            row.label(text=f"{item.time_str(context)}s")
+            row.label(text=f"{cf.start_time_str}s")
 
         if clp.show_col_len_frame:
-            row.label(text=f"{item.duration_frames_str(context)}")
+            row.label(text=f"{cf.duration_frames_str}")
         if clp.show_col_len_time:
-            row.label(text=f"{item.duration_str}s")
+            row.label(text=f"{cf.duration_str}s")
 
         if clp.show_col_end_frame:
-            row.label(text=f"{item.end_frame_str(context)}")
+            row.label(text=f"{cf.end_frame_str}")
         if clp.show_col_end_time:
-            row.label(text=f"{item.end_time_str(context)}s")
+            row.label(text=f"{cf.end_time_str}s")
 
         if clp.show_col_play:
             row = subs.row()  # Operator (0.15)
             op = row.operator(PlayRange.bl_idname, text="", icon="TRIA_RIGHT_BAR")
 
-            cf: MouthCueFrames = item.cue_frames
             op.start_frame = int(cf.start_frame_float)  # Nearest whole frame before the exact time
             op.play_frames = cf.duration_frames
 

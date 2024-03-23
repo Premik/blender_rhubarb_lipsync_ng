@@ -47,7 +47,7 @@ class MouthCueListItem(PropertyGroup):
     def frame_config_from_context(ctx: Context) -> FrameConfig:
         props = CaptureListProperties.capture_from_context(ctx)
         sf = props.start_frame if props else 1
-        return FrameConfig(ctx.scene.render.fps, ctx.scene.render.fps_base, sf)
+        return FrameConfig(ctx.scene.render.fps, ctx.scene.render.fps_base, sf, ctx.scene.show_subframe)
 
     def cue_frames(self, ctx: Context) -> MouthCueFrames:
         """Wraps the cue to provide additinal frame-related calculation"""
@@ -58,14 +58,6 @@ class MouthCueListItem(PropertyGroup):
         self.key = cue.key
         self.start = cue.start
         self.end = cue.end
-
-    def time_str(self, ctx: Context) -> str:
-        cf = self.cue_frames(ctx)
-        return f"{cf.start_frame+cf.offset_seconds:0.2f}"
-
-    def end_time_str(self, ctx: Context) -> str:
-        cf = self.cue_frames(ctx)
-        return f"{cf.end_frame+cf.offset_seconds:0.2f}"
 
     def frame_str(self, ctx: Context) -> str:
         cf = self.cue_frames(ctx)
@@ -78,20 +70,6 @@ class MouthCueListItem(PropertyGroup):
         if ctx.scene.show_subframe:
             return f"{cf.end_frame_float:0.2f}"
         return f"{cf.end_frame}"
-
-    @property
-    def duration(self) -> float:
-        return self.cue.duration
-
-    def duration_frames_str(self, ctx: Context) -> str:
-        cf = self.cue_frames(ctx)
-        if ctx.scene.show_subframe:
-            return f"{cf.duration_frames_float:0.2f}"
-        return f"{cf.duration_frames}"
-
-    @property
-    def duration_str(self) -> str:
-        return f"{self.cue.duration:0.2f}"
 
 
 class MouthCueList(PropertyGroup):
