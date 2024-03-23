@@ -14,7 +14,7 @@ from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, Ca
 from rhubarb_lipsync.blender.mapping_properties import MappingItem, MappingProperties, NlaTrackRef
 from rhubarb_lipsync.blender.preferences import CueListPreferences, MappingPreferences, RhubarbAddonPreferences
 from rhubarb_lipsync.blender.strip_placement_properties import StripPlacementProperties
-from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthShapeInfos, duration_scale_rate
+from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthShapeInfos, duration_scale_rate, MouthCueFrames
 
 log = logging.getLogger(__name__)
 
@@ -149,26 +149,14 @@ class BakingContext:
     def rlog(self) -> ResultLogListProperties:
         return self.clist_props and self.clist_props.last_resut_log
 
-    def trim_long_cues(self) -> int:
-        clp: CueListPreferences = self.prefs.cue_list_prefs
-        max_dur = clp.highlight_long_cues
-        trimmed = 0
-        for ci in self.mouth_cue_items:
-            d = ci.cue.duration
-            if d <= max_dur:
-                continue
-            trimmed += 1
-            ci.end = ci.start + max_dur
-        return trimmed
-
     @property
     def current_traceback(self) -> str:
         """A string describing the "location" of baking state. `Cue`, `Object`, `Track` (where applicable).
         To help identify where warning/error occurred"""
         trace = ""
-        cc = self.current_cue_item
-        if cc:
-            trace = f"{cc.frame_str(self.ctx)} {cc.cue.info.key_displ}"
+        cf = self.current_cue
+        if cf:
+            trace = f"{cf.start_frame_str} {cf.cue.info.key_displ}"
         if self.current_object:
             trace = f"{trace} {self.current_object.name}"
         if self.current_track:
@@ -182,34 +170,53 @@ class BakingContext:
         cl: MouthCueList = self.cprops.cue_list
         return cl.items
 
-    def cue_iter(self) -> Iterator[MouthCueListItem]:
-        for i, c in enumerate(self.mouth_cue_items):
+    @cached_property
+    def cue_frames(self) -> list[MouthCueFrames]:
+        """List of the detected cues wrapped in CueFrames.
+        This is a copy so the list and cues can be mutated without affecting the original Capture  """
+        cfg = MouthCueListItem.frame_config_from_context(self.ctx)
+        return [MouthCueFrames(ci.cue, cfg) for ci in self.mouth_cue_items]
+
+    def cue_iter(self) -> Iterator[MouthCueFrames]:
+        for i, cf in enumerate(self.cue_frames):
             self.cue_index = i
-            yield c
+            yield cf
         self.cue_index = -1
 
     @property
-    def current_cue_item(self) -> Optional[MouthCueListItem]:
+    def current_cue(self) -> Optional[MouthCueFrames]:
         """Current mouth cue - source side of the mapping"""
         if self.cue_index < 0:
             return None
-        if self.cue_index >= len(self.mouth_cue_items):
+        if self.cue_index >= len(self.cue_frames):
             self.cue_index = -1
             return None
-        return self.mouth_cue_items[self.cue_index]
+        return self.cue_frames[self.cue_index]
 
     @property
-    def the_last_cue_item(self) -> Optional[MouthCueListItem]:
-        if not self.mouth_cue_items:
+    def the_last_cue(self) -> Optional[MouthCueFrames]:
+        if not self.cue_frames:
             return None
-        return self.mouth_cue_items[-1]
+        return self.cue_frames[-1]
+
+    def trim_long_cues(self) -> int:
+        clp: CueListPreferences = self.prefs.cue_list_prefs
+        max_dur = clp.highlight_long_cues
+        trimmed = 0
+        for ci in self.mouth_cue_items:
+            d = ci.cue.duration
+            if d <= max_dur:
+                continue
+            trimmed += 1
+            ci.end = ci.start + max_dur
+        return trimmed
 
     @cached_property
     def total_frame_range(self) -> Optional[tuple[int, int]]:
         """Frame range of the final output after all the Actions are placed"""
-        if not self.the_last_cue_item:
+        if not self.the_last_cue:
             return None
-        cf = self.the_last_cue_item.cue_frames(self.ctx)
+        cf = self.the_last_cue
         return self.cprops.start_frame, cf.end_frame
 
     @property
@@ -224,9 +231,9 @@ class BakingContext:
     @property
     def current_mapping_item(self) -> MappingItem:
         """Mapping item corresponding to the current Cue"""
-        if not self.mprops or not self.current_cue_item:
+        if not self.mprops or not self.current_cue:
             return None
-        cue_index = self.current_cue_item.cue.key_index
+        cue_index = self.current_cue.cue.key_index
         return self.mprops.items[cue_index]
 
     @property

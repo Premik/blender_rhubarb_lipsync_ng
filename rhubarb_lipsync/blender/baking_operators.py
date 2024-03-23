@@ -243,12 +243,12 @@ class BakeToNLA(bpy.types.Operator):
 
     def to_strip(self) -> None:
         b = self.bctx
-        cue_item = b.current_cue_item
-        cue: MouthCue = cue_item and cue_item.cue or None
+        cue_frames = b.current_cue
+        cue: MouthCue = cue_frames and cue_frames.cue or None
         if not b.current_mapping_action:
             b.rlog.warning(f"There is no mapping for the cue {cue} in the capture. Ignoring", self.bctx.current_traceback)
             return
-        cue_frames = cue_item.cue_frames(b.ctx)
+
         name = f"{cue.info.key_displ}.{str(b.cue_index).zfill(3)}"
 
         # Shift the start frame
@@ -296,7 +296,7 @@ class BakeToNLA(bpy.types.Operator):
 
     def bake_cue(self) -> None:
         for obj in self.bctx.object_iter():
-            assert self.bctx.current_cue_item, "No cue selected"
+            assert self.bctx.current_cue, "No cue selected"
             self.bctx.next_track()  # Alternate tracks for each cue change of the current object
             # print(self.bctx.cue_index)
             if log.isEnabledFor(logging.TRACE):  # type: ignore
@@ -317,11 +317,11 @@ class BakeToNLA(bpy.types.Operator):
         log.info(f"About to bake {l} cues")
         wm.progress_begin(0, l)
         try:
-            for i, cue_item in enumerate(b.cue_iter()):
+            for i, cue_frames in enumerate(b.cue_iter()):
                 # print(b.cue_index)
                 wm.progress_update(i)
                 if log.isEnabledFor(logging.DEBUG):
-                    log.debug(f"Baking cue {cue_item.cue} ({i}/{l}) ")
+                    log.debug(f"Baking cue {cue_frames.cue} ({i}/{l}) ")
                 self.bctx.next_track()  # Swap tracks on each cue
                 self.bake_cue()
             msg = f"Baked {l} cues to {self.strips_added} action strips"
@@ -408,8 +408,8 @@ class BakeToNLA(bpy.types.Operator):
         layout = self.layout
         row = layout.row(align=False)
         row.prop(self.bctx.cprops, "start_frame")
-        if self.bctx.the_last_cue_item:
-            row.label(text=f"End frame: {self.bctx.the_last_cue_item.end_frame_str(ctx)}")
+        if self.bctx.the_last_cue:
+            row.label(text=f"End frame: {self.bctx.the_last_cue.end_frame_str}")
         layout.prop(ctx.scene, "show_subframe", text="Use subframes")
         row = layout.row(align=False)
         row.prop(self, "trim_cue_excess", text=f"Trim cues longer than")
