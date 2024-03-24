@@ -10,7 +10,7 @@ from bpy.types import Context, NlaTrack, PropertyGroup
 import rhubarb_lipsync.blender.mapping_utils as mapping_utils
 from rhubarb_lipsync.blender.strip_placement_properties import StripPlacementProperties
 from rhubarb_lipsync.blender.ui_utils import DropdownHelper
-from rhubarb_lipsync.rhubarb.cue_info import MouthShapeInfo, MouthShapeInfos
+from rhubarb_lipsync.rhubarb.mouth_shape_info import MouthShapeInfo, MouthShapeInfos
 
 log = logging.getLogger(__name__)
 

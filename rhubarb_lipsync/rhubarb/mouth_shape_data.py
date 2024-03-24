@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from functools import cached_property
 from typing import Any, Callable, ParamSpec, TypeAlias, TypeVar
 
-from rhubarb_lipsync.rhubarb.cue_info import MouthShapeInfo, MouthShapeInfos
+from rhubarb_lipsync.rhubarb.mouth_shape_info import MouthShapeInfo, MouthShapeInfos
 
 
 def time2frame_float(time: float, fps: int, fps_base=1.0) -> float:
