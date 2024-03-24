@@ -211,8 +211,8 @@ class BakingContext:
                 continue
             trimmed += 1
             cf.cue.end = cf.cue.start + max_dur
-        if trimmed > 0:
-            self.rlog.info(f"Trimmed {trimmed} Cues as they were too long.")
+        # if trimmed > 0:
+        #     self.rlog.info(f"Trimmed {trimmed} Cues as they were too long.")
         return trimmed
 
     @cached_property

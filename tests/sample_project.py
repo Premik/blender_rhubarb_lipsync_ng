@@ -57,6 +57,7 @@ class SampleProject:
         SampleProject.registered = True
 
     def assert_empty_scene(self) -> None:
+        """Make sure the default scene looks as expected and doesn't contain any left-over objects."""
         non_default_objects = [o for o in bpy.data.objects if o.name not in ["Camera", "Cube", "Light"]]
         assert not bool(non_default_objects), f"Unexpected objects in the default scene: {non_default_objects}"
         assert not bool(list(bpy.data.actions)), f"Unexpected actions in the default scene: {list(bpy.data.actions)}"
@@ -72,6 +73,7 @@ class SampleProject:
         return sample_data.snd_en_male_electricity
 
     def create_capture(self) -> None:
+        """Create new (black) capture in the Scene and do basic verification"""
         bpy.ops.rhubarb.create_capture_props()  # Create new capture item
         props = self.cprops
         assert props
@@ -107,8 +109,6 @@ class SampleProject:
             assert loops < 50, f"Got not progress update after 5 secs {last}"
         assert self.jprops.status == "Done", f"Capture failed {self.jprops.status} {self.jprops.error}"
 
-    def add_objects(self) -> None:
-        ui_utils.assert_op_ret(bpy.ops.mesh.primitive_cylinder_add())
 
     @property
     def clist_props(self) -> CaptureListProperties:
@@ -116,6 +116,7 @@ class SampleProject:
 
     @property
     def last_result(self) -> ResultLogListProperties:
+        """Result from the last Capture (if any)"""
         return self.clist_props and self.clist_props.last_resut_log
 
     def parse_last_bake_result_details(self) -> tuple[int, int]:
@@ -132,6 +133,7 @@ class SampleProject:
 
     @property
     def cprops(self) -> CaptureProperties:
+        """Selected Capture properties in the active Scene """
         return CaptureListProperties.capture_from_context(bpy.context)
 
     @property
@@ -149,7 +151,7 @@ class SampleProject:
 
     @property
     def cue_list(self) -> MouthCueList:
-        """Captured cues (PropertGroup)"""
+        """Cues (PropertGroup) of the Capture selected in the active Scene"""
         return self.cprops and self.cprops.cue_list
 
     @property
@@ -197,7 +199,7 @@ class SampleProject:
 
     @property
     def action_10(self) -> bpy.types.Action:
-        """Action with two keyframes: `location.x@1=1` `location.x@10=10`"""
+        """Action 10 frames long. With two keyframes: `location.x@1=1` `location.x@10=10`"""
         created, a = self.ensure_action("action_10")
         if not created:
             return a
@@ -228,6 +230,7 @@ class SampleProject:
 
     @property
     def sphere1(self) -> bpy.types.Object:
+        """Ensure Object with `Sphere` name exists in the scene"""
         if "Sphere" in bpy.data.objects.keys():
             return bpy.data.objects["Sphere"]
 
@@ -237,12 +240,14 @@ class SampleProject:
         return ret
 
     def initialize_mapping(self, obj: bpy.types.Object) -> None:
+        """Make the provided Object active and initialize blank Mapping on it."""
         bpy.context.view_layer.objects.active = obj  # Make the obj active
         assert self.mprops
         ui_utils.assert_op_ret(bpy.ops.rhubarb.build_cueinfo_uilist())  # Populate the cue-type list
 
     def create_mapping(self, actions: list[bpy.types.Action]) -> None:
-        """Populate all the cue mappings using the actions from the list. Looping the list from the start if needed."""
+        """Populate all the cue mappings using the actions from the list.
+        Repeat the actions from the list if needed."""
         assert actions
         assert self.mprops
         alen = len(actions)
@@ -268,6 +273,7 @@ class SampleProject:
         return self.create_baking_context()
 
     def add_track(self, t: NlaTrackRef) -> NlaTrackRef:
+        """Add a new NLA Track and return the updated reference to it"""
         ui_utils.assert_op_ret(bpy.ops.rhubarb.new_nla_track())
         assert len(list(t.items())) > 0, "After track was created there is still no eligible track. "
         t.index += 1  # Select the newly created track
