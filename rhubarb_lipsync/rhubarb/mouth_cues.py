@@ -206,6 +206,25 @@ class MouthCueFrames:
     def duration_str(self) -> str:
         return f"{self.cue.duration:0.2f}"
 
+@dataclass
+class CueProcessor:
+    """Holds and processes the list of detected Mouth cues before they are baked."""
+
+    frame_cfg: FrameConfig
+    cue_frames:list[MouthCueFrames]
+
+    def trim_long_cues(self, max_dur: float) -> int:
+        trimmed = 0
+        for cf in self.cue_frames:
+            d = cf.cue.duration
+            if d <= max_dur:
+                continue
+            trimmed += 1
+            cf.cue.end = cf.cue.start + max_dur
+        # if trimmed > 0:
+        #     self.rlog.info(f"Trimmed {trimmed} Cues as they were too long.")
+        return trimmed
+
 
 if __name__ == '__main__':
     c = MouthCue("A", 1, 2)
