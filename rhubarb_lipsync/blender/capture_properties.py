@@ -59,7 +59,6 @@ class MouthCueListItem(PropertyGroup):
         self.start = cue.start
         self.end = cue.end
 
-
     def end_frame_str(self, ctx: Context) -> str:
         cf = self.cue_frames(ctx)
         if ctx.scene.show_subframe:

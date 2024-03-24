@@ -12,7 +12,7 @@ from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, Re
 from rhubarb_lipsync.blender.mapping_properties import MappingProperties, NlaTrackRef, StripPlacementProperties
 from rhubarb_lipsync.blender.misc_operators import ShowResultLogDetails
 from rhubarb_lipsync.blender.preferences import CueListPreferences, MappingPreferences, RhubarbAddonPreferences
-from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthShapeInfos
+from rhubarb_lipsync.rhubarb.cue_info import MouthShapeInfos
 
 log = logging.getLogger(__name__)
 

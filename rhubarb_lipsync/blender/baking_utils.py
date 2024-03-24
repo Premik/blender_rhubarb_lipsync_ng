@@ -1,7 +1,7 @@
-from dataclasses import dataclass
 import logging
 from bisect import bisect_left
 from collections import defaultdict
+from dataclasses import dataclass
 from functools import cached_property
 from typing import Iterator, List, Optional
 
@@ -14,7 +14,8 @@ from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, Ca
 from rhubarb_lipsync.blender.mapping_properties import MappingItem, MappingProperties, NlaTrackRef
 from rhubarb_lipsync.blender.preferences import CueListPreferences, MappingPreferences, RhubarbAddonPreferences
 from rhubarb_lipsync.blender.strip_placement_properties import StripPlacementProperties
-from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthShapeInfos, duration_scale_rate, MouthCueFrames
+from rhubarb_lipsync.rhubarb.cue_info import MouthShapeInfos
+from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCueFrames, duration_scale_rate
 
 log = logging.getLogger(__name__)
 
