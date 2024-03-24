@@ -4,7 +4,7 @@ import unittest
 import rhubarb_lipsync.rhubarb.rhubarb_command as rhubarb_command
 
 # import tests.sample_data
-from rhubarb_lipsync.rhubarb.mouth_shape_data import duration_scale, time2frame_float
+from rhubarb_lipsync.rhubarb.mouth_cues import duration_scale, time2frame_float
 
 
 def enableDebug() -> None:

@@ -11,7 +11,7 @@ import rhubarb_lipsync.blender.auto_load
 import rhubarb_lipsync.blender.baking_utils as baking_utils
 import rhubarb_lipsync.blender.rhubarb_operators as rhubarb_operators
 import rhubarb_lipsync.blender.ui_utils as ui_utils
-import rhubarb_lipsync.rhubarb.mouth_shape_data as shape_data
+import rhubarb_lipsync.rhubarb.mouth_cues as shape_data
 import sample_data
 from rhubarb_lipsync.blender.capture_properties import (
     CaptureListProperties,

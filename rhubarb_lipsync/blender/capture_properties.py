@@ -13,7 +13,7 @@ from bpy.types import Context, PropertyGroup, Sound
 from numpy import deprecate
 
 from rhubarb_lipsync.blender.ui_utils import DropdownHelper
-from rhubarb_lipsync.rhubarb.mouth_shape_data import FrameConfig, MouthCue, MouthCueFrames, frame2time
+from rhubarb_lipsync.rhubarb.mouth_cues import FrameConfig, MouthCue, MouthCueFrames, frame2time
 from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandAsyncJob
 
 log = logging.getLogger(__name__)

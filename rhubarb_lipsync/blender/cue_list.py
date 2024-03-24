@@ -4,7 +4,7 @@ from rhubarb_lipsync.blender.capture_properties import MouthCueList, MouthCueLis
 from rhubarb_lipsync.blender.preferences import CueListPreferences, RhubarbAddonPreferences
 from rhubarb_lipsync.blender.sound_operators import PlayRange
 from rhubarb_lipsync.blender.ui_utils import IconsManager
-from rhubarb_lipsync.rhubarb.mouth_shape_data import MouthCueFrames
+from rhubarb_lipsync.rhubarb.mouth_cues import MouthCueFrames
 
 
 class MouthCueUIList(UIList):
