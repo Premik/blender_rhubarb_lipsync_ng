@@ -4,7 +4,7 @@ import bpy
 from bpy.types import Context
 
 import rhubarb_lipsync.blender.baking_operators as baking_operators
-import rhubarb_lipsync.blender.mapping_list as mapping_list
+import rhubarb_lipsync.blender.mapping_uilist as mapping_list
 import rhubarb_lipsync.blender.mapping_operators as mapping_operators
 import rhubarb_lipsync.blender.mapping_utils as mapping_utils
 import rhubarb_lipsync.blender.ui_utils as ui_utils

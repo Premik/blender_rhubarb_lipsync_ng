@@ -10,7 +10,7 @@ import rhubarb_lipsync.blender.sound_operators as sound_operators
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 import rhubarb_lipsync.rhubarb.mouth_cues as shape_data
 from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, JobProperties, MouthCueList, MouthCueListItem
-from rhubarb_lipsync.blender.cue_list import MouthCueUIList
+from rhubarb_lipsync.blender.cue_uilist import MouthCueUIList
 from rhubarb_lipsync.blender.preferences import CueListPreferences, RhubarbAddonPreferences
 from rhubarb_lipsync.blender.ui_utils import IconsManager
 
