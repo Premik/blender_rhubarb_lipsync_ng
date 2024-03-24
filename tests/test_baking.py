@@ -83,7 +83,8 @@ class BakingContextTest(unittest.TestCase):
             assert len(errs) == 0, errs[0]
         ui_utils.assert_op_ret(bpy.ops.rhubarb.bake_to_nla())
         assert not list(self.project.last_result.errors), list(self.project.last_result.items)
-        # Trimming warning is ok
+        # Trimming warnings are ok
+        w = self.project.last_result.warnings
         w = [w for w in self.project.last_result.warnings if "Had to trim" not in w.msg]
         assert not w, list(self.project.last_result.items)
         cues, strips = self.project.parse_last_bake_result_details()

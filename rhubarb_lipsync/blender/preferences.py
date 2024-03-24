@@ -31,8 +31,8 @@ class CueListPreferences(PropertyGroup):
     highlight_long_cues: FloatProperty(  # type: ignore
         name="Long cue duration (s)",
         description="If a captured cue is longer that this given time (in second) the cue is drawn in red in the list. Set to -1 to disable.",
-        default=0.25,
-        soft_min=0.1,
+        default=0.20,
+        soft_min=0.05,
         soft_max=2,
     )
     highlight_short_cues: FloatProperty(  # type: ignore

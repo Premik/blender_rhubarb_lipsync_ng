@@ -123,13 +123,15 @@ class SampleProject:
         if not self.last_result or not list(self.last_result.infos):
             return 0, 0
         infos = list(self.last_result.infos)
-        assert len(infos) == 1, infos
-        info = infos[0]
-        m = SampleProject.bake_result_info_line.search(info.msg)
+        assert len(infos) >= 1, infos
+        for info in infos:
+            m = SampleProject.bake_result_info_line.search(info.msg)
+            if m is None:
+                continue
+            cues = int(m.groupdict()["cues"])
+            strips = int(m.groupdict()["strips"])
+            return cues, strips
         assert m is not None, f"{info} not matching {SampleProject.bake_result_info_line}"
-        cues = int(m.groupdict()["cues"])
-        strips = int(m.groupdict()["strips"])
-        return cues, strips
 
     @property
     def cprops(self) -> CaptureProperties:

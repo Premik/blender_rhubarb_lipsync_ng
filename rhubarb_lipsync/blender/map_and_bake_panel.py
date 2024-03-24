@@ -146,22 +146,24 @@ class MappingAndBakingPanel(bpy.types.Panel):
         col.use_property_split = True
         col.prop(strip_placement, 'extrapolation')
 
-        if not ui_utils.draw_expandable_header(prefs, "strip_blending_panel_expanded", "Strip in/out blending", self.layout):
-            return
+        # if not ui_utils.draw_expandable_header(prefs, "strip_blending_panel_expanded", "Strip in/out blending", self.layout):
+        #     return
         col = self.layout.column(align=False)
         col.use_property_split = True
         col.prop(strip_placement, 'blend_type')
+        if not strip_placement.blend_mode == "FIXED":
+            row.enabled = False
 
+        # row = self.layout.row(align=True)
+        # row.prop(strip_placement, 'blend_mode', expand=True)
+
+        # blend_mode: str = strip_placement.blend_mode
+        # if blend_mode == "FIXED":
         row = self.layout.row(align=True)
-        row.prop(strip_placement, 'blend_mode', expand=True)
-
-        blend_mode: str = strip_placement.blend_mode
-        if blend_mode == "FIXED":
-            row = self.layout.row(align=True)
-            row.prop(strip_placement, 'blend_in', text="Blend In")
-            row.prop(strip_placement, 'blend_out', text="Out")
-            id = baking_operators.PlacementBlendInOutFromOverlap.bl_idname
-            row.operator_menu_enum(id, "sync_type", text="", icon="DOWNARROW_HLT")
+        row.prop(strip_placement, 'blend_in', text="Blend In")
+        row.prop(strip_placement, 'blend_out', text="Out")
+        id = baking_operators.PlacementBlendInOutFromOverlap.bl_idname
+        row.operator_menu_enum(id, "sync_type", text="", icon="DOWNARROW_HLT")
 
         # self.layout.prop(strip_placement, 'use_auto_blend')
 
