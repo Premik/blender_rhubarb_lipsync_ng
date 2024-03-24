@@ -149,7 +149,6 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 ## Todo
 
 ### High
-* Add start- end frame properties to the MappingItem. So NLA clips can clip a frame range from a longer action (i.e.to support face-it style)
 * Mapping wizards
   * Clear - will remove the mapping (delete from the object completly?)
   * Auto-it 
@@ -166,13 +165,10 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 ### Low
 * Baking - round to whole frames when not sub-frames visible
 - Strip placement reorg should be possible to set/override on different levelson Individual cue? (mapping item)
-- Strip placement -add preset? Similar like the Render Properties / Light paths (button on the group)
 * Add [speaker](https://docs.blender.org/manual/en/latest/render/output/audio/speaker.html) as an alternative to Sequencer audio clip
 * The scaled down icons (32x32) still hard to see. Pre-scale different set icons?
-* Capture panel, optimize, store pref, props etc. directy on the self (same like self.ctx)
 * Verify the Dialog file is working
 * Add "null" cue type to indicate un-detected cues (those red longer than the limit)
-* Capture panel - add `crop` button to replace to crop too long cues and add x shape instead of them
 * Changel all labels cases to follow Blender style "Foo in Bar"
 * Add some simple blender sample file
 * There are still some ogg unsupported format - could have been an user error (ogg file was not really an ogg?)
