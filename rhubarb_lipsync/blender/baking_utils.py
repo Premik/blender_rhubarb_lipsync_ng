@@ -173,7 +173,7 @@ class BakingContext:
     @cached_property
     def cue_frames(self) -> list[MouthCueFrames]:
         """List of the detected cues wrapped in CueFrames.
-        This is a copy so the list and cues can be mutated without affecting the original Capture  """
+        This is a copy so the list and cues can be mutated without affecting the original Capture"""
         cfg = MouthCueListItem.frame_config_from_context(self.ctx)
         return [MouthCueFrames(ci.cue, cfg) for ci in self.mouth_cue_items]
 
@@ -199,16 +199,19 @@ class BakingContext:
             return None
         return self.cue_frames[-1]
 
-    def trim_long_cues(self) -> int:
-        clp: CueListPreferences = self.prefs.cue_list_prefs
-        max_dur = clp.highlight_long_cues
+    def trim_long_cues(self, max_dur: float = -1) -> int:
+        if max_dur < 0:
+            clp: CueListPreferences = self.prefs.cue_list_prefs
+            max_dur = clp.highlight_long_cues
         trimmed = 0
-        for ci in self.mouth_cue_items:
-            d = ci.cue.duration
+        for cf in self.cue_frames:
+            d = cf.cue.duration
             if d <= max_dur:
                 continue
             trimmed += 1
-            ci.end = ci.start + max_dur
+            cf.cue.end = cf.cue.start + max_dur
+        if trimmed > 0:
+            self.rlog.info(f"Trimmed {trimmed} Cues as they were too long.")
         return trimmed
 
     @cached_property

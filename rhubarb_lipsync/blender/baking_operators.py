@@ -308,9 +308,7 @@ class BakeToNLA(bpy.types.Operator):
         self.strips_added = 0
         b = self.bctx
         if self.trim_cue_excess:
-            trimmed = b.trim_long_cues()
-            if trimmed > 0:
-                log.info(f"Trimmed {trimmed} Cues as they were too long.")
+            b.trim_long_cues()
 
         wm = ctx.window_manager
         l = len(b.mouth_cue_items)
