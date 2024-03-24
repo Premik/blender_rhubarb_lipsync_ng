@@ -269,11 +269,14 @@ class BakeToNLA(bpy.types.Operator):
 
         # Create new strip. Start frame is mandatory but int only, so round it up to avoid clashing with previous one because of rouding error
         strip = b.current_track.strips.new(name, int(start + 1), b.current_mapping_action)
+        if b.current_mapping_item.custom_frame_ranage:
+            strip.action_frame_start = b.current_mapping_item.frame_start
+            strip.action_frame_end = b.current_mapping_item.frame_end
         strip.frame_start = start  # Set start frame again as float (ctor takes only int)
         strip.scale = scale
         # if b.ctx.scene.show_subframe:
         strip.frame_end = end
-        strip.action_frame_end
+
         self.strips_added += 1
 
         strip.name = name
