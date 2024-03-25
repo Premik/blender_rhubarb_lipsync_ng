@@ -43,19 +43,18 @@ class BakingContextTest(unittest.TestCase):
         self.project = sample_project.SampleProject()
         self.project.capture_load_json()
 
-    def basic(self) -> None:
-        self.bc = self.project.create_mapping_single_sphere1()
+    def basic_asserts(self) -> None:
         assert len(self.bc.objects) == 1, "No active object"
         assert len(self.bc.mouth_cue_items) > 1, "No cues in the capture"
         assert self.bc.total_frame_range == (1, 26)
 
     def testBasicSingleAction(self) -> None:
-        self.bc = self.project.create_mapping_single_sphere1()
-        self.basic()
+        self.bc = self.project.create_mapping_1action_on_armature()
+        self.basic_asserts()
 
     def testBasicTwoActions(self) -> None:
-        self.bc = self.project.create_mapping_2actions_sphere1()
-        self.basic()
+        self.bc = self.project.create_mapping_2actions_on_armature()
+        self.basic_asserts()
 
     def trackValidation(self) -> None:
         errs = self.bc.validate_track()
@@ -65,21 +64,22 @@ class BakingContextTest(unittest.TestCase):
         self.project.add_track1()
         self.bc.next_track()
         assert self.bc.current_object, "No object selected"
-        assert self.bc.current_track
+        assert self.bc.current_track, "No current track"
         errs = self.bc.validate_track()
         assert len(errs) == 0, errs[0]
 
     def testTrackValidation_signle_action(self) -> None:
-        self.bc = self.project.create_mapping_single_sphere1()
+        self.bc = self.project.create_mapping_1action_on_armature()
         self.trackValidation()
 
     def testTrackValidation_two_actions(self) -> None:
-        self.bc = self.project.create_mapping_2actions_sphere1()
+        self.bc = self.project.create_mapping_2actions_on_armature()
         self.trackValidation()
 
     def bake(self) -> None:
         for o in self.bc.object_iter():
-            errs = self.bc.validate_selection()
+            # errs = self.bc.validate_selection()
+            errs = self.bc.validate_current_object()
             assert len(errs) == 0, errs[0]
         ui_utils.assert_op_ret(bpy.ops.rhubarb.bake_to_nla())
         assert not list(self.project.last_result.errors), list(self.project.last_result.items)
@@ -98,21 +98,21 @@ class BakingContextTest(unittest.TestCase):
         self.bake()
 
     def testBakeTwoTracksSingleAction(self) -> None:
-        self.bc = self.project.create_mapping_single_sphere1()
+        self.bc = self.project.create_mapping_1action_on_armature()
         self.bakeTwoTracks()
 
     def testBakeOnlyTrack2SingleAction(self) -> None:
-        self.bc = self.project.create_mapping_single_sphere1()
+        self.bc = self.project.create_mapping_1action_on_armature()
         self.project.add_track2()
         self.bake()
 
     def testBakeTwoTracksTwoActions(self) -> None:
-        self.bc = self.project.create_mapping_2actions_sphere1()
+        self.bc = self.project.create_mapping_2actions_on_armature()
         self.bakeTwoTracks()
-        # self.project.save_blend_file("/tmp/work/1.blend")
+        self.project.save_blend_file("/tmp/work/1.blend")
 
     def testBakeSingleTracksTwoActions(self) -> None:
-        self.bc = self.project.create_mapping_2actions_sphere1()
+        self.bc = self.project.create_mapping_2actions_on_armature()
         self.project.add_track1()
         assert not self.bc.has_two_tracks
         self.bake()

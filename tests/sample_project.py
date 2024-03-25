@@ -109,7 +109,6 @@ class SampleProject:
             assert loops < 50, f"Got not progress update after 5 secs {last}"
         assert self.jprops.status == "Done", f"Capture failed {self.jprops.status} {self.jprops.error}"
 
-
     @property
     def clist_props(self) -> CaptureListProperties:
         return CaptureListProperties.from_context(bpy.context)
@@ -135,7 +134,7 @@ class SampleProject:
 
     @property
     def cprops(self) -> CaptureProperties:
-        """Selected Capture properties in the active Scene """
+        """Selected Capture properties in the active Scene"""
         return CaptureListProperties.capture_from_context(bpy.context)
 
     @property
@@ -232,13 +231,24 @@ class SampleProject:
 
     @property
     def sphere1(self) -> bpy.types.Object:
-        """Ensure Object with `Sphere` name exists in the scene"""
+        """Ensure Object (mesh) with `Sphere` name exists in the scene"""
         if "Sphere" in bpy.data.objects.keys():
             return bpy.data.objects["Sphere"]
 
         ui_utils.assert_op_ret(bpy.ops.mesh.primitive_uv_sphere_add())
         ret = bpy.context.active_object
         assert ret.name == "Sphere"
+        return ret
+
+    @property
+    def armature1(self) -> bpy.types.Object:
+        """Ensure Armature Object with `Sphere` name exists in the scene"""
+        if "Armature" in bpy.data.objects.keys():
+            return bpy.data.objects["Armature"]
+
+        ui_utils.assert_op_ret(bpy.ops.object.armature_add())
+        ret = bpy.context.active_object
+        assert ret.name == "Armature"
         return ret
 
     def initialize_mapping(self, obj: bpy.types.Object) -> None:
@@ -264,28 +274,30 @@ class SampleProject:
         assert bc.current_object, f"No object selected from the {bc.objects}"
         return bc
 
-    def create_mapping_single_sphere1(self) -> baking_utils.BakingContext:
-        self.initialize_mapping(self.sphere1)  # Sphere becomes active
+    def create_mapping_1action_on_armature(self) -> baking_utils.BakingContext:
+        self.initialize_mapping(self.armature1)  # Sphere becomes active
         self.create_mapping([self.action_single])
         return self.create_baking_context()
 
-    def create_mapping_2actions_sphere1(self) -> baking_utils.BakingContext:
-        self.initialize_mapping(self.sphere1)  # Sphere becomes active
+    def create_mapping_2actions_on_armature(self) -> baking_utils.BakingContext:
+        self.initialize_mapping(self.armature1)  # Sphere becomes active
         self.create_mapping([self.action_single, self.action_10])
         return self.create_baking_context()
 
-    def add_track(self, t: NlaTrackRef) -> NlaTrackRef:
+    def add_track(self, t: NlaTrackRef, track_index: int) -> NlaTrackRef:
         """Add a new NLA Track and return the updated reference to it"""
-        ui_utils.assert_op_ret(bpy.ops.rhubarb.new_nla_track())
-        assert len(list(t.items())) > 0, "After track was created there is still no eligible track. "
-        t.index += 1  # Select the newly created track
+        name = f"RLSP Track {track_index}"
+        field_name = f"nla_track{track_index}"
+        ui_utils.assert_op_ret(bpy.ops.rhubarb.new_nla_track(name=name, track_field_name=field_name))
+        assert len(list(t.items())) > 0, "After a track was created there is still selectable track"
+        assert t.name.endswith(name), f"Create track '{name}' but the selected track name is '{t.name}'"
         return t
 
     def add_track1(self) -> NlaTrackRef:
-        return self.add_track(self.mprops.nla_track1)
+        return self.add_track(self.mprops.nla_track1, 1)
 
     def add_track2(self) -> NlaTrackRef:
-        return self.add_track(self.mprops.nla_track2)
+        return self.add_track(self.mprops.nla_track2, 2)
 
     def save_blend_file(self, trg: str) -> None:
         bpy.ops.wm.save_as_mainfile(filepath=trg)
