@@ -109,7 +109,7 @@ class BakingContextTest(unittest.TestCase):
     def testBakeTwoTracksTwoActions(self) -> None:
         self.bc = self.project.create_mapping_2actions_on_armature()
         self.bakeTwoTracks()
-        self.project.save_blend_file("/tmp/work/1.blend")
+        # self.project.save_blend_file("/tmp/work/1.blend")
 
     def testBakeSingleTracksTwoActions(self) -> None:
         self.bc = self.project.create_mapping_2actions_on_armature()
