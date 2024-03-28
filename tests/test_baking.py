@@ -110,7 +110,6 @@ class BakingContextTest(unittest.TestCase):
         self.bc = self.project.create_mapping_2actions_on_armature()
         self.bakeTwoTracks()
 
-
     def testBake1Tracks2ActionsArmature(self) -> None:
         self.bc = self.project.create_mapping_2actions_on_armature()
         self.project.add_track1()
@@ -120,7 +119,11 @@ class BakingContextTest(unittest.TestCase):
     def testBake2Tracks1ShapekeyAction(self) -> None:
         self.bc = self.project.create_mapping_1action_on_mesh()
         self.bakeTwoTracks()
-        #self.project.save_blend_file("/tmp/work/1.blend")
+
+    def testBakeActionSheet(self) -> None:
+        self.bc = self.project.create_mapping_sheet()
+        self.bakeTwoTracks()
+        self.project.save_blend_file("/tmp/work/1.blend")
 
 
 if __name__ == "__main__":

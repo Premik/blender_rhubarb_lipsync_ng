@@ -26,7 +26,7 @@ class StripPlacementProperties(PropertyGroup):
         description="Scale up maximal value. Speed up the clip playback speed up to this fraction when the action is too long. Has no effect when set to 1",
         min=1,
         soft_min=1,
-        max=3,
+        max=10,
         soft_max=2,
         default=1.4,
         options={'LIBRARY_EDITABLE'},

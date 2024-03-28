@@ -13,7 +13,6 @@ class BakingContextTest(unittest.TestCase):
         self.aasset = self.project.action_10
         self.ashpky = self.project.action_shapekey1
         self.ainvld = self.project.action_invalid
-        self.project.sphere1
         self.project.armature1
 
     def list_action(self, shapekeys: bool, valid: bool, assets: bool) -> list[bpy.types.Action]:

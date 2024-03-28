@@ -195,7 +195,7 @@ class SampleProject:
         created, a = self.ensure_action("action_single")
         if not created:
             return a
-        fc = a.fcurves.new("location", index=1)
+        fc = a.fcurves.new("location", index=0)
         fc.keyframe_points.insert(1, 1)
         return a
 
@@ -206,7 +206,7 @@ class SampleProject:
         if not created:
             return a
         a.asset_mark()
-        fc = a.fcurves.new("location", index=1)
+        fc = a.fcurves.new("location", index=0)
         fc.keyframe_points.insert(1, 1)
         fc.keyframe_points.insert(10, 10)
         return a
@@ -228,6 +228,20 @@ class SampleProject:
             return a
         fc = a.fcurves.new('key_blocks["ShapeKey1"].value', index=0)
         fc.keyframe_points.insert(1, 1)
+        return a
+
+    @property
+    def action_sheet(self) -> bpy.types.Action:
+        """Action with 2x10 keyframes for 'location.y'. Mimicking faceit layout"""
+        created, a = self.ensure_action("action_sheet")
+        if not created:
+            return a
+        fc = a.fcurves.new("location", index=1)  # 'index=1' for Y location
+        for k in range(1, 11):  # Looping from 1 to 10
+            kf = fc.keyframe_points.insert(10 * k, k / 10)  # The actual "shape"
+            kf.interpolation = 'CONSTANT'
+            kf = fc.keyframe_points.insert(10 * (k - 1) + 1, 0)  # Reset to "default" shape
+            kf.interpolation = 'CONSTANT'
         return a
 
     @property
@@ -291,6 +305,18 @@ class SampleProject:
     def create_mapping_1action_on_mesh(self) -> baking_utils.BakingContext:
         self.initialize_mapping(self.sphere1)  # Sphere object becomes active
         self.create_mapping([self.action_shapekey1])
+        return self.create_baking_context()
+
+    def create_mapping_sheet(self) -> baking_utils.BakingContext:
+        self.initialize_mapping(self.armature1)  # Armature object becomes active
+        action = self.action_sheet
+        for i, _item in enumerate(self.mprops.items):
+            mi: MappingItem = _item
+            mi.action = action
+            mi.custom_frame_ranage = True
+            mi.frame_start = i * 10
+            mi.frame_count = 1
+
         return self.create_baking_context()
 
     def add_track(self, t: NlaTrackRef, track_index: int) -> NlaTrackRef:

@@ -266,7 +266,7 @@ class BakingContext:
         if scale_max < 0:
             scale_max = self.strip_placement_props.scale_max
         l = self.current_mapping_action_length_frames
-        if l <= 0:  # No mapping item selected or the action has no frames
+        if l <= 1:  # No mapping item selected or the action has no frames or the action only has single frame
             return 1
         return duration_scale_rate(l, desired_len_frames, scale_min, scale_max)
 
