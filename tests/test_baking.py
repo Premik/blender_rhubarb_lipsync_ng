@@ -48,7 +48,7 @@ class BakingContextTest(unittest.TestCase):
         assert len(self.bc.mouth_cue_items) > 1, "No cues in the capture"
         assert self.bc.total_frame_range == (1, 26)
 
-    def testBasicSingleAction(self) -> None:
+    def testBasic1Action(self) -> None:
         self.bc = self.project.create_mapping_1action_on_armature()
         self.basic_asserts()
 
@@ -68,11 +68,11 @@ class BakingContextTest(unittest.TestCase):
         errs = self.bc.validate_track()
         assert len(errs) == 0, errs[0]
 
-    def testTrackValidation_signle_action(self) -> None:
+    def testTrackValidation_1action(self) -> None:
         self.bc = self.project.create_mapping_1action_on_armature()
         self.trackValidation()
 
-    def testTrackValidation_two_actions(self) -> None:
+    def testTrackValidation_2actions(self) -> None:
         self.bc = self.project.create_mapping_2actions_on_armature()
         self.trackValidation()
 
@@ -85,7 +85,7 @@ class BakingContextTest(unittest.TestCase):
         assert not list(self.project.last_result.errors), list(self.project.last_result.items)
         # Trimming warnings are ok
         w = self.project.last_result.warnings
-        w = [w for w in self.project.last_result.warnings if "Had to trim" not in w.msg]
+        w = [w for w in w if "Had to trim" not in w.msg]
         assert not w, list(self.project.last_result.items)
         cues, strips = self.project.parse_last_bake_result_details()
         assert cues == strips, f"Number of strips ({strips}) created doesn't match the number of captured cues ({cues})"
@@ -97,25 +97,30 @@ class BakingContextTest(unittest.TestCase):
         assert self.bc.has_two_tracks
         self.bake()
 
-    def testBakeTwoTracksSingleAction(self) -> None:
+    def testBake2Tracks1ActionArmature(self) -> None:
         self.bc = self.project.create_mapping_1action_on_armature()
         self.bakeTwoTracks()
 
-    def testBakeOnlyTrack2SingleAction(self) -> None:
+    def testBake1Track1ActionsArmature(self) -> None:
         self.bc = self.project.create_mapping_1action_on_armature()
         self.project.add_track2()
         self.bake()
 
-    def testBakeTwoTracksTwoActions(self) -> None:
+    def testBake2Tracks2ActionsArmature(self) -> None:
         self.bc = self.project.create_mapping_2actions_on_armature()
         self.bakeTwoTracks()
-        # self.project.save_blend_file("/tmp/work/1.blend")
 
-    def testBakeSingleTracksTwoActions(self) -> None:
+
+    def testBake1Tracks2ActionsArmature(self) -> None:
         self.bc = self.project.create_mapping_2actions_on_armature()
         self.project.add_track1()
         assert not self.bc.has_two_tracks
         self.bake()
+
+    def testBake2Tracks1ShapekeyAction(self) -> None:
+        self.bc = self.project.create_mapping_1action_on_mesh()
+        self.bakeTwoTracks()
+        #self.project.save_blend_file("/tmp/work/1.blend")
 
 
 if __name__ == "__main__":

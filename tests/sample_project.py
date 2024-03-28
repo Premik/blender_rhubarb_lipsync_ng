@@ -119,6 +119,7 @@ class SampleProject:
         return self.clist_props and self.clist_props.last_resut_log
 
     def parse_last_bake_result_details(self) -> tuple[int, int]:
+        """Parse number of cues processed and strips created from the info-log message"""
         if not self.last_result or not list(self.last_result.infos):
             return 0, 0
         infos = list(self.last_result.infos)
@@ -238,6 +239,9 @@ class SampleProject:
         ui_utils.assert_op_ret(bpy.ops.mesh.primitive_uv_sphere_add())
         ret = bpy.context.active_object
         assert ret.name == "Sphere"
+        # Add Shape-key
+        ret.shape_key_add(name="Basis", from_mix=False)
+        ret.shape_key_add(name="ShapeKey1", from_mix=False)
         return ret
 
     @property
@@ -275,13 +279,18 @@ class SampleProject:
         return bc
 
     def create_mapping_1action_on_armature(self) -> baking_utils.BakingContext:
-        self.initialize_mapping(self.armature1)  # Sphere becomes active
+        self.initialize_mapping(self.armature1)  # Armature object becomes active
         self.create_mapping([self.action_single])
         return self.create_baking_context()
 
     def create_mapping_2actions_on_armature(self) -> baking_utils.BakingContext:
-        self.initialize_mapping(self.armature1)  # Sphere becomes active
+        self.initialize_mapping(self.armature1)  # Armature object becomes active
         self.create_mapping([self.action_single, self.action_10])
+        return self.create_baking_context()
+
+    def create_mapping_1action_on_mesh(self) -> baking_utils.BakingContext:
+        self.initialize_mapping(self.sphere1)  # Sphere object becomes active
+        self.create_mapping([self.action_shapekey1])
         return self.create_baking_context()
 
     def add_track(self, t: NlaTrackRef, track_index: int) -> NlaTrackRef:
