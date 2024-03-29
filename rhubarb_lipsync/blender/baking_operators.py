@@ -347,7 +347,7 @@ class BakeToNLA(bpy.types.Operator):
         b = self.bctx
 
         # Redundant validations to allow collapsing this sub-panel while still indicating any errors
-        selected_objects = list(b.mprefs.object_selection(b.ctx))
+        selected_objects = list(b.mprefs.filtered_objects_with_mapping(b.ctx))
 
         errors = not b.cprops or not b.mouth_cue_items or not selected_objects or not b.objects
         if not ui_utils.draw_expandable_header(b.prefs, "bake_info_panel_expanded", "Info", self.layout, errors):

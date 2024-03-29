@@ -1,15 +1,16 @@
 import logging
-from typing import Optional
+from typing import Iterator, Optional
 
 import bpy
 from bpy.props import EnumProperty, FloatProperty, IntProperty, StringProperty
-from bpy.types import Context
+from bpy.types import Context, Object
 
 import rhubarb_lipsync.blender.mapping_utils as mapping_utils
 import rhubarb_lipsync.blender.ui_utils as ui_utils
-from rhubarb_lipsync.blender.mapping_properties import MappingProperties, NlaTrackRef
+from rhubarb_lipsync.blender.mapping_properties import MappingProperties, NlaTrackRef, MappingItem
 from rhubarb_lipsync.blender.ui_utils import IconsManager
 from rhubarb_lipsync.rhubarb.mouth_shape_info import MouthShapeInfo, MouthShapeInfos
+from rhubarb_lipsync.blender.preferences import CueListPreferences, MappingPreferences, RhubarbAddonPreferences
 
 log = logging.getLogger(__name__)
 
@@ -320,12 +321,20 @@ class PreviewMappingAction(bpy.types.Operator):
     bl_idname = "rhubarb.preview_mapping_action"
     bl_label = "Preview"
 
-    target_cue_index: IntProperty(name="index", description="Mouth cue index to preview")  # type: ignore
+    target_cue_index: IntProperty(name="index", description="Mouth cue index to preview", default=-1)  # type: ignore
+
+    @staticmethod
+    def objects_with_mapping(context: Context) -> Iterator[Object]:
+        prefs = RhubarbAddonPreferences.from_context(context)
+        mlp: MappingPreferences = prefs.mapping_prefs
+        return mlp.filtered_objects_with_mapping(context)
 
     @classmethod
     def disabled_reason(cls, context: Context, limit=0) -> str:
         if not context.scene:
             return "No active scene"
+        if not PreviewMappingAction.objects_with_mapping(context):
+            return "No object with mapping selected"
         return ""
 
     @classmethod
@@ -333,4 +342,18 @@ class PreviewMappingAction(bpy.types.Operator):
         return ui_utils.validation_poll(cls, context)
 
     def execute(self, context: Context) -> set[str]:
+        # prefs = RhubarbAddonPreferences.from_context(context)
+        # mlp: MappingPreferences = prefs.mapping_prefs
+        cue_index: int = self.target_cue_index
+        for o in PreviewMappingAction.objects_with_mapping(context):
+            mprops: MappingProperties = MappingProperties.from_object(o)
+            mi: MappingItem = mprops[cue_index]
+            if not mi:
+                self.report(type={"ERROR"}, message="Invalid target cue index selected.")
+                return {'CANCELLED'}
+            if not mi.action:
+                continue
+
+            #mi.frame_range
+
         return {'FINISHED'}

@@ -115,7 +115,7 @@ class MappingPreferences(PropertyGroup):
         default="All",
     )
 
-    def object_selection(self, ctx: Context) -> Iterator[Object]:
+    def filtered_objects_with_mapping(self, ctx: Context) -> Iterator[Object]:
         if self.object_with_mapping_filter_type == 'Active':
             return iter([ctx.active_object])
         if self.object_with_mapping_filter_type == 'Selected':

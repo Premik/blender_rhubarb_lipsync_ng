@@ -100,7 +100,7 @@ class BakingContext:
             self.clear_obj_cache()  # Selection type has changed, invalidate cache
             self.last_object_selection_type = self.mprefs.object_with_mapping_filter_type
         if self._objs is None:  # Rebuild obj cache
-            obj_sel = self.mprefs.object_selection(self.ctx)
+            obj_sel = self.mprefs.filtered_objects_with_mapping(self.ctx)
             self._objs = list(objects_with_mapping(obj_sel))
         return self._objs
 
