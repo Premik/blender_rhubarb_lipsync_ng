@@ -179,7 +179,7 @@ class SetShiftActionFrameRangeStart(bpy.types.Operator):
 
 
 class ClearMappedActions(bpy.types.Operator):
-    """Remove the mapped action for this cue index"""
+    """Remove the mapped Action for this Cue type"""
 
     bl_idname = "rhubarb.clear_mapped_action"
     bl_label = "Clear the mapped action"
@@ -311,4 +311,26 @@ class CreateNLATrack(bpy.types.Operator):
             trackRef.object = o
             trackRef.dropdown_helper.select_last()
 
+        return {'FINISHED'}
+
+
+class PreviewMappingAction(bpy.types.Operator):
+    """Preview the Action(s) mapped for this Cue type"""
+
+    bl_idname = "rhubarb.preview_mapping_action"
+    bl_label = "Preview"
+
+    target_cue_index: IntProperty(name="index", description="Mouth cue index to preview")  # type: ignore
+
+    @classmethod
+    def disabled_reason(cls, context: Context, limit=0) -> str:
+        if not context.scene:
+            return "No active scene"
+        return ""
+
+    @classmethod
+    def poll(cls, context: Context) -> bool:
+        return ui_utils.validation_poll(cls, context)
+
+    def execute(self, context: Context) -> set[str]:
         return {'FINISHED'}

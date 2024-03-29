@@ -32,7 +32,8 @@ def draw_mapping_item(ctx: Context, layout: UILayout, mp: MappingProperties, ite
     else:
         desc = f"{item.action_str}"
 
-    col2.operator(mapping_operators.ListFilteredActions.bl_idname, text=desc, emboss=emboss, icon="DOWNARROW_HLT").target_cue_index = itemIndex
+    blid = mapping_operators.ListFilteredActions.bl_idname
+    col2.operator(blid, text=desc, emboss=mlp.action_dropdown_emboss, icon="DOWNARROW_HLT").target_cue_index = itemIndex
 
     # col2.prop(item, "frame_start", text="")
     # col2.prop(item, "frame_count", text="")
@@ -42,8 +43,14 @@ def draw_mapping_item(ctx: Context, layout: UILayout, mp: MappingProperties, ite
         icon = "CENTER_ONLY"
     else:
         icon = "ARROW_LEFTRIGHT"
-    col2.operator(mapping_operators.SetActionFrameRange.bl_idname, text="", emboss=emboss, icon=icon).target_cue_index = itemIndex
-    col2.operator(mapping_operators.ClearMappedActions.bl_idname, text="", emboss=emboss, icon="TRASH").target_cue_index = itemIndex
+    blid = mapping_operators.PreviewMappingAction.bl_idname
+    col2.operator(blid, text="", emboss=emboss, icon="TRIA_RIGHT_BAR").target_cue_index = itemIndex
+
+    blid = mapping_operators.SetActionFrameRange.bl_idname
+    col2.operator(blid, text="", emboss=emboss, icon=icon).target_cue_index = itemIndex
+
+    blid = mapping_operators.ClearMappedActions.bl_idname
+    col2.operator(blid, text="", emboss=emboss, icon="TRASH").target_cue_index = itemIndex
 
 
 class MappingUIList(UIList):

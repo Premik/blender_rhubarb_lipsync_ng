@@ -45,6 +45,7 @@ class MappingListOptionsPanel(bpy.types.Panel):
         # layout.prop(mlp, "show_help_button")
         layout.prop(clp, "as_circle")
         layout.prop(mlp, "action_buttons_emboss")
+        layout.prop(mlp, "action_dropdown_emboss")
         layout.separator()
         layout.label(text="Action filters")
         draw_action_filters(layout, mprops, False)
@@ -187,7 +188,9 @@ class MappingAndBakingPanel(bpy.types.Panel):
             self.draw_strip_placement_settings()
 
             layout.separator()
-            layout.operator(baking_operators.BakeToNLA.bl_idname, icon="NLA")
+            row=layout.row()
+            row.scale_y = 2
+            row.operator(baking_operators.BakeToNLA.bl_idname, icon="NLA")
             rll: ResultLogListProperties = CaptureListProperties.from_context(context).last_resut_log
             if rll.has_any_errors_or_warnings:
                 box = layout.box()

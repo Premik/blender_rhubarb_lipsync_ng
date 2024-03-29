@@ -99,6 +99,12 @@ class MappingPreferences(PropertyGroup):
         default=True,
     )
 
+    action_dropdown_emboss: BoolProperty(  # type: ignore
+        name="Action DropdownEmboss",
+        description="Show the Actions dropdown in the mapping UIList as buttons with emboss or as flat text",
+        default=True,
+    )
+
     object_with_mapping_filter_type: EnumProperty(  # type: ignore
         name="Filter objects with mapping",
         items=[
