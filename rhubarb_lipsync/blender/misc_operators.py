@@ -5,13 +5,15 @@ import traceback
 from urllib import request
 
 import bpy
-from bpy.props import EnumProperty, StringProperty
+from bpy.props import EnumProperty, StringProperty, IntProperty
 from bpy.types import Context
 
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 from rhubarb_lipsync import bl_info
+from rhubarb_lipsync.blender import ui_utils as ui_utils
 from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, ResultLogItemProperties, ResultLogListProperties
 from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences
+from rhubarb_lipsync.blender.sound_operators import log
 from rhubarb_lipsync.rhubarb.log_manager import logManager
 
 log = logging.getLogger(__name__)
@@ -188,3 +190,69 @@ class ShowResultLogDetails(bpy.types.Operator):
 
 #     def execute(self, context: Context) -> set[str]:
 #         return {'FINISHED'}
+class PlayRange(bpy.types.Operator):
+    """Starts animation playback from the current frame and stops automatically after played certain number of frames."""
+
+    bl_idname = "rhubarb.play_range"
+    bl_label = "Play and Stop"
+
+    play_frames: IntProperty(name="Frames", description="Number of frames to play", default=10)  # type: ignore
+    start_frame: IntProperty(name="Start", description="Frame to jump to prior playing", default=-1)  # type: ignore
+    # restore_frame: BoolProperty(name="Restore frame", description="Jump back to the start frame after playback is done")  # type: ignore
+    frames_left = 0
+
+    @staticmethod
+    def on_frame(scene: bpy.types.Scene) -> None:
+        if log.isEnabledFor(logging.TRACE):  # type: ignore
+            log.trace(f"On frame {PlayRange.frames_left}")  # type: ignore
+        PlayRange.frames_left -= 1
+        if PlayRange.frames_left <= 0:
+            log.trace("Stopping playback. Counter reached zero.")  # type: ignore
+            try:
+                bpy.ops.screen.animation_cancel(restore_frame=False)
+            except:
+                log.error("Failed to stop animation playback")
+                traceback.print_exc()
+            if not PlayRange.remove_handlers():
+                log.warn(
+                    f"""Coulnd't remove handler {ui_utils.func_fqname(PlayRange.on_frame)}. 
+                        Handler not found:\n{bpy.app.handlers.frame_change_post}"""
+                )
+
+    @staticmethod
+    def remove_handlers() -> bool:
+        try:
+            # print(list(bpy.app.handlers.frame_change_post))
+            handlers = bpy.app.handlers.frame_change_post
+            return ui_utils.remove_handler(handlers, PlayRange.on_frame)
+        except:
+            log.error("Unexpected error while stopping the animation")
+            traceback.print_exc()
+            return False
+
+    @classmethod
+    def disabled_reason(cls, context: Context, limit=0) -> str:
+        if not context.scene:
+            return "No active scene"
+        # if getattr(context.screen, 'is_animation_playing', False):
+        #    return f"Animation is playing. Counter:{PlayRange.frames_left}"
+        # if self.pl
+        return ""
+
+    @classmethod
+    def poll(cls, context: Context) -> bool:
+        return ui_utils.validation_poll(cls, context)
+
+    def execute(self, context: Context) -> set[str]:
+        PlayRange.frames_left = self.play_frames
+        log.debug(f"Starting animation playback from {self.start_frame} frame. Frames to play: {self.play_frames}.")
+        PlayRange.remove_handlers()
+        if self.start_frame >= 0:
+            context.scene.frame_set(frame=self.start_frame, subframe=0)
+
+        if not getattr(context.screen, 'is_animation_playing', False):
+            bpy.ops.screen.animation_play()  # Another play call would stop the playback if already playing
+        else:
+            log.trace("Animation is already playing.")  # type: ignore
+        bpy.app.handlers.frame_change_post.append(PlayRange.on_frame)
+        return {'FINISHED'}

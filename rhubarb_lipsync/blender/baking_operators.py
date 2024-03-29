@@ -418,7 +418,7 @@ class BakeToNLA(bpy.types.Operator):
         if not self.trim_cue_excess:
             row.enabled = False
         row.prop(clp, "highlight_long_cues")
-        layout.prop(self.bctx.mprefs, "object_selection_type")
+        layout.prop(self.bctx.mprefs, "object_with_mapping_filter_type", text="Objects to bake")
         self.draw_info()
         self.draw_validation()
         layout.operator(RemoveCapturedNlaStrips.bl_idname)

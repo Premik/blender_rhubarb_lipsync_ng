@@ -99,22 +99,22 @@ class MappingPreferences(PropertyGroup):
         default=True,
     )
 
-    object_selection_type: EnumProperty(  # type: ignore
-        name="Objects to bake",
+    object_with_mapping_filter_type: EnumProperty(  # type: ignore
+        name="Filter objects with mapping",
         items=[
-            ("Active", "Active", "Bake only the active object"),
-            ("Selected", "Selected", "Bake all the selected objects which has a mapping"),
-            ("All", "All", "Bake all the objects of the current scene which has a mapping"),
+            ("Active", "Active", "Only the active object"),
+            ("Selected", "Selected", "All the selected objects which has mapping"),
+            ("All", "All", "All the objects of the current scene which has mapping"),
         ],
         default="All",
     )
 
     def object_selection(self, ctx: Context) -> Iterator[Object]:
-        if self.object_selection_type == 'Active':
+        if self.object_with_mapping_filter_type == 'Active':
             return iter([ctx.active_object])
-        if self.object_selection_type == 'Selected':
+        if self.object_with_mapping_filter_type == 'Selected':
             return ctx.selected_objects
-        if self.object_selection_type == 'All':
+        if self.object_with_mapping_filter_type == 'All':
             return ctx.scene.objects
         raise AttributeError(f"Unknown object_selection_type {self.bake_object_selection}")
 

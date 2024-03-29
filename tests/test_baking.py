@@ -123,7 +123,7 @@ class BakingContextTest(unittest.TestCase):
     def testBakeActionSheet(self) -> None:
         self.bc = self.project.create_mapping_sheet()
         self.bakeTwoTracks()
-        self.project.save_blend_file("/tmp/work/1.blend")
+        # self.project.save_blend_file("/tmp/work/1.blend")
 
 
 if __name__ == "__main__":

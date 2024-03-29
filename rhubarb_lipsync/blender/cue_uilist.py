@@ -2,7 +2,7 @@ from bpy.types import Context, UI_UL_list, UILayout, UIList
 
 from rhubarb_lipsync.blender.capture_properties import MouthCueList, MouthCueListItem
 from rhubarb_lipsync.blender.preferences import CueListPreferences, RhubarbAddonPreferences
-from rhubarb_lipsync.blender.sound_operators import PlayRange
+from rhubarb_lipsync.blender.misc_operators import PlayRange
 from rhubarb_lipsync.blender.ui_utils import IconsManager
 from rhubarb_lipsync.rhubarb.mouth_cues import MouthCueFrames
 
