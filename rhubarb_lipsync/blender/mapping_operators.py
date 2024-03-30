@@ -327,7 +327,7 @@ class PreviewMappingAction(bpy.types.Operator):
     def objects_with_mapping(context: Context) -> Iterator[Object]:
         prefs = RhubarbAddonPreferences.from_context(context)
         mlp: MappingPreferences = prefs.mapping_prefs
-        return mlp.filtered_objects_with_mapping(context)
+        return mlp.object_selection_filtered(context)
 
     @classmethod
     def disabled_reason(cls, context: Context, limit=0) -> str:

@@ -105,7 +105,7 @@ class MappingPreferences(PropertyGroup):
         default=True,
     )
 
-    object_with_mapping_filter_type: EnumProperty(  # type: ignore
+    object_selection_filter_type: EnumProperty(  # type: ignore
         name="Filter objects with mapping",
         items=[
             ("Active", "Active", "Only the active object"),
@@ -115,14 +115,14 @@ class MappingPreferences(PropertyGroup):
         default="All",
     )
 
-    def filtered_objects_with_mapping(self, ctx: Context) -> Iterator[Object]:
-        if self.object_with_mapping_filter_type == 'Active':
+    def object_selection_filtered(self, ctx: Context) -> Iterator[Object]:
+        if self.object_selection_filter_type == 'Active':
             return iter([ctx.active_object])
-        if self.object_with_mapping_filter_type == 'Selected':
+        if self.object_selection_filter_type == 'Selected':
             return ctx.selected_objects
-        if self.object_with_mapping_filter_type == 'All':
+        if self.object_selection_filter_type == 'All':
             return ctx.scene.objects
-        raise AttributeError(f"Unknown object_selection_type {self.object_with_mapping_filter_type}")
+        raise AttributeError(f"Unknown object_selection_type {self.object_selection_filter_type}")
 
 
 class RhubarbAddonPreferences(AddonPreferences):
