@@ -344,6 +344,7 @@ class PreviewMappingAction(bpy.types.Operator):
     def execute(self, context: Context) -> set[str]:
         # prefs = RhubarbAddonPreferences.from_context(context)
         # mlp: MappingPreferences = prefs.mapping_prefs
+
         cue_index: int = self.target_cue_index
         for o in PreviewMappingAction.objects_with_mapping(context):
             mprops: MappingProperties = MappingProperties.from_object(o)
@@ -351,9 +352,10 @@ class PreviewMappingAction(bpy.types.Operator):
             if not mi:
                 self.report(type={"ERROR"}, message="Invalid target cue index selected.")
                 return {'CANCELLED'}
-            if not mi.action:
-                continue
 
-            #mi.frame_range
+            if not bool(o.animation_data):  # Ensure the object has animation data
+                o.animation_data_create()
+            # Set the action
+            o.animation_data.action = mi.action
 
         return {'FINISHED'}

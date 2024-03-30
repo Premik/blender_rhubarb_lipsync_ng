@@ -303,6 +303,8 @@ class BakingContext:
         return self.current_track
 
     def strips_on_current_track(self) -> Iterator[NlaStrip]:
+        if self.total_frame_range == None:
+            return []
         start, end = self.total_frame_range
         t = self.current_track
         yield from strips_on_track(t, start, end)

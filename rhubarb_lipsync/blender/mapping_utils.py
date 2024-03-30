@@ -1,10 +1,13 @@
+from argparse import Action
 import logging
 from typing import Iterator
 
 import bpy
 from bpy.types import Object
 
+
 import rhubarb_lipsync.blender.mapping_properties as mapping_properties
+
 
 log = logging.getLogger(__name__)
 
@@ -87,3 +90,36 @@ def filtered_actions_for_current_object(ctx: bpy.types.Context) -> Iterator[bpy.
     o: bpy.types.Object = ctx.object
     mprops = mapping_properties.MappingProperties.from_object(o)
     yield from filtered_actions(o, mprops)
+
+
+def is_mapping_item_active(ctx: bpy.types.Context, mi: 'mapping_properties.MappingItem', on_object: Object) -> bool:
+    """Indicates whether the provided mapping item's Action is active on the provided Object."""
+    if (not mi) or (not mi.action):
+        return False
+    if (not on_object) or not bool(on_object.animation_data):
+        return False
+    obj_action: Action = on_object.animation_data.action
+    if not obj_action:
+        return False
+    if mi.action != obj_action:
+        return False  # Object has an Active action but it is not the one mapped
+    if not mi.custom_frame_ranage:
+        return True  # When not custom framerange and actions match, any timeline position is cosidered active
+    f = ctx.scene.frame_current
+    # When custom frame rage, only active the timeline position is within the sub-range
+    return mi.frame_range[0] <= f < mi.frame_range[1]
+
+
+def activate_mapping_item(ctx: bpy.types.Context, mi: 'mapping_properties.MappingItem', on_object: Object) -> None:
+    """Make sure the provided object has the provided Action active and current timeline is at the mapped frame-range"""
+    if not bool(on_object.animation_data):
+        on_object.animation_data_create()  # Ensure the object has animation data
+    # Make the mapped Action active
+    on_object.animation_data.action = mi.action
+    if not mi.custom_frame_ranage:
+        return  # No custom range, timeline can be anywhere
+    f = ctx.scene.frame_current
+    if mi.frame_range[0] <= f < mi.frame_range[1]:
+        return  # Already within the frame subrange
+    # Set timeline to the begening of the frame (sub)range
+    ctx.scene.frame_set(frame=int(mi.frame_range[0]), subframe=0)

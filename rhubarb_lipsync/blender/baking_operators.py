@@ -353,6 +353,8 @@ class BakeToNLA(bpy.types.Operator):
         if not ui_utils.draw_expandable_header(b.prefs, "bake_info_panel_expanded", "Info", self.layout, errors):
             return
 
+        #layout.prop(rootProps, 'name', text="")
+
         box = self.layout.box().column(align=True)
         line = box.split()
         if b.cprops:
@@ -407,17 +409,23 @@ class BakeToNLA(bpy.types.Operator):
         clp: CueListPreferences = self.bctx.prefs.cue_list_prefs
 
         layout = self.layout
+        rootProps = self.bctx.clist_props
+        row = self.layout.row(align=True)
+        row.prop(rootProps, 'name', text="Capture")
+        layout.separator()
         row = layout.row(align=False)
         row.prop(self.bctx.cprops, "start_frame")
         if self.bctx.the_last_cue:
             row.label(text=f"End frame: {self.bctx.the_last_cue.end_frame_str}")
-        layout.prop(ctx.scene, "show_subframe", text="Use subframes")
+
         row = layout.row(align=False)
         row.prop(self, "trim_cue_excess", text=f"Trim cues longer than")
         row = row.row()
         if not self.trim_cue_excess:
             row.enabled = False
         row.prop(clp, "highlight_long_cues")
+        layout.prop(ctx.scene, "show_subframe", text="Use subframes")
+        layout.separator()
         layout.prop(self.bctx.mprefs, "object_with_mapping_filter_type", text="Objects to bake")
         self.draw_info()
         self.draw_validation()

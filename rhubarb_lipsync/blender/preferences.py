@@ -122,7 +122,7 @@ class MappingPreferences(PropertyGroup):
             return ctx.selected_objects
         if self.object_with_mapping_filter_type == 'All':
             return ctx.scene.objects
-        raise AttributeError(f"Unknown object_selection_type {self.bake_object_selection}")
+        raise AttributeError(f"Unknown object_selection_type {self.object_with_mapping_filter_type}")
 
 
 class RhubarbAddonPreferences(AddonPreferences):
