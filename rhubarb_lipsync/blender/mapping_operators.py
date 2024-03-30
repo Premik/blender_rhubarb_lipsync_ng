@@ -327,7 +327,8 @@ class PreviewMappingAction(bpy.types.Operator):
     def objects_with_mapping(context: Context) -> Iterator[Object]:
         prefs = RhubarbAddonPreferences.from_context(context)
         mlp: MappingPreferences = prefs.mapping_prefs
-        return mlp.object_selection_filtered(context)
+        obj_sel = mlp.object_selection_filtered(context)
+        return mapping_utils.objects_with_mapping(obj_sel)
 
     @classmethod
     def disabled_reason(cls, context: Context, limit=0) -> str:
@@ -346,16 +347,23 @@ class PreviewMappingAction(bpy.types.Operator):
         # mlp: MappingPreferences = prefs.mapping_prefs
 
         cue_index: int = self.target_cue_index
+        active_mi: MappingItem = MappingItem.from_object(context.object, cue_index)
+
+        # Play or Stop depends on the selected active Object
+        is_active_active = mapping_utils.is_mapping_item_active(context, active_mi, context.object)
         for o in PreviewMappingAction.objects_with_mapping(context):
-            mprops: MappingProperties = MappingProperties.from_object(o)
-            mi: MappingItem = mprops[cue_index]
+            mi: MappingItem = MappingItem.from_object(o, cue_index)
             if not mi:
-                self.report(type={"ERROR"}, message="Invalid target cue index selected.")
+                self.report(type={"ERROR"}, message="Invalid target cue index. Object has not mapping item.")
                 return {'CANCELLED'}
 
-            if not bool(o.animation_data):  # Ensure the object has animation data
-                o.animation_data_create()
-            # Set the action
-            o.animation_data.action = mi.action
+            if is_active_active:  # Active object has the Mapping Item Active, stop all previews
+                mapping_utils.deactivate_mapping_item(context, o)
+            else:
+                mapping_utils.activate_mapping_item(context, mi, o)
+
+        if active_mi.custom_frame_ranage and not is_active_active:
+            # Shoud play and has custom sub-range, trigger playback for the subrange
+            bpy.ops.rhubarb.play_range(play_frames=int(active_mi.frame_count), start_frame=int(active_mi.frame_start))
 
         return {'FINISHED'}

@@ -161,6 +161,7 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 * Integrate with: https://mecabricks.com/en/shop/product/6
 * Create aur package
 * Detect blender --debug and similar argument and auto-enable debug log level (and same for log file?)
+* Add "auto-remove" checkbox on the Bake confirmation dialog (so one doesn'thave to press "remove cues")
 
 ### Low
 * Baking - round to whole frames when not sub-frames visible

@@ -167,6 +167,13 @@ class MappingItem(PropertyGroup):
             return " "
         return self.action.name
 
+    @staticmethod
+    def from_object(obj: bpy.types.Object, cue_index: int) -> Optional["MappingItem"]:
+        if not obj:
+            return None
+        mprops: MappingProperties = MappingProperties.from_object(obj)
+        return mprops[cue_index]
+
 
 class MappingProperties(PropertyGroup):
     """Mapping of all the mouth shape types to action(s)"""

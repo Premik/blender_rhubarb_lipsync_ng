@@ -40,12 +40,16 @@ class MappingListOptionsPanel(bpy.types.Panel):
         clp: CueListPreferences = prefs.cue_list_prefs
         mlp: MappingPreferences = prefs.mapping_prefs
         mprops: MappingProperties = MappingProperties.from_context(context)
+        prefs = RhubarbAddonPreferences.from_context(context)
         layout = self.layout
         layout.label(text=MappingListOptionsPanel.bl_label)
         # layout.prop(mlp, "show_help_button")
         layout.prop(clp, "as_circle")
         layout.prop(mlp, "action_buttons_emboss")
         layout.prop(mlp, "action_dropdown_emboss")
+        layout.separator()
+        layout.label(text="Mapping preview on objects", icon="PLAY")
+        layout.prop(prefs.mapping_prefs, "object_selection_filter_type", text="")
         layout.separator()
         layout.label(text="Action filters")
         draw_action_filters(layout, mprops, False)

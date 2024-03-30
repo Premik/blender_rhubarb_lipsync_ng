@@ -109,7 +109,7 @@ class MappingPreferences(PropertyGroup):
         name="Filter objects with mapping",
         items=[
             ("Active", "Active", "Only the active object"),
-            ("Selected", "Selected", "All the selected objects which has mapping"),
+            ("All Selected", "Selected", "All the selected objects which has mapping"),
             ("All", "All", "All the objects of the current scene which has mapping"),
         ],
         default="All",

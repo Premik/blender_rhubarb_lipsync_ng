@@ -113,6 +113,9 @@ def activate_mapping_item(ctx: bpy.types.Context, mi: 'mapping_properties.Mappin
     if not bool(on_object.animation_data):
         on_object.animation_data_create()  # Ensure the object has animation data
     # Make the mapped Action active
+    if on_object.type == 'ARMATURE':  # Ensure Armature is not in the rest pose
+        on_object.data.pose_position = 'POSE'
+
     on_object.animation_data.action = mi.action
     if not mi.custom_frame_ranage:
         return  # No custom range, timeline can be anywhere
@@ -121,3 +124,11 @@ def activate_mapping_item(ctx: bpy.types.Context, mi: 'mapping_properties.Mappin
         return  # Already within the frame subrange
     # Set timeline to the begening of the frame (sub)range
     ctx.scene.frame_set(frame=int(mi.frame_range[0]), subframe=0)
+
+
+def deactivate_mapping_item(ctx: bpy.types.Context, on_object: Object) -> None:
+    if not bool(on_object.animation_data):
+        return
+    if getattr(ctx.screen, 'is_animation_playing', False):
+        bpy.ops.screen.animation_cancel()
+    on_object.animation_data.action = None
