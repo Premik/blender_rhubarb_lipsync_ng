@@ -354,5 +354,3 @@ class ConvertSoundFromat(bpy.types.Operator):
             return {'FINISHED'}
         props.sound = new_sounds[0]
         return {'FINISHED'}
-
-

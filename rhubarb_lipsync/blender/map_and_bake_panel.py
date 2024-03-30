@@ -188,7 +188,7 @@ class MappingAndBakingPanel(bpy.types.Panel):
             self.draw_strip_placement_settings()
 
             layout.separator()
-            row=layout.row()
+            row = layout.row()
             row.scale_y = 2
             row.operator(baking_operators.BakeToNLA.bl_idname, icon="NLA")
             rll: ResultLogListProperties = CaptureListProperties.from_context(context).last_resut_log

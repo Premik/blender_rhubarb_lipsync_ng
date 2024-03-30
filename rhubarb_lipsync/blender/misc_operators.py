@@ -5,7 +5,7 @@ import traceback
 from urllib import request
 
 import bpy
-from bpy.props import EnumProperty, StringProperty, IntProperty
+from bpy.props import EnumProperty, IntProperty, StringProperty
 from bpy.types import Context
 
 import rhubarb_lipsync.blender.ui_utils as ui_utils
@@ -187,6 +187,7 @@ class ShowResultLogDetails(bpy.types.Operator):
 #     def invoke(self, context: Context, event) -> set[int] | set[str]:
 #         ret = context.window_manager.invoke_confirm(self, event)
 #         return ret
+
 
 #     def execute(self, context: Context) -> set[str]:
 #         return {'FINISHED'}

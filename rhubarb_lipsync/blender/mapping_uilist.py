@@ -1,7 +1,7 @@
 from bpy.types import Context, UI_UL_list, UILayout, UIList
 
-from rhubarb_lipsync.blender import mapping_utils
 import rhubarb_lipsync.blender.mapping_operators as mapping_operators
+from rhubarb_lipsync.blender import mapping_utils
 from rhubarb_lipsync.blender.mapping_properties import MappingItem, MappingProperties
 from rhubarb_lipsync.blender.preferences import CueListPreferences, MappingPreferences, RhubarbAddonPreferences
 

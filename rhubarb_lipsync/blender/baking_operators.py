@@ -353,7 +353,7 @@ class BakeToNLA(bpy.types.Operator):
         if not ui_utils.draw_expandable_header(b.prefs, "bake_info_panel_expanded", "Info", self.layout, errors):
             return
 
-        #layout.prop(rootProps, 'name', text="")
+        # layout.prop(rootProps, 'name', text="")
 
         box = self.layout.box().column(align=True)
         line = box.split()

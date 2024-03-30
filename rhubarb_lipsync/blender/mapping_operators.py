@@ -7,10 +7,10 @@ from bpy.types import Context, Object
 
 import rhubarb_lipsync.blender.mapping_utils as mapping_utils
 import rhubarb_lipsync.blender.ui_utils as ui_utils
-from rhubarb_lipsync.blender.mapping_properties import MappingProperties, NlaTrackRef, MappingItem
+from rhubarb_lipsync.blender.mapping_properties import MappingItem, MappingProperties, NlaTrackRef
+from rhubarb_lipsync.blender.preferences import CueListPreferences, MappingPreferences, RhubarbAddonPreferences
 from rhubarb_lipsync.blender.ui_utils import IconsManager
 from rhubarb_lipsync.rhubarb.mouth_shape_info import MouthShapeInfo, MouthShapeInfos
-from rhubarb_lipsync.blender.preferences import CueListPreferences, MappingPreferences, RhubarbAddonPreferences
 
 log = logging.getLogger(__name__)
 
