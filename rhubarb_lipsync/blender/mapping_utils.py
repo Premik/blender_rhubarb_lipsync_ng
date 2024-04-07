@@ -5,6 +5,7 @@ from typing import Iterator
 import bpy
 from bpy.types import Object
 
+import rhubarb_lipsync
 import rhubarb_lipsync.blender.mapping_properties as mapping_properties
 
 log = logging.getLogger(__name__)
@@ -93,43 +94,62 @@ def filtered_actions_for_current_object(ctx: bpy.types.Context) -> Iterator[bpy.
 
 def is_mapping_item_active(ctx: bpy.types.Context, mi: 'mapping_properties.MappingItem', on_object: Object) -> bool:
     """Indicates whether the provided mapping item's Action is active on the provided Object."""
-    if (not mi) or (not mi.action):
+    if (not mi) or (not mi.action) or (not object):
         return False
-    if (not on_object) or not bool(on_object.animation_data):
+    active_object_action: Action
+    if mi.maps_to_shapekey:  # There is a shape-key Action on the mapping item
+        shape_keys = on_object.data.shape_keys
+        if (not shape_keys) or (not shape_keys.animation_data):
+            return False  # Shape-key Action can't be active on an object without any shape-keys
+        active_object_action = shape_keys.animation_data.action
+    else:  # Target is a non-mesh object
+        if not bool(on_object.animation_data):
+            return False
+        active_object_action = on_object.animation_data.action
+    if not active_object_action:  # No Action active
         return False
-    obj_action: Action = on_object.animation_data.action
-    if not obj_action:
-        return False
-    if mi.action != obj_action:
+    if mi.action != active_object_action:
         return False  # Object has an Active action but it is not the one mapped
     if not mi.custom_frame_ranage:
         return True  # When not custom framerange and actions match, any timeline position is cosidered active
-    f = ctx.scene.frame_current
-    # When custom frame rage, only active the timeline position is within the sub-range
+    f = ctx.scene.frame_current  # Only active when the timeline position is within the frame sub-range
     return mi.frame_range[0] <= f < mi.frame_range[1]
 
 
 def activate_mapping_item(ctx: bpy.types.Context, mi: 'mapping_properties.MappingItem', on_object: Object) -> None:
     """Make sure the provided object has the provided Action active and current timeline is at the mapped frame-range"""
-    if not bool(on_object.animation_data):
-        on_object.animation_data_create()  # Ensure the object has animation data
-    # Make the mapped Action active
+    if not mi or not mi.action:
+        return
+    f = ctx.scene.frame_current
+    if not (mi.frame_range[0] <= f < mi.frame_range[1]):
+        # Unless already within the Action's frame subrange set timeline to the begening of the frame (sub)range
+        ctx.scene.frame_set(frame=int(mi.frame_range[0]), subframe=0)
+
+    if mi.maps_to_shapekey:  # There is a shape-key Action on the mapping item
+        if not does_object_support_shapekey_actions(on_object):
+            return  # Object is not mesh or doesn't have any shape-keys
+        shape_keys = on_object.data.shape_keys
+        # Shapekeys action are nested onto the shape_keys animation data
+        if not bool(shape_keys.animation_data):
+            shape_keys.animation_data_create()
+        shape_keys.animation_data.action = mi.action
+        return
+    # The Action of the mi is a normal Action
     if on_object.type == 'ARMATURE':  # Ensure Armature is not in the rest pose
         on_object.data.pose_position = 'POSE'
 
+    if not bool(on_object.animation_data):
+        on_object.animation_data_create()  # Ensure the object has animation data
     on_object.animation_data.action = mi.action
-    if not mi.custom_frame_ranage:
-        return  # No custom range, timeline can be anywhere
-    f = ctx.scene.frame_current
-    if mi.frame_range[0] <= f < mi.frame_range[1]:
-        return  # Already within the frame subrange
-    # Set timeline to the begening of the frame (sub)range
-    ctx.scene.frame_set(frame=int(mi.frame_range[0]), subframe=0)
+    # TODO - mute the RLSP (or any track?) which affects the object
 
 
 def deactivate_mapping_item(ctx: bpy.types.Context, on_object: Object) -> None:
-    if not bool(on_object.animation_data):
-        return
     if getattr(ctx.screen, 'is_animation_playing', False):
         bpy.ops.screen.animation_cancel()
-    on_object.animation_data.action = None
+    if bool(on_object.animation_data):
+        on_object.animation_data.action = None
+    if does_object_support_shapekey_actions(on_object):
+        shape_keys = on_object.data.shape_keys
+        if shape_keys and bool(shape_keys.animation_data):
+            shape_keys.animation_data.action = None

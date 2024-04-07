@@ -362,8 +362,9 @@ class PreviewMappingAction(bpy.types.Operator):
             else:
                 mapping_utils.activate_mapping_item(context, mi, o)
 
-        if active_mi.custom_frame_ranage and not is_active_active:
-            # Shoud play and has custom sub-range, trigger playback for the subrange
-            bpy.ops.rhubarb.play_range(play_frames=int(active_mi.frame_count), start_frame=int(active_mi.frame_start))
+        frame_count = active_mi.frame_range[1] - active_mi.frame_range[0]
+        if frame_count > 1 and not is_active_active:
+            # Shoud play has more than a single frame=> trigger playback for the subrange
+            bpy.ops.rhubarb.play_range(play_frames=int(frame_count), start_frame=int(active_mi.frame_range[0]))
 
         return {'FINISHED'}

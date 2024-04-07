@@ -153,7 +153,6 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
   * Clear - will remove the mapping (delete from the object completly?)
   * Auto-it 
   * By name - More instances (alow user defined) - will map action by matching name patterns (should provide some placeholder/expansions in the expression for objectName, etc)
-* Preview/play mapping doesn't work for shapekeys
 
 ### Normal
 * Add warning (in the baking validation popup?) when any selected object has an active Action (seems to be confusing for NLA newbies when the rig doesn't animate after bake because of that)

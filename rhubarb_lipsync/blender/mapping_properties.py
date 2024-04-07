@@ -167,6 +167,10 @@ class MappingItem(PropertyGroup):
             return " "
         return self.action.name
 
+    @property
+    def maps_to_shapekey(self) -> bool:
+        return mapping_utils.is_action_shape_key_action(self.action)
+
     @staticmethod
     def from_object(obj: bpy.types.Object, cue_index: int) -> Optional["MappingItem"]:
         if not obj:
