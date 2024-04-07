@@ -13,7 +13,6 @@ class BakingContextTest(unittest.TestCase):
         self.aasset = self.project.action_10
         self.ashpky = self.project.action_shapekey1
         self.ainvld = self.project.action_invalid
-        self.project.armature1
 
     def list_action(self, shapekeys: bool, valid: bool, assets: bool) -> list[bpy.types.Action]:
         self.project.mprops.only_shapekeys = shapekeys
@@ -21,30 +20,34 @@ class BakingContextTest(unittest.TestCase):
         self.project.mprops.only_valid_actions = valid
         return list(mapping_utils.filtered_actions_for_current_object(bpy.context))
 
-    def testNoShapeKeys(self) -> None:
-        actions = self.list_action(False, False, False)
-        assert self.anrmal in actions
-        assert self.aasset in actions
-        assert self.ashpky not in actions
-        assert self.ainvld in actions
+    def testWithouShapeKeys(self) -> None:
+        self.project.armature1
+        actions = self.list_action(False, True, False)
+        self.assertIn(self.anrmal, actions)
+        self.assertIn(self.aasset, actions)
+        self.assertNotIn(self.ashpky, actions)
+        self.assertNotIn(self.ainvld, actions)
 
-    def testShapeKeyOnly(self) -> None:
-        actions = self.list_action(True, False, False)
-        assert self.anrmal not in actions
-        assert self.aasset not in actions
-        assert self.ashpky in actions
-        assert self.ainvld not in actions
+    def testValidShapeKeysOnly(self) -> None:
+        self.project.sphere1
+        actions = self.list_action(True, True, False)
+        self.assertNotIn(self.anrmal, actions)
+        self.assertNotIn(self.aasset, actions)
+        self.assertIn(self.ashpky, actions)
+        self.assertNotIn(self.ainvld, actions)
 
     def testValidOnly(self) -> None:
+        self.project.armature1
         actions = self.list_action(False, True, False)
-        assert self.anrmal in actions
-        assert self.aasset in actions
-        assert self.ashpky not in actions  # Shape key has invalid key on the sphere1
-        assert self.ainvld not in actions
+        self.assertIn(self.anrmal, actions)
+        self.assertIn(self.aasset, actions)
+        self.assertNotIn(self.ashpky, actions)  # Shape key has invalid key on the sphere1
+        self.assertNotIn(self.ainvld, actions)
 
-    def testAssetsOnly(self) -> None:
-        actions = self.list_action(False, False, True)
-        assert self.anrmal not in actions
-        assert self.aasset in actions
-        assert self.ashpky not in actions
-        assert self.ainvld not in actions
+    def testValidAssetsOnly(self) -> None:
+        self.project.armature1
+        actions = self.list_action(False, True, True)
+        self.assertNotIn(self.anrmal, actions)
+        self.assertIn(self.aasset, actions)
+        self.assertNotIn(self.ashpky, actions)
+        self.assertNotIn(self.ainvld, actions)

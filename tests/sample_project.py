@@ -201,7 +201,7 @@ class SampleProject:
 
     @property
     def action_10(self) -> bpy.types.Action:
-        """Action 10 frames long. With two keyframes: `location.x@1=1` `location.x@10=10`"""
+        """Action 10 frames long. With two keyframes: `location.x@1=1` `location.x@10=10`. Marked as an asset"""
         created, a = self.ensure_action("action_10")
         if not created:
             return a
@@ -223,6 +223,7 @@ class SampleProject:
 
     @property
     def action_shapekey1(self) -> bpy.types.Action:
+        """Shape-key Action on `ShapeKey1` sets value1@=1"""
         created, a = self.ensure_action("action_shapekey1")
         if not created:
             return a
@@ -248,7 +249,9 @@ class SampleProject:
     def sphere1(self) -> bpy.types.Object:
         """Ensure Object (mesh) with `Sphere` name exists in the scene"""
         if "Sphere" in bpy.data.objects.keys():
-            return bpy.data.objects["Sphere"]
+            ret = bpy.data.objects["Sphere"]
+            bpy.context.active_object = ret
+            return ret
 
         ui_utils.assert_op_ret(bpy.ops.mesh.primitive_uv_sphere_add())
         ret = bpy.context.active_object
@@ -262,7 +265,9 @@ class SampleProject:
     def armature1(self) -> bpy.types.Object:
         """Ensure Armature Object with `Sphere` name exists in the scene"""
         if "Armature" in bpy.data.objects.keys():
-            return bpy.data.objects["Armature"]
+            ret = bpy.data.objects["Armature"]
+            bpy.context.active_object = ret
+            return ret
 
         ui_utils.assert_op_ret(bpy.ops.object.armature_add())
         ret = bpy.context.active_object

@@ -153,6 +153,7 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
   * Clear - will remove the mapping (delete from the object completly?)
   * Auto-it 
   * By name - More instances (alow user defined) - will map action by matching name patterns (should provide some placeholder/expansions in the expression for objectName, etc)
+* Preview/play mapping doesn't work for shapekeys
 
 ### Normal
 * Add warning (in the baking validation popup?) when any selected object has an active Action (seems to be confusing for NLA newbies when the rig doesn't animate after bake because of that)
@@ -175,6 +176,21 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 * There are still some ogg unsupported format - could have been an user error (ogg file was not really an ogg?)
 ##
 - 
+
+## Mapping
+- Mapping preview button. Activates the mapped Action on the selected Object(s) or all objects which has mapping.
+- A custom frame-range on the mapped Action can be configured. It is now possible to use ***pose-sheets*** and it is no longer necessary to slice individual poses out into the Actions. Like for example the `overwrite_shape_action` from the `Faceit` plugin.  This is also prerequisite for more automated Faceit integration (wip).
+
+## NLA Bake dialog
+- Auto-trim too long Cues on the NLA baking. Enabled by default with some reasonable time.
+- Caputre selection can be now changed directly
+
+## Capture
+- Import/Export captured Cues to json file (mainly used by unitests )
+
+## Other
+- Several small UI changes and reorganization
+- Unittests on Github works for all three platforms
 
 ## Check
 https://github.com/Hunanbean/Papagayo-NGLipsyncImporterForBlender

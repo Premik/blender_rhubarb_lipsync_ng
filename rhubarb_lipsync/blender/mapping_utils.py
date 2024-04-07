@@ -73,11 +73,12 @@ def filtered_actions(o: bpy.types.Object, mp: "mapping_properties.MappingPropert
     if not mp:
         return
     for action in bpy.data.actions:
-        # if mp.only_shapekeys and not is_action_shape_key_action(action):
+        if not does_action_fit_object(o, action):  # An invalid action
+            if not mp.only_valid_actions:
+                yield action  # Show-invalid-actions take precedence
+            continue
         # The Only-shape-key is a switch
         if mp.only_shapekeys != is_action_shape_key_action(action):
-            continue
-        if mp.only_valid_actions and not does_action_fit_object(o, action):
             continue
         if mp.only_asset_actions and not action.asset_data:
             continue
