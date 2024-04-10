@@ -287,7 +287,7 @@ class BakingContext:
 
     @property
     def has_two_tracks(self) -> bool:
-        return self.track1 and self.track2
+        return bool(self.track1 and self.track2) and self.track1 != self.track2
 
     @property
     def current_track(self) -> NlaTrack:

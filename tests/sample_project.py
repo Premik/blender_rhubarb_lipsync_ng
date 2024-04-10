@@ -6,6 +6,7 @@ from typing import Optional
 import addon_utils
 import bpy
 
+from bpy.types import Object
 import rhubarb_lipsync
 import rhubarb_lipsync.blender.auto_load
 import rhubarb_lipsync.blender.baking_utils as baking_utils
@@ -30,7 +31,7 @@ class SampleProject:
     """Manages Blender test project"""
 
     # INFO:Baked 8 cues to 8 action strips
-    bake_result_info_line = re.compile(r".*(?P<cues>\d+) cues.*(?P<strips>\d+) action strips.*")
+    bake_result_info_line = re.compile(r".*(?P<cues>\d+) cues.*?(?P<strips>\d+) action strips.*")
 
     registered = False
 
@@ -250,7 +251,7 @@ class SampleProject:
         """Ensure Object (mesh) with `Sphere` name exists in the scene"""
         if "Sphere" in bpy.data.objects.keys():
             ret = bpy.data.objects["Sphere"]
-            bpy.context.active_object = ret
+            self.make_object_active(ret)
             return ret
 
         ui_utils.assert_op_ret(bpy.ops.mesh.primitive_uv_sphere_add())
@@ -266,7 +267,7 @@ class SampleProject:
         """Ensure Armature Object with `Sphere` name exists in the scene"""
         if "Armature" in bpy.data.objects.keys():
             ret = bpy.data.objects["Armature"]
-            bpy.context.active_object = ret
+            self.make_object_active(ret)
             return ret
 
         ui_utils.assert_op_ret(bpy.ops.object.armature_add())
@@ -312,6 +313,13 @@ class SampleProject:
         self.create_mapping([self.action_shapekey1])
         return self.create_baking_context()
 
+    def create_mapping_two_objects(self) -> baking_utils.BakingContext:
+        self.initialize_mapping(self.sphere1)  # Sphere object becomes active
+        self.create_mapping([self.action_shapekey1])
+        self.initialize_mapping(self.armature1)  # Armature object becomes active
+        self.create_mapping([self.action_single, self.action_10])
+        return self.create_baking_context()
+
     def create_mapping_sheet(self) -> baking_utils.BakingContext:
         self.initialize_mapping(self.armature1)  # Armature object becomes active
         action = self.action_sheet
@@ -338,6 +346,9 @@ class SampleProject:
 
     def add_track2(self) -> NlaTrackRef:
         return self.add_track(self.mprops.nla_track2, 2)
+
+    def make_object_active(self, o: Object) -> None:
+        bpy.context.view_layer.objects.active = o
 
     def save_blend_file(self, trg: str) -> None:
         bpy.ops.wm.save_as_mainfile(filepath=trg)
