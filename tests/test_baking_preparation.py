@@ -62,7 +62,6 @@ class BakingContextTest(unittest.TestCase):
         print(self.bc.track_pair)
         assert not self.bc.current_track
         self.project.add_track1()
-        self.bc.next_track()
         assert self.bc.current_object, "No object selected"
         assert self.bc.current_track, "No current track"
         errs = self.bc.validate_track()

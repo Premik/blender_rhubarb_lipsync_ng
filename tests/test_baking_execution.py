@@ -65,7 +65,6 @@ class BakingTest(unittest.TestCase):
     def testBake2Tracks1ShapekeyAction(self) -> None:
         self.bc = self.project.create_mapping_1action_on_mesh()
         self.bakeTwoTracks()
-        # self.project.save_blend_file("/tmp/work/1.blend")
 
     def testBakeTwoObjects(self) -> None:
         self.bc = self.project.create_mapping_two_objects()
@@ -75,11 +74,6 @@ class BakingTest(unittest.TestCase):
     def testBakeActionSheet(self) -> None:
         self.bc = self.project.create_mapping_sheet()
         self.bakeTwoTracks()
-        # for o in self.bc.object_iter():
-        #     self.project.make_object_active(o)
-        #     self.assertTrue(self.bc.has_two_tracks)
-
-        # self.project.save_blend_file("/tmp/work/1.blend")
 
 
 if __name__ == "__main__":

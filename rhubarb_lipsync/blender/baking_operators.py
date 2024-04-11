@@ -34,12 +34,11 @@ class RemoveCapturedNlaStrips(bpy.types.Operator):
     # def poll(cls, context: Context) -> bool:
     #     return ui_utils.validation_poll(cls, context)
 
-    def on_track(self, bctx: baking_utils.BakingContext) -> None:
-        track = bctx.current_track
+    def on_track(self, bctx: baking_utils.BakingContext, track:bpy.types.NlaTrack) -> None:
         if not track:
             return
         self.tracks_cleaned += 1
-        strips = list(bctx.strips_on_current_track())
+        strips = list(bctx.strips_on_track(track))
         log.debug(f"Going to remove {len(strips)}")
         for strip in strips:
             track.strips.remove(strip)
@@ -47,11 +46,9 @@ class RemoveCapturedNlaStrips(bpy.types.Operator):
 
     def on_object(self, bctx: baking_utils.BakingContext) -> None:
         log.debug(f"Removing strips from {bctx.current_object}")
-        bctx.next_track()
-        self.on_track(bctx)
-        if bctx.has_two_tracks:
-            bctx.next_track()
-            self.on_track(bctx)
+        for t in bctx.unique_tracks:
+            self.on_track(bctx, t)
+
 
     def execute(self, ctx: Context) -> set[str]:
         b = baking_utils.BakingContext(ctx)
@@ -300,7 +297,6 @@ class BakeToNLA(bpy.types.Operator):
     def bake_cue(self) -> None:
         for obj in self.bctx.object_iter():
             assert self.bctx.current_cue, "No cue selected"
-            self.bctx.next_track()  # Alternate tracks for each cue. Same track for all objects
             # print(self.bctx.cue_index)
             if log.isEnabledFor(logging.TRACE):  # type: ignore
                 log.trace(f"Baking on object {obj} ")  # type: ignore
@@ -318,13 +314,15 @@ class BakeToNLA(bpy.types.Operator):
         log.info(f"About to bake {l} cues")
         wm.progress_begin(0, l)
         try:
-            # Loop over cues and for each cue between objects and for each object between track_pair
+            # Loop over cues and for each cue alternate between the two tracks and for each track loop over all objects
             for i, cue_frames in enumerate(b.cue_iter()):
                 # print(b.cue_index)
                 wm.progress_update(i)
                 if log.isEnabledFor(logging.DEBUG):
                     log.debug(f"Baking cue {cue_frames.cue} ({i}/{l}) ")                
+                self.bctx.next_track()
                 self.bake_cue()
+
             msg = f"Baked {l} cues to {self.strips_added} action strips"
             self.bctx.rlog.info(msg, self.bctx.current_traceback)
             self.report({'INFO'}, msg)

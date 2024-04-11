@@ -72,7 +72,7 @@ class BakingContext:
     cue_index: int = -1
     _objs: List[Object] = None
     object_index: int = -1
-    track_index: int = -1
+    track_index: int = 0
     last_object_selection_type: str = ""
 
     # def __post_init__(self) -> None:
@@ -90,7 +90,7 @@ class BakingContext:
         log.debug("Clearing obj cache")
         self._objs: List[Object] = None
         self.object_index = -1
-        self.track_index = -1
+        self.track_index = 0
         self.last_object_selection_type = ""
 
     @property
@@ -283,9 +283,23 @@ class BakingContext:
     @property
     def track_pair(self) -> Optional[Tuple[NlaTrack, NlaTrack]]:
         """Both tracks of the current object. The track can be repeated 2x if only singe track is selected."""
+        if self.track_index < 0:
+            return None
         if self.track1 is None and self.track2 is None:
             return None
         return (self.track1 or self.track2, self.track2 or self.track1)
+
+    @property
+    def unique_tracks(self) -> List[NlaTrack]:
+        """All (up to 2) not-None tracks"""
+        if not self.track_pair:
+            return []
+        t1, t2 = self.track_pair
+        if self.has_two_tracks:
+            return [t1, t2]
+        if t1:
+            return [t1]
+        return [t2]
 
     @property
     def has_two_tracks(self) -> bool:
@@ -305,25 +319,24 @@ class BakingContext:
         return self.current_track
 
     def strips_on_current_track(self) -> Iterator[NlaStrip]:
-        if self.total_frame_range == None:
+        yield from self.strips_on_track(self.current_track)
+
+    def strips_on_track(self, t: NlaTrack) -> Iterator[NlaStrip]:
+        if self.total_frame_range == None or not t:
             return []
         start, end = self.total_frame_range
-        t = self.current_track
         yield from strips_on_track(t, start, end)
 
     def validate_track(self) -> list[str]:
-        self.next_track()
-        if not self.current_track:
+        if not self.unique_tracks:
             return ["no NLA track selected"]
         ret: list[str] = []
         if self.track1 == self.track2:
             ret += ["Track1 and Track2 are the same"]
         limit = 5000
         strips = 0
-        t = self.next_track()
-        strips += ui_utils.len_limited(self.strips_on_current_track(), limit)
-        if self.next_track() != t and strips < limit:
-            strips += ui_utils.len_limited(self.strips_on_current_track(), limit)
+        for t in self.unique_tracks:
+            strips += ui_utils.len_limited(self.strips_on_track(t), limit)
 
         if strips > 0:
             extra = "+" if strips >= limit else ""
