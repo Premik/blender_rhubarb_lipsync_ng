@@ -3,7 +3,7 @@ from bisect import bisect_left
 from collections import defaultdict
 from dataclasses import dataclass
 from functools import cached_property
-from typing import Iterator, List, Optional
+from typing import Iterator, List, Optional, Tuple
 
 import bpy
 from bpy.types import Context, NlaStrip, NlaTrack, Object
@@ -281,25 +281,27 @@ class BakingContext:
         return track_ref and track_ref.selected_item
 
     @property
-    def tracks(self) -> List[NlaTrack]:
-        """Both tracks of the current object. Some items can be None"""
-        return [self.track1, self.track2]
+    def track_pair(self) -> Optional[Tuple[NlaTrack, NlaTrack]]:
+        """Both tracks of the current object. The track can be repeated 2x if only singe track is selected."""
+        if self.track1 is None and self.track2 is None:
+            return None
+        return (self.track1 or self.track2, self.track2 or self.track1)
 
     @property
     def has_two_tracks(self) -> bool:
         return bool(self.track1 and self.track2) and self.track1 != self.track2
 
     @property
-    def current_track(self) -> NlaTrack:
+    def current_track(self) -> Optional[NlaTrack]:
         if self.track_index < 0:
             return None
-        return self.tracks[self.track_index % 2]
+        if self.track_pair == None:
+            return None
+        return self.track_pair[self.track_index % 2]
 
-    def next_track(self) -> Object:
-        """Alternates between non-null tracks. If only one track is non-null it would always be the current track"""
-        self.track_index += 1
-        if not self.current_track:  # Next one was None
-            self.track_index += 1  # Try the other one. If None too then both are None
+    def next_track(self) -> Optional[NlaTrack]:
+        """Alternates between non-null track_pair. If only one track is non-null it would always be the current track"""
+        self.track_index = (self.track_index + 1) % 2
         return self.current_track
 
     def strips_on_current_track(self) -> Iterator[NlaStrip]:

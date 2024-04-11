@@ -300,7 +300,7 @@ class BakeToNLA(bpy.types.Operator):
     def bake_cue(self) -> None:
         for obj in self.bctx.object_iter():
             assert self.bctx.current_cue, "No cue selected"
-            self.bctx.next_track()  # Alternate tracks for each cue change of the current object
+            self.bctx.next_track()  # Alternate tracks for each cue. Same track for all objects
             # print(self.bctx.cue_index)
             if log.isEnabledFor(logging.TRACE):  # type: ignore
                 log.trace(f"Baking on object {obj} ")  # type: ignore
@@ -318,12 +318,12 @@ class BakeToNLA(bpy.types.Operator):
         log.info(f"About to bake {l} cues")
         wm.progress_begin(0, l)
         try:
+            # Loop over cues and for each cue between objects and for each object between track_pair
             for i, cue_frames in enumerate(b.cue_iter()):
                 # print(b.cue_index)
                 wm.progress_update(i)
                 if log.isEnabledFor(logging.DEBUG):
-                    log.debug(f"Baking cue {cue_frames.cue} ({i}/{l}) ")
-                self.bctx.next_track()  # Swap tracks on each cue
+                    log.debug(f"Baking cue {cue_frames.cue} ({i}/{l}) ")                
                 self.bake_cue()
             msg = f"Baked {l} cues to {self.strips_added} action strips"
             self.bctx.rlog.info(msg, self.bctx.current_traceback)

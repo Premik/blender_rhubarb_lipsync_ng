@@ -59,7 +59,7 @@ class BakingContextTest(unittest.TestCase):
     def trackValidation(self) -> None:
         errs = self.bc.validate_track()
         assert len(errs) > 0, f"Expected validation error since a track is not selected {errs}"
-        print(self.bc.tracks)
+        print(self.bc.track_pair)
         assert not self.bc.current_track
         self.project.add_track1()
         self.bc.next_track()
