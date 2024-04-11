@@ -43,7 +43,7 @@ jobs:
       
       - name: Cache Downloads
         id: cache-download
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: download
           key: download-${{hashFiles('pyproject.toml')}}

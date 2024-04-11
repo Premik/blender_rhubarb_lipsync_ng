@@ -1,6 +1,6 @@
 # Rhubarb Lip Sync NG - Blender plugin
 
-![unit test](https://github.com/Premik/blender-rhubarb-lipsync/actions/workflows/unit-tests.yml/badge.svg)
+[![unit test](https://github.com/Premik/blender_rhubarb_lipsync_ng/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/Premik/blender_rhubarb_lipsync_ng/actions/workflows/unit-tests.yml)
 
 Inspired by the [scaredyfish/blender-rhubarb-lipsync](https://github.com/scaredyfish/blender-rhubarb-lipsync).
 

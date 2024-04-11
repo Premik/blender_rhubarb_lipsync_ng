@@ -149,34 +149,32 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 ## Todo
 
 ### High
-* Baking Armature+Mesh on 2 track pairs at once only use 2 NLA tracks instead of all 4.
 * Mapping wizards
   * Clear - will remove the mapping (delete from the object completly?)
-  * Auto-it 
+  * Face-it - From Test rig - Normal actions+shape-key corrections? 2) From shape-key test action 3) The final control rig (doesn't need a wizard)
   * By name - More instances (alow user defined) - will map action by matching name patterns (should provide some placeholder/expansions in the expression for objectName, etc)
+  * Baking + Strip placement reorg 
+    - Use the new `CueProcessor` in the ruhbard module
+    - Blend in time only up to the cue start time (never after)
+    - Blend out time: start fading on cue start time rounded to nearset frame (rounded up) down to the cue end time, should reduce "freezing"
 
 ### Normal
 * When  Place sound strip is ran, adjust playback frame range to cover the full sound length
 * Add warning (in the baking validation popup?) when any selected object has an active Action (seems to be confusing for NLA newbies when the rig doesn't animate after bake because of that)
 * extended shapes- seems they are generated even when disabled -check
-* Mapping - integration with FaceIt - auto-populate mapping from rig expressions or shapekeys
 * Integrate with: https://mecabricks.com/en/shop/product/6
 * Create aur package
 * Detect blender --debug and similar argument and auto-enable debug log level (and same for log file?)
 * Add "auto-remove" checkbox on the Bake confirmation dialog (so one doesn'thave to press "remove cues")
 
 ### Low
-* Baking - round to whole frames when not sub-frames visible
-- Strip placement reorg should be possible to set/override on different levelson Individual cue? (mapping item)
 * Add [speaker](https://docs.blender.org/manual/en/latest/render/output/audio/speaker.html) as an alternative to Sequencer audio clip
 * The scaled down icons (32x32) still hard to see. Pre-scale different set icons?
 * Verify the Dialog file is working
-* Add "null" cue type to indicate un-detected cues (those red longer than the limit)
 * Changel all labels cases to follow Blender style "Foo in Bar"
 * Add some simple blender sample file
 * There are still some ogg unsupported format - could have been an user error (ogg file was not really an ogg?)
-##
-- 
+
 
 ## Mapping
 - Mapping preview button. Activates the mapped Action on the selected Object(s) or all objects which has mapping.
