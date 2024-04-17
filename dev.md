@@ -157,6 +157,7 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
     - Use the new `CueProcessor` in the ruhbard module
     - Blend in time only up to the cue start time (never after)
     - Blend out time: start fading on cue start time rounded to nearset frame (rounded up) down to the cue end time, should reduce "freezing"
+    - Trim long cues, only trim the non-X
 
 ### Normal
 * When  Place sound strip is ran, adjust playback frame range to cover the full sound length
@@ -176,20 +177,6 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 * There are still some ogg unsupported format - could have been an user error (ogg file was not really an ogg?)
 
 
-## Mapping
-- Mapping preview button. Activates the mapped Action on the selected Object(s) or all objects which has mapping.
-- A custom frame-range on the mapped Action can be configured. It is now possible to use ***pose-sheets*** and it is no longer necessary to slice individual poses out into the Actions. Like for example the `overwrite_shape_action` from the `Faceit` plugin.  This is also prerequisite for more automated Faceit integration (wip).
-
-## NLA Bake dialog
-- Auto-trim too long Cues on the NLA baking. Enabled by default with some reasonable time.
-- Caputre selection can be now changed directly
-
-## Capture
-- Import/Export captured Cues to json file (mainly used by unitests )
-
-## Other
-- Several small UI changes and reorganization
-- Unittests on Github works for all three platforms
 
 ## Check
 https://github.com/Hunanbean/Papagayo-NGLipsyncImporterForBlender

@@ -118,7 +118,7 @@ class MappingItem(PropertyGroup):
 
     custom_frame_ranage: BoolProperty(  # type: ignore
         name="Custom Frame Range",
-        description="Whether use a custom (sub)range of frames of the Action or whole frame range when cearing the Action Clip",
+        description="Whether use a custom (sub)range of frames of the Action or whole frame range when creating the Action Clip",
         default=False,
         options={'LIBRARY_EDITABLE'},
         override={'LIBRARY_OVERRIDABLE'},

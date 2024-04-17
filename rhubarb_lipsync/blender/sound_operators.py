@@ -58,6 +58,11 @@ class CreateSoundStripWithSound(bpy.types.Operator):
     start_frame: IntProperty(name="Start Frame", default=1)  # type: ignore
     channel: IntProperty(name="Channel", default=1)  # type: ignore
     show_waveform: BoolProperty(name="Show Waveform", default=True)  # type: ignore
+    enlarge_endframe: BoolProperty(  # type: ignore
+        name="Update scene end frame",
+        description="Update the scene end frame if the sound strip would end after the current end.",
+        default=True,
+    )
     sync_audio: BoolProperty(  # type: ignore
         name="Sync audio",
         description="Enable sound caching, audio scrubbing and playback sync with audio. To get the most real-time-like syncing.",
@@ -121,6 +126,10 @@ class CreateSoundStripWithSound(bpy.types.Operator):
         # Set to the current sound instead. This would leave the newly created copy with 0 users.
         strip.sound = sound
         strip.show_waveform = self.show_waveform
+        if self.enlarge_endframe:
+            if context.scene.frame_end < strip.frame_final_end:
+                context.scene.frame_end = strip.frame_final_end
+
         # Remove the newly created sound sound
         # https://blender.stackexchange.com/questions/27234/python-how-to-completely-remove-an-object
         bpy.data.sounds.remove(oldSound, do_unlink=True)
