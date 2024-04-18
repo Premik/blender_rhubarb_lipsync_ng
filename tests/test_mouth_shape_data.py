@@ -115,6 +115,15 @@ class CueFramesTest(unittest.TestCase):
         self.assertTrue(cp.cue_frames[0].intersects_frame)
         self.assertTrue(cp.cue_frames[1].intersects_frame)
 
+    def testCueProcessorRoundEnds(self) -> None:
+        # The first and second cues crosses a frame but shouldn't be rounded as it is too short
+        cp = self.create_cue_processor(1, 1.9, 2.3, 4.3)
+        self.assertAlmostEqual(cp.cue_frames[0].duration_frames_float, 0.9)
+        cp.round_ends_down()
+        self.assertAlmostEqual(cp.cue_frames[0].duration_frames_float, 0.9)
+        self.assertAlmostEqual(cp.cue_frames[1].end_frame_float, 2.3)
+        self.assertAlmostEqual(cp.cue_frames[2].end_frame_float, 4)
+
 
 if __name__ == '__main__':
     # unittest.main(RhubarbParserTest())

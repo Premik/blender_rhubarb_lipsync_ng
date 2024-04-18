@@ -1,7 +1,7 @@
 import math
 from dataclasses import dataclass, field
 from functools import cached_property
-from typing import Any, Callable, ParamSpec, TypeAlias, TypeVar
+from typing import Any, Callable, Optional, ParamSpec, TypeAlias, TypeVar
 import logging
 from rhubarb_lipsync.rhubarb.mouth_shape_info import MouthShapeInfo, MouthShapeInfos
 
@@ -29,6 +29,7 @@ def time2frame_down(time: float, fps: int, fps_base=1.0) -> int:
 
 
 def frame2time(frame: float, fps: int, fps_base=1.0) -> float:
+    """Converts frame number to time in seconds"""
     assert fps > 0 and fps_base > 0, f"Can't convert to time when fps is {fps}/{fps_base}"
     return frame * fps_base / fps
 
@@ -264,6 +265,11 @@ class CueProcessor:
 
     frame_cfg: FrameConfig
     cue_frames: list[MouthCueFrames]
+    blend_in_time: float = 0.04
+
+    @docstring_from(frame2time)  # type: ignore[misc]
+    def frame2time(self, frame: float) -> float:
+        return frame2time(frame, self.frame_cfg.fps, self.frame_cfg.fps_base)
 
     def trim_long_cues(self, max_dur: float) -> int:
         modified = 0
@@ -280,7 +286,7 @@ class CueProcessor:
         return modified
 
     def ensure_frame_intersection(self) -> int:
-        """Find extremly short cues where there is no intersection with a frame and move either start or end to the closest frame time"""
+        """Finds extremly short cues where there is no intersection with a frame and move either start or end to the closest frame time"""
         modified = 0
         for cf in self.cue_frames:
             if cf.intersects_frame:
@@ -290,18 +296,40 @@ class CueProcessor:
             d_end = cf.end_frame_right - cf.end_frame_float
             assert d_start > 0 and d_end > 0
             if d_start < d_end:  # Start is closer, expand the cue start to the left
-                cf.cue.start = frame2time(cf.start_frame_left, self.frame_cfg.fps, self.frame_cfg.fps_base)
+                cf.cue.start = self.frame2time(cf.start_frame_left)
             else:  # End is closer, expand the cue end to the right
-                cf.cue.end = frame2time(cf.end_frame_right, self.frame_cfg.fps, self.frame_cfg.fps_base)
+                cf.cue.end = self.frame2time(cf.end_frame_right)
             modified += 1
         if modified > 0:
             log.info(f"Prolonged {modified} Cues as they were too short and would not have been visible.")
         return modified
 
-    """    
-    - Round down the ends to nearest frame on the left, but not for short cues (so it won't collapse to only blend-in phase)
-    - From cue start find the first frame intersection, look up/down if there is any other cue blend-in (blend-out should be ok because of the above)
-    """
+    def round_ends_down(self) -> int:
+        """Rounds down the cue ends to nearest frame on the left. While making sure very
+        short cues won't collapse to only-blend-in phase."""
+        modified = 0
+        skipped = 0
+        for cf in self.cue_frames:
+            if not cf.intersects_frame:
+                skipped += 1  # Too short. Shouldn't happend if the `ensure_frame_intersection` was called first
+                continue
+            new_end_frame = cf.end_frame_left
+            if abs(cf.start_frame_right - new_end_frame) < 0.0001:
+                skipped += 1  # The new end would match the start frame rounded up. So there wouldn't be and blend-out section
+                continue  # Leave it out as it is still a short Cue which just happend to be crossing a frame
+            cf.cue.end = self.frame2time(new_end_frame)
+            modified += 1
+        if modified > 0:
+            log.info(f"Rounded {modified} Cue ends down to whole frame while skipped {skipped} Cues as they were too short.")
+        return modified
+
+    def set_blend_in_times(self) -> None:
+        """Sets blend-in for each Cue. Trim the blend-in length in case it intersects with previous cue's first frame"""
+        last_cue_start_frame_time: Optional[float] = None
+        for cf in self.cue_frames:
+            cf.blend_in = self.blend_in_time
+
+            last_cue_start_frame_time = self.frame2time(cf.start_frame_right)
 
 
 if __name__ == '__main__':
