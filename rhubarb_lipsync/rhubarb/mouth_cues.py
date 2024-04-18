@@ -11,8 +11,19 @@ def time2frame_float(time: float, fps: int, fps_base=1.0) -> float:
     return time * fps / fps_base
 
 
-def time2frame(time: float, fps: int, fps_base=1.0) -> int:
+def time2frame_nearest(time: float, fps: int, fps_base=1.0) -> int:
+    """Convert time in seconds to nearest int frame number"""
     return int(round(time2frame_float(time, fps, fps_base)))
+
+
+def time2frame_up(time: float, fps: int, fps_base=1.0) -> int:
+    """Convert time in seconds to nearest bigger or equal int frame number"""
+    return int(math.ceil(time2frame_float(time, fps, fps_base)))
+
+
+def time2frame_down(time: float, fps: int, fps_base=1.0) -> int:
+    """Convert time in seconds to nearest smaller or equal int frame number"""
+    return int(math.floor(time2frame_float(time, fps, fps_base)))
 
 
 def frame2time(frame: float, fps: int, fps_base=1.0) -> float:
@@ -89,16 +100,16 @@ class MouthCue:
         return MouthShapeInfos.key2index(self.key)
 
     def get_start_frame(self, fps: int, fps_base=1.0, offset=0) -> int:
-        """Whole frame number of the cue start time"""
-        return time2frame(self.start, fps, fps_base) + offset
+        """Closest whole frame number of the cue start time"""
+        return time2frame_nearest(self.start, fps, fps_base) + offset
 
     def get_start_frame_float(self, fps: int, fps_base=1.0, offset=0) -> float:
         """Exact decimal frame number of the cue start time"""
         return time2frame_float(self.start, fps, fps_base) + offset
 
     def get_end_frame(self, fps: int, fps_base=1.0, offset=0) -> int:
-        """Whole frame number of the cue end time"""
-        return time2frame(self.end, fps, fps_base) + offset
+        """Closest whole frame number of the cue end time"""
+        return time2frame_nearest(self.end, fps, fps_base) + offset
 
     def get_end_frame_float(self, fps: int, fps_base=1.0, offset=0) -> float:
         """Exact decimal frame number of the cue stop time"""
@@ -137,6 +148,7 @@ class MouthCueFrames:
 
     cue: MouthCue
     frame_cfg: FrameConfig
+    blend_in: float = 0
 
     @docstring_from(MouthCue.get_start_frame_float)  # type: ignore[misc]
     @property
@@ -148,6 +160,22 @@ class MouthCueFrames:
     def start_frame_float(self) -> float:
         return self.cue.get_start_frame_float(*self.frame_cfg.fps_base_offset)
 
+    @docstring_from(MouthCue.get_start_subframe)  # type: ignore[misc]
+    @property
+    def start_subframe(self) -> tuple[int, float]:
+        return self.cue.get_start_subframe(*self.frame_cfg.fps_base_offset)
+
+    @property
+    def start_frame_right(self) -> int:
+        """Start time rounded up to the closest integer frame number"""
+        c = self.frame_cfg
+        return time2frame_up(self.cue.start, c.fps, c.fps_base) + c.offset
+
+    @property
+    def pre_start_float(self) -> float:
+        """Start time with the blend-in included. This time is few fractions of second before the start time"""
+        return self.cue.start - self.blend_in
+
     @docstring_from(MouthCue.get_end_frame)  # type: ignore[misc]
     @property
     def end_frame(self) -> int:
@@ -158,10 +186,24 @@ class MouthCueFrames:
     def end_frame_float(self) -> float:
         return self.cue.get_end_frame_float(*self.frame_cfg.fps_base_offset)
 
-    @docstring_from(MouthCue.get_start_subframe)  # type: ignore[misc]
     @property
-    def start_subframe(self) -> tuple[int, float]:
-        return self.cue.get_start_subframe(*self.frame_cfg.fps_base_offset)
+    def end_frame_right(self) -> int:
+        """End time rounded up to the closest integer frame number"""
+        c = self.frame_cfg
+        return time2frame_up(self.cue.end, c.fps, c.fps_base) + c.offset
+
+    @property
+    def end_frame_left(self) -> int:
+        """End time rounded down to the closest integer frame number"""
+        c = self.frame_cfg
+        return time2frame_down(self.cue.end, c.fps, c.fps_base) + c.offset
+
+    @property
+    def intersects_frame(self) -> bool:
+        """Whether the cue duration is long enough and/or placed so there is an integer frame number intersecting the cue duration interval."""
+        s = self.start_frame_right
+        e = self.end_frame_left
+        return bool(e - s >= 0)  # The cue duration is sorter than a single frame duration and is placed inbetween two frames
 
     @property
     def offset_seconds(self) -> float:
@@ -178,7 +220,7 @@ class MouthCueFrames:
 
     @property
     def start_time_str(self) -> str:
-        return f"{self.start_frame+self.offset_seconds:0.2f}"
+        return f"{self.cue.start+self.offset_seconds:0.2f}"
 
     @property
     def start_frame_str(self) -> str:
@@ -218,6 +260,8 @@ class CueProcessor:
         trimmed = 0
         for cf in self.cue_frames:
             d = cf.cue.duration
+            if cf.cue.key == 'X':
+                continue  # Don't trim X (silence)
             if d <= max_dur:
                 continue
             trimmed += 1
@@ -225,6 +269,28 @@ class CueProcessor:
         # if trimmed > 0:
         #     self.rlog.info(f"Trimmed {trimmed} Cues as they were too long.")
         return trimmed
+
+    def ensure_frame_intersection(self, max_dur: float) -> int:
+        """Find ultra-short cues where there is no intersection with a frame and move either start or end to the closest frame time"""
+        modified = 0
+        for cf in self.cue_frames:
+            d = cf.cue.duration
+            if cf.cue.key == 'X':
+                continue  # Don't trim X (silence)
+            if d <= max_dur:
+                continue
+            modified += 1
+            cf.cue.end = cf.cue.start + max_dur
+        # if trimmed > 0:
+        #     self.rlog.info(f"Trimmed {trimmed} Cues as they were too long.")
+        return modified
+
+    """
+    - Trim long cues (except X)    
+    - Find ultra-short cues where there is no intersection with a frame and move either start or end to the closest frame time
+    - Round down the ends to nearest frame on the left, but not for short cues (so it won't collapse to only blend-in phase)
+    - From cue start find the first frame intersection, look up/down if there is any other cue blend-in (blend-out should be ok because of the above)
+    """
 
 
 if __name__ == '__main__':

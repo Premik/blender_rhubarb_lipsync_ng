@@ -5,8 +5,8 @@ from typing import Optional
 
 import addon_utils
 import bpy
-
 from bpy.types import Object
+
 import rhubarb_lipsync
 import rhubarb_lipsync.blender.auto_load
 import rhubarb_lipsync.blender.baking_utils as baking_utils

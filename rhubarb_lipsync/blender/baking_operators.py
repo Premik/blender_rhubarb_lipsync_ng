@@ -34,7 +34,7 @@ class RemoveCapturedNlaStrips(bpy.types.Operator):
     # def poll(cls, context: Context) -> bool:
     #     return ui_utils.validation_poll(cls, context)
 
-    def on_track(self, bctx: baking_utils.BakingContext, track:bpy.types.NlaTrack) -> None:
+    def on_track(self, bctx: baking_utils.BakingContext, track: bpy.types.NlaTrack) -> None:
         if not track:
             return
         self.tracks_cleaned += 1
@@ -48,7 +48,6 @@ class RemoveCapturedNlaStrips(bpy.types.Operator):
         log.debug(f"Removing strips from {bctx.current_object}")
         for t in bctx.unique_tracks:
             self.on_track(bctx, t)
-
 
     def execute(self, ctx: Context) -> set[str]:
         b = baking_utils.BakingContext(ctx)
@@ -319,7 +318,7 @@ class BakeToNLA(bpy.types.Operator):
                 # print(b.cue_index)
                 wm.progress_update(i)
                 if log.isEnabledFor(logging.DEBUG):
-                    log.debug(f"Baking cue {cue_frames.cue} ({i}/{l}) ")                
+                    log.debug(f"Baking cue {cue_frames.cue} ({i}/{l}) ")
                 self.bctx.next_track()
                 self.bake_cue()
 
