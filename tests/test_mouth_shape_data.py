@@ -124,6 +124,15 @@ class CueFramesTest(unittest.TestCase):
         self.assertAlmostEqual(cp.cue_frames[1].end_frame_float, 2.3)
         self.assertAlmostEqual(cp.cue_frames[2].end_frame_float, 4)
 
+    def testCueProcessorBlendIn(self) -> None:
+        # The first cue crosses frame 1 and ends right after that
+        # so the second cue blend-in would overlap and should get shrinked
+        cp = self.create_cue_processor(0.5, 1.1, 4)
+        # self.assertAlmostEqual(cp.cue_frames[1].pre_start_float, 1.1 - cp.blend_in_frames_float)
+        cp.set_blend_in_times()
+        self.assertAlmostEqual(cp.cue_frames[0].blend_in, cp.blend_in_time)
+        self.assertAlmostEqual(cp.cue_frames[1].pre_start_float, cp.frame2time(1))
+
 
 if __name__ == '__main__':
     # unittest.main(RhubarbParserTest())

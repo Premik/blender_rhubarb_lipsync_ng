@@ -414,7 +414,7 @@ class BakeToNLA(bpy.types.Operator):
         if not self.trim_cue_excess:
             row.enabled = False
         row.prop(clp, "highlight_long_cues")
-        layout.prop(ctx.scene, "show_subframe", text="Use subframes")
+        layout.prop(ctx.scene, "show_subframe", text="Show subframes")
         layout.separator()
         layout.prop(self.bctx.mprefs, "object_selection_filter_type", text="Objects to bake")
         self.draw_info()

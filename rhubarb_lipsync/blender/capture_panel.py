@@ -57,7 +57,7 @@ class CueListOptionsPanel(bpy.types.Panel):
         o: CueListPreferences = prefs.cue_list_prefs
         layout = self.layout
         layout.label(text=CueListOptionsPanel.bl_label)
-        layout.prop(context.scene, "show_subframe", text="Use subframes")
+        layout.prop(context.scene, "show_subframe", text="Show subframes")
         for name in o.noncol_props_names:
             layout.prop(o, name)
 

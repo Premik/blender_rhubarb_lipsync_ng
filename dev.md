@@ -160,7 +160,6 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
     - Trim long cues, only trim the non-X
 
 ### Normal
-* When  Place sound strip is ran, adjust playback frame range to cover the full sound length
 * Add warning (in the baking validation popup?) when any selected object has an active Action (seems to be confusing for NLA newbies when the rig doesn't animate after bake because of that)
 * extended shapes- seems they are generated even when disabled -check
 * Integrate with: https://mecabricks.com/en/shop/product/6
