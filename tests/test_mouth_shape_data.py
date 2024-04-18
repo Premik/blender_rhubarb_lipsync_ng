@@ -4,7 +4,7 @@ import unittest
 import rhubarb_lipsync.rhubarb.rhubarb_command as rhubarb_command
 
 # import tests.sample_data
-from rhubarb_lipsync.rhubarb.mouth_cues import FrameConfig, MouthCue, MouthCueFrames, duration_scale, time2frame_float, frame2time
+from rhubarb_lipsync.rhubarb.mouth_cues import CueProcessor, FrameConfig, MouthCue, MouthCueFrames, duration_scale, time2frame_float, frame2time
 
 
 def enableDebug() -> None:
@@ -83,6 +83,37 @@ class CueFramesTest(unittest.TestCase):
         self.assertEqual(c.end_frame_right, 2)
         self.assertEqual(c.end_frame_left, 1)
         self.assertFalse(c.intersects_frame)
+
+    def create_cue_processor(self, *frames: float) -> CueProcessor:
+        mcfs = []
+        for i in range(len(frames) - 1):
+            duration = frames[i + 1] - frames[i]
+            mcfs.append(self.create_mcf_at(frames[i], duration))
+        return CueProcessor(self.fcfg, mcfs)
+
+    def testCueProcessorTrim(self) -> None:
+        # Two cues, first got trimmed, second doesn't
+        cp = self.create_cue_processor(2, 7, 8)
+        self.assertAlmostEqual(cp.cue_frames[0].duration_frames, 5)
+        self.assertAlmostEqual(cp.cue_frames[1].duration_frames, 1)
+        max_dur = frame2time(2, self.fcfg.fps, self.fcfg.fps_base)
+        cp.trim_long_cues(max_dur)
+        self.assertAlmostEqual(cp.cue_frames[0].cue.duration, max_dur)
+        self.assertAlmostEqual(cp.cue_frames[1].duration_frames, 1)
+
+    def testCueProcessorExpandShort(self) -> None:
+        # First cue is inbetween frame 1 and 2, second cross frame 2
+        cp = self.create_cue_processor(1.1, 1.3, 2.3)
+        self.assertAlmostEqual(cp.cue_frames[0].duration_frames_float, 0.2)
+        self.assertAlmostEqual(cp.cue_frames[1].duration_frames_float, 1)
+        cp.ensure_frame_intersection()
+        # First one should got expaned to left since 1.1 is closer to 1 than 1.3 is to 2
+        self.assertAlmostEqual(cp.cue_frames[0].start_frame_float, 1)
+        self.assertAlmostEqual(cp.cue_frames[0].end_frame_float, 1.3)
+        self.assertAlmostEqual(cp.cue_frames[1].start_frame_float, 1.3)
+        self.assertAlmostEqual(cp.cue_frames[1].duration_frames_float, 1)
+        self.assertTrue(cp.cue_frames[0].intersects_frame)
+        self.assertTrue(cp.cue_frames[1].intersects_frame)
 
 
 if __name__ == '__main__':

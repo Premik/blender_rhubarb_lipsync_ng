@@ -1,9 +1,11 @@
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from functools import cached_property
 from typing import Any, Callable, ParamSpec, TypeAlias, TypeVar
-
+import logging
 from rhubarb_lipsync.rhubarb.mouth_shape_info import MouthShapeInfo, MouthShapeInfos
+
+log = logging.getLogger(__name__)
 
 
 def time2frame_float(time: float, fps: int, fps_base=1.0) -> float:
@@ -147,7 +149,7 @@ class MouthCueFrames:
     """Additional wrapper on top of Cues which handles frame related calculations"""
 
     cue: MouthCue
-    frame_cfg: FrameConfig
+    frame_cfg: FrameConfig = field(repr=False)
     blend_in: float = 0
 
     @docstring_from(MouthCue.get_start_frame_float)  # type: ignore[misc]
@@ -170,6 +172,12 @@ class MouthCueFrames:
         """Start time rounded up to the closest integer frame number"""
         c = self.frame_cfg
         return time2frame_up(self.cue.start, c.fps, c.fps_base) + c.offset
+
+    @property
+    def start_frame_left(self) -> int:
+        """Start time rounded down to the closest integer frame number"""
+        c = self.frame_cfg
+        return time2frame_down(self.cue.start, c.fps, c.fps_base) + c.offset
 
     @property
     def pre_start_float(self) -> float:
@@ -200,7 +208,8 @@ class MouthCueFrames:
 
     @property
     def intersects_frame(self) -> bool:
-        """Whether the cue duration is long enough and/or placed so there is an integer frame number intersecting the cue duration interval."""
+        """Whether the cue duration is long enough and/or placed so there is an integer frame number
+        intersecting the cue duration interval. When false there this no intersection with a frame at all and a cue would not be visible (outside NLA)"""
         s = self.start_frame_right
         e = self.end_frame_left
         return bool(e - s >= 0)  # The cue duration is sorter than a single frame duration and is placed inbetween two frames
@@ -257,21 +266,6 @@ class CueProcessor:
     cue_frames: list[MouthCueFrames]
 
     def trim_long_cues(self, max_dur: float) -> int:
-        trimmed = 0
-        for cf in self.cue_frames:
-            d = cf.cue.duration
-            if cf.cue.key == 'X':
-                continue  # Don't trim X (silence)
-            if d <= max_dur:
-                continue
-            trimmed += 1
-            cf.cue.end = cf.cue.start + max_dur
-        # if trimmed > 0:
-        #     self.rlog.info(f"Trimmed {trimmed} Cues as they were too long.")
-        return trimmed
-
-    def ensure_frame_intersection(self, max_dur: float) -> int:
-        """Find ultra-short cues where there is no intersection with a frame and move either start or end to the closest frame time"""
         modified = 0
         for cf in self.cue_frames:
             d = cf.cue.duration
@@ -281,13 +275,30 @@ class CueProcessor:
                 continue
             modified += 1
             cf.cue.end = cf.cue.start + max_dur
-        # if trimmed > 0:
-        #     self.rlog.info(f"Trimmed {trimmed} Cues as they were too long.")
+        if modified > 0:
+            log.info(f"Trimmed {modified} Cues as they were too long.")
         return modified
 
-    """
-    - Trim long cues (except X)    
-    - Find ultra-short cues where there is no intersection with a frame and move either start or end to the closest frame time
+    def ensure_frame_intersection(self) -> int:
+        """Find extremly short cues where there is no intersection with a frame and move either start or end to the closest frame time"""
+        modified = 0
+        for cf in self.cue_frames:
+            if cf.intersects_frame:
+                continue
+            # Cue is in the middle of two frames, find which end is closer to a frame
+            d_start = cf.start_frame_float - cf.start_frame_left
+            d_end = cf.end_frame_right - cf.end_frame_float
+            assert d_start > 0 and d_end > 0
+            if d_start < d_end:  # Start is closer, expand the cue start to the left
+                cf.cue.start = frame2time(cf.start_frame_left, self.frame_cfg.fps, self.frame_cfg.fps_base)
+            else:  # End is closer, expand the cue end to the right
+                cf.cue.end = frame2time(cf.end_frame_right, self.frame_cfg.fps, self.frame_cfg.fps_base)
+            modified += 1
+        if modified > 0:
+            log.info(f"Prolonged {modified} Cues as they were too short and would not have been visible.")
+        return modified
+
+    """    
     - Round down the ends to nearest frame on the left, but not for short cues (so it won't collapse to only blend-in phase)
     - From cue start find the first frame intersection, look up/down if there is any other cue blend-in (blend-out should be ok because of the above)
     """
