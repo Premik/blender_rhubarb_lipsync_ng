@@ -1,4 +1,5 @@
 import bisect
+from contextlib import contextmanager
 import logging
 import math
 import pathlib
@@ -47,7 +48,6 @@ class MouthCueListItem(PropertyGroup):
         props = CaptureListProperties.capture_from_context(ctx)
         sf = props.start_frame if props else 1
         return FrameConfig(ctx.scene.render.fps, ctx.scene.render.fps_base, sf, ctx.scene.show_subframe)
-
 
     def cue_frames(self, ctx: Context) -> MouthCueFrames:
         """Wraps the cue to provide additional frame-related calculation"""
@@ -276,6 +276,21 @@ class ResultLogListProperties(PropertyGroup):
 
     items: CollectionProperty(type=ResultLogItemProperties, name="Log entries")  # type: ignore
 
+    @cached_property
+    def should_deduplicate(self) -> list[bool]:
+        return [False]
+
+    @contextmanager
+    def check_dups(self):
+        try:
+            self.should_deduplicate[0] = True
+            yield self
+        finally:
+            self.should_deduplicate[0] = False
+
+    def all_messages(self) -> Iterable[str]:
+        return (it.msg for it in self.items)
+
     def items_by_level(self, level: str) -> Iterable[ResultLogItemProperties]:
         return (m for m in self.items if m.level == level)
 
@@ -300,6 +315,10 @@ class ResultLogListProperties(PropertyGroup):
         mx = ResultLogListProperties.max_entries
         if l > mx:  # Drop messages if the limit has been reached
             return None  # type: ignore
+        if self.should_deduplicate[0]:
+            if any(msg in m for m in self.all_messages()):
+                return None  # Drop as duplicate
+
         if l == mx:  # Add warning as the limit is about the be reached
             msg = f"There were more log messages but they were dropped since the limit ({mx}) has been reached."
             level = "WARNING"

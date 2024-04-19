@@ -242,7 +242,9 @@ class BakeToNLA(bpy.types.Operator):
         cue_frames = b.current_cue
         cue: MouthCue = cue_frames and cue_frames.cue or None
         if not b.current_mapping_action:
-            b.rlog.warning(f"There is no mapping for the cue {cue} in the capture. Ignoring", self.bctx.current_traceback)
+            with b.rlog.check_dups() as log:
+                log.warning(f"There is no mapping for the cue {cue.key} in the capture. Ignoring", self.bctx.current_traceback)
+
             return
 
         name = f"{cue.info.key_displ}.{str(b.cue_index).zfill(3)}"
@@ -289,7 +291,7 @@ class BakeToNLA(bpy.types.Operator):
         track = b.current_track
         if not track:
             if b.cue_index <= 0:  # Only log the error 1x
-                b.rlog.warning(f"{obj and obj.name} has no NLA track selected. Ignoring", self.bctx.current_traceback)
+                b.rlog.error(f"{obj and obj.name} has no NLA track selected. Ignoring", self.bctx.current_traceback)
             return
         self.to_strip()
 
@@ -305,7 +307,6 @@ class BakeToNLA(bpy.types.Operator):
         self.bctx = baking_utils.BakingContext(ctx)
         self.strips_added = 0
         b = self.bctx
-
 
         wm = ctx.window_manager
         l = len(b.mouth_cue_items)
