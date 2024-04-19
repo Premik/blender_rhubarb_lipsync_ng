@@ -305,15 +305,16 @@ class BakeToNLA(bpy.types.Operator):
         self.bctx = baking_utils.BakingContext(ctx)
         self.strips_added = 0
         b = self.bctx
-        if self.trim_cue_excess:
-            b.trim_long_cues()
+
 
         wm = ctx.window_manager
         l = len(b.mouth_cue_items)
-        log.info(f"About to bake {l} cues")
+        log.info(f"About to optimize {l} cues")
         wm.progress_begin(0, l)
         try:
+            b.optimize_cues()
             # Loop over cues and for each cue alternate between the two tracks and for each track loop over all objects
+            log.debug(f"Optimization done. Placing NLA strips")
             for i, cue_frames in enumerate(b.cue_iter()):
                 # print(b.cue_index)
                 wm.progress_update(i)

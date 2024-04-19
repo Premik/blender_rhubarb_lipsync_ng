@@ -1,8 +1,9 @@
+import logging
 import math
 from dataclasses import dataclass, field
 from functools import cached_property
 from typing import Any, Callable, Optional, ParamSpec, TypeAlias, TypeVar
-import logging
+
 from rhubarb_lipsync.rhubarb.mouth_shape_info import MouthShapeInfo, MouthShapeInfos
 
 log = logging.getLogger(__name__)
@@ -348,6 +349,12 @@ class CueProcessor:
         if shrinked > 0:
             log.info(f"Shrinkened {shrinked} Cue blend-in times down to fully prononuce the previous Cue.")
         return shrinked
+
+    def process_cues(self) -> None:
+        self.trim_long_cues(0.2)
+        self.ensure_frame_intersection()
+        self.round_ends_down()
+        self.set_blend_in_times()
 
 
 if __name__ == '__main__':

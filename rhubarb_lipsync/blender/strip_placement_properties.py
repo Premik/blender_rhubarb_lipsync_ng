@@ -12,7 +12,12 @@ class StripPlacementProperties(PropertyGroup):
 
     scale_min: FloatProperty(  # type: ignore
         "Scale Min",
-        description="Scale down minimal value. Slow down the clip playback speed up to this fraction when the action is too short. Has no effect when set to 1",
+        description=textwrap.dedent(
+            """\
+            Scale down minimal value. Slow down the clip playback speed up to this fraction when the action is too short. 
+            Has no effect when set to 1. Has no effect on Actions with a single keyframe only (aka poses). 
+            """
+        ),
         min=0.01,
         soft_min=0.4,
         max=1,
@@ -23,7 +28,12 @@ class StripPlacementProperties(PropertyGroup):
     )
     scale_max: FloatProperty(  # type: ignore
         "Scale Max",
-        description="Scale up maximal value. Speed up the clip playback speed up to this fraction when the action is too long. Has no effect when set to 1",
+        description=textwrap.dedent(
+            """\
+            Scale up maximal value. Speed up the clip playback speed up to this fraction when the action is too long. 
+            Has no effect when set to 1. Has no effect on Actions with a single keyframe only (aka poses). 
+            """
+        ),
         min=1,
         soft_min=1,
         max=10,

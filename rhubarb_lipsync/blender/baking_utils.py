@@ -14,7 +14,7 @@ from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, Ca
 from rhubarb_lipsync.blender.mapping_properties import MappingItem, MappingProperties, NlaTrackRef
 from rhubarb_lipsync.blender.preferences import CueListPreferences, MappingPreferences, RhubarbAddonPreferences
 from rhubarb_lipsync.blender.strip_placement_properties import StripPlacementProperties
-from rhubarb_lipsync.rhubarb.mouth_cues import MouthCueFrames, duration_scale_rate
+from rhubarb_lipsync.rhubarb.mouth_cues import CueProcessor, FrameConfig, MouthCueFrames, duration_scale_rate
 from rhubarb_lipsync.rhubarb.mouth_shape_info import MouthShapeInfos
 
 log = logging.getLogger(__name__)
@@ -172,11 +172,15 @@ class BakingContext:
         return cl.items
 
     @cached_property
+    def cue_processor(self) -> CueProcessor:
+        fcfg = MouthCueListItem.frame_config_from_context(self.ctx)
+        cfs = [MouthCueFrames(ci.cue, fcfg) for ci in self.mouth_cue_items]
+        return CueProcessor(fcfg, cfs)
+
+    @property
     def cue_frames(self) -> list[MouthCueFrames]:
-        """List of the detected cues wrapped in CueFrames.
-        This is a copy so the list and cues can be mutated without affecting the original Capture"""
-        cfg = MouthCueListItem.frame_config_from_context(self.ctx)
-        return [MouthCueFrames(ci.cue, cfg) for ci in self.mouth_cue_items]
+        """List of the detected cues wrapped in CueFrames."""
+        return self.cue_processor.cue_frames
 
     def cue_iter(self) -> Iterator[MouthCueFrames]:
         for i, cf in enumerate(self.cue_frames):
@@ -200,20 +204,11 @@ class BakingContext:
             return None
         return self.cue_frames[-1]
 
-    def trim_long_cues(self, max_dur: float = -1) -> int:
-        if max_dur < 0:
-            clp: CueListPreferences = self.prefs.cue_list_prefs
-            max_dur = clp.highlight_long_cues
-        trimmed = 0
-        for cf in self.cue_frames:
-            d = cf.cue.duration
-            if d <= max_dur:
-                continue
-            trimmed += 1
-            cf.cue.end = cf.cue.start + max_dur
-        if trimmed > 0:
-            self.rlog.info(f"Trimmed {trimmed} Cues as they were too long.")
-        return trimmed
+    def optimize_cues(self):
+        self.cue_processor.process_cues()
+        #if trimmed > 0:
+            #self.rlog.info(f"Trimmed {trimmed} Cues as they were too long.")
+
 
     @cached_property
     def total_frame_range(self) -> Optional[tuple[int, int]]:

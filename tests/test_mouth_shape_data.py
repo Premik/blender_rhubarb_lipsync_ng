@@ -4,7 +4,7 @@ import unittest
 import rhubarb_lipsync.rhubarb.rhubarb_command as rhubarb_command
 
 # import tests.sample_data
-from rhubarb_lipsync.rhubarb.mouth_cues import CueProcessor, FrameConfig, MouthCue, MouthCueFrames, duration_scale, time2frame_float, frame2time
+from rhubarb_lipsync.rhubarb.mouth_cues import CueProcessor, FrameConfig, MouthCue, MouthCueFrames, duration_scale, frame2time, time2frame_float
 
 
 def enableDebug() -> None:
