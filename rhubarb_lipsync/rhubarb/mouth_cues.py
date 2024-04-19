@@ -266,7 +266,6 @@ class CueProcessor:
 
     frame_cfg: FrameConfig
     cue_frames: list[MouthCueFrames]
-    blend_in_time: float = 0.04
 
     @docstring_from(frame2time)  # type: ignore[misc]
     def frame2time(self, frame: float) -> float:
@@ -275,10 +274,6 @@ class CueProcessor:
     @docstring_from(time2frame_float)  # type: ignore[misc]
     def time2frame_float(self, t: float) -> float:
         return time2frame_float(t, self.frame_cfg.fps, self.frame_cfg.fps_base)
-
-    @property
-    def blend_in_frames_float(self) -> float:
-        return self.time2frame_float(self.blend_in_time)
 
     def trim_long_cues(self, max_dur: float) -> int:
         modified = 0
@@ -332,29 +327,37 @@ class CueProcessor:
             log.info(f"Rounded {modified} Cue ends down to whole frame while skipped {skipped} Cues as they were too short.")
         return modified
 
-    def set_blend_in_times(self) -> int:
+    def set_blend_in_times(self, blend_in_time: float = 0.04) -> int:
         """Sets blend-in for each Cue. Trim the blend-in length in case it intersects with previous cue's first frame"""
         last_cue_start_frame_time: Optional[float] = None
         shrinked = 0
         for cf in self.cue_frames:
-            cf.blend_in = self.blend_in_time
+            cf.blend_in = blend_in_time
             if last_cue_start_frame_time is not None:  # Not a first cue
                 d = cf.pre_start_float - last_cue_start_frame_time
                 if d >= 0:  # The start time including the blend-in is after the previous cue first frame intersection
                     continue
-                assert self.blend_in_time + d >= 0, f"Cue {cf} start overlaps with previous cue. Blend-in time {self.blend_in_time} + {d} would be negative "
-                cf.blend_in = self.blend_in_time + d  # Shrink the blend-in phase so the previous cue is fully pronounced at its first frame intersection
+                assert blend_in_time + d >= 0, f"Cue {cf} start overlaps with previous cue. Blend-in time {self.blend_in_time} + {d} would be negative "
+                cf.blend_in = blend_in_time + d  # Shrink the blend-in phase so the previous cue is fully pronounced at its first frame intersection
                 shrinked += 1
             last_cue_start_frame_time = self.frame2time(cf.start_frame_right)
         if shrinked > 0:
             log.info(f"Shrinkened {shrinked} Cue blend-in times down to fully prononuce the previous Cue.")
         return shrinked
 
-    def process_cues(self) -> None:
-        self.trim_long_cues(0.2)
-        self.ensure_frame_intersection()
-        self.round_ends_down()
-        self.set_blend_in_times()
+    def optimize_cues(self, min_cue_duration=0.2, blend_in_time=0.02) -> str:
+        steps = [
+            (lambda: self.trim_long_cues(min_cue_duration), "ends trimmed"),
+            (self.ensure_frame_intersection, "duration enlarged"),
+            (self.round_ends_down, "ends rounded to frame"),
+            (lambda: self.set_blend_in_times(blend_in_time), "blend-in time shortened"),
+        ]
+        report = ""
+        for s in steps:
+            count = s[0]()
+            if count > 0:
+                report += f" {s[1]}: {count}"
+        return report
 
 
 if __name__ == '__main__':

@@ -204,11 +204,10 @@ class BakingContext:
             return None
         return self.cue_frames[-1]
 
-    def optimize_cues(self):
-        self.cue_processor.process_cues()
-        #if trimmed > 0:
-            #self.rlog.info(f"Trimmed {trimmed} Cues as they were too long.")
-
+    def optimize_cues(self) -> None:
+        res = self.cue_processor.optimize_cues(0.2, 0.02)
+        if res:
+            self.rlog.info(f"Optimization result: {res}")
 
     @cached_property
     def total_frame_range(self) -> Optional[tuple[int, int]]:
