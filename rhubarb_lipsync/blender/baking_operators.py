@@ -244,7 +244,6 @@ class BakeToNLA(bpy.types.Operator):
         if not b.current_mapping_action:
             with b.rlog.check_dups() as log:
                 log.warning(f"There is no mapping for the cue {cue.key} in the capture. Ignoring", self.bctx.current_traceback)
-
             return
 
         name = f"{cue.info.key_displ}.{str(b.cue_index).zfill(3)}"

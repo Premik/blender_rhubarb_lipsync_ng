@@ -113,7 +113,7 @@ def iter_my_deps_from_annotations(cls: Type, my_classes: set[Type]) -> Generator
 
 
 def get_dependency_from_annotation(value: Any) -> Type:
-    if blender_version >= (2, 93):
+    if blender_version and blender_version >= (2, 93):
         if isinstance(value, bpy.props._PropertyDeferred):
             return value.keywords.get("type")
     else:

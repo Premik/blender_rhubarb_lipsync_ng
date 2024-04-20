@@ -72,6 +72,8 @@ class IconsManager:
 
 def addons_path() -> pathlib.Path:
     ap = bpy.utils.user_resource('SCRIPTS', path="addons")
+    if not ap:
+        return pathlib.Path()
     return pathlib.Path(ap)
 
 
