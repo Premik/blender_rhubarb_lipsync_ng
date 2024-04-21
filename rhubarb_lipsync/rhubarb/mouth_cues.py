@@ -11,7 +11,8 @@ log = logging.getLogger(__name__)
 
 def time2frame_float(time: float, fps: int, fps_base=1.0) -> float:
     assert fps > 0 and fps_base > 0, f"Can't convert to frame when fps is {fps}/{fps_base}"
-    return time * fps / fps_base
+    frame_float = time * fps / fps_base
+    return round(frame_float, 7)  # Round when very close to an integer value to gain better frame<=>time consistency
 
 
 def time2frame_nearest(time: float, fps: int, fps_base=1.0) -> int:
@@ -152,7 +153,7 @@ class MouthCueFrames:
 
     cue: MouthCue
     frame_cfg: FrameConfig = field(repr=False)
-    blend_in: float = 0
+    blend_in: float = field(default=0, repr=False)
 
     @docstring_from(MouthCue.get_start_frame_float)  # type: ignore[misc]
     @property
@@ -269,11 +270,11 @@ class CueProcessor:
 
     @docstring_from(frame2time)  # type: ignore[misc]
     def frame2time(self, frame: float) -> float:
-        return frame2time(frame, self.frame_cfg.fps, self.frame_cfg.fps_base)
+        return frame2time(frame - self.frame_cfg.offset, self.frame_cfg.fps, self.frame_cfg.fps_base)
 
     @docstring_from(time2frame_float)  # type: ignore[misc]
     def time2frame_float(self, t: float) -> float:
-        return time2frame_float(t, self.frame_cfg.fps, self.frame_cfg.fps_base)
+        return time2frame_float(t, self.frame_cfg.fps, self.frame_cfg.fps_base) + self.frame_cfg.offset
 
     def trim_long_cues(self, max_dur: float) -> int:
         modified = 0
@@ -337,7 +338,7 @@ class CueProcessor:
                 d = cf.pre_start_float - last_cue_start_frame_time
                 if d >= 0:  # The start time including the blend-in is after the previous cue first frame intersection
                     continue
-                assert blend_in_time + d >= 0, f"Cue {cf} start overlaps with previous cue. Blend-in time {self.blend_in_time} + {d} would be negative "
+                assert blend_in_time + d >= 0, f"Cue {cf} start overlaps with previous cue. Blend-in time {blend_in_time} + {d} would be negative "
                 cf.blend_in = blend_in_time + d  # Shrink the blend-in phase so the previous cue is fully pronounced at its first frame intersection
                 shrinked += 1
             last_cue_start_frame_time = self.frame2time(cf.start_frame_right)

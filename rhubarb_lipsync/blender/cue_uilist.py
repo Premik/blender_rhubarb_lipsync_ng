@@ -95,7 +95,7 @@ class MouthCueUIList(UIList):
             row = subs.row()  # Operator (0.15)
             op = row.operator(PlayRange.bl_idname, text="", icon="PLAY")
 
-            op.start_frame = int(cf.start_frame_float)  # Nearest whole frame before the exact time
+            op.start_frame = cf.start_frame_left
             op.play_frames = cf.duration_frames
 
     def draw_grid(self, layout: UILayout, item: MouthCueListItem, context: Context) -> None:

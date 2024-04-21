@@ -14,7 +14,21 @@ def enableDebug() -> None:
     rhubarb_command.log.setLevel(logging.DEBUG)
 
 
-# @pytest.mark.parametrize("offset", [0.0])
+@pytest.mark.parametrize(
+    "fcfg",
+    [
+        FrameConfig(60, 1, 0),
+        FrameConfig(60, 1, 10),
+        FrameConfig(2997, 100, -2),
+        FrameConfig(5, 1, 0),
+    ],
+    ids=[
+        "60fps no offset",
+        "60fps +10 frames shift",
+        "29.97fps -2 frames offset",
+        "5fps no offset",
+    ],
+)
 class TestCueFrames:
     def create_mcf_at(self, start_frame: float, duration_frames: float, fcfg: FrameConfig, key="A") -> MouthCueFrames:
         start = frame2time(start_frame, fcfg.fps, fcfg.fps_base)
@@ -22,9 +36,9 @@ class TestCueFrames:
         mc = MouthCue(key, start, end)
         return MouthCueFrames(mc, fcfg)
 
-    @pytest.fixture()
-    def fcfg(self) -> FrameConfig:
-        return FrameConfig(60, 1, 0)
+    # @pytest.fixture()
+    # def fcfg(self) -> FrameConfig:
+    #     return FrameConfig(60, 1, 0)
 
     @pytest.fixture(autouse=True)
     def setup_debug(self) -> None:
@@ -78,14 +92,13 @@ class TestCueFrames:
     def test_cue_processor_trim(self, fcfg: FrameConfig) -> None:
         # Two cues, first got trimmed, second doesn't
         cp = self.create_cue_processor(fcfg, 2, 7, 8)
-        o = fcfg.offset
 
-        assert cp.cue_frames[0].duration_frames == approx(5 + o)
-        assert cp.cue_frames[1].duration_frames == approx(1 + o)
-        max_dur = frame2time(2 + o, fcfg.fps, fcfg.fps_base)
+        assert cp.cue_frames[0].duration_frames == approx(5)
+        assert cp.cue_frames[1].duration_frames == approx(1)
+        max_dur = frame2time(2, fcfg.fps, fcfg.fps_base)
         cp.trim_long_cues(max_dur)
         assert cp.cue_frames[0].cue.duration == approx(max_dur)
-        assert cp.cue_frames[1].duration_frames == approx(1 + o)
+        assert cp.cue_frames[1].duration_frames == approx(1)
 
     def test_cue_processor_expand_short(self, fcfg: FrameConfig) -> None:
         # First cue is between frames 1 and 2, second crosses frame 2
@@ -108,20 +121,21 @@ class TestCueFrames:
         cp = self.create_cue_processor(fcfg, 1, 1.9, 2.3, 4.3)
         o = fcfg.offset
 
-        assert cp.cue_frames[0].duration_frames_float == pytest.approx(0.9 + o)
+        assert cp.cue_frames[0].duration_frames_float == pytest.approx(0.9)
         cp.round_ends_down()
-        assert cp.cue_frames[0].duration_frames_float == pytest.approx(0.9 + o)
+        assert cp.cue_frames[0].duration_frames_float == pytest.approx(0.9)
         assert cp.cue_frames[1].end_frame_float == pytest.approx(2.3 + o)
         assert cp.cue_frames[2].end_frame_float == pytest.approx(4 + o)
 
-    def test_cue_processor_blend_in(self, fcfg: FrameConfig) -> None:
+    @pytest.mark.parametrize('blend_in_duration_frames', [0.2, 0.5, 2])
+    def test_cue_processor_blend_in(self, fcfg: FrameConfig, blend_in_duration_frames: float) -> None:
         # The first cue crosses frame 1 and ends right after that
         # so the second cue blend-in would overlap and should get shrinked
         cp = self.create_cue_processor(fcfg, 0.5, 1.1, 4)
         o = fcfg.offset
 
-        blend_in_time = 0.02 + o
-        cp.set_blend_in_times(blend_in_time)
+        blend_in_duration = frame2time(blend_in_duration_frames, fcfg.fps, fcfg.fps_base)
+        assert cp.set_blend_in_times(blend_in_duration) == 1, "Expect exactly one cue to get blend-in section shrank"
 
-        assert cp.cue_frames[0].blend_in == approx(blend_in_time)
-        assert cp.cue_frames[1].pre_start_float == approx(cp.frame2time(1 + o))
+        assert cp.cue_frames[0].blend_in == approx(blend_in_duration)  # Cue1 - blend_in unchanged
+        assert cp.cue_frames[1].pre_start_float == approx(cp.frame2time(1 + o))  # Cue2 - (pre)starts at the whole frame of the previous one
