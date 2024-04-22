@@ -248,19 +248,13 @@ class BakeToNLA(bpy.types.Operator):
 
         name = f"{cue.info.key_displ}.{str(b.cue_index).zfill(3)}"
 
-        # Shift the start frame
-        start = cue_frames.start_frame_float + b.strip_placement_props.offset_start
-        # Calculate the desired strip length based on cue length and include the offset
-        desired_strip_duration = cue_frames.duration_frames_float + b.strip_placement_props.overlap_length
-        # Try to scale the strip to the cue duration with the blendings included.
+        start = cue_frames.pre_start_frame_float  # The clip starts slightly before the cue start driven by the blend-in value
+        end = cue_frames.end_frame_float + cue_frames.blend_in_frames  # Clips starts by blend_in_frames earlier
+        desired_strip_duration = cue_frames.duration_frames_float
+        # Try to scale the strip to the cue duration
         scale = b.current_mapping_action_scale(desired_strip_duration)
 
-        # Calculate the end frame based on the scale and the start. This is where the Action ends after the scaling (with offsets)
-        # end = start + b.current_mapping_action_length_frames * scale
-        # Set the strip end to the cue end (plus offset) no matter where the actual action ends.
-        end = cue_frames.end_frame_float + b.strip_placement_props.offset_end
-
-        # Crop the previous strip-end to make a room for the current strip start (if needed)
+        # Crop the previous strip-end to make room for the current strip start (if needed)
         if baking_utils.trim_strip_end_at(b.current_track, start):
             b.rlog.warning("Had to trim previous strip to make room for this one", self.bctx.current_traceback)
 
@@ -281,10 +275,11 @@ class BakeToNLA(bpy.types.Operator):
         strip.extrapolation = b.strip_placement_props.extrapolation
         strip.use_sync_length = b.strip_placement_props.use_sync_length
         strip.use_auto_blend = bool(b.strip_placement_props.blend_mode == "AUTOBLEND")
-        strip.blend_in = b.strip_placement_props.blend_in
-        strip.blend_out = b.strip_placement_props.blend_out
 
-    def bake_cue_on(self, obj: Object) -> None:
+        strip.blend_in = cue_frames.blend_in_frames
+        strip.blend_out = cue_frames.blend_out_frames
+
+    def bake_cue_on_object(self, obj: Object) -> None:
         b = self.bctx
 
         track = b.current_track
@@ -300,7 +295,7 @@ class BakeToNLA(bpy.types.Operator):
             # print(self.bctx.cue_index)
             if log.isEnabledFor(logging.TRACE):  # type: ignore
                 log.trace(f"Baking on object {obj} ")  # type: ignore
-            self.bake_cue_on(obj)
+            self.bake_cue_on_object(obj)
 
     def execute(self, ctx: Context) -> set[str]:
         self.bctx = baking_utils.BakingContext(ctx)
