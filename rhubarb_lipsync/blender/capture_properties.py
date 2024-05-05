@@ -1,8 +1,8 @@
 import bisect
-from contextlib import contextmanager
 import logging
 import math
 import pathlib
+from contextlib import contextmanager
 from functools import cached_property
 from operator import attrgetter
 from typing import Any, Callable, Generator, Iterable, Optional

@@ -14,7 +14,8 @@ from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, Ca
 from rhubarb_lipsync.blender.mapping_properties import MappingItem, MappingProperties, NlaTrackRef
 from rhubarb_lipsync.blender.preferences import CueListPreferences, MappingPreferences, RhubarbAddonPreferences
 from rhubarb_lipsync.blender.strip_placement_properties import StripPlacementProperties
-from rhubarb_lipsync.rhubarb.mouth_cues import CueProcessor, FrameConfig, MouthCueFrames, duration_scale_rate
+from rhubarb_lipsync.rhubarb.cue_processor import CueProcessor
+from rhubarb_lipsync.rhubarb.mouth_cues import FrameConfig, MouthCueFrames, duration_scale_rate
 from rhubarb_lipsync.rhubarb.mouth_shape_info import MouthShapeInfos
 
 log = logging.getLogger(__name__)
