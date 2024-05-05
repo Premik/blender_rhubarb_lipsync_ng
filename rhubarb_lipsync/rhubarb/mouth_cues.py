@@ -258,7 +258,7 @@ class MouthCueFrames:
     def blend_out_frames(self) -> float:
         # Blend-out starts right after the cue hits a whole frame number down to the cue end
         c = self.frame_cfg
-        return self.end_frame_float + self.blend_in_frames - self.start_frame_right
+        return self.end_frame_float - self.start_frame_right
 
     @property
     def blend_in_frames(self) -> float:
@@ -276,6 +276,9 @@ class MouthCueFrames:
     @property
     def duration_str(self) -> str:
         return f"{self.cue.duration:0.2f}"
+
+    def __repr__(self) -> str:
+        return f"'{self.cue.key}' {self.cue.start:0.2f}({self.start_frame_float:0.1f})-{self.cue.end:0.2f}({self.end_frame_float:0.1f})"
 
 
 if __name__ == '__main__':

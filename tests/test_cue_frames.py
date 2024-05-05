@@ -125,9 +125,12 @@ class TestCueFrames:
 
         assert cp.cue_frames[0].duration_frames_float == pytest.approx(0.9)
         cp.round_ends_down()
+        assert cp.cue_frames[0].blend_out_frames == pytest.approx(0.9)
         assert cp.cue_frames[0].duration_frames_float == pytest.approx(0.9)
         assert cp.cue_frames[1].end_frame_float == pytest.approx(2.3 + o)
+        assert cp.cue_frames[1].blend_out_frames == pytest.approx(0.3)
         assert cp.cue_frames[2].end_frame_float == pytest.approx(4 + o)
+        assert cp.cue_frames[2].blend_out_frames == pytest.approx(1)
 
     @pytest.mark.parametrize('blend_in_duration_frames', [0.2, 0.5, 2])
     def test_cue_processor_blend_in(self, fcfg: FrameConfig, blend_in_duration_frames: float) -> None:

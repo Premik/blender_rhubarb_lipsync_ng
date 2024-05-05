@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional
 
 from rhubarb_lipsync.rhubarb.mouth_cues import FrameConfig, MouthCueFrames, docstring_from, frame2time, log, time2frame_float
@@ -9,7 +9,7 @@ class CueProcessor:
     """Holds and processes the list of detected Mouth cues before they are baked."""
 
     frame_cfg: FrameConfig
-    cue_frames: list[MouthCueFrames]
+    cue_frames: list[MouthCueFrames] = field(repr=False)
 
     @docstring_from(frame2time)  # type: ignore[misc]
     def frame2time(self, frame: float) -> float:
@@ -63,7 +63,7 @@ class CueProcessor:
                 continue
             new_end_frame = cf.end_frame_left
             if abs(cf.start_frame_right - new_end_frame) < 0.0001:
-                skipped += 1  # The new end would match the start frame rounded up. So there wouldn't be and blend-out section
+                skipped += 1  # The new end would match the start frame rounded up. So there wouldn't be a blend-out section
                 continue  # Leave it out as it is still a short Cue which just happend to be crossing a frame
             cf.cue.end = self.frame2time(new_end_frame)
             modified += 1

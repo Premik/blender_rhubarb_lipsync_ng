@@ -249,7 +249,7 @@ class BakeToNLA(bpy.types.Operator):
         name = f"{cue.info.key_displ}.{str(b.cue_index).zfill(3)}"
 
         start = cue_frames.pre_start_frame_float  # The clip starts slightly before the cue start driven by the blend-in value
-        end = cue_frames.end_frame_float + cue_frames.blend_in_frames  # Clips starts by blend_in_frames earlier
+
         desired_strip_duration = cue_frames.duration_frames_float
         # Try to scale the strip to the cue duration
         scale = b.current_mapping_action_scale(desired_strip_duration)
@@ -266,7 +266,7 @@ class BakeToNLA(bpy.types.Operator):
         strip.frame_start = start  # Set start frame again as float (ctor takes only int)
         strip.scale = scale
         # if b.ctx.scene.show_subframe:
-        strip.frame_end = end
+        strip.frame_end = cue_frames.end_frame_float
 
         self.strips_added += 1
 
