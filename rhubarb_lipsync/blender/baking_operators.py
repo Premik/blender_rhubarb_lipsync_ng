@@ -17,6 +17,19 @@ from rhubarb_lipsync.rhubarb.rhubarb_command import MouthCue
 log = logging.getLogger(__name__)
 
 
+def time_frame_predefined_vals(ctx: Context, times: list[float], frames: list[float]) -> tuple[str, str, str, str, int]:
+    fps = ctx.scene.render.fps
+    fps_base = ctx.scene.render.fps_base
+    frames = [(frame2time(f, fps, fps_base) * 1000, f, "SNAP_INCREMENT") for f in frames]
+    mss = [(s, time2frame_float(s / 1000, fps, fps_base), "TIME") for s in times]
+    vals = frames + mss
+
+    def fields(i: int, ms: float, frame: float, ico: str) -> tuple[str, str, str, str, int]:
+        return (f"{frame}", f"{ms:02}ms ({frame:0.2f} frames)", "", ico, i)
+
+    return [fields(i, int(v[0]), v[1], v[2]) for i, v in enumerate(vals)]
+
+
 class RemoveCapturedNlaStrips(bpy.types.Operator):
     """Remove NLA Strips on bake-selected NLA Tracks on a given frame range. Making room for another bake."""
 
@@ -99,10 +112,6 @@ class PlacementScaleFromPreset(bpy.types.Operator):
         return {'FINISHED'}
 
 
-def blend_in_values2(prop_group: 'PlacementBlendInFromPreset', ctx: Context) -> list[tuple[str, str, str]]:
-    return [('0,0', 'No offset', "")]
-
-
 class PlacementBlendInFromPreset(bpy.types.Operator):
     """Set the strip blend-in time/frames from the preconfigured values"""
 
@@ -111,31 +120,21 @@ class PlacementBlendInFromPreset(bpy.types.Operator):
     bl_options = {'UNDO'}
 
     vals_frames = [0.5, 0.75, 1, 1.5]
-    vals_ms = [10, 20, 30, 40, 50, 60, 70]
+    vals_times = [10, 20, 30, 40, 50, 60, 70]
 
-    @staticmethod
-    def get_predefined_vals(ctx: Context) -> list[tuple[float, float]]:
-        fps = ctx.scene.render.fps
-        fps_base = ctx.scene.render.fps_base
-        frames = [(frame2time(f, fps, fps_base), f) for f in PlacementBlendInFromPreset.vals_frames]
-        mss = [(s, time2frame_float(s, fps, fps_base)) for s in PlacementBlendInFromPreset.vals_ms]
-        return frames + mss
-
-    @staticmethod
-    def blend_in_values(prop_group: 'PlacementBlendInFromPreset', ctx: Context) -> list[tuple[str, str, str]]:
-        def fields(i: int, ms: float, frame: float) -> tuple[str, str, str]:
-            return (f"v{i}", f"{ms:1.0f}ms ({frame:0.2f} frames)", "")
-            # return (a.name, a.name, a.name_full)
-
-        return [('0,0', 'No offset', "")]
-        # return [fields(i, v[0], v[1]) for i, v in enumerate(PlacementBlendInFromPreset.get_predefined_vals(ctx))]
-
-    blend_in_preset: EnumProperty(name="Blend in Preset", items=blend_in_values2)  # type: ignore
+    blend_in_preset: EnumProperty(  # type: ignore
+        name="Blend in Preset",
+        items=lambda _, ctx: time_frame_predefined_vals(
+            ctx,
+            PlacementBlendInFromPreset.vals_times,
+            PlacementBlendInFromPreset.vals_frames,
+        ),
+    )
 
     def execute(self, ctx: Context) -> set[str]:
         mprops: MappingProperties = MappingProperties.from_context(ctx)
         sprops: StripPlacementProperties = mprops.strip_placement
-
+        sprops.blend_in_frames = float(self.blend_in_preset)
         return {'FINISHED'}
 
 

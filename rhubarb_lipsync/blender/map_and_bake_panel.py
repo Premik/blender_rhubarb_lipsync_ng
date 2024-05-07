@@ -58,7 +58,7 @@ class MappingListOptionsPanel(bpy.types.Panel):
 
 class MappingAndBakingPanel(bpy.types.Panel):
     bl_idname = "RLPS_PT_map_and_bake"
-    bl_label = "RLPS: Cue mapping and baking"
+    bl_label = "RLPS: Cue Mapping and Baking"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_category = "RLSP"
@@ -121,7 +121,7 @@ class MappingAndBakingPanel(bpy.types.Panel):
 
         row = self.layout.row(align=True)
         strip_placement: StripPlacementProperties = mprops.strip_placement
-        if not ui_utils.draw_expandable_header(prefs, "strip_placement_setting_panel_expanded", "Strip placement settings", row):
+        if not ui_utils.draw_expandable_header(prefs, "strip_placement_setting_panel_expanded", "Strip Placement Settings", row):
             return
         sideRow = row.row(align=True)
         sideRow.label(text="")  # Spacer to force icons alight to the right
@@ -139,9 +139,9 @@ class MappingAndBakingPanel(bpy.types.Panel):
         self.layout.use_property_decorate = False
         row = self.layout.row(align=True)
 
-        row.prop(strip_placement, 'blend_in_frames', text="Blend In")
+        row.prop(strip_placement, 'blend_in_frames', text="Blend in Frames")
         id = baking_operators.PlacementBlendInFromPreset.bl_idname
-        row.operator_menu_enum(id, "blend_in_values", text="", icon="DOWNARROW_HLT")
+        row.operator_menu_enum(id, "blend_in_preset", text="", icon="DOWNARROW_HLT")
 
         if strip_placement.use_auto_blend:
             row.enabled = False

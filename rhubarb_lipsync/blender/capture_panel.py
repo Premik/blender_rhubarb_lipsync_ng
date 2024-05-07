@@ -80,7 +80,7 @@ class CueListColsVisibilityPanel(bpy.types.Panel):
 
 class CaptureMouthCuesPanel(bpy.types.Panel):
     bl_idname = "RLPS_PT_capture"
-    bl_label = "RLPS: Sound setup and cues capture"
+    bl_label = "RLPS: Sound Setup and Cues Capture"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_category = "RLSP"
@@ -110,7 +110,7 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
         else:
             path = pathlib.Path(sound.filepath)
             errors = not sound or sound.packed_file or not path.exists or not props.is_sound_format_supported()
-        if not ui_utils.draw_expandable_header(prefs, "sound_source_panel_expanded", "Input sound setup", self.layout, errors):
+        if not ui_utils.draw_expandable_header(prefs, "sound_source_panel_expanded", "Input Sound Setup", self.layout, errors):
             return not errors
         layout = self.layout
 
@@ -188,25 +188,25 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
         props = CaptureListProperties.capture_from_context(self.ctx)
         prefs = RhubarbAddonPreferences.from_context(self.ctx)
 
-        if not ui_utils.draw_expandable_header(prefs, "info_panel_expanded", "Additional info", self.layout):
+        if not ui_utils.draw_expandable_header(prefs, "info_panel_expanded", "Additional Info", self.layout):
             return
         box = self.layout.box().column(align=True)
         # line = layout.split()
         if props and props.sound:
             sound: Sound = props.sound
             line = box.split()
-            line.label(text="Sample rate")
+            line.label(text="Sample Rate")
             line.label(text=f"{sound.samplerate} Hz")
             line = box.split()
             line.label(text="Channels")
             line.label(text=str(sound.channels))
 
             line = box.split()
-            line.label(text="File extension")
+            line.label(text="File Extension")
             line.label(text=props.sound_file_extension)
             box.separator()
         line = box.split()
-        line.label(text="Rhubarb version")
+        line.label(text="Rhubarb Version")
         ver = rhubarb_operators.GetRhubarbExecutableVersion.get_cached_value(self.ctx)
         if ver:  # Cached value, just show
             line.label(text=ver)

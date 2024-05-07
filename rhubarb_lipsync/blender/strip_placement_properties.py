@@ -151,7 +151,7 @@ class StripPlacementProperties(PropertyGroup):
     )
 
     blend_in_frames: FloatProperty(  # type: ignore
-        "Blend In",
+        "Blend In Frames",
         description="Number of frames at start of strip to fade in the influence",
         min=0,
         soft_max=10,
