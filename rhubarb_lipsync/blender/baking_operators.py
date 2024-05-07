@@ -11,6 +11,7 @@ from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, Ca
 from rhubarb_lipsync.blender.mapping_properties import MappingProperties, StripPlacementProperties
 from rhubarb_lipsync.blender.preferences import CueListPreferences
 from rhubarb_lipsync.blender.ui_utils import IconsManager
+from rhubarb_lipsync.rhubarb.mouth_cues import FrameConfig, MouthCue, MouthCueFrames, duration_scale, frame2time, time2frame_float
 from rhubarb_lipsync.rhubarb.rhubarb_command import MouthCue
 
 log = logging.getLogger(__name__)
@@ -72,7 +73,7 @@ class PlacementScaleFromPreset(bpy.types.Operator):
     """Set the Blend In/Out value based on the strip Placement offsets"""
 
     bl_idname = "rhubarb.placement_set_scale"
-    bl_label = "Set scale ranges from predefined value"
+    bl_label = "Set scale ranges from predefined values"
     bl_options = {'UNDO'}
 
     scale_type: EnumProperty(  # type: ignore
@@ -98,35 +99,42 @@ class PlacementScaleFromPreset(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class PlacementBlendInOutFromOverlap(bpy.types.Operator):
-    """Set the placement scale value based on the preconfigured values"""
+def blend_in_values2(prop_group: 'PlacementBlendInFromPreset', ctx: Context) -> list[tuple[str, str, str]]:
+    return [('0,0', 'No offset', "")]
 
-    bl_idname = "rhubarb.placement_set_blendinout"
-    bl_label = "Set Blend In/Out from Offsets"
+
+class PlacementBlendInFromPreset(bpy.types.Operator):
+    """Set the strip blend-in time/frames from the preconfigured values"""
+
+    bl_idname = "rhubarb.placement_set_blendin"
+    bl_label = "Set Blend in from predefined values"
     bl_options = {'UNDO'}
 
-    sync_type: EnumProperty(  # type: ignore
-        name="Set blend in/out base on",
-        items=[
-            ('ZERO', 'in=0 out=0', "Zero blend in/out"),
-            ('START_END', 'From Offset: in=start out=end', "Based on offset start and offset end"),
-            ('OVERLAP', 'From Offset in=out=(end-start)', "Based on the overalp"),
-        ],
-        default='START_END',
-    )
+    vals_frames = [0.5, 0.75, 1, 1.5]
+    vals_ms = [10, 20, 30, 40, 50, 60, 70]
+
+    @staticmethod
+    def get_predefined_vals(ctx: Context) -> list[tuple[float, float]]:
+        fps = ctx.scene.render.fps
+        fps_base = ctx.scene.render.fps_base
+        frames = [(frame2time(f, fps, fps_base), f) for f in PlacementBlendInFromPreset.vals_frames]
+        mss = [(s, time2frame_float(s, fps, fps_base)) for s in PlacementBlendInFromPreset.vals_ms]
+        return frames + mss
+
+    @staticmethod
+    def blend_in_values(prop_group: 'PlacementBlendInFromPreset', ctx: Context) -> list[tuple[str, str, str]]:
+        def fields(i: int, ms: float, frame: float) -> tuple[str, str, str]:
+            return (f"v{i}", f"{ms:1.0f}ms ({frame:0.2f} frames)", "")
+            # return (a.name, a.name, a.name_full)
+
+        return [('0,0', 'No offset', "")]
+        # return [fields(i, v[0], v[1]) for i, v in enumerate(PlacementBlendInFromPreset.get_predefined_vals(ctx))]
+
+    blend_in_preset: EnumProperty(name="Blend in Preset", items=blend_in_values2)  # type: ignore
 
     def execute(self, ctx: Context) -> set[str]:
         mprops: MappingProperties = MappingProperties.from_context(ctx)
         sprops: StripPlacementProperties = mprops.strip_placement
-        if self.sync_type == "ZERO":
-            sprops.blend_in = 0
-            sprops.blend_out = 0
-        if self.sync_type == "START_END":
-            sprops.blend_in = -sprops.offset_start
-            sprops.blend_out = sprops.offset_end
-        if self.sync_type == "OVERLAP":
-            sprops.blend_in = sprops.overlap_length
-            sprops.blend_out = sprops.overlap_length
 
         return {'FINISHED'}
 
@@ -274,7 +282,7 @@ class BakeToNLA(bpy.types.Operator):
         strip.blend_type = b.strip_placement_props.blend_type
         strip.extrapolation = b.strip_placement_props.extrapolation
         strip.use_sync_length = b.strip_placement_props.use_sync_length
-        strip.use_auto_blend = bool(b.strip_placement_props.blend_mode == "AUTOBLEND")
+        strip.use_auto_blend = b.strip_placement_props.use_auto_blend
 
         strip.blend_in = cue_frames.blend_in_frames
         strip.blend_out = cue_frames.blend_out_frames
@@ -392,7 +400,6 @@ class BakeToNLA(bpy.types.Operator):
 
     def draw(self, ctx: Context) -> None:
         self.bctx = baking_utils.BakingContext(ctx)
-        clp: CueListPreferences = self.bctx.prefs.cue_list_prefs
 
         layout = self.layout
         rootProps = self.bctx.clist_props
@@ -403,15 +410,6 @@ class BakeToNLA(bpy.types.Operator):
         row.prop(self.bctx.cprops, "start_frame")
         if self.bctx.the_last_cue:
             row.label(text=f"End frame: {self.bctx.the_last_cue.end_frame_str}")
-
-        row = layout.row(align=False)
-        row.prop(self, "trim_cue_excess", text=f"Trim cues longer than")
-        row = row.row()
-        if not self.trim_cue_excess:
-            row.enabled = False
-        row.prop(clp, "highlight_long_cues")
-        layout.prop(ctx.scene, "show_subframe", text="Show subframes")
-        layout.separator()
         layout.prop(self.bctx.mprefs, "object_selection_filter_type", text="Objects to bake")
         self.draw_info()
         self.draw_validation()

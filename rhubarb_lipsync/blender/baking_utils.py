@@ -208,8 +208,8 @@ class BakingContext:
     def optimize_cues(self) -> None:
         clp: CueListPreferences = self.prefs.cue_list_prefs
         max_dur = clp.highlight_long_cues
-        # blend_in = self.strip_placement_props.blend_in
-        blend_in = 0.02
+        blend_in = self.cue_processor.frame2time(self.strip_placement_props.blend_in_frames)
+        # blend_in = 0.02
 
         res = self.cue_processor.optimize_cues(max_dur, blend_in)
         if res:

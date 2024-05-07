@@ -73,7 +73,7 @@ class MouthCueUIList(UIList):
             long = clp.highlight_long_cues
             short = clp.highlight_short_cues
             if (long > 0 and item.cue.duration > long) or (short >= 0 and item.cue.duration <= short):
-                row.alert = True  # Too long/short cue is suspisous, unless it is silence
+                row.alert = True  # Too long/short cue is suspicious, unless it is silence
 
         cf = item.cue_frames(context)
         if clp.show_col_start_frame:

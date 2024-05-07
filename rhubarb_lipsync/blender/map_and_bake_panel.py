@@ -117,6 +117,8 @@ class MappingAndBakingPanel(bpy.types.Panel):
     def draw_strip_placement_settings(self) -> None:
         mprops: MappingProperties = MappingProperties.from_context(self.ctx)
         prefs = RhubarbAddonPreferences.from_context(self.ctx)
+        clp: CueListPreferences = prefs.cue_list_prefs
+
         row = self.layout.row(align=True)
         strip_placement: StripPlacementProperties = mprops.strip_placement
         if not ui_utils.draw_expandable_header(prefs, "strip_placement_setting_panel_expanded", "Strip placement settings", row):
@@ -136,16 +138,31 @@ class MappingAndBakingPanel(bpy.types.Panel):
 
         self.layout.use_property_decorate = False
         row = self.layout.row(align=True)
+
+        row.prop(strip_placement, 'blend_in_frames', text="Blend In")
+        id = baking_operators.PlacementBlendInFromPreset.bl_idname
+        row.operator_menu_enum(id, "blend_in_values", text="", icon="DOWNARROW_HLT")
+
+        if strip_placement.use_auto_blend:
+            row.enabled = False
+
+        row = self.layout.row(align=True)
+        row.label(text=f"Trim cues longer than")
+        row.prop(clp, "highlight_long_cues")
+
+        row = self.layout.row(align=True)
         row.prop(strip_placement, 'scale_min', text="Scale Min")
         row.prop(strip_placement, 'scale_max', text="Max")
         id = baking_operators.PlacementScaleFromPreset.bl_idname
         row.operator_menu_enum(id, "scale_type", text="", icon="DOWNARROW_HLT")
+        self.layout.prop(self.ctx.scene, "show_subframe", text="Show subframes")
+        self.layout.separator()
 
-        row = self.layout.row(align=True)
-        row.prop(strip_placement, 'offset_start', text="Offset Start")
-        row.prop(strip_placement, 'offset_end', text="End")
-        id = baking_operators.PlacementOffsetFromPreset.bl_idname
-        row.operator_menu_enum(id, "offset_type", text="", icon="DOWNARROW_HLT")
+        # row = self.layout.row(align=True)
+        # row.prop(strip_placement, 'offset_start', text="Offset Start")
+        # row.prop(strip_placement, 'offset_end', text="End")
+        # id = baking_operators.PlacementOffsetFromPreset.bl_idname
+        # row.operator_menu_enum(id, "offset_type", text="", icon="DOWNARROW_HLT")
 
         col = self.layout.column(align=False)
         col.use_property_split = True
@@ -156,21 +173,17 @@ class MappingAndBakingPanel(bpy.types.Panel):
         col = self.layout.column(align=False)
         col.use_property_split = True
         col.prop(strip_placement, 'blend_type')
-        if not strip_placement.blend_mode == "FIXED":
-            row.enabled = False
 
         # row = self.layout.row(align=True)
         # row.prop(strip_placement, 'blend_mode', expand=True)
 
         # blend_mode: str = strip_placement.blend_mode
         # if blend_mode == "FIXED":
-        row = self.layout.row(align=True)
-        row.prop(strip_placement, 'blend_in', text="Blend In")
-        row.prop(strip_placement, 'blend_out', text="Out")
-        id = baking_operators.PlacementBlendInOutFromOverlap.bl_idname
-        row.operator_menu_enum(id, "sync_type", text="", icon="DOWNARROW_HLT")
+        # row = self.layout.row(align=True)
+        # id = baking_operators.PlacementBlendInOutFromOverlap.bl_idname
+        # row.operator_menu_enum(id, "sync_type", text="", icon="DOWNARROW_HLT")
 
-        # self.layout.prop(strip_placement, 'use_auto_blend')
+        self.layout.prop(strip_placement, 'use_auto_blend')
 
     def draw(self, context: Context) -> None:
         try:

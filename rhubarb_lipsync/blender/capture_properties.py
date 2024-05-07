@@ -262,9 +262,6 @@ class ResultLogItemProperties(PropertyGroup):
     )
     trace: StringProperty("trace", description="Where to log even happend (object, frame..)")  # type: ignore
 
-    def __str__(self) -> str:
-        return self.__repr__()
-
     def __repr__(self) -> str:
         return f"{self.level}:{self.msg}\n{self.trace}"
 

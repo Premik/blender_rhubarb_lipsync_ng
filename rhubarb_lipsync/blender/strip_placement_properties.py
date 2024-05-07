@@ -150,69 +150,19 @@ class StripPlacementProperties(PropertyGroup):
         override={'LIBRARY_OVERRIDABLE'},
     )
 
-    blend_mode: EnumProperty(  # type: ignore
-        name="Blend Mode",
-        description=textwrap.dedent(
-            """\
-            How to setup blending of the Strips between cues.
-            """
-        ),
-        items=[
-            (
-                "AUTOBLEND",
-                "Auto blend",
-                textwrap.dedent(
-                    """\
-                    
-                    Number of frames for Blending In/Out is automatically determined from overlapping strips.
-                    This is Blender inbuilt method.
-                    """
-                ),
-            ),
-            (
-                "FIXED",
-                "Fixed",
-                textwrap.dedent(
-                    """\
-                     
-                    Blend in/out values is set to a fixed number of frames.
-                    This method was used by the older version of the lipsync plugin. 
-                    """
-                ),
-            ),
-            (
-                "PROPORTIONAL",
-                "Proportional",
-                textwrap.dedent(
-                    """\
-                     
-                    (Recommended) 
-                    Blend in/out values are scaled proportionally to the Strip length. 
-                    This method should produce more fluent animation with less "freezing" frames.  
-                    Especially for longer strips and/or higher fps values. """
-                ),
-            ),
-        ],
-        default="PROPORTIONAL",
-        options={'LIBRARY_EDITABLE'},
-        override={'LIBRARY_OVERRIDABLE'},
-    )
-
-    blend_in: FloatProperty(  # type: ignore
+    blend_in_frames: FloatProperty(  # type: ignore
         "Blend In",
-        description="Number of frames at start of strip to fade in influence",
+        description="Number of frames at start of strip to fade in the influence",
         min=0,
         soft_max=10,
         default=1,
         options={'LIBRARY_EDITABLE'},
         override={'LIBRARY_OVERRIDABLE'},
     )
-    blend_out: FloatProperty(  # type: ignore
-        "Blend Out",
-        description="Number of frames at start of strip to fade out influence",
-        min=0,
-        soft_max=10,
-        default=1,
+    use_auto_blend: BoolProperty(  # type: ignore
+        default=False,
+        description="Number of frames for Blending In/Out is automatically determined from overlapping strips",
+        name="Auto Blend In/Out",
         options={'LIBRARY_EDITABLE'},
         override={'LIBRARY_OVERRIDABLE'},
     )

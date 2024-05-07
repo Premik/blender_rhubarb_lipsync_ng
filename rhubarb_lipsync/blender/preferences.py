@@ -29,14 +29,14 @@ def local_executable_path(verify=True) -> pathlib.Path:
 
 class CueListPreferences(PropertyGroup):
     highlight_long_cues: FloatProperty(  # type: ignore
-        name="Long cue duration (s)",
+        name="Duration (sec)",
         description="If a captured cue is longer that this given time (in second) the cue is drawn in red in the list. Set to -1 to disable.",
         default=0.20,
         soft_min=0.05,
         soft_max=2,
     )
     highlight_short_cues: FloatProperty(  # type: ignore
-        name="Short cue duration (s)",
+        name="Duration (sec)",
         description="If a captured cue is shorter that this given time (in second) the cue is drawn in red in the list. Set to -1 to disable.",
         default=0.01,
         soft_min=0.005,
@@ -232,8 +232,7 @@ class RhubarbAddonPreferences(AddonPreferences):
     info_panel_expanded: BoolProperty(default=False)  # type: ignore
     sound_source_panel_expanded: BoolProperty(default=True)  # type: ignore
     caputre_panel_expanded: BoolProperty(default=True)  # type: ignore
-    strip_placement_setting_panel_expanded: BoolProperty(default=True)  # type: ignore
-    strip_blending_panel_expanded: BoolProperty(default=True)  # type: ignore
+    strip_placement_setting_panel_expanded: BoolProperty(default=False)  # type: ignore
     mapping_list_panel_expanded: BoolProperty(default=True)  # type: ignore
     bake_info_panel_expanded: BoolProperty(default=True)  # type: ignore
     bake_errors_panel_expanded: BoolProperty(default=True)  # type: ignore
