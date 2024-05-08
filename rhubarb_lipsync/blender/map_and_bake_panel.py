@@ -33,7 +33,7 @@ class MappingListOptionsPanel(bpy.types.Panel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "HEADER"
 
-    # bl_category = "RLSP"
+    # bl_category = "RLPS"
 
     def draw(self, context: Context) -> None:
         prefs = RhubarbAddonPreferences.from_context(context)
@@ -61,7 +61,7 @@ class MappingAndBakingPanel(bpy.types.Panel):
     bl_label = "RLPS: Cue Mapping and Baking"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
-    bl_category = "RLSP"
+    bl_category = "RLPS"
     bl_options = {'DEFAULT_CLOSED'}
     bl_order = 1
 
@@ -157,7 +157,7 @@ class MappingAndBakingPanel(bpy.types.Panel):
         row.prop(strip_placement, 'scale_max', text="Max")
         id = baking_operators.PlacementScaleFromPreset.bl_idname
         row.operator_menu_enum(id, "scale_type", text="", icon="DOWNARROW_HLT")
-        self.layout.prop(self.ctx.scene, "show_subframe", text="Show subframes")
+        # self.layout.prop(self.ctx.scene, "show_subframe", text="Show subframes")
         self.layout.separator()
 
         # row = self.layout.row(align=True)

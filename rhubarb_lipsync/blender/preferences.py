@@ -194,7 +194,7 @@ class RhubarbAddonPreferences(AddonPreferences):
         name="Capture tab name",
         description="Name of the tab in the 3D view sidebar where the 'Sound setup and capture' panel is put into."
         + " Change this to make the name shorter or more description or to share same tab with other plugins.",
-        default="RLSP",
+        default="RLPS",
         update=capture_tab_name_updated,
     )
 
@@ -202,7 +202,7 @@ class RhubarbAddonPreferences(AddonPreferences):
         name="Mapping tab name",
         description="Name of the tab in the 3D view sidebar where the 'Cue mapping and baking' panel is put into."
         + " Change this to make the name shorter or more description or to share same tab with other plugins.",
-        default="RLSP",
+        default="RLPS",
         update=map_tab_name_updated,
     )
 

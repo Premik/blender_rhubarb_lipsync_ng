@@ -22,18 +22,35 @@ bl_info = {
 }
 
 
+def is_blender_in_debug() -> bool:
+    '''Whether Blender was started with --debug or --debug-python flags'''
+    return bpy.app.debug or bpy.app.debug_python
+
+
 def init_loggers(prefs: RhubarbAddonPreferences | None) -> None:
+    if is_blender_in_debug():
+        print("RLPS: enter init_loggers() ")
     logManager.init(rhubarb_lipsync.blender.auto_load.modules)
 
-    if hasattr(prefs, 'log_level') and prefs.log_level != 0:  # 0 default level
-        logManager.set_level(prefs.log_level)
+    if is_blender_in_debug():  # If Blender is in debug, force TRACE loglevel
+        logManager.set_trace()
+        print(f"RLPS Set TRACE level for {len(logManager.logs)} loggers")
+        logManager.ensure_console_handler()
+    else:
+        if hasattr(prefs, 'log_level') and prefs.log_level != 0:  # 0 default level
+            logManager.set_level(prefs.log_level)
+    logManager.ensure_console_handler
 
 
 # print(f"FILE:  {__file__}")
+if is_blender_in_debug():
+    print("RLPS: before discovering python modules ")
 rhubarb_lipsync.blender.auto_load.init(__file__)
 
 
 def register() -> None:
+    if is_blender_in_debug():
+        print("RLPS: enter register() ")
     rhubarb_lipsync.blender.auto_load.register()
     bpy.types.Scene.rhubarb_lipsync_captures = PointerProperty(type=CaptureListProperties)
     bpy.types.Object.rhubarb_lipsync_mapping = PointerProperty(
@@ -47,14 +64,18 @@ def register() -> None:
     if hasattr(prefs, 'capture_tab_name'):  # Re-set the tab names in case they differ from defaults
         prefs.capture_tab_name_updated(bpy.context)
         prefs.map_tab_name_updated(bpy.context)
+    if is_blender_in_debug():
+        print("RLPS: exit register() ")
 
 
 def unregister() -> None:
+    IconsManager.unregister()
+    # if 'logManager' in globals():
+    #     global logManager
+    #     del logManager
     rhubarb_lipsync.blender.auto_load.unregister()
     del bpy.types.Scene.rhubarb_lipsync_captures
     del bpy.types.Object.rhubarb_lipsync_mapping
-
-    IconsManager.unregister()
 
 
 # bpy.utils.register_classes_factory

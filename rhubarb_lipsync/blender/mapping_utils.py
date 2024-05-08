@@ -141,7 +141,7 @@ def activate_mapping_item(ctx: bpy.types.Context, mi: 'mapping_properties.Mappin
     if not bool(on_object.animation_data):
         on_object.animation_data_create()  # Ensure the object has animation data
     on_object.animation_data.action = mi.action
-    # TODO - mute the RLSP (or any track?) which affects the object
+    # TODO - mute the RLPS (or any track?) which affects the object
 
 
 def deactivate_mapping_item(ctx: bpy.types.Context, on_object: Object) -> None:

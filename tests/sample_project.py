@@ -334,7 +334,7 @@ class SampleProject:
 
     def add_track(self, t: NlaTrackRef, track_index: int) -> NlaTrackRef:
         """Add a new NLA Track and return the updated reference to it"""
-        name = f"RLSP Track {track_index}"
+        name = f"RLPS Track {track_index}"
         field_name = f"nla_track{track_index}"
         ui_utils.assert_op_ret(bpy.ops.rhubarb.new_nla_track(name=name, track_field_name=field_name))
         assert len(list(t.items())) > 0, "After a track was created there is still selectable track"

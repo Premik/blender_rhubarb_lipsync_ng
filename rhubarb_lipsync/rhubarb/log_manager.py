@@ -3,6 +3,7 @@ import pathlib
 from functools import cached_property
 from types import ModuleType
 from typing import Optional
+import sys
 
 
 # https://stackoverflow.com/questions/2183233/how-to-add-a-custom-loglevel-to-pythons-logging-facility/35804945#35804945
@@ -109,6 +110,9 @@ class LogManager:
     def set_debug(self) -> None:
         self.set_level(logging.DEBUG)
 
+    def set_trace(self) -> None:
+        self.set_level(LogManager.TRACE_LEVEL)
+
     def validate_log_file(self) -> str:
         p = self.log_file_path
         if not p:
@@ -164,6 +168,22 @@ class LogManager:
         if self.file_handler is not None:
             return "ENABLED"
         return "FAILED"
+
+    @cached_property
+    def console_handler(self) -> logging.StreamHandler:
+        console_formatter = logging.Formatter(logging.BASIC_FORMAT)
+        console_handler = logging.StreamHandler(sys.stdout)
+        console_handler.setFormatter(console_formatter)
+        console_handler.setLevel(1)  # All
+        return console_handler
+
+    def ensure_console_handler(self) -> None:
+        added = 0
+        for logger in self.logs:
+            if not any(handler == self.console_handler for handler in logger.handlers):
+                logger.addHandler(self.console_handler)
+                added += 1
+        print(f"Added console handler on {added} loggers.")
 
     @staticmethod
     def level2name(level: int) -> str:

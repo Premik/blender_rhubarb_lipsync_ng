@@ -22,7 +22,7 @@ class CaptureExtraOptionsPanel(bpy.types.Panel):
     bl_label = "RLPS: Additional capture options"
     bl_space_type = "PROPERTIES"
     bl_region_type = "HEADER"
-    # bl_category = "RLSP"
+    # bl_category = "RLPS"
 
     def draw(self, context: Context) -> None:
         prefs = RhubarbAddonPreferences.from_context(context)
@@ -50,7 +50,7 @@ class CueListOptionsPanel(bpy.types.Panel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "HEADER"
 
-    # bl_category = "RLSP"
+    # bl_category = "RLPS"
 
     def draw(self, context: Context) -> None:
         prefs = RhubarbAddonPreferences.from_context(context)
@@ -68,7 +68,7 @@ class CueListColsVisibilityPanel(bpy.types.Panel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "HEADER"
     bl_parent_id = CueListOptionsPanel.bl_idname
-    # bl_category = "RLSP"
+    # bl_category = "RLPS"
 
     def draw(self, context: Context) -> None:
         prefs = RhubarbAddonPreferences.from_context(context)
@@ -83,7 +83,7 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
     bl_label = "RLPS: Sound Setup and Cues Capture"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
-    bl_category = "RLSP"
+    bl_category = "RLPS"
     # bl_parent_id= 'VIEW3D_PT_example_panel'
     # bl_description = "Tool tip"
     # bl_context = "object"
