@@ -9,7 +9,7 @@ import rhubarb_lipsync.blender.baking_utils as baking_utils
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, ResultLogListProperties
 from rhubarb_lipsync.blender.mapping_properties import MappingProperties, StripPlacementProperties
-from rhubarb_lipsync.blender.preferences import CueListPreferences
+from rhubarb_lipsync.blender.preferences import CueListPreferences, MappingPreferences, RhubarbAddonPreferences
 from rhubarb_lipsync.blender.ui_utils import IconsManager
 from rhubarb_lipsync.rhubarb.mouth_cues import FrameConfig, MouthCue, MouthCueFrames, duration_scale, frame2time, time2frame_float
 from rhubarb_lipsync.rhubarb.rhubarb_command import MouthCue
@@ -135,6 +135,32 @@ class PlacementBlendInFromPreset(bpy.types.Operator):
         mprops: MappingProperties = MappingProperties.from_context(ctx)
         sprops: StripPlacementProperties = mprops.strip_placement
         sprops.blend_in_frames = float(self.blend_in_preset)
+        return {'FINISHED'}
+
+
+class PlacementCueTrimFromPreset(bpy.types.Operator):
+    """Set the cue trim time/frames from the preconfigured values"""
+
+    bl_idname = "rhubarb.placement_set_trim"
+    bl_label = "Set cue trim from predefined values"
+    bl_options = {'UNDO'}
+
+    vals_frames = [3, 4, 5, 6]
+    vals_times = [150, 200, 250, 300, 400, 500, 600]
+
+    trim_preset: EnumProperty(  # type: ignore
+        name="Blend in Preset",
+        items=lambda _, ctx: time_frame_predefined_vals(
+            ctx,
+            PlacementCueTrimFromPreset.vals_times,
+            PlacementCueTrimFromPreset.vals_frames,
+        ),
+    )
+
+    def execute(self, ctx: Context) -> set[str]:
+        prefs = RhubarbAddonPreferences.from_context(ctx)
+        clp: CueListPreferences = prefs.cue_list_prefs
+        clp.highlight_long_cues = float(self.trim_preset)
         return {'FINISHED'}
 
 
@@ -316,7 +342,7 @@ class BakeToNLA(bpy.types.Operator):
         try:
             b.optimize_cues()
             # Loop over cues and for each cue alternate between the two tracks and for each track loop over all objects
-            log.debug(f"Optimization done. Placing NLA strips")
+            log.debug("Optimization done. Placing NLA strips")
             for i, cue_frames in enumerate(b.cue_iter()):
                 # print(b.cue_index)
                 wm.progress_update(i)

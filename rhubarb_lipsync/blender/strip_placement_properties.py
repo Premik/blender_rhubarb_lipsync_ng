@@ -42,31 +42,6 @@ class StripPlacementProperties(PropertyGroup):
         options={'LIBRARY_EDITABLE'},
         override={'LIBRARY_OVERRIDABLE'},
     )
-    offset_start: FloatProperty(  # type: ignore
-        "Offset Start",
-        description=textwrap.dedent(
-            """\
-            The start frame of the strip is shifted by this number of frames. 
-            The strip can for example start earlier (negative value) than the actual cue-start
-            making the action fully visible at the correct time when the strip is blended with the previous strip. 
-            """
-        ),
-        default=-0.5,
-        options={'LIBRARY_EDITABLE'},
-        override={'LIBRARY_OVERRIDABLE'},
-    )
-    offset_end: FloatProperty(  # type: ignore
-        "Offset End",
-        description=textwrap.dedent(
-            """\
-            The end frame of the strip is shifted by this number of frames. 
-            The strip can for example end after (positive value) the following cue-start.
-            """
-        ),
-        default=1,
-        options={'LIBRARY_EDITABLE'},
-        override={'LIBRARY_OVERRIDABLE'},
-    )
 
     blend_type: EnumProperty(  # type: ignore
         name="Blend Type",
@@ -166,17 +141,3 @@ class StripPlacementProperties(PropertyGroup):
         options={'LIBRARY_EDITABLE'},
         override={'LIBRARY_OVERRIDABLE'},
     )
-
-    @property
-    def overlap_length(self) -> float:
-        """Number of frames the two consecutive strips overlap because of the start/end offsets"""
-        return self.offset_end - self.offset_start
-
-    # min_strip_len: IntProperty(  # type: ignore
-    #     "Min strip length",
-    #     description="""If there is room on the track any strip shorter than this amount of frames will be prolonged.
-    #                    This is mainly to improve visibility of the strips labels.  """,
-    #     default=3,
-    #    options={'LIBRARY_EDITABLE'},
-    #    override={'LIBRARY_OVERRIDABLE'},
-    # )

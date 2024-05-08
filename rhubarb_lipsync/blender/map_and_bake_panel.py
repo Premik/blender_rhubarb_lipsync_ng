@@ -149,6 +149,8 @@ class MappingAndBakingPanel(bpy.types.Panel):
         row = self.layout.row(align=True)
         row.label(text=f"Trim cues longer than")
         row.prop(clp, "highlight_long_cues")
+        id = baking_operators.PlacementCueTrimFromPreset.bl_idname
+        row.operator_menu_enum(id, "trim_preset", text="", icon="DOWNARROW_HLT")
 
         row = self.layout.row(align=True)
         row.prop(strip_placement, 'scale_min', text="Scale Min")
