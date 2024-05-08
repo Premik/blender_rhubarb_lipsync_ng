@@ -130,8 +130,7 @@ class SetLogLevel(bpy.types.Operator):
 
     def execute(self, context: Context) -> set[str]:
         level = int(self.level)
-        logManager.set_level(level)
-        logManager.ensure_console_handler()
+        logManager.set_level(level)        
         prefs = RhubarbAddonPreferences.from_context(context)
         # Save to prefs so the same level can get recoveret on restart/register
         prefs.log_level = level

@@ -13,7 +13,7 @@ import rhubarb_lipsync.blender.ui_utils as ui_utils
 from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, MouthCueList, MouthCueListItem, ResultLogListProperties
 from rhubarb_lipsync.blender.mapping_properties import MappingItem, MappingProperties, NlaTrackRef
 from rhubarb_lipsync.blender.preferences import CueListPreferences, MappingPreferences, RhubarbAddonPreferences
-from rhubarb_lipsync.blender.strip_placement_properties import StripPlacementProperties
+from rhubarb_lipsync.blender.strip_placement_preferences import StripPlacementPreferences
 from rhubarb_lipsync.rhubarb.cue_processor import CueProcessor
 from rhubarb_lipsync.rhubarb.mouth_cues import FrameConfig, MouthCueFrames, duration_scale_rate
 from rhubarb_lipsync.rhubarb.mouth_shape_info import MouthShapeInfos
@@ -224,8 +224,9 @@ class BakingContext:
         return self.cprops.start_frame, cf.end_frame
 
     @property
-    def strip_placement_props(self) -> StripPlacementProperties:
-        return self.mprops and self.mprops.strip_placement
+    def strip_placement_props(self) -> StripPlacementPreferences:
+        return self.prefs and self.prefs.strip_placement
+
 
     @property
     def mprops(self) -> MappingProperties:

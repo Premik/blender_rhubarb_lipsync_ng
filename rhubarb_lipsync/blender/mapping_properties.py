@@ -8,7 +8,7 @@ from bpy.props import BoolProperty, CollectionProperty, FloatProperty, IntProper
 from bpy.types import Context, NlaTrack, PropertyGroup
 
 import rhubarb_lipsync.blender.mapping_utils as mapping_utils
-from rhubarb_lipsync.blender.strip_placement_properties import StripPlacementProperties
+from rhubarb_lipsync.blender.strip_placement_preferences import StripPlacementPreferences
 from rhubarb_lipsync.blender.ui_utils import DropdownHelper
 from rhubarb_lipsync.rhubarb.mouth_shape_info import MouthShapeInfo, MouthShapeInfos
 
@@ -223,13 +223,6 @@ class MappingProperties(PropertyGroup):
         name="Only Asset Actions",
         description="When enabled only Actions marked as an Asset (aka poses) are listed",
         default=False,
-        options={'LIBRARY_EDITABLE'},
-        override={'LIBRARY_OVERRIDABLE'},
-    )
-
-    strip_placement: PointerProperty(  # type: ignore
-        type=StripPlacementProperties,
-        name="Strip timing properties",
         options={'LIBRARY_EDITABLE'},
         override={'LIBRARY_OVERRIDABLE'},
     )

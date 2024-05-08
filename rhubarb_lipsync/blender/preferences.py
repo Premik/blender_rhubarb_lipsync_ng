@@ -7,6 +7,7 @@ from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty, Po
 from bpy.types import AddonPreferences, Context, Object, PropertyGroup, UILayout
 
 import rhubarb_lipsync.blender.ui_utils as ui_utils
+from rhubarb_lipsync.blender.strip_placement_preferences import StripPlacementPreferences
 from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandWrapper
 
 
@@ -239,6 +240,7 @@ class RhubarbAddonPreferences(AddonPreferences):
 
     cue_list_prefs: PointerProperty(type=CueListPreferences, name="Cues list preferences")  # type: ignore
     mapping_prefs: PointerProperty(type=MappingPreferences, name="Mapping list preferences")  # type: ignore
+    strip_placement: PointerProperty(type=StripPlacementPreferences, name="Strip timing preferences")  # type: ignore
 
     def new_command_handler(self) -> RhubarbCommandWrapper:
         return RhubarbCommandWrapper(self.executable_path, self.recognizer, self.use_extended_shapes)

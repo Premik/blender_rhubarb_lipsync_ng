@@ -7,7 +7,7 @@ from bpy.types import PropertyGroup
 log = logging.getLogger(__name__)
 
 
-class StripPlacementProperties(PropertyGroup):
+class StripPlacementPreferences(PropertyGroup):
     """Defines how to fit an action strip to the track constrained by the cue start and cue length"""
 
     scale_min: FloatProperty(  # type: ignore

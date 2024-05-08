@@ -9,7 +9,7 @@ import rhubarb_lipsync.blender.mapping_uilist as mapping_list
 import rhubarb_lipsync.blender.mapping_utils as mapping_utils
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, ResultLogListProperties
-from rhubarb_lipsync.blender.mapping_properties import MappingProperties, NlaTrackRef, StripPlacementProperties
+from rhubarb_lipsync.blender.mapping_properties import MappingProperties, NlaTrackRef, StripPlacementPreferences
 from rhubarb_lipsync.blender.misc_operators import ShowResultLogDetails
 from rhubarb_lipsync.blender.preferences import CueListPreferences, MappingPreferences, RhubarbAddonPreferences
 from rhubarb_lipsync.rhubarb.mouth_shape_info import MouthShapeInfos
@@ -115,12 +115,12 @@ class MappingAndBakingPanel(bpy.types.Panel):
         self.draw_nla_track_picker(self.ctx, "nla_track2", "Track 2")
 
     def draw_strip_placement_settings(self) -> None:
-        mprops: MappingProperties = MappingProperties.from_context(self.ctx)
         prefs = RhubarbAddonPreferences.from_context(self.ctx)
+        strip_placement: StripPlacementPreferences = prefs.strip_placement
         clp: CueListPreferences = prefs.cue_list_prefs
 
         row = self.layout.row(align=True)
-        strip_placement: StripPlacementProperties = mprops.strip_placement
+
         if not ui_utils.draw_expandable_header(prefs, "strip_placement_setting_panel_expanded", "Strip Placement Settings", row):
             return
         sideRow = row.row(align=True)

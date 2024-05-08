@@ -1,9 +1,9 @@
 import logging
 import pathlib
+import sys
 from functools import cached_property
 from types import ModuleType
 from typing import Optional
-import sys
 
 
 # https://stackoverflow.com/questions/2183233/how-to-add-a-custom-loglevel-to-pythons-logging-facility/35804945#35804945

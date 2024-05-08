@@ -16,7 +16,7 @@ jobs:
         #os: ["ubuntu-latest"]
         # , "3.11.3" - Only bpy 4.0.0 in pypi
         python-version: ["3.10"]
-    steps:        
+    steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 1
@@ -27,27 +27,27 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-          cache: 'pip' 
-      
+          cache: 'pip'
+
         # - name: Install System Dependencies (Ubuntu)
         # sudo apt-get install -y libxxf86vm1 libxfixes3 libxi6 libxkbcommon0 libgl1-mesa-glx
         # if: startsWith(matrix.os, 'ubuntu')
-        # run: |        
-        #   sudo apt-get update          
+        # run: |
+        #   sudo apt-get update
         #   sudo apt-get install -y libgl1-mesa-glx
-      - name: Install dependencies        
+      - name: Install dependencies
         run: |
           pip install pytest tomli
           pip install bpy
           pip install -e .
-      
+
       - name: Cache Downloads
         id: cache-download
         uses: actions/cache@v4
         with:
           path: download
           key: download-${{hashFiles('pyproject.toml')}}
-      
+
       - name: Download rhubard binaries
         run: |
          cd scripts

@@ -8,7 +8,7 @@ from bpy.types import AlphaUnderSequence, Context, ImageUser, Object, UILayout
 import rhubarb_lipsync.blender.baking_utils as baking_utils
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, ResultLogListProperties
-from rhubarb_lipsync.blender.mapping_properties import MappingProperties, StripPlacementProperties
+from rhubarb_lipsync.blender.mapping_properties import MappingProperties, StripPlacementPreferences
 from rhubarb_lipsync.blender.preferences import CueListPreferences, MappingPreferences, RhubarbAddonPreferences
 from rhubarb_lipsync.blender.ui_utils import IconsManager
 from rhubarb_lipsync.rhubarb.mouth_cues import FrameConfig, MouthCue, MouthCueFrames, duration_scale, frame2time, time2frame_float
@@ -103,8 +103,8 @@ class PlacementScaleFromPreset(bpy.types.Operator):
     )
 
     def execute(self, ctx: Context) -> set[str]:
-        mprops: MappingProperties = MappingProperties.from_context(ctx)
-        sprops: StripPlacementProperties = mprops.strip_placement
+        prefs = RhubarbAddonPreferences.from_context(ctx)
+        sprops: StripPlacementPreferences = prefs.strip_placement
         rate = float(self.scale_type)
         # sprops.scale_min = 2 - rate
         sprops.scale_min = 1 / rate
@@ -132,9 +132,9 @@ class PlacementBlendInFromPreset(bpy.types.Operator):
     )
 
     def execute(self, ctx: Context) -> set[str]:
-        mprops: MappingProperties = MappingProperties.from_context(ctx)
-        sprops: StripPlacementProperties = mprops.strip_placement
-        sprops.blend_in_frames = float(self.blend_in_preset)
+        prefs = RhubarbAddonPreferences.from_context(ctx)
+        strip_placement: StripPlacementPreferences = prefs.strip_placement
+        strip_placement.blend_in_frames = float(self.blend_in_preset)
         return {'FINISHED'}
 
 
@@ -193,8 +193,10 @@ class PlacementOffsetFromPreset(bpy.types.Operator):
     )
 
     def execute(self, ctx: Context) -> set[str]:
+        prefs = RhubarbAddonPreferences.from_context(ctx)
+        sprops: StripPlacementPreferences = prefs.strip_placement
         mprops: MappingProperties = MappingProperties.from_context(ctx)
-        sprops: StripPlacementProperties = mprops.strip_placement
+        sprops: StripPlacementPreferences = mprops.strip_placement
         rx = PlacementOffsetFromPreset.offset_rx
         m = re.search(rx, self.offset_type)
         assert m is not None, f"The {self.offset_type} doesn't match {rx}"
