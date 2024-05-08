@@ -106,6 +106,10 @@ class LogManager:
 
             except Exception as e:
                 print(f"Failed to set log level for '{l}': \n{e}")
+        try:
+            logManager.ensure_console_handler()
+        except Exception as e:
+            print(f"Failed enable console handlers: \n{e}")
 
     def set_debug(self) -> None:
         self.set_level(logging.DEBUG)

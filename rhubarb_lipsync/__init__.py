@@ -43,8 +43,8 @@ def init_loggers(prefs: RhubarbAddonPreferences | None) -> None:
 
 
 # print(f"FILE:  {__file__}")
-if is_blender_in_debug():
-    print("RLPS: before discovering python modules ")
+# if is_blender_in_debug():
+print("RLPS: before discovering python modules ")
 rhubarb_lipsync.blender.auto_load.init(__file__)
 
 
