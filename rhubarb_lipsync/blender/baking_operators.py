@@ -160,7 +160,9 @@ class PlacementCueTrimFromPreset(bpy.types.Operator):
     def execute(self, ctx: Context) -> set[str]:
         prefs = RhubarbAddonPreferences.from_context(ctx)
         clp: CueListPreferences = prefs.cue_list_prefs
-        clp.highlight_long_cues = float(self.trim_preset)
+        fps = ctx.scene.render.fps
+        fps_base = ctx.scene.render.fps_base
+        clp.highlight_long_cues = frame2time(float(self.trim_preset), fps, fps_base)
         return {'FINISHED'}
 
 

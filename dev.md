@@ -166,6 +166,7 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 * Create aur package
 * Detect blender --debug and similar argument and auto-enable debug log level (and same for log file?)
 * Add "auto-remove" checkbox on the Bake confirmation dialog (so one doesn'thave to press "remove cues")
+* When tracks are alraedy selected and new NLA track is added sometimes this disturbs the track selection and wrong tracks get used.
 
 ### Low
 * Add [speaker](https://docs.blender.org/manual/en/latest/render/output/audio/speaker.html) as an alternative to Sequencer audio clip

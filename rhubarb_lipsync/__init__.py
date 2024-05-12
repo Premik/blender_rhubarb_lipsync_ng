@@ -44,13 +44,14 @@ def init_loggers(prefs: RhubarbAddonPreferences | None) -> None:
 
 # print(f"FILE:  {__file__}")
 # if is_blender_in_debug():
-print("RLPS: before discovering python modules ")
-rhubarb_lipsync.blender.auto_load.init(__file__)
 
 
 def register() -> None:
+    # import rhubarb_lipsync.blender.auto_load
+
     if is_blender_in_debug():
         print("RLPS: enter register() ")
+    rhubarb_lipsync.blender.auto_load.init(__file__)
     rhubarb_lipsync.blender.auto_load.register()
     bpy.types.Scene.rhubarb_lipsync_captures = PointerProperty(type=CaptureListProperties)
     bpy.types.Object.rhubarb_lipsync_mapping = PointerProperty(

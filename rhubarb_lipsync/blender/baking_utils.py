@@ -15,7 +15,7 @@ from rhubarb_lipsync.blender.mapping_properties import MappingItem, MappingPrope
 from rhubarb_lipsync.blender.preferences import CueListPreferences, MappingPreferences, RhubarbAddonPreferences
 from rhubarb_lipsync.blender.strip_placement_preferences import StripPlacementPreferences
 from rhubarb_lipsync.rhubarb.cue_processor import CueProcessor
-from rhubarb_lipsync.rhubarb.mouth_cues import FrameConfig, MouthCueFrames, duration_scale_rate
+from rhubarb_lipsync.rhubarb.mouth_cues import FrameConfig, MouthCueFrames, duration_scale_rate, frame2time, time2frame_float
 from rhubarb_lipsync.rhubarb.mouth_shape_info import MouthShapeInfos
 
 log = logging.getLogger(__name__)
@@ -173,10 +173,13 @@ class BakingContext:
         return cl.items
 
     @cached_property
+    def frame_cfg(self) -> FrameConfig:
+        return MouthCueListItem.frame_config_from_context(self.ctx)
+
+    @cached_property
     def cue_processor(self) -> CueProcessor:
-        fcfg = MouthCueListItem.frame_config_from_context(self.ctx)
-        cfs = [MouthCueFrames(ci.cue, fcfg) for ci in self.mouth_cue_items]
-        return CueProcessor(fcfg, cfs)
+        cfs = [MouthCueFrames(ci.cue, self.frame_cfg) for ci in self.mouth_cue_items]
+        return CueProcessor(self.frame_cfg, cfs)
 
     @property
     def cue_frames(self) -> list[MouthCueFrames]:
@@ -208,7 +211,7 @@ class BakingContext:
     def optimize_cues(self) -> None:
         clp: CueListPreferences = self.prefs.cue_list_prefs
         max_dur = clp.highlight_long_cues
-        blend_in = self.cue_processor.frame2time(self.strip_placement_props.blend_in_frames)
+        blend_in = frame2time(self.strip_placement_props.blend_in_frames, self.frame_cfg.fps, self.frame_cfg.fps_base)
         # blend_in = 0.02
 
         res = self.cue_processor.optimize_cues(max_dur, blend_in)
@@ -226,7 +229,6 @@ class BakingContext:
     @property
     def strip_placement_props(self) -> StripPlacementPreferences:
         return self.prefs and self.prefs.strip_placement
-
 
     @property
     def mprops(self) -> MappingProperties:
