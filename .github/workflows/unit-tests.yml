@@ -57,10 +57,13 @@ jobs:
         run: pytest --junitxml=pytest_junit_results.xml --tb=long
 
       - name: Test Report # https://github.com/dorny/test-reporter/issues/244
-        uses: dorny/test-reporter@v1
+        uses: phoenix-actions/test-reporting@v8
         if: success() || failure()    # run this step even if previous step failed
         with:
-          name: Pytest
+          name: Pytest results ${{ matrix.os }}
           path: pytest_junit_results.xml
           reporter: java-junit
 
+      - name: Read output variables
+        run: |
+          echo "url is ${{ steps.test-report.outputs.runHtmlUrl }}"
