@@ -12,3 +12,4 @@ download/
 *.egg*
 settings.json
 .blenderFresh
+*junit*.xml

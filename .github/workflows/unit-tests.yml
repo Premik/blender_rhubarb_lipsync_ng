@@ -52,5 +52,15 @@ jobs:
         run: |
          cd scripts
          python rhubarb_bin.py
+
       - name: Run pytest
-        run: pytest
+        run: pytest --junitxml=pytest_junit_results.xml --tb=long
+
+      - name: Test Report # https://github.com/dorny/test-reporter/issues/244
+        uses: dorny/test-reporter@v1
+        if: success() || failure()    # run this step even if previous step failed
+        with:
+          name: Pytest
+          path: pytest_junit_results.xml
+          reporter: java-junit
+
