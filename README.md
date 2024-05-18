@@ -12,38 +12,39 @@ Inspired by the [scaredyfish/blender-rhubarb-lipsync](https://github.com/scaredy
 
 ### Installation
 
-1. Go to the [releases page](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/latest) and download the `rhubarb_lipsync_ng<your_system>*.zip` anywhere to your PC. For example `rhubarb_lipsync_ng-Windows-1.3.0.zip` for Windows.
+1. Go to the [releases page](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/latest) and download the `rhubarb_lipsync_ng<your_system>*.zip` file to your PC. For example: `rhubarb_lipsync_ng-Windows-1.3.0.zip` for Windows.
 
-2. Run Blender, go to the `Main menu/Edit/Preferences/Addons`. Click the **Install** button (top right) and select the downloaded zip (don't unzip the file).
+2. Run Blender, go to the `Main menu/Edit/Preferences/Addons`. Click the **Install** button (top right) and select the downloaded zip file (don't unzip the file).
 
 ![Install plugin](doc/img/PluginInstall.png)
 
-3. After short moment the plugin would install and show up. **Enable the plugin** by ticking the checkbox in front of the plugin name.
+3. After a short moment, the plugin will install and show up. **Enable the plugin** by ticking the checkbox in front of the plugin name.
 
-4. Verify the `rhubarb` executable is working by pressing the **Check rhubarb version**. Note the plugin wraps the executable from [rhubarb-lip-sync](https://github.com/DanielSWolf/rhubarb-lip-sync) project.
+4. Verify the `rhubarb` executable is working by pressing the **Check rhubarb version** button. Note the plugin wraps the executable from the [rhubarb-lip-sync](https://github.com/DanielSWolf/rhubarb-lip-sync) project.
 
 ![Version check](doc/img/rhubarbVersion.gif)
 
-Note: Generally, each time you see a button is disabled hover the mouse cursor over the button and a popup would show the reason.
+Note: Generally, each time you see a button is disabled, hover the mouse cursor over the button and a popup will show the reason.
 
-### Create capture
 
-1. There should now be new ***RLSP*** tab visible in the 3d view with two panels. First create new `Capture` in the current scene by pressing **Create capture** button in the `RLSP: Sound setup and cues capture` panel.
+### Create Capture
 
-1. Select a sound file. 
+1. There should now be a new ***RLSP*** tab visible in the 3D view with two panels. First, create a new `Capture` in the current scene by pressing the **Create capture** button in the `RLSP: Sound setup and cues capture` panel.
+
+1. Select a sound file.
    * Note the plugin can convert sound files to the supported formats.
-   * For better experience: Enable **Audio Scrubbing**, **Cache** and **Sync to Audio**
-   * Optionally place the `sound strip` to the `Sequencer` by pressing **Place as Strip** button. You can set the start frame here. But if you change the start frame later, you need to remove the strip and place it again.
-   
+   * For a better experience: Enable `Audio Scrubbing` `Cache` and `Sync to Audio`.
+   * Optionally, place the `sound strip` in the `Sequencer` by pressing the **Place as Strip** button. You can set the start frame here, but if you change the start frame later, you need to remove the strip and place it again.
 
 1. Press the **Capture** button. The list of Cues should get populated. Note:
-   * The capture task runs in background. So you can still use Blender while it is runninig. You can even create and run another capture(s) concurently. But pressing `Esc` would cancel the running operator.
-   * The underlying `rhubarb cli` is also able to utilize multiple-threads. But only for longer sound clips. It runs single-threaded for sort sounds.
-   * There are additional capture options available when pressing the small `⌄` button beside the `Capture` button. Like extended-shapes usage or **Dialog file**. Dialog file is a sound transcription which can improve accuracy, but only works for english.
+   * The capture task runs in the background, so you can still use Blender while it is running. You can even create and run another capture(s) concurrently. However, pressing `Esc` will cancel the running operator.
+   * The underlying `rhubarb cli` is also able to utilize multiple threads, but only for longer sound clips. It runs single-threaded for short sounds.
+   * There are additional capture options available when pressing the small `⌄` button beside the `Capture` button, such as extended-shapes usage or **Dialog file**. The dialog file is a sound transcription that can improve accuracy, but only works for English.
 
-1. You can preview the captured cues by clicking on the cue lists. Too short or too long cues are highlighted in red. You can also start playback and the small icon would follow the cues. But there is probably some refreshing-bug and sometimes the icon doesn't refresh unless mouse cursor is moving over the panel.
+1. You can preview the captured cues by clicking on the cue lists. Too short or too long cues are highlighted in red. You can also start playback, and the small icon will follow the cues. However, there is probably some refreshing bug, and sometimes the icon doesn't refresh unless the mouse cursor is moving over the panel.
 
 ![Capture](doc/img/capture.gif)
+
 
 ### Map cues to Actions
 
@@ -90,28 +91,28 @@ Note: Generally, each time you see a button is disabled hover the mouse cursor o
 ![Capture](doc/img/maping.gif)
 
 
+### Tweak the Action Strips
 
-### Tweak the Action strips
+1. Open the `NLA Editor`. You can tweak the position/length/blending of the `NLA Strips`. Some default Strip properties can be changed in the `Strip placement settings` section. However, the `Bake to NLA` would have to be run again (removing the existing `Strips` first).
 
-1. Open the `NLA Editor`. You can tweak the position/length/blending of the `NLA Strips`. Some default Strip properties can be changed in the `Strip placement settings` section. But the `Bake to NLA` would have to be run-again (removing the existing `Strips` first).
-
-1. Hint: In Blender it is possible to change a property of multiple objects at once. For instance to enable auto-blending on all strips: 
-   *  Select all the strips in the NLA (press the `a` key).
-   *  `2x Shift-click` any of the already selected strip again to make it active. This should show the side panel.
+1. Hint: In Blender, it is possible to change a property of multiple objects at once. For instance, to enable auto-blending on all strips:
+   * Select all the strips in the NLA (press the `a` key).
+   * `2x Shift-click` any of the already selected strips again to make it active. This should show the side panel.
    * `Alt+click` the `Auto Blend In/Out` to distribute the change to all the selected strips.
 
-### Bake to single Action
-If needed the `NLA Tracks` can be baked into single new `Action`. Note if you have both normal-action track pair and shapekey-action track pair they have to be baked one-by-one.
+### Bake to Single Action
+If needed, the `NLA Tracks` can be baked into a single new `Action`. Note, if you have both a normal-action track pair and a shapekey-action track pair, they have to be baked one-by-one.
 
 1. Select the Armature and go to `Pose mode` (for normal-action tracks).
-1. Select the Bones you want to bake. For example press `a` to select all.
-1. Select the strips in the NLA track you want to bake. The `b` key and box-select strips if you don't want to include all tracks.
-1. The go to to `NLA Editor/main menu/Edit/Bake Action`
+1. Select the Bones you want to bake. For example, press `a` to select all.
+1. Select the strips in the NLA track you want to bake. Use the `b` key and box-select strips if you don't want to include all tracks.
+1. Then go to `NLA Editor/main menu/Edit/Bake Action`.
 1. Consider checking the `Visual Keying` and `Clean Curves` options:
 
 ![Capture](doc/img/BakeNLATracks.png)
 
-A new `Action` would be created and selected in the `Action Editor`. Nowthe two RLPS tracks can now be disabled or removed (mouse-hover on the track name and press `x`).
+A new `Action` will be created and selected in the `Action Editor`. The two RLPS tracks can now be disabled or removed (mouse-hover on the track name and press `x`).
+
 
 ## Dev notes
 
