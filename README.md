@@ -57,11 +57,11 @@ Note: Generally, each time you see a button is disabled hover the mouse cursor o
 
      ![ActionFrameRange](doc/img/ActionFrameRange.png)
 
-   * There are action filters available which can be used to narrow down the selection in the dropdowns. Use this for instance if all your poses are flagged as an asset. Or if you want to make invalid Actions (with a missing key) to show up as well.
+   * There are action filters available that can be used to narrow down the selection in the dropdowns. Use this, for instance, if all your poses are flagged as an asset. Or if you want to make invalid Actions (with a missing key) show up as well.
 
      ![ActionFilters](doc/img/ActionFilters.png)
 
-1. Select or create `NLA Track` pair. It is possible to place the mapped Cue actions to a single track. But **two tracks** are preferable since it allows the placed `Action strips` to interleave and fluently blend their influence.
+1. Select or create `NLA Track` pair. It is possible to place the mapped Cue actions on a single track. But **two tracks** are preferable since it allows the placed `Action strips` to interleave and fluently blend their influence.
 
    ![Frame range](doc/img/NLATrackSelection.png)
 
@@ -73,37 +73,48 @@ Note: Generally, each time you see a button is disabled hover the mouse cursor o
 
 ### Bake to NLA
 
-1. Press the big **Bake to NLA** button. This will bring additional dialog up with few more baking options and information:
+1. Press the big **Bake to NLA** button. This will bring up an additional dialog with a few more baking options and information:
 
-  ![BakeToNLA](doc/img/BakeToNLADialog.png)
+   ![BakeToNLA](doc/img/BakeToNLADialog.png)
 
-  * Select the `Capture` (cue list) to be baked. It matches the one selected in the `RLSP: Sound setup and cues capture` panel. Note it is possible to bake multiple Captures and bake them one-by-one reusing the same mapping.
-  * You can again set/change the `Start Frame` here.
-  * The `Object to bake` options indicates which `Objects` should be considered for baking. By default, all `Objects` with non-empty mapping would get baked at once. For example there could be mapping on the Armature with the basic animation. And then also on the mesh with some additional corrective shape-key Actions. Or could be useful where there are separate Objects for tongue and teeth.
+   * Select the `Capture` (cue list) to be baked. It matches the one selected in the `RLSP: Sound setup and cues capture` panel. Note it is possible to bake multiple Captures and bake them one-by-one reusing the same mapping.
+   * You can again set/change the `Start Frame` here.
+   * The `Object to bake` option indicates which `Objects` should be considered for baking. By default, all `Objects` with non-empty mapping will get baked at once. For example, there could be mapping on the Armature with the basic animation. Additionally, there could be mapping on the mesh with some additional corrective shape-key Actions. Or it could be useful where there are separate Objects for the tongue and teeth.
 
-1. Review errors/warnings and press the **Ok** button. Note: 
-   * The baking might work even with some errors/warning.
-   * If you are repeating the bake again you can press the **Remove strips** button to remove the previous baked `Actions` and make room for new `Strips`.
-1. After the baking is done review the baking report. Report is shown only when there were any baking error/warnings.
+1. Review errors/warnings and press the **Ok** button. Note:
+   * The baking might work even with some errors/warnings.
+   * If you are repeating the bake, you can press the **Remove strips** button to remove the previously baked `Actions` and make room for new `Strips`.
+
+1. After the baking is done, review the baking report. The report is shown only when there were any baking errors/warnings.
 
 ![Capture](doc/img/maping.gif)
+
+
 
 ### Tweak the Action strips
 
 1. Open the `NLA Editor`. You can tweak the position/length/blending of the `NLA Strips`. Some default Strip properties can be changed in the `Strip placement settings` section. But the `Bake to NLA` would have to be run-again (removing the existing `Strips` first).
 
-1. If needed the `NLA Tracks` can be baked into single new `Action`. Select `NLA Editor/main menu/Edit/Bake Action`. New action would be created. The two RLPS tracks can now be removed or disabled.
+1. Hint: In Blender it is possible to change a property of multiple objects at once. For instance to enable auto-blending on all strips: 
+   *  Select all the strips in the NLA (press the `a` key).
+   *  `2x Shift-click` any of the already selected strip again to make it active. This should show the side panel.
+   * `Alt+click` the `Auto Blend In/Out` to distribute the change to all the selected strips.
+
+### Bake to single Action
+If needed the `NLA Tracks` can be baked into single new `Action`. Note if you have both normal-action track pair and shapekey-action track pair they have to be baked one-by-one.
+
+1. Select the Armature and go to `Pose mode` (for normal-action tracks).
+1. Select the Bones you want to bake. For example press `a` to select all.
+1. Select the strips in the NLA track you want to bake. The `b` key and box-select strips if you don't want to include all tracks.
+1. The go to to `NLA Editor/main menu/Edit/Bake Action`
+1. Consider checking the `Visual Keying` and `Clean Curves` options:
 
 ![Capture](doc/img/BakeNLATracks.png)
 
-## More details
+A new `Action` would be created and selected in the `Action Editor`. Nowthe two RLPS tracks can now be disabled or removed (mouse-hover on the track name and press `x`).
 
-Some diagrams
-
-| Preview                                  | Click to View                |
-|------------------------------------------|------------------------------|
-| <a href="doc/diagrams/capture.svg">![Capture](doc/diagrams/capture.svg.png)</a> | <a href="doc/diagrams/capture.svg">svg</a>|
-| <a href="doc/diagrams/mapping.svg">![Mapping](doc/diagrams/mapping.svg.png)</a> | <a href="doc/diagrams/mapping.svg">svg</a> |
-
+## Dev notes
 
 [Development notes](dev.md)
+
+

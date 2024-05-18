@@ -1,3 +1,6 @@
+# Random dev notes
+
+
 
 https://docs.pytest.org/en/7.1.x/explanation/goodpractices.html#src-layout
 
@@ -7,6 +10,17 @@ source /opt/mambaforge/etc/profile.d/conda.sh
 ```
 
 https://github.com/DanielSWolf/rhubarb-lip-sync
+
+## Diagrams
+
+Some diagrams
+
+| Preview                                  | Click to View                |
+|------------------------------------------|------------------------------|
+| <a href="doc/diagrams/capture.svg">![Capture](doc/diagrams/capture.svg.png)</a> | <a href="doc/diagrams/capture.svg">svg</a>|
+| <a href="doc/diagrams/mapping.svg">![Mapping](doc/diagrams/mapping.svg.png)</a> | <a href="doc/diagrams/mapping.svg">svg</a> |
+
+
 
 ## License
 `# SPDX-License-Identifier: MIT`
