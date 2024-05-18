@@ -24,8 +24,10 @@ Inspired by the [scaredyfish/blender-rhubarb-lipsync](https://github.com/scaredy
 
 ![Version check](doc/img/rhubarbVersion.gif)
 
-### Create capture
 Note: Generally, each time you see a button is disabled hover the mouse cursor over the button and a popup would show the reason.
+
+### Create capture
+
 1. There should now be new ***RLSP*** tab visible in the 3d view with two panels. First create new `Capture` in the current scene by pressing **Create capture** button in the `RLSP: Sound setup and cues capture` panel.
 
 1. Select a sound file. 
@@ -35,35 +37,49 @@ Note: Generally, each time you see a button is disabled hover the mouse cursor o
    
 
 1. Press the **Capture** button. The list of Cues should get populated. Note:
-   * The capture task runs in background. So you can still use Blender while it is runninig. You can even create and run another capture(s) concurently.
+   * The capture task runs in background. So you can still use Blender while it is runninig. You can even create and run another capture(s) concurently. But pressing `Esc` would cancel the running operator.
    * The underlying `rhubarb cli` is also able to utilize multiple-threads. But only for longer sound clips. It runs single-threaded for sort sounds.
-   * There are additional capture options available when pressing the small `⌄` button beside the `Capture` button. Like Dialog file or extended-shapes usage.
+   * There are additional capture options available when pressing the small `⌄` button beside the `Capture` button. Like extended-shapes usage or **Dialog file**. Dialog file is a sound transcription which can improve accuracy, but only works for english.
 
 1. You can preview the captured cues by clicking on the cue lists. Too short or too long cues are highlighted in red. You can also start playback and the small icon would follow the cues. But there is probably some refreshing-bug and sometimes the icon doesn't refresh unless mouse cursor is moving over the panel.
 
 ![Capture](doc/img/capture.gif)
 
-### Map cues to Actions and bake
+### Map cues to Actions
 
-1. Open the other panel `RLSP: Cue mapping and baking` and select the `Object` you wan't to animate. Typically an armature. Note:
-   * Shape Keys support is still WIP.
-   * Usually your `Actions` would have a single keyframe on the first frame (a.k.a. pose). But multi-frame actions are supported as well.
-   * The Capture currently selected in the `RLSP: Sound setup and cues capture` panel is the one which would get baked. You can have multiple Captures and baked them one-by-one reusing the same mapping.   
+1. Open the other panel `RLSP: Cue mapping and baking` and select the `Object` you want to animate. For bone animation, select an armature. For shape-key animation, select a mesh.
 
-1. For each `Cue type` select the apropriate Action. You can use the `?` button to show a hint about the expected mouth shape (copied from the `rhubarb-cli` page). 
-   * Note you can map the same `Action` to multiple `Cue types`. For instance `A` and `X`.
-   * Note you can create mapping on multiple `Objects`. If your animation/pose doesn't involve a single armature or is a composed from multiple objects.
+1. For each `Cue type`, select the appropriate Action. Note:
+   * Use the `?` button to show a hint about the expected mouth shape (copied from the `rhubarb-cli` page).
+   * Usually, your `Actions` would have a single keyframe on the first frame (a.k.a. pose). But multi-frame actions are supported as well.
+   * It is possible to map the same `Action` to multiple `Cue types`. For instance `A` and `X`.
+   * Using `Action-sheet` where multiple cues are on different frames of the same Action is supported too. Use the custom frame range button to select the desired (sub)range:
 
-1. Select or create `NLA Tracks`. It is possible to place the mapped Cue actions to a single track. But **two tracks** are preferable. Since it alows the placed `Action strips` to interleave and blend automatically.
+     ![ActionFrameRange](doc/img/ActionFrameRange.png)
 
-1. You can tweak the `Strip placement settings`. Note this section is still very *draft* and would need some redesign:
+   * There are action filters available which can be used to narrow down the selection in the dropdowns. Use this for instance if all your poses are flagged as an asset. Or if you want to make invalid Actions (with a missing key) to show up as well.
 
-![Placement Settings](doc/img/placementSettings.png)
+     ![ActionFilters](doc/img/ActionFilters.png)
+
+1. Select or create `NLA Track` pair. It is possible to place the mapped Cue actions to a single track. But **two tracks** are preferable since it allows the placed `Action strips` to interleave and fluently blend their influence.
+
+   ![Frame range](doc/img/NLATrackSelection.png)
+
+1. You can tweak the `Strip placement settings`. Note this section is currently being redesigned and will be simplified.
+
+   ![Placement Settings](doc/img/placementSettings.png)
 
 
-1. Press the **Bake to NLA** button. Additional dialog would open.
-   * If you have mapping on multiple `Objects` change the `Bake mode`. By default all `Objects` are baked.
-   * Enable **Use subframes**. Especially if your fps is low (<60). Often the cues are crowded/short and this would reduce clashing/collapsing. You can then do manuall cleanup in the NLA editor and disable the subframes visibility again (Blender always store frames as floats internally). Note the current baking process always use sub-frames (non integer frames) even when this tickbox is disabled (TBD).
+
+### Bake to NLA
+
+1. Press the big **Bake to NLA** button. This will bring additional dialog up with few more baking options and information:
+
+  ![BakeToNLA](doc/img/BakeToNLADialog.png)
+
+  * Select the `Capture` (cue list) to be baked. It matches the one selected in the `RLSP: Sound setup and cues capture` panel. Note it is possible to bake multiple Captures and bake them one-by-one reusing the same mapping.
+  * You can again set/change the `Start Frame` here.
+  * The `Object to bake` options indicates which `Objects` should be considered for baking. By default, all `Objects` with non-empty mapping would get baked at once. For example there could be mapping on the Armature with the basic animation. And then also on the mesh with some additional corrective shape-key Actions. Or could be useful where there are separate Objects for tongue and teeth.
 
 1. Review errors/warnings and press the **Ok** button. Note: 
    * The baking might work even with some errors/warning.
