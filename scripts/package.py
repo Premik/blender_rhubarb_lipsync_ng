@@ -29,6 +29,10 @@ class PackagePlugin:
     # 'version': (4, 0, 0),
     bl_info_version_pattern = r'''['"]version["']\s*:\s*\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*\)'''
     bl_info_version_rx = re.compile(f"(.*)({bl_info_version_pattern})(.*)", re.DOTALL)
+
+    readme_version_pattern = r'-\d+\.\d+\.\d+\.zip'
+    readme_version_rx = re.compile(f"(.*)({readme_version_pattern})(.*)", re.DOTALL)
+
     main_package_name = 'rhubarb_lipsync'
 
     def __init__(self, cfg: dict) -> None:
@@ -50,26 +54,32 @@ class PackagePlugin:
         return Path(__file__).parents[1]
 
     @cached_property
-    def main__init__(self) -> Path:
+    def main__init__path(self) -> Path:
         return self.project_dir / PackagePlugin.main_package_name / "__init__.py"
+
+    @cached_property
+    def readme_md_path(self) -> Path:
+        return self.project_dir / "README.md"
 
     @cached_property
     def dist_dir(self) -> Path:
         return self.project_dir / "dist"
 
-    def update_bl_info_version(self) -> None:
-        p = self.main__init__
-        print(f"Updating version string to '{self.version_str}' in the {p}")
-        assert p.exists(), f"The {p} doesn't exists "
+    def update_version_in_file(self, rx: re.Pattern[str], p: Path, new_ver: str) -> None:
+        print(f"Updating version string to '{new_ver}' in the {p}")
+        assert p.exists(), f"The {p} doesn't exist"
         with open(p, 'r', encoding='utf-8') as s:
             text = s.read()
-        m = PackagePlugin.bl_info_version_rx.match(text)
-        assert m is not None, f"Failed to find bl_info version string in the {p}. Pattern\n{PackagePlugin.bl_info_version_rx}"
-        new_ver = f"'version': {self.version_tuple}"
+        m = rx.match(text)
+        assert m is not None, f"Failed to find version string in the {p}. Pattern\n{rx}"
         text = f"{m.groups()[0]}{new_ver}{m.groups()[2]}"
 
         with open(p, 'w', encoding='utf-8') as s:
             s.write(text)
+
+    def update_version_files(self) -> None:
+        self.update_version_in_file(PackagePlugin.bl_info_version_rx, self.main__init__path, f"'version': {self.version_tuple}")
+        self.update_version_in_file(PackagePlugin.readme_version_rx, self.readme_md_path, f"-{self.version_str}.zip")
 
     def clean_temp_files(self) -> None:
         d = clean_temp_files_at(self.project_dir)
@@ -86,7 +96,7 @@ class PackagePlugin:
 
 if __name__ == '__main__':
     pp = PackagePlugin(project_cfg)
-    pp.update_bl_info_version()
+    pp.update_version_files()
     pp.clean_temp_files()
     current = RhubarbBinary.currently_deployed_platform(rhubarb_cfg)  # Keep the current platform bin
     for b in RhubarbBinary.all_platforms(rhubarb_cfg):
