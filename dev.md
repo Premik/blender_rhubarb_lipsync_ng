@@ -189,12 +189,13 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 * Changel all labels cases to follow Blender style "Foo in Bar"
 * Add some simple blender sample file
 * There are still some ogg unsupported format - could have been an user error (ogg file was not really an ogg?)
-
+* Workflow from Sequencer - Paste sound_strip first, create captures of them and render to NLA,
 
 
 ## Check
 https://github.com/Hunanbean/Papagayo-NGLipsyncImporterForBlender
-
+https://blendermarket.com/products/syncnix
+https://blendermarket.com/products/parrot-lipsync
 
 ## NLA
 
@@ -248,5 +249,19 @@ class FaceitExpressions(PropertyGroup):
         items=PROCEDURAL_EXPRESSION_ITEMS,
     )
 
+- Inbuilt sound converter. 
+
+- Flexible sound -> animation mapping. Shape-keys, armature bones, action-sheets or any other combination of actions is supported. 
+- No external dependencies, straightforward installation.
+(collecting phoneme groups). Quick preview of captured mouth-cues.
+- Comperhensive unit and integration tests ran automatically by Gitlab on windows, linux and mac runner. Breaking bugs should get detected early.
+- Robust UI. Disabled buttons show reason why they are disabled when hovering on them. Detailed validations prior baking, result report, unexpected errors shown directly in UI. Not just small notification at the bottom of the screen which goes away in few seconds and is easy to miss. Background processing with proper progressbar for creating mouth-cue captures 
 
 
+## Faq
+- Difference between rhubarb-cli, rhubarb_lipsync, rhubarb_lipync_ng,
+- Support Github tickets
+
+## Basic troubleshooting
+- Enable increase log-level in preferences. Enable login to file.
+- If the issue happens early or plugin doesn't register, run `blender --debug`

@@ -11,6 +11,8 @@ import sample_project
 class BakingTest(unittest.TestCase):
     def setUp(self) -> None:
         self.project = sample_project.SampleProject()
+        # Set the trim-long-cues to hight number to avoid trimming for test consistency (extra X cues)
+        self.project.prefs.cue_list_prefs.highlight_long_cues = 1
         self.project.capture_load_json()
 
     def bake(self) -> None:

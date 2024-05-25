@@ -98,7 +98,7 @@ class TestCueFrames:
         assert cp.cue_frames[0].duration_frames == approx(5)
         assert cp.cue_frames[1].duration_frames == approx(1)
         max_dur = frame2time(2, fcfg.fps, fcfg.fps_base)
-        cp.trim_long_cues(max_dur)
+        cp.trim_long_cues(max_dur, False)
         assert cp.cue_frames[0].cue.duration == approx(max_dur)
         assert cp.cue_frames[1].duration_frames == approx(1)
 

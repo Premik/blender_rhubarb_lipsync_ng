@@ -155,6 +155,10 @@ class MouthCueFrames:
     frame_cfg: FrameConfig = field(repr=False)
     blend_in: float = field(default=0, repr=False)
 
+    @staticmethod
+    def create_X(frame_cfg: FrameConfig, start: float, end: float) -> 'MouthCueFrames':
+        return MouthCueFrames(cue=MouthCue(MouthShapeInfos.X.value.key, start, end), frame_cfg=frame_cfg)
+
     @docstring_from(MouthCue.get_start_frame_float)  # type: ignore[misc]
     @property
     def start_frame(self) -> int:

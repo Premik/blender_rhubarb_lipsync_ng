@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Iterable, Optional
 
-from rhubarb_lipsync.rhubarb.mouth_cues import FrameConfig, MouthCueFrames, docstring_from, frame2time, log, time2frame_float
+from rhubarb_lipsync.rhubarb.mouth_cues import FrameConfig, MouthCue, MouthCueFrames, docstring_from, frame2time, log, time2frame_float
 
 
 @dataclass
@@ -19,16 +19,29 @@ class CueProcessor:
     def time2frame_float(self, t: float) -> float:
         return time2frame_float(t, self.frame_cfg.fps, self.frame_cfg.fps_base) + self.frame_cfg.offset
 
-    def trim_long_cues(self, max_dur: float) -> int:
-        modified = 0
-        for cf in self.cue_frames:
+    def find_cues_by_duration(self, min_dur: float = -1, max_dur: float = -1) -> Iterable[MouthCueFrames]:
+        """Finds cues with duration shorter than min_dur (-1 to ignore)
+        or longer than max_dur (-1 to ignore) while skipping X (silence)"""
+        for i, cf in enumerate(list(self.cue_frames)):
             d = cf.cue.duration
             if cf.cue.key == 'X':
-                continue  # Don't trim X (silence)
-            if d <= max_dur:
+                continue  # Ignore X (silence)
+            if max_dur > 0 and d <= max_dur:
                 continue
-            modified += 1
-            cf.cue.end = cf.cue.start + max_dur
+            if min_dur > 0 and d >= min_dur:
+                continue
+            yield i, cf
+
+    def trim_long_cues(self, max_dur: float, append_x: bool = True) -> int:
+        modified = 0
+        for i, cf in self.find_cues_by_duration(-1, max_dur):
+            new_end = cf.cue.start + max_dur
+            if append_x:
+                cf_x = MouthCueFrames.create_X(self.frame_cfg, new_end, cf.cue.end)
+                # Insert the new X after the current trimmed X, encouting previous insertions as they shift the indices
+                self.cue_frames.insert(i + modified + 1, cf_x)
+            cf.cue.end = new_end  # Trim duration
+
         if modified > 0:
             log.info(f"Trimmed {modified} Cues as they were too long.")
         return modified

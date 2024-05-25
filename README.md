@@ -54,11 +54,11 @@ Note: Generally, each time you see a button is disabled, hover the mouse cursor 
    * Use the `?` button to show a hint about the expected mouth shape (copied from the `rhubarb-cli` page).
    * Usually, your `Actions` would have a single keyframe on the first frame (a.k.a. pose). But multi-frame actions are supported as well.
    * It is possible to map the same `Action` to multiple `Cue types`. For instance `A` and `X`.
-   * Using `Action-sheet` where multiple cues are on different frames of the same Action is supported too. Use the custom frame range button to select the desired (sub)range:
+   * Using `Action-sheet` where multiple cues are on different frames of the same `Action` is supported too. Use the custom frame range button to select the desired (sub)range:
 
      ![ActionFrameRange](doc/img/ActionFrameRange.png)
 
-   * There are action filters available that can be used to narrow down the selection in the dropdowns. Use this, for instance, if all your poses are flagged as an asset. Or if you want to make invalid Actions (with a missing key) show up as well.
+   * There are action-filters available that can be used to narrow down the selection in the dropdowns. Use this, for instance, if all your poses are flagged as an asset. Or if you want to make invalid Actions (with a missing key) show up as well.
 
      ![ActionFilters](doc/img/ActionFilters.png)
 
@@ -66,7 +66,7 @@ Note: Generally, each time you see a button is disabled, hover the mouse cursor 
 
    ![Frame range](doc/img/NLATrackSelection.png)
 
-1. You can tweak the `Strip placement settings`. Note this section is currently being redesigned and will be simplified.
+1. You can tweak the `Strip placement settings`. Note this section is currently being redesigned and will be simplified in the future.
 
    ![Placement Settings](doc/img/placementSettings.png)
 
@@ -78,13 +78,13 @@ Note: Generally, each time you see a button is disabled, hover the mouse cursor 
 
    ![BakeToNLA](doc/img/BakeToNLADialog.png)
 
-   * Select the `Capture` (cue list) to be baked. It matches the one selected in the `RLSP: Sound setup and cues capture` panel. Note it is possible to bake multiple Captures and bake them one-by-one reusing the same mapping.
+   * Select the `Capture` (cue list) to be baked. It matches the one selected earlier in the `RLSP: Sound setup and cues capture` panel. Note it is possible to bake multiple Captures and bake them one-by-one reusing the same mapping.
    * You can again set/change the `Start Frame` here.
-   * The `Object to bake` option indicates which `Objects` should be considered for baking. By default, all `Objects` with non-empty mapping will get baked at once. For example, there could be mapping on the Armature with the basic animation. Additionally, there could be mapping on the mesh with some additional corrective shape-key Actions. Or it could be useful where there are separate Objects for the tongue and teeth.
+   * The `Object to bake` option indicates which `Objects` should be considered for baking. By default, all `Objects` with non-empty mapping will get baked at once. For example, there could be mapping on the Armature with the basic animation. Additionally, there could be mapping on the mesh with some corrective shape-key Actions. Or it could be useful where there are separate Objects for the tongue and teeth.
 
 1. Review errors/warnings and press the **Ok** button. Note:
-   * The baking might work even with some errors/warnings.
-   * If you are repeating the bake, you can press the **Remove strips** button to remove the previously baked `Actions` and make room for new `Strips`.
+   * The baking might still work even with some errors/warnings.
+   * If you are repeating the bake,press the **Remove strips** button to remove the previously baked `Actions` and make room for new `Strips`.
 
 1. After the baking is done, review the baking report. The report is shown only when there were any baking errors/warnings.
 
