@@ -274,19 +274,6 @@ class MouthCueFrames:
         return f"{self.end_frame}"
 
     @property
-    def blend_out_frames(self) -> float:
-        # Blend-out starts right after the cue hits a whole frame number down to the cue end
-        c = self.frame_cfg
-        return self.end_frame_float - self.start_frame_right
-
-    @property
-    def blend_in_frames(self) -> float:
-        # Blend-in starts slightly before the actual cue start (which is pre-shifted to the left by the blend-in value).
-        # It can also be shortened via optimization when previous cue is very short to make sure previous cue is prononuced well
-        c = self.frame_cfg
-        return time2frame_float(self.blend_in, c.fps, c.fps_base)
-
-    @property
     def duration_frames_str(self) -> str:
         if self.frame_cfg.subframes:
             return f"{self.duration_frames_float:0.2f}"

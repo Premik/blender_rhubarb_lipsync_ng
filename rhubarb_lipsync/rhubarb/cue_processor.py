@@ -119,7 +119,7 @@ class CueProcessor:
             log.info(f"Prolonged {modified} Cues as they were too short and would not have been visible.")
         return modified
 
-    def optimize_cues(self, max_cue_duration=0.2, blend_in_time=0.02) -> str:
+    def optimize_cues(self, max_cue_duration=0.2) -> str:
         steps = [
             (lambda: self.trim_long_cues(max_cue_duration), "ends trimmed"),
             (self.ensure_frame_intersection, "duration enlarged"),

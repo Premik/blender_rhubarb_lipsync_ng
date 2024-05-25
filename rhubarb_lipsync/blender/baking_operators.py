@@ -82,6 +82,33 @@ class RemoveCapturedNlaStrips(bpy.types.Operator):
         return {'FINISHED'}
 
 
+class PlacementBlendInOutRatioPreset(bpy.types.Operator):
+    """Set the strip blend in/out ratio from the preconfigured values"""
+
+    bl_idname = "rhubarb.placement_set_blendinout_ration"
+    bl_label = "Set Blend in/out ratio from predefined values"
+    bl_options = {'UNDO'}
+
+    ratio_type: EnumProperty(  # type: ignore
+        name="Scale preset",
+        items=[
+            ('0.2', '20% very quick blend in, very slow blend out', ""),
+            ('0.4', '40% quick blend in, slow blend out', ""),
+            ('0.5', '50% balanced blend in blend out', ""),
+            ('0.6', '60% slow blend in, quick blend out', ""),
+            ('0.8', '80% very slow blend in, very quick blend out', ""),
+        ],
+        default='0.5',
+    )
+
+    def execute(self, ctx: Context) -> set[str]:
+        prefs = RhubarbAddonPreferences.from_context(ctx)
+        sprops: StripPlacementPreferences = prefs.strip_placement
+        rate = float(self.ratio_type)
+        sprops.blend_inout_ratio = rate
+        return {'FINISHED'}
+
+
 class PlacementScaleFromPreset(bpy.types.Operator):
     """Set the Blend In/Out value based on the strip Placement offsets"""
 
@@ -112,32 +139,6 @@ class PlacementScaleFromPreset(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class PlacementBlendInFromPreset(bpy.types.Operator):
-    """Set the strip blend-in time/frames from the preconfigured values"""
-
-    bl_idname = "rhubarb.placement_set_blendin"
-    bl_label = "Set Blend in from predefined values"
-    bl_options = {'UNDO'}
-
-    vals_frames = [0.5, 0.75, 1, 1.5]
-    vals_times = [10, 20, 30, 40, 50, 60, 70]
-
-    blend_in_preset: EnumProperty(  # type: ignore
-        name="Blend in Preset",
-        items=lambda _, ctx: time_frame_predefined_vals(
-            ctx,
-            PlacementBlendInFromPreset.vals_times,
-            PlacementBlendInFromPreset.vals_frames,
-        ),
-    )
-
-    def execute(self, ctx: Context) -> set[str]:
-        prefs = RhubarbAddonPreferences.from_context(ctx)
-        strip_placement: StripPlacementPreferences = prefs.strip_placement
-        strip_placement.blend_in_frames = float(self.blend_in_preset)
-        return {'FINISHED'}
-
-
 class PlacementCueTrimFromPreset(bpy.types.Operator):
     """Set the cue trim time/frames from the preconfigured values"""
 
@@ -163,49 +164,6 @@ class PlacementCueTrimFromPreset(bpy.types.Operator):
         fps = ctx.scene.render.fps
         fps_base = ctx.scene.render.fps_base
         clp.highlight_long_cues = frame2time(float(self.trim_preset), fps, fps_base)
-        return {'FINISHED'}
-
-
-class PlacementOffsetFromPreset(bpy.types.Operator):
-    """Set the Offset  start/end value based on the predefined values"""
-
-    offset_rx = re.compile(r"(?P<start>\d+\.?\d*),(?P<end>\d+\.?\d*)")
-
-    bl_idname = "rhubarb.placement_set_offset"
-    bl_label = "Set offsets from predefined value"
-    bl_options = {'UNDO'}
-
-    offset_type: EnumProperty(  # type: ignore
-        name="Offset preset",
-        items=[
-            ('0,0', 'No offset', ""),
-            ('0,1', '0.0 1.0', ""),
-            ('0.5,1', '0.5 1.0', ""),
-            ('0.5,2', '0.5 2.0', ""),
-            ('1,1', '1.0 1.0', ""),
-            ('1,1.5', '1.0 1.5', ""),
-            ('1,2', '1.0 2.0', ""),
-            ('1.5,1.5', '1.5 1.5', ""),
-            ('1.5,2', '1.5 2', ""),
-            ('1.5,2.5', '1.5 2.5', ""),
-            ('1.5,3', '1.5 3', ""),
-            ('2,3', '2 3', ""),
-        ],
-        default='1,2',
-    )
-
-    def execute(self, ctx: Context) -> set[str]:
-        prefs = RhubarbAddonPreferences.from_context(ctx)
-        sprops: StripPlacementPreferences = prefs.strip_placement
-        mprops: MappingProperties = MappingProperties.from_context(ctx)
-        sprops: StripPlacementPreferences = mprops.strip_placement
-        rx = PlacementOffsetFromPreset.offset_rx
-        m = re.search(rx, self.offset_type)
-        assert m is not None, f"The {self.offset_type} doesn't match {rx}"
-        start = float(m.groupdict()["start"])
-        end = float(m.groupdict()["end"])
-        sprops.offset_start = -start
-        sprops.offset_end = end
         return {'FINISHED'}
 
 
@@ -290,26 +248,26 @@ class BakeToNLA(bpy.types.Operator):
 
         # start = cue_frames.pre_start_frame_float  # The clip starts slightly before the cue start driven by the blend-in value
 
-        blend_inout_ratio: float = 0.5  # TODO: From properties
+        bir: float = b.strip_placement_props.blend_inout_ratio
         prev_cf = b.preceding_cue
 
         if prev_cf.is_X:
             # When the previous cue is silence, this cue should blend in without overlap
             start = cf.start_frame_float
-            blend_in = cf.get_middle_start_frame(blend_inout_ratio) - start
+            blend_in = cf.get_middle_start_frame(bir) - start
         else:
             # The clip starts (blending in) after the end of the middle section of the previous clip.
-            start = prev_cf.get_middle_end_frame_float(blend_inout_ratio)
-            blend_in = cf.get_middle_start_frame(blend_inout_ratio) - start
+            start = prev_cf.get_middle_end_frame_float(bir)
+            blend_in = cf.get_middle_start_frame(bir) - start
 
         next_cf = b.following_cue
         if next_cf.is_X:
             # When the following cue is silence, this cue should blend out without overlap
             end = cf.end_frame_float
-            blend_out = cf.end_frame_float - cf.get_middle_end_frame_float(blend_inout_ratio)
+            blend_out = cf.end_frame_float - cf.get_middle_end_frame_float(bir)
         else:
-            end = next_cf.get_middle_start_frame(blend_inout_ratio)
-            blend_out = end - cf.get_middle_end_frame_float(blend_inout_ratio)
+            end = next_cf.get_middle_start_frame(bir)
+            blend_out = end - cf.get_middle_end_frame_float(bir)
 
         desired_strip_duration = end - start
         assert desired_strip_duration > 0, f"desired_strip_duration={desired_strip_duration} [{b.current_traceback}]"

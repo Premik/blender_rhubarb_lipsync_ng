@@ -139,9 +139,9 @@ class MappingAndBakingPanel(bpy.types.Panel):
         self.layout.use_property_decorate = False
         row = self.layout.row(align=True)
 
-        row.prop(strip_placement, 'blend_in_frames', text="Blend in Frames")
-        id = baking_operators.PlacementBlendInFromPreset.bl_idname
-        row.operator_menu_enum(id, "blend_in_preset", text="", icon="DOWNARROW_HLT")
+        row.prop(strip_placement, 'blend_inout_ratio', text="Blend In-Out Ratio")
+        id = baking_operators.PlacementBlendInOutRatioPreset.bl_idname
+        row.operator_menu_enum(id, "ratio_type", text="", icon="DOWNARROW_HLT")
 
         if strip_placement.use_auto_blend:
             row.enabled = False

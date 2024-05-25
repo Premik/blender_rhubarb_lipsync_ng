@@ -167,18 +167,13 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
   * Clear - will remove the mapping (delete from the object completly?)
   * Face-it - From Test rig - Normal actions+shape-key corrections? 2) From shape-key test action 3) The final control rig (doesn't need a wizard)
   * By name - More instances (alow user defined) - will map action by matching name patterns (should provide some placeholder/expansions in the expression for objectName, etc)
-  * Baking + Strip placement reorg 
-    - Use the new `CueProcessor` in the ruhbard module
-    - Blend in time only up to the cue start time (never after)
-    - Blend out time: start fading on cue start time rounded to nearset frame (rounded up) down to the cue end time, should reduce "freezing"
-    - Trim long cues, only trim the non-X
+
 
 ### Normal
 * Add warning (in the baking validation popup?) when any selected object has an active Action (seems to be confusing for NLA newbies when the rig doesn't animate after bake because of that)
 * extended shapes- seems they are generated even when disabled -check
 * Integrate with: https://mecabricks.com/en/shop/product/6
 * Create aur package
-* Detect blender --debug and similar argument and auto-enable debug log level (and same for log file?)
 * Add "auto-remove" checkbox on the Bake confirmation dialog (so one doesn'thave to press "remove cues")
 * When tracks are alraedy selected and new NLA track is added sometimes this disturbs the track selection and wrong tracks get used.
 
@@ -190,7 +185,7 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 * Add some simple blender sample file
 * There are still some ogg unsupported format - could have been an user error (ogg file was not really an ogg?)
 * Workflow from Sequencer - Paste sound_strip first, create captures of them and render to NLA,
-
+* When dialog file is specified but file doesn;t exists rhubar_cli ends with `error-code` but not much clue. Add check for dialog file.
 
 ## Check
 https://github.com/Hunanbean/Papagayo-NGLipsyncImporterForBlender
@@ -248,6 +243,12 @@ class FaceitExpressions(PropertyGroup):
         name='Procedural Expression',
         items=PROCEDURAL_EXPRESSION_ITEMS,
     )
+
+
+- **New simplified bake-to-NLA which should produce better results out-of-the-box**.
+- After the too-long cues are trimmed down the gap is filled with the `X` cues (silence)
+- Update the scene end frame if the sound strip would end after the current end.
+- Starting `blender --debug` will force trace level debuging of the plugin (useful for troubleshooting).
 
 - Inbuilt sound converter. 
 

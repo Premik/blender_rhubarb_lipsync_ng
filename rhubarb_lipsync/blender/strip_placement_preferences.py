@@ -125,12 +125,22 @@ class StripPlacementPreferences(PropertyGroup):
         override={'LIBRARY_OVERRIDABLE'},
     )
 
-    blend_in_frames: FloatProperty(  # type: ignore
-        "Blend In Frames",
-        description="Number of frames at start of strip to fade in the influence",
+    blend_inout_ratio: FloatProperty(  # type: ignore
+        "Blend In-Out Ratio",
+        description=textwrap.dedent(
+            """\
+            Ratio between blend-in and blend-out sections.
+              
+            For the default value of 0.5, it takes the same amount of time for a cue to fully appear as it does to disappear.  
+            Lower values mean the cue appears faster but takes longer to disappear.  
+            Higher values make the cue appears slower but disappears faster.
+            """
+        ),
         min=0,
-        soft_max=10,
-        default=1,
+        max=1,
+        soft_min=0.1,
+        soft_max=0.9,
+        default=0.5,
         options={'LIBRARY_EDITABLE'},
         override={'LIBRARY_OVERRIDABLE'},
     )
