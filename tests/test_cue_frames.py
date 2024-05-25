@@ -91,10 +91,10 @@ class TestCueFrames:
             mcfs.append(self.create_mcf_at(frames[i], duration, fcfg))
         return CueProcessor(fcfg, mcfs)
 
-    def test_cue_processor_trim(self, fcfg: FrameConfig) -> None:
+    def test_cue_processor_trim_no_x(self, fcfg: FrameConfig) -> None:
         # Two cues, first got trimmed, second doesn't
         cp = self.create_cue_processor(fcfg, 2, 7, 8)
-        cp.trim_tolerance=0.001
+        cp.trim_tolerance = 0.001
 
         assert cp.cue_frames[0].duration_frames == approx(5)
         assert cp.cue_frames[1].duration_frames == approx(1)
@@ -102,6 +102,26 @@ class TestCueFrames:
         cp.trim_long_cues(max_dur, False)
         assert cp.cue_frames[0].cue.duration == approx(max_dur)
         assert cp.cue_frames[1].duration_frames == approx(1)
+
+    def test_cue_processor_trim_extra_x(self, fcfg: FrameConfig) -> None:
+        # Three cues, first got trimmed, second doesn't, third does
+        cp = self.create_cue_processor(fcfg, 2, 7, 8, 18)
+        cp.trim_tolerance = 0.01
+
+        assert cp.cue_frames[0].duration_frames == approx(5)
+        assert cp.cue_frames[1].duration_frames == approx(1)
+        max_dur = frame2time(2, fcfg.fps, fcfg.fps_base)
+        cp.trim_long_cues(max_dur, True)
+        assert not cp.cue_frames[0].is_X
+        assert cp.cue_frames[0].cue.duration == approx(max_dur)
+        assert cp.cue_frames[1].is_X
+        assert cp.cue_frames[0].duration_frames + cp.cue_frames[1].duration_frames == approx(5)
+
+        assert cp.cue_frames[2].duration_frames == approx(1)
+
+        assert not cp.cue_frames[3].is_X
+        assert cp.cue_frames[3].cue.duration == approx(max_dur)
+        assert cp.cue_frames[4].is_X
 
     def test_cue_processor_expand_short(self, fcfg: FrameConfig) -> None:
         # First cue is between frames 1 and 2, second crosses frame 2
@@ -118,30 +138,3 @@ class TestCueFrames:
         assert cp.cue_frames[1].duration_frames_float == approx(1)
         assert cp.cue_frames[0].intersects_frame
         assert cp.cue_frames[1].intersects_frame
-
-    def test_cue_processor_round_ends(self, fcfg: FrameConfig) -> None:
-        # The first and second cues cross a frame but shouldn't be rounded as it is too short
-        cp = self.create_cue_processor(fcfg, 1, 1.9, 2.3, 4.3)
-        o = fcfg.offset
-
-        assert cp.cue_frames[0].duration_frames_float == pytest.approx(0.9)
-        cp.round_ends_down()
-        assert cp.cue_frames[0].blend_out_frames == pytest.approx(0.9)
-        assert cp.cue_frames[0].duration_frames_float == pytest.approx(0.9)
-        assert cp.cue_frames[1].end_frame_float == pytest.approx(2.3 + o)
-        assert cp.cue_frames[1].blend_out_frames == pytest.approx(0.3)
-        assert cp.cue_frames[2].end_frame_float == pytest.approx(4 + o)
-        assert cp.cue_frames[2].blend_out_frames == pytest.approx(1)
-
-    @pytest.mark.parametrize('blend_in_duration_frames', [0.2, 0.5, 2])
-    def test_cue_processor_blend_in(self, fcfg: FrameConfig, blend_in_duration_frames: float) -> None:
-        # The first cue crosses frame 1 and ends right after that
-        # so the second cue blend-in would overlap and should get shrinked
-        cp = self.create_cue_processor(fcfg, 0.5, 1.1, 4)
-        o = fcfg.offset
-
-        blend_in_duration = frame2time(blend_in_duration_frames, fcfg.fps, fcfg.fps_base)
-        assert cp.set_blend_in_times(blend_in_duration) == 1, "Expect exactly one cue to get blend-in section shrank"
-
-        assert cp.cue_frames[0].blend_in == approx(blend_in_duration)  # Cue1 - blend_in unchanged
-        assert cp.cue_frames[1].pre_start_float == approx(cp.frame2time(1 + o))  # Cue2 - (pre)starts at the whole frame of the previous one

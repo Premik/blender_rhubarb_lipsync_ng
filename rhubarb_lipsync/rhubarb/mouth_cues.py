@@ -153,11 +153,14 @@ class MouthCueFrames:
 
     cue: MouthCue
     frame_cfg: FrameConfig = field(repr=False)
-    blend_in: float = field(default=0, repr=False)
 
     @staticmethod
     def create_X(frame_cfg: FrameConfig, start: float, end: float) -> 'MouthCueFrames':
         return MouthCueFrames(cue=MouthCue(MouthShapeInfos.X.value.key, start, end), frame_cfg=frame_cfg)
+
+    @property
+    def is_X(self) -> bool:
+        return self.cue.key == MouthShapeInfos.X.value.key
 
     @docstring_from(MouthCue.get_start_frame_float)  # type: ignore[misc]
     @property
@@ -186,20 +189,11 @@ class MouthCueFrames:
         c = self.frame_cfg
         return time2frame_down(self.cue.start, c.fps, c.fps_base) + c.offset
 
-    @property
-    def pre_start_float(self) -> float:
-        """Start time with the blend-in included. This time is few fractions of second before the start time"""
-        return self.cue.start - self.blend_in
-
-    @property
-    def pre_start_frame_float(self) -> float:
-        return self.start_frame_float - self.blend_in_frames
-
     def get_middle_start(self, blend_inout_ratio: float = 0.5) -> float:
         """Start time of the middle part of the cue which shoud be fully visible without blending.
         Affected by the blend_inout_ratio. Blend-in section ends here as well as blend-out section of the previous strip"""
         blend_inout_ratio = max(0, min(blend_inout_ratio, 1))
-        return self.start * (1 - blend_inout_ratio) + self.end * blend_inout_ratio
+        return self.cue.start * (1 - blend_inout_ratio) + self.cue.end * blend_inout_ratio
 
     def get_middle_start_frame(self, blend_inout_ratio: float = 0.5) -> float:
         c = self.frame_cfg

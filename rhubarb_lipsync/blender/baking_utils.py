@@ -209,10 +209,16 @@ class BakingContext:
             return None
         return self.cue_processor[self.cue_index + 1]
 
+    def frame2time_no_offset(self, f: float) -> float:
+        return frame2time(f, self.frame_cfg.fps, self.frame_cfg.fps_base)
+
+    def time2frame_no_offset(self, t: float) -> float:
+        return time2frame_float(t, self.frame_cfg.fps, self.frame_cfg.fps_base)
+
     def optimize_cues(self) -> None:
         clp: CueListPreferences = self.prefs.cue_list_prefs
         max_dur = clp.highlight_long_cues
-        blend_in = frame2time(self.strip_placement_props.blend_in_frames, self.frame_cfg.fps, self.frame_cfg.fps_base)
+        blend_in = self.frame2time_no_offset(self.strip_placement_props.blend_in_frames)
         # blend_in = 0.02
 
         res = self.cue_processor.optimize_cues(max_dur, blend_in)
