@@ -129,11 +129,6 @@ class MouthCue:
     def duration(self) -> float:
         return self.end - self.start
 
-    @property
-    def middle(self) -> float:
-        """Time in the middle of the cue"""
-        return (self.start + self.end) / 2
-
     def get_duration_frames(self, fps: int, fps_base=1.0) -> float:
         return time2frame_float(self.duration, fps, fps_base)
 
@@ -200,12 +195,26 @@ class MouthCueFrames:
     def pre_start_frame_float(self) -> float:
         return self.start_frame_float - self.blend_in_frames
 
-    @property
-    def middle_right_float(self) -> int:
-        """Cue middle-time rounded up to the closest integer frame number.
-        Note for too short cues this could be after the cue end"""
+    def get_middle_start(self, blend_inout_ratio: float = 0.5) -> float:
+        """Start time of the middle part of the cue which shoud be fully visible without blending.
+        Affected by the blend_inout_ratio. Blend-in section ends here as well as blend-out section of the previous strip"""
+        blend_inout_ratio = max(0, min(blend_inout_ratio, 1))
+        return self.start * (1 - blend_inout_ratio) + self.end * blend_inout_ratio
+
+    def get_middle_start_frame(self, blend_inout_ratio: float = 0.5) -> float:
         c = self.frame_cfg
-        return time2frame_up(self.cue.middle, c.fps, c.fps_base) + c.offset
+        return time2frame_float(self.get_middle_start(blend_inout_ratio), c.fps, c.fps_base) + c.offset
+
+    def get_middle_end_frame_float(self, blend_inout_ratio: float = 0.5) -> float:
+        """End time of the middle cue part. Blend-out section starts here as well as blend-in section of the following strip.
+        It is the first integer-frame after middle_start. Or could be same as middle_start when cue is too short.
+        """
+        c = self.frame_cfg
+        # Round the middle part start up to the first integer frame and use it as the end
+        ret = time2frame_up(self.get_middle_start(blend_inout_ratio), c.fps, c.fps_base) + c.offset
+        if ret >= self.end_frame_float:  # Middle would end after cue end, make the middle part start=end
+            return self.get_middle_start_frame(blend_inout_ratio)
+        return ret
 
     @docstring_from(MouthCue.get_end_frame)  # type: ignore[misc]
     @property

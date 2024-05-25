@@ -11,6 +11,7 @@ class CueProcessor:
     frame_cfg: FrameConfig
     cue_frames: list[MouthCueFrames] = field(repr=False)
     trim_tolerance: float = 0.05
+    blend_inout_ratio: float = 0.5
 
     @docstring_from(frame2time)  # type: ignore[misc]
     def frame2time(self, frame: float) -> float:

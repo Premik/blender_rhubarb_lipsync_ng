@@ -197,7 +197,17 @@ class BakingContext:
             return None
         return self.cue_processor.cue_frames[self.cue_index]
 
+    @property
+    def preceding_cue(self) -> Optional[MouthCueFrames]:
+        if not self.current_cue:
+            return None
+        return self.cue_processor[self.cue_index - 1]
 
+    @property
+    def following_cue(self) -> Optional[MouthCueFrames]:
+        if not self.current_cue:
+            return None
+        return self.cue_processor[self.cue_index + 1]
 
     def optimize_cues(self) -> None:
         clp: CueListPreferences = self.prefs.cue_list_prefs
