@@ -281,8 +281,8 @@ class BakeToNLA(bpy.types.Operator):
 
     def to_strip(self) -> None:
         b = self.bctx
-        cue_frames = b.current_cue
-        cue: MouthCue = cue_frames and cue_frames.cue or None
+        cf = b.current_cue
+        cue: MouthCue = cf and cf.cue or None
         if not b.current_mapping_action:
             with b.rlog.check_dups() as log:
                 log.warning(f"There is no mapping for the cue {cue.key} in the capture. Ignoring", self.bctx.current_traceback)
@@ -295,21 +295,21 @@ class BakeToNLA(bpy.types.Operator):
 
         if prev_cf.is_X:
             # When the previous cue is silence, this cue should blend in without overlap
-            start = cue_frames.start_frame_float
-            blend_in = b.time2frame_no_offset(cue_frames.get_middle_start(blend_inout_ratio))
+            start = cf.start_frame_float
+            blend_in = cf.get_middle_start_frame(blend_inout_ratio) - start
         else:
             # The clip starts (blending in) after the end of the middle section of the previous clip.
             start = prev_cf.get_middle_end_frame_float(blend_inout_ratio)
-            blend_in = cue_frames.get_middle_start_frame(blend_inout_ratio) - start
+            blend_in = cf.get_middle_start_frame(blend_inout_ratio) - start
 
         next_cf = b.following_cue
         if next_cf.is_X:
             # When the following cue is silence, this cue should blend out without overlap
-            end = cue_frames.end_frame_float
-            blend_out = cue_frames.end_frame_float - cue_frames.get_middle_end_frame_float(blend_inout_ratio)
+            end = cf.end_frame_float
+            blend_out = cf.end_frame_float - cf.get_middle_end_frame_float(blend_inout_ratio)
         else:
             end = next_cf.get_middle_start_frame(blend_inout_ratio)
-            blend_out = end - cue_frames.get_middle_end_frame_float(blend_inout_ratio)
+            blend_out = end - cf.get_middle_end_frame_float(blend_inout_ratio)
 
         desired_strip_duration = end - start
         assert desired_strip_duration > 0, f"desired_strip_duration={desired_strip_duration} [{b.current_traceback}]"
@@ -322,8 +322,8 @@ class BakeToNLA(bpy.types.Operator):
 
     def place_strip(self, start: float, end: float, blend_in: float, blend_out: float, scale: float):
         b = self.bctx
-        cue_frames = b.current_cue
-        cue: MouthCue = cue_frames and cue_frames.cue or None
+        cf = b.current_cue
+        cue: MouthCue = cf and cf.cue or None
         # Crop the previous strip-end to make room for the current strip start (if needed)
         if baking_utils.trim_strip_end_at(b.current_track, start):
             b.rlog.warning("Had to trim previous strip to make room for this one", self.bctx.current_traceback)
@@ -342,7 +342,7 @@ class BakeToNLA(bpy.types.Operator):
         strip.blend_type = b.strip_placement_props.blend_type
         strip.extrapolation = b.strip_placement_props.extrapolation
         strip.use_sync_length = b.strip_placement_props.use_sync_length
-        strip.use_auto_blend = b.strip_placement_props.use_auto_blend
+        strip.use_auto_blend = b.strip_placement_props.use_auto_blend or cf.is_X
         strip.blend_in = blend_in
         strip.blend_out = blend_out
 

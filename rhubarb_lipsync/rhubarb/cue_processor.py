@@ -79,6 +79,27 @@ class CueProcessor:
             log.info(f"Trimmed {modified} Cues as they were too long.")
         return modified
 
+    def merge_double_x(self) -> int:
+        modified = 0
+        orig_list = list(self.cue_frames)
+        for i, cf in enumerate(orig_list):
+            if i <= 0:
+                continue
+            if not cf.is_X:
+                continue
+            prev_cue = orig_list[i - 1]
+            if not prev_cue.is_X:
+                continue
+            prev_cue.cue.end = cf.cue.end  # Prolong prev X end up to this X end
+            removed = self.cue_frames.pop(i - modified)  # Remove the current X
+            assert removed == cf
+            modified += 1
+            prev_cue = cf
+
+        if modified > 0:
+            log.info(f"Removed {modified} X-Cues as they duplicate.")
+        return modified
+
     def ensure_frame_intersection(self) -> int:
         """Finds extremely short cues where there is no intersection with a frame and move either start or end to the closest frame time"""
         modified = 0
@@ -102,6 +123,7 @@ class CueProcessor:
         steps = [
             (lambda: self.trim_long_cues(max_cue_duration), "ends trimmed"),
             (self.ensure_frame_intersection, "duration enlarged"),
+            (self.merge_double_x, "double X removed"),
         ]
         report = ""
         for s in steps:
