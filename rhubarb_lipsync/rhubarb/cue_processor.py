@@ -10,6 +10,7 @@ class CueProcessor:
 
     frame_cfg: FrameConfig
     cue_frames: list[MouthCueFrames] = field(repr=False)
+    trim_tolerance: float = 0.05
 
     @docstring_from(frame2time)  # type: ignore[misc]
     def frame2time(self, frame: float) -> float:
@@ -19,26 +20,55 @@ class CueProcessor:
     def time2frame_float(self, t: float) -> float:
         return time2frame_float(t, self.frame_cfg.fps, self.frame_cfg.fps_base) + self.frame_cfg.offset
 
-    def find_cues_by_duration(self, min_dur: float = -1, max_dur: float = -1) -> Iterable[MouthCueFrames]:
-        """Finds cues with duration shorter than min_dur (-1 to ignore)
-        or longer than max_dur (-1 to ignore) while skipping X (silence)"""
+    @property
+    def pre_start_cue(self) -> MouthCueFrames:
+        s = 0
+        if self.cue_frames:
+            s = self.cue_frames[0].cue.start
+        return MouthCueFrames.create_X(self.frame_cfg, s - 10, s)
+
+    def get(self, index) -> MouthCueFrames:
+        """Returns CueFrames at the given index while supporting out-of-range indices too
+        by providing fake X cues after the range boundary"""
+        if index < 0:
+            return self.pre_start_cue
+        if index >= len(self.cue_frames):
+            return self.post_end_cue
+        self.cue_frames[index]
+
+    @property
+    def post_end_cue(self) -> MouthCueFrames:
+        s = 0
+        if self.cue_frames:
+            s = self.cue_frames[-1].cue.end
+        return MouthCueFrames.create_X(self.frame_cfg, s, s + 10)
+
+    @property
+    def the_last_cue(self) -> Optional[MouthCueFrames]:
+        if not self.cue_frames:
+            return None
+        return self.cue_frames[-1]
+
+    def find_cues_by_duration(self, min_dur: float = -1, max_dur: float = -1, tol_max: float = 0.05, tol_min: float = 0.001) -> Iterable[MouthCueFrames]:
+        """Finds cues with duration shorter than min_dur (-1 to ignore) or longer than max_dur (-1 to ignore).
+        The X (silence) is ignored. Only cues which are significatnly (driven by two tolerance params) longer/short are returned"""
         for i, cf in enumerate(list(self.cue_frames)):
             d = cf.cue.duration
             if cf.cue.key == 'X':
                 continue  # Ignore X (silence)
-            if max_dur > 0 and d <= max_dur:
+            if max_dur > 0 and d <= max_dur + tol_max:
                 continue
-            if min_dur > 0 and d >= min_dur:
+            if min_dur > 0 and d >= min_dur - tol_min:
                 continue
             yield i, cf
 
     def trim_long_cues(self, max_dur: float, append_x: bool = True) -> int:
         modified = 0
-        for i, cf in self.find_cues_by_duration(-1, max_dur):
+        for i, cf in self.find_cues_by_duration(-1, max_dur, self.trim_tolerance):
             new_end = cf.cue.start + max_dur
             if append_x:
                 cf_x = MouthCueFrames.create_X(self.frame_cfg, new_end, cf.cue.end)
-                # Insert the new X after the current trimmed X, encouting previous insertions as they shift the indices
+                # Insert the new X after the current trimmed X, encountering previous insertions as they shift the indices
                 self.cue_frames.insert(i + modified + 1, cf_x)
             cf.cue.end = new_end  # Trim duration
 
@@ -102,9 +132,9 @@ class CueProcessor:
             log.info(f"Shrinkened {shrinked} Cue blend-in times down to fully prononuce the previous Cue.")
         return shrinked
 
-    def optimize_cues(self, min_cue_duration=0.2, blend_in_time=0.02) -> str:
+    def optimize_cues(self, max_cue_duration=0.2, blend_in_time=0.02) -> str:
         steps = [
-            (lambda: self.trim_long_cues(min_cue_duration), "ends trimmed"),
+            (lambda: self.trim_long_cues(max_cue_duration), "ends trimmed"),
             (self.ensure_frame_intersection, "duration enlarged"),
             (self.round_ends_down, "ends rounded to frame"),
             (lambda: self.set_blend_in_times(blend_in_time), "blend-in time shortened"),

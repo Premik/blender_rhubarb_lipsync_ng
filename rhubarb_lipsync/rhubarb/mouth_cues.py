@@ -129,6 +129,11 @@ class MouthCue:
     def duration(self) -> float:
         return self.end - self.start
 
+    @property
+    def middle(self) -> float:
+        """Time in the middle of the cue"""
+        return (self.start + self.end) / 2
+
     def get_duration_frames(self, fps: int, fps_base=1.0) -> float:
         return time2frame_float(self.duration, fps, fps_base)
 
@@ -194,6 +199,13 @@ class MouthCueFrames:
     @property
     def pre_start_frame_float(self) -> float:
         return self.start_frame_float - self.blend_in_frames
+
+    @property
+    def middle_right_float(self) -> int:
+        """Cue middle-time rounded up to the closest integer frame number.
+        Note for too short cues this could be after the cue end"""
+        c = self.frame_cfg
+        return time2frame_up(self.cue.middle, c.fps, c.fps_base) + c.offset
 
     @docstring_from(MouthCue.get_end_frame)  # type: ignore[misc]
     @property

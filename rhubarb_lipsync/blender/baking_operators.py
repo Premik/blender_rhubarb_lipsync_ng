@@ -1,6 +1,6 @@
 import logging
 import re
-
+import textwrap
 import bpy
 from bpy.props import BoolProperty, CollectionProperty, EnumProperty, FloatProperty, IntProperty, PointerProperty, StringProperty
 from bpy.types import AlphaUnderSequence, Context, ImageUser, Object, UILayout
@@ -247,7 +247,12 @@ class BakeToNLA(bpy.types.Operator):
     bl_label = "Bake to NLA"
     trim_cue_excess: BoolProperty(  # type: ignore
         name="Trim excess Cue length",
-        description="For detected Cues which are longer that the max Cue duration from preferences trim the excess length.",
+        description=textwrap.dedent(
+            """\
+            For detected Cues which are longer that the max Cue duration from preferences trim the excess length.  
+            The gaps created by trimming are filled with the X shape. 
+            """
+        ),
         default=True,
     )
 
@@ -437,8 +442,8 @@ class BakeToNLA(bpy.types.Operator):
         layout.separator()
         row = layout.row(align=False)
         row.prop(self.bctx.cprops, "start_frame")
-        if self.bctx.the_last_cue:
-            row.label(text=f"End frame: {self.bctx.the_last_cue.end_frame_str}")
+        if self.bctx.cue_processor.the_last_cue:
+            row.label(text=f"End frame: {self.bctx.cue_processor.the_last_cue.end_frame_str}")
         layout.prop(self.bctx.mprefs, "object_selection_filter_type", text="Objects to bake")
         self.draw_info()
         self.draw_validation()

@@ -181,13 +181,8 @@ class BakingContext:
         cfs = [MouthCueFrames(ci.cue, self.frame_cfg) for ci in self.mouth_cue_items]
         return CueProcessor(self.frame_cfg, cfs)
 
-    @property
-    def cue_frames(self) -> list[MouthCueFrames]:
-        """List of the detected cues wrapped in CueFrames."""
-        return self.cue_processor.cue_frames
-
     def cue_iter(self) -> Iterator[MouthCueFrames]:
-        for i, cf in enumerate(self.cue_frames):
+        for i, cf in enumerate(self.cue_processor.cue_frames):
             self.cue_index = i
             yield cf
         self.cue_index = -1
@@ -197,16 +192,12 @@ class BakingContext:
         """Current mouth cue - source side of the mapping"""
         if self.cue_index < 0:
             return None
-        if self.cue_index >= len(self.cue_frames):
+        if self.cue_index >= len(self.cue_processor.cue_frames):
             self.cue_index = -1
             return None
-        return self.cue_frames[self.cue_index]
+        return self.cue_processor.cue_frames[self.cue_index]
 
-    @property
-    def the_last_cue(self) -> Optional[MouthCueFrames]:
-        if not self.cue_frames:
-            return None
-        return self.cue_frames[-1]
+
 
     def optimize_cues(self) -> None:
         clp: CueListPreferences = self.prefs.cue_list_prefs
@@ -221,9 +212,9 @@ class BakingContext:
     @cached_property
     def total_frame_range(self) -> Optional[tuple[int, int]]:
         """Frame range of the final output after all the Actions are placed"""
-        if not self.the_last_cue:
+        cf = self.cue_processor.the_last_cue
+        if not cf:
             return None
-        cf = self.the_last_cue
         return self.cprops.start_frame, cf.end_frame
 
     @property

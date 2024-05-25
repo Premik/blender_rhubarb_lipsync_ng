@@ -94,6 +94,7 @@ class TestCueFrames:
     def test_cue_processor_trim(self, fcfg: FrameConfig) -> None:
         # Two cues, first got trimmed, second doesn't
         cp = self.create_cue_processor(fcfg, 2, 7, 8)
+        cp.trim_tolerance=0.001
 
         assert cp.cue_frames[0].duration_frames == approx(5)
         assert cp.cue_frames[1].duration_frames == approx(1)
