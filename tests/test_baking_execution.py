@@ -1,9 +1,7 @@
 import unittest
-from dataclasses import dataclass
 
 import bpy
 
-import rhubarb_lipsync.blender.baking_utils as baking_utils
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 import sample_project
 

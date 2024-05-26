@@ -268,7 +268,7 @@ class BakingContext:
         return range[1] - range[0]
 
     def current_mapping_action_scale(self, desired_len_frames: float, scale_min: float = -1, scale_max: float = -1) -> float:
-        """Scale factor to use on the strip so it's length matches the current mapping item action's length."""
+        """Scale factor to use on the strip, so it's length matches the current mapping item action's length."""
         if scale_min < 0:
             scale_min = self.strip_placement_props.scale_min
         if scale_max < 0:
@@ -317,7 +317,7 @@ class BakingContext:
     def current_track(self) -> Optional[NlaTrack]:
         if self.track_index < 0:
             return None
-        if self.track_pair == None:
+        if self.track_pair is None:
             return None
         return self.track_pair[self.track_index % 2]
 
@@ -330,7 +330,7 @@ class BakingContext:
         yield from self.strips_on_track(self.current_track)
 
     def strips_on_track(self, t: NlaTrack) -> Iterator[NlaStrip]:
-        if self.total_frame_range == None or not t:
+        if self.total_frame_range is None or not t:
             return []
         start, end = self.total_frame_range
         yield from strips_on_track(t, start, end)

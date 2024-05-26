@@ -1,14 +1,10 @@
 import logging
 import unittest
 
-import pytest
-from pytest import approx
-
 import rhubarb_lipsync.rhubarb.rhubarb_command as rhubarb_command
-from rhubarb_lipsync.rhubarb.cue_processor import CueProcessor
 
 # import tests.sample_data
-from rhubarb_lipsync.rhubarb.mouth_cues import FrameConfig, MouthCue, MouthCueFrames, duration_scale, frame2time, time2frame_float
+from rhubarb_lipsync.rhubarb.mouth_cues import duration_scale, frame2time, time2frame_float
 
 
 def enableDebug() -> None:

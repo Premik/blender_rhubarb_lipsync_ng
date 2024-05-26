@@ -276,7 +276,6 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
     def draw_capture_toolbar(self) -> None:
         prefs = RhubarbAddonPreferences.from_context(self.ctx)
         cpref: CueListPreferences = prefs.cue_list_prefs
-        props = CaptureListProperties.capture_from_context(self.ctx)
 
         row = self.layout.row()
 
@@ -293,7 +292,6 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
 
     def draw_capture(self) -> None:
         prefs = RhubarbAddonPreferences.from_context(self.ctx)
-        cpref: CueListPreferences = prefs.cue_list_prefs
         props = CaptureListProperties.capture_from_context(self.ctx)
         if not props:
             return

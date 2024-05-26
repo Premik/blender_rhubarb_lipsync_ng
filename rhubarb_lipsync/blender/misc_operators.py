@@ -10,10 +10,8 @@ from bpy.types import Context
 
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 from rhubarb_lipsync import bl_info
-from rhubarb_lipsync.blender import ui_utils as ui_utils
 from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, ResultLogItemProperties, ResultLogListProperties
 from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences
-from rhubarb_lipsync.blender.sound_operators import log
 from rhubarb_lipsync.rhubarb.log_manager import logManager
 
 log = logging.getLogger(__name__)

@@ -1,9 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Iterable, Optional
 
-import pytest
-
-from rhubarb_lipsync.rhubarb.mouth_cues import FrameConfig, MouthCue, MouthCueFrames, docstring_from, frame2time, log, time2frame_float
+from rhubarb_lipsync.rhubarb.mouth_cues import FrameConfig, MouthCueFrames, docstring_from, frame2time, log, time2frame_float
 
 
 @dataclass

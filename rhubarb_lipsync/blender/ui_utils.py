@@ -1,7 +1,6 @@
 import pathlib
 import re
 import traceback
-import warnings
 from enum import Enum
 from typing import Any, Callable, Iterator, Sequence, Type
 
@@ -47,7 +46,7 @@ class IconsManager:
         # img.preview_ensure()
         # Create a new texture and assign the loaded image to it
         text_name = image_name
-        if not text_name in bpy.data.textures.keys():
+        if text_name not in bpy.data.textures.keys():
             tex = bpy.data.textures.new(name=image_name, type='IMAGE')
             tex.extension = 'EXTEND'
             tex.image = img

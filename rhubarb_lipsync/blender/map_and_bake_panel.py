@@ -9,9 +9,9 @@ import rhubarb_lipsync.blender.mapping_uilist as mapping_list
 import rhubarb_lipsync.blender.mapping_utils as mapping_utils
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, ResultLogListProperties
-from rhubarb_lipsync.blender.mapping_properties import MappingProperties, NlaTrackRef, StripPlacementPreferences
+from rhubarb_lipsync.blender.mapping_properties import MappingProperties, NlaTrackRef
 from rhubarb_lipsync.blender.misc_operators import ShowResultLogDetails
-from rhubarb_lipsync.blender.preferences import CueListPreferences, MappingPreferences, RhubarbAddonPreferences
+from rhubarb_lipsync.blender.preferences import CueListPreferences, MappingPreferences, RhubarbAddonPreferences, StripPlacementPreferences
 from rhubarb_lipsync.rhubarb.mouth_shape_info import MouthShapeInfos
 
 log = logging.getLogger(__name__)
@@ -147,7 +147,7 @@ class MappingAndBakingPanel(bpy.types.Panel):
             row.enabled = False
 
         row = self.layout.row(align=True)
-        row.label(text=f"Trim cues longer than")
+        row.label(text="Trim cues longer than")
         row.prop(clp, "highlight_long_cues")
         id = baking_operators.PlacementCueTrimFromPreset.bl_idname
         row.operator_menu_enum(id, "trim_preset", text="", icon="DOWNARROW_HLT")

@@ -8,7 +8,6 @@ from bpy.props import BoolProperty, CollectionProperty, FloatProperty, IntProper
 from bpy.types import Context, NlaTrack, PropertyGroup
 
 import rhubarb_lipsync.blender.mapping_utils as mapping_utils
-from rhubarb_lipsync.blender.strip_placement_preferences import StripPlacementPreferences
 from rhubarb_lipsync.blender.ui_utils import DropdownHelper
 from rhubarb_lipsync.rhubarb.mouth_shape_info import MouthShapeInfo, MouthShapeInfos
 

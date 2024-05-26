@@ -157,7 +157,6 @@ class ImportJsonCueList(bpy.types.Operator):
         return ui_utils.validation_poll(cls, context)
 
     def invoke(self, context: Context, event) -> set[int] | set[str]:
-        rootProps = CaptureListProperties.from_context(context)
         context.window_manager.fileselect_add(self)
         return {'RUNNING_MODAL'}
 
