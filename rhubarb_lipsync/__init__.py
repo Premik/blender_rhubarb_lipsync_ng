@@ -11,7 +11,7 @@ from rhubarb_lipsync.rhubarb.log_manager import logManager
 bl_info = {
     'name': 'Rhubarb Lipsync NG',
     'author': 'Premysl Srubar. Inspired by the original version by Andrew Charlton. Includes Rhubarb Lip Sync by Daniel S. Wolf',
-    'version': (1, 3, 0),
+    'version': (1, 3, 1),
     'blender': (4, 0, 2),
     'location': '3d View > Sidebar',
     'description': 'Integrate Rhubarb Lipsync into Blender',
