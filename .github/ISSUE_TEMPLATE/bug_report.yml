@@ -1,0 +1,15 @@
+name: 🪲 Bug Report
+description: Wehn found something is not working as expected.
+labels: ["type/bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **System Information:**
+        - Operating System: [Windows, Linux, MacOS]
+        - Plugin Version: [1.2.0, 1.3.1]
+        Check the `.zip` file name or in Blender: `Edit/Preferences/Add-ons` Find and expand `Animation: Rhubarb Lipsync NG`
+        - Blender Version: [3.]
+        🔆
+      **Any additional details like error message, screenshot **
+      - If the issue happens early or plugin doesn't register, run `blender --debug`
