@@ -5,27 +5,24 @@ body:
   - type: markdown
     attributes:
       value: |
-        💡 Start Blender in debug mode from the command line: `blender --debug`. This will make the addon 
-        log messages with maximal verbosity, possibly giving more clues about the issue.
+        💡 Start Blender in debug mode from the command line: `blender --debug`. This will make the addon log messages with maximal verbosity, possibly giving more clues about the issue.
         
-        💡 On Windows, go to the main menu: `Window/Toggle System Console` 
-        to open the console window.
+        💡 On Windows, go to the main menu: `Window/Toggle System Console` to open the console window.
 
         💡 You can make the plugin write logs directly to a file:        
-        - Go to the main menu: `Edit/Preferences/Add-ons`. 
-        - Find and expand `Animation: Rhubarb Lipsync NG`. 
-        - Set `Log File` to file-path. For example, `C:\temp\rhubarb.log`.
-      
-        🔆      
+              - Go to the main menu: `Edit/Preferences/Add-ons`. 
+              - Find and expand `Animation: Rhubarb Lipsync NG`. 
+              - Set `Log File` to file-path. For example, `C:\temp\rhubarb.log`.
+
   - type: textarea
     attributes:
       label: Summary
       description: |
           Explain the problem briefly below. Where it makes sense, include:
-          - The steps to reproduce the issue.
-          - What is the current vs. expected outcome.
-          - Any error message or screenshot.
-          - If it used to work in the previous version of the addon (regression), provide the last working version.
+              - The steps to reproduce the issue.
+              - What is the current vs. expected outcome.
+              - Any error message or screenshot.
+              - If it used to work in the previous version of the addon (regression), provide the last working version.
     validations:
       required: true
 
@@ -35,20 +32,12 @@ body:
       description: |
         Addon version. Check the `.zip` file name you used to install the addon or in Blender: `Edit/Preferences/Add-ons`. 
         Find and expand `Animation: Rhubarb Lipsync NG`.
-      placeholder: |
-         1.2.1
-         1.3.1
-         1.4.0
-         1.4.1 
+      placeholder: "1.2.1, 1.3.1, 1.4.0, 1.4.1"
 
   - type: input
     attributes:
       label: Blender Version
-      placeholder: |
-          3.5
-          3.8
-          4.0
-          4.2.0
+      placeholder: "3.5, 3.8, 4.0, 4.2.0"
 
   - type: input
     attributes:
