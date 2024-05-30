@@ -26,7 +26,6 @@ body:
           - What is the current vs. expected outcome.
           - Any error message or screenshot.
           - If it used to work in the previous version of the addon (regression), provide the last working version.
-      placeholder: >-        
     validations:
       required: true
 
