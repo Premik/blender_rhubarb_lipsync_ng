@@ -2,13 +2,15 @@
 
 [![unit test](https://github.com/Premik/blender_rhubarb_lipsync_ng/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/Premik/blender_rhubarb_lipsync_ng/actions/workflows/unit-tests.yml)
 
-Inspired by the [scaredyfish/blender-rhubarb-lipsync](https://github.com/scaredyfish/blender-rhubarb-lipsync).
+## Video tutorials
+
+### Combining Armature Actions with Shape Keys
+[![Combining Armature Actions with Shape Keys](doc/img/demo2Thumb.jpeg)](https://odysee.com/@OwlGear:8/rhubarblipsync-ng-shape-keys:6)
+
+### Start from scratch
+[![Start from scratch](doc/img/demo1Thumb.jpeg)](https://odysee.com/@OwlGear:8/RhubarbLipsyncNGBlenderplugin-fromScratch:7)
 
 ## Quick start
-
-### Video tutorials
-
-[![Start from scratch](https://thumbnails.odycdn.com/optimize/s:0:0/quality:85/plain/https://player.odycdn.com/speech/7e8ad7b0932c9277:0.png)](https://odysee.com/@OwlGear:8/RhubarbLipsyncNGBlenderplugin-fromScratch:7)
 
 ### Installation
 
@@ -113,9 +115,7 @@ If needed, the `NLA Tracks` can be baked into a single new `Action`. Note, if yo
 
 A new `Action` will be created and selected in the `Action Editor`. The two RLPS tracks can now be disabled or removed (mouse-hover on the track name and press `x`).
 
+## Contributions
 
-## Dev notes
-
-[Development notes](dev.md)
-
-
+* Inspired by the [scaredyfish/blender-rhubarb-lipsync](https://github.com/scaredyfish/blender-rhubarb-lipsync).
+* The underlying engine [rhubarb-lip-sync project.](https://github.com/DanielSWolf/rhubarb-lip-sync)
