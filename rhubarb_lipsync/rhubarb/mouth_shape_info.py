@@ -20,7 +20,9 @@ class MouthShapeInfo:
 
 
 class MouthShapeInfos(Enum):
-    """All possible mouth shapes. Based on the  https://github.com/DanielSWolf/rhubarb-lip-sync#readme"""
+    """All possible mouth shapes. Based on the  https://github.com/DanielSWolf/rhubarb-lip-sync#readme
+    https://sunewatts.dk/lipsync/lipsync/article_02.php
+    """
 
     _all: list[MouthShapeInfo]
 
@@ -39,14 +41,15 @@ class MouthShapeInfos(Enum):
         '''\
             Slightly open mouth with clenched teeth. 
             This mouth shape is used for most consonants (“K”, “S”, “T”, etc.). 
-            It’s also used for some vowels such as the “EE” sound in bee.''',
+             It’s also used for some vowels such as the “EE” /i:/ sound in b[ee].''',
     )
     C = MouthShapeInfo(
         'C',
         'Ⓒ',
         'EH AE sounds. Opened mouth.',
         '''\
-            Open mouth. This mouth shape is used for vowels like “EH” as in men and “AE” as in bat. 
+            Open mouth. This mouth shape is used for front-open vowels like “EH” /ɛ/ as in m[e]n or r[e]d 
+            and “AE” /æ/ as in b[a]t, s[u]n or s[a]y. 
             It’s also used for some consonants, depending on context.
             This shape is also used as an in-between when animating from Ⓐ or Ⓑ to Ⓓ. 
             So make sure the animations ⒶⒸⒹ and ⒷⒸⒹ look smooth!''',
@@ -56,14 +59,16 @@ class MouthShapeInfos(Enum):
         'Ⓓ',
         'A sound. Wide opened mouth.',
         '''\
-            Wide open mouth. This mouth shapes is used for vowels like “AA” as in father.''',
+            Wide open mouth. The widest of them all. This mouth shape is used vowels 
+            like “AA” /ɑ/ as in f[a]ther or h[i]de''',
     )
     E = MouthShapeInfo(
         'E',
         'Ⓔ',
         'AO ER sounds. Slightly rounded mouth.',
         '''\
-            Slightly rounded mouth. This mouth shape is used for vowels like “AO” as in off and “ER” as in bird.
+            Slightly rounded mouth. This mouth shape is used for vowels like “AO” /ɒ/ as in [o]ff, f[a]ll or fr[o]st 
+            and “ER” /ɝ/ as in h[er], b[ir]d or h[ur]t.
             This shape is also used as an in-between when animating from Ⓒ or Ⓓ to Ⓕ. 
             Make sure the mouth isn’t wider open than for Ⓒ. 
             Both ⒸⒺⒻ and ⒹⒺⒻ should result in smooth animation.''',
@@ -73,14 +78,15 @@ class MouthShapeInfos(Enum):
         'Ⓕ',
         'UW OW W sounds. Puckered lips.',
         '''\
-            Puckered lips. This mouth shape is used for “UW” as in you, “OW” as in show, and “W” as in way.''',
+            Puckered lips. This mouth shape is used for “UW” as in y[ou] 
+            and “OW” as in sh[ow] /əʊ/, and “W” as in [w]ay.''',
     )
     G = MouthShapeInfo(
         'G',
         'Ⓖ',
         'F V sounds. Teeth touched lip.',
         '''\
-            Upper teeth touching the lower lip for “F” as in for and “V” as in very.
+            Upper teeth touching the lower lip for “F” as in [f]or and “V” as in [v]ery.
             If your art style is detailed enough, it greatly improves the overall look of the animation.''',
         True,
     )

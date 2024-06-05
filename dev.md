@@ -163,6 +163,7 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 ## Todo
 
 ### High
+* Troubleshooting guide
 * Mapping wizards
   * Clear - will remove the mapping (delete from the object completly?)
   * Face-it - From Test rig - Normal actions+shape-key corrections? 2) From shape-key test action 3) The final control rig (doesn't need a wizard)
@@ -176,6 +177,7 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 * Create aur package
 * Add "auto-remove" checkbox on the Bake confirmation dialog (so one doesn'thave to press "remove cues")
 * When tracks are alraedy selected and new NLA track is added sometimes this disturbs the track selection and wrong tracks get used.
+* Make a Capture operation dialog (now only confirmation), put the dialog-file, recognizer and start frame there?
 
 ### Low
 * Add [speaker](https://docs.blender.org/manual/en/latest/render/output/audio/speaker.html) as an alternative to Sequencer audio clip
@@ -266,3 +268,5 @@ class FaceitExpressions(PropertyGroup):
 ## Basic troubleshooting
 - Enable increase log-level in preferences. Enable login to file.
 - If the issue happens early or plugin doesn't register, run `blender --debug`
+
+
