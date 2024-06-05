@@ -1,5 +1,6 @@
 name: 🔆 Feature Request
 description: Use this form to suggest a new feature, improvement idea, or to report a missing feature.
+labels: ["enhancement"]
 body:
   - type: textarea
     attributes:

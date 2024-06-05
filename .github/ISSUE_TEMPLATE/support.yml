@@ -1,0 +1,8 @@
+name: 🗨️ Support, questions
+description: Use this form if you need help, have a question, or not sure whether something is a bug.
+body:
+  - type: textarea
+    attributes:
+      label: Description
+    validations:
+      required: true
