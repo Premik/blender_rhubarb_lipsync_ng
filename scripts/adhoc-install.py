@@ -57,9 +57,9 @@ print(bpy.ops.rhubarb.create_capture_props())
 # wget --no-check-certificate https://raw.githubusercontent.com/Premik/blender_rhubarb_lipsync_ng/master/scripts/adhoc-install.py
 # or
 # curl --insecure https://raw.githubusercontent.com/Premik/blender_rhubarb_lipsync_ng/master/scripts/adhoc-install.py -o adhoc-install.py
-# blender --background --python adhoc-install.py
+# blender --debug --background --python adhoc-install.py
 
 # MacOS
 # cd /Applications/Blender.app/Contents/MacOS
-# ./Blender --background --python adhoc-install.py
+# ./Blender --debug --background --python adhoc-install.py
 # XDG_CONFIG_HOME=/tmp/blenderTemp ./Blender --background --python adhoc-install.py
