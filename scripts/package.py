@@ -3,12 +3,8 @@ import shutil
 from functools import cached_property
 from pathlib import Path
 
-from config import project_cfg, rhubarb_cfg
+from config import project_cfg, rhubarb_cfg, dist_zip_name
 from rhubarb_bin import RhubarbBinary
-
-
-def dist_zip_name(platform: str, ver: str) -> str:
-    return f"rhubarb_lipsync_ng-{platform}-{ver}"
 
 
 def clean_temp_files_at(start_path: Path) -> int:
