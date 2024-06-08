@@ -246,27 +246,3 @@ class FaceitExpressions(PropertyGroup):
         items=PROCEDURAL_EXPRESSION_ITEMS,
     )
 
-
-- **New simplified bake-to-NLA which should produce better results out-of-the-box**.
-- After the too-long cues are trimmed down the gap is filled with the `X` cues (silence)
-- Update the scene end frame if the sound strip would end after the current end.
-- Starting `blender --debug` will force trace level debuging of the plugin (useful for troubleshooting).
-
-- Inbuilt sound converter. 
-
-- Flexible sound -> animation mapping. Shape-keys, armature bones, action-sheets or any other combination of actions is supported. 
-- No external dependencies, straightforward installation.
-(collecting phoneme groups). Quick preview of captured mouth-cues.
-- Comperhensive unit and integration tests ran automatically by Gitlab on windows, linux and mac runner. Breaking bugs should get detected early.
-- Robust UI. Disabled buttons show reason why they are disabled when hovering on them. Detailed validations prior baking, result report, unexpected errors shown directly in UI. Not just small notification at the bottom of the screen which goes away in few seconds and is easy to miss. Background processing with proper progressbar for creating mouth-cue captures 
-
-
-## Faq
-- Difference between rhubarb-cli, rhubarb_lipsync, rhubarb_lipync_ng,
-- Support Github tickets
-
-## Basic troubleshooting
-- Enable increase log-level in preferences. Enable login to file.
-- If the issue happens early or plugin doesn't register, run `blender --debug`
-
-

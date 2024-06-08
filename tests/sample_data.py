@@ -10,14 +10,15 @@ from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbParser
 
 sample_data_path = Path(__file__).parent / "data"
 
-assert sample_data_path.exists()
-assert sample_data_path.is_dir()
-
 
 class SampleData:
     """Test data. Links to a sound file and additional data"""
 
     def __init__(self, name: str, sample_data_path=sample_data_path) -> None:
+        if not sample_data_path.exists():
+            raise FileNotFoundError(f"The path '{sample_data_path}' does not exist.")
+        if not sample_data_path.is_dir():
+            raise NotADirectoryError(f"The path '{sample_data_path}' is not a directory.")
         self.name = name
         self.sample_data_path = sample_data_path
 
