@@ -179,7 +179,7 @@ class BakingContext:
     @cached_property
     def cue_processor(self) -> CueProcessor:
         cfs = [MouthCueFrames(ci.cue, self.frame_cfg) for ci in self.mouth_cue_items]
-        return CueProcessor(self.frame_cfg, cfs)
+        return CueProcessor(self.frame_cfg, cfs, use_extended_shapes=self.prefs.use_extended_shapes)
 
     def cue_iter(self) -> Iterator[MouthCueFrames]:
         for i, cf in enumerate(self.cue_processor.cue_frames):
@@ -363,13 +363,14 @@ class BakingContext:
 
     def validate_mapping_item(self, mi: MappingItem) -> str:
         k: str = mi.key
-        is_extended = bool(k in MouthShapeInfos.extended())
+        is_extended = MouthShapeInfos.is_key_extended(k)
+
         if not mi.action:
             # Non-extended cues has to be mapped, as well the extended cues when used
             if not is_extended or self.prefs.use_extended_shapes:
                 return "{} {} no Action mapped"
         else:  # There is an Action mapped
-            if not self.prefs.use_extended_shapes:
+            if not self.prefs.use_extended_shapes and is_extended:
                 return "Not using extended shapes but {} {} mapping"
         if not mi.action.fcurves:
             return "{} {} Action with no keyframes"

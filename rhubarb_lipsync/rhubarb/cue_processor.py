@@ -11,6 +11,7 @@ class CueProcessor:
     frame_cfg: FrameConfig
     cue_frames: list[MouthCueFrames] = field(repr=False)
     trim_tolerance: float = 0.05
+    use_extended_shapes: bool = True
 
     @docstring_from(frame2time)  # type: ignore[misc]
     def frame2time(self, frame: float) -> float:
@@ -20,12 +21,23 @@ class CueProcessor:
     def time2frame_float(self, t: float) -> float:
         return time2frame_float(t, self.frame_cfg.fps, self.frame_cfg.fps_base) + self.frame_cfg.offset
 
+    def create_silence_cue(self, start: float, end: float) -> MouthCueFrames:
+        if self.use_extended_shapes:
+            return MouthCueFrames.create_X(self.frame_cfg, start, end)
+        # When not using extended shapes, the A is used instead of X
+        return MouthCueFrames.create_A(self.frame_cfg, start, end)
+
+    def is_cue_silence(self, cf: MouthCueFrames) -> bool:
+        if self.use_extended_shapes:
+            return cf.is_X
+        return cf.is_A
+
     @property
     def pre_start_cue(self) -> MouthCueFrames:
         s = 0
         if self.cue_frames:
             s = self.cue_frames[0].cue.start
-        return MouthCueFrames.create_X(self.frame_cfg, s - 10, s)
+        return self.create_silence_cue(s - 10, s)
 
     def __getitem__(self, index) -> MouthCueFrames:
         """Returns CueFrames at the given index while supporting out-of-range indices too
@@ -41,7 +53,7 @@ class CueProcessor:
         s = 0
         if self.cue_frames:
             s = self.cue_frames[-1].cue.end
-        return MouthCueFrames.create_X(self.frame_cfg, s, s + 10)
+        return self.create_silence_cue(s, s + 10)
 
     @property
     def the_last_cue(self) -> Optional[MouthCueFrames]:
@@ -68,9 +80,9 @@ class CueProcessor:
             modified += 1
             new_end = cf.cue.start + max_dur
             if append_x:
-                cf_x = MouthCueFrames.create_X(self.frame_cfg, new_end, cf.cue.end)
+                cf_silence = self.create_silence_cue(new_end, cf.cue.end)
                 # Insert the new X after the current trimmed X, encountering previous insertions as they shift the indices
-                self.cue_frames.insert(i + modified, cf_x)
+                self.cue_frames.insert(i + modified, cf_silence)
             cf.cue.end = new_end  # Trim duration
 
         if modified > 0:
@@ -83,10 +95,10 @@ class CueProcessor:
         for i, cf in enumerate(orig_list):
             if i <= 0:
                 continue
-            if not cf.is_X:
+            if not self.is_cue_silence(cf):
                 continue
             prev_cue = orig_list[i - 1]
-            if not prev_cue.is_X:
+            if not self.is_cue_silence(prev_cue):
                 continue
             prev_cue.cue.end = cf.cue.end  # Prolong prev X end up to this X end
             removed = self.cue_frames.pop(i - modified)  # Remove the current X

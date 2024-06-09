@@ -172,7 +172,6 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 
 ### Normal
 * Add warning (in the baking validation popup?) when any selected object has an active Action (seems to be confusing for NLA newbies when the rig doesn't animate after bake because of that)
-* extended shapes- seems they are generated even when disabled -check
 * Integrate with: https://mecabricks.com/en/shop/product/6
 * Create aur package
 * Add "auto-remove" checkbox on the Bake confirmation dialog (so one doesn'thave to press "remove cues")

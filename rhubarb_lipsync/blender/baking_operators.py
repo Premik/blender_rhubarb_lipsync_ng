@@ -250,7 +250,7 @@ class BakeToNLA(bpy.types.Operator):
         bir: float = b.strip_placement_props.blend_inout_ratio
         prev_cf = b.preceding_cue
 
-        if prev_cf.is_X:
+        if b.cue_processor.is_cue_silence(prev_cf):
             # When the previous cue is silence, this cue should blend in without overlap
             start = cf.start_frame_float
             blend_in = cf.get_middle_start_frame(bir) - start
@@ -260,7 +260,7 @@ class BakeToNLA(bpy.types.Operator):
             blend_in = cf.get_middle_start_frame(bir) - start
 
         next_cf = b.following_cue
-        if next_cf.is_X:
+        if b.cue_processor.is_cue_silence(next_cf):
             # When the following cue is silence, this cue should blend out without overlap
             end = cf.end_frame_float
             blend_out = cf.end_frame_float - cf.get_middle_end_frame_float(bir)
@@ -299,7 +299,7 @@ class BakeToNLA(bpy.types.Operator):
         strip.blend_type = b.strip_placement_props.blend_type
         strip.extrapolation = b.strip_placement_props.extrapolation
         strip.use_sync_length = b.strip_placement_props.use_sync_length
-        strip.use_auto_blend = b.strip_placement_props.use_auto_blend or cf.is_X
+        strip.use_auto_blend = b.strip_placement_props.use_auto_blend or b.cue_processor.is_cue_silence(cf)
         strip.blend_in = blend_in
         strip.blend_out = blend_out
 

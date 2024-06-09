@@ -158,9 +158,17 @@ class MouthCueFrames:
     def create_X(frame_cfg: FrameConfig, start: float, end: float) -> 'MouthCueFrames':
         return MouthCueFrames(cue=MouthCue(MouthShapeInfos.X.value.key, start, end), frame_cfg=frame_cfg)
 
+    @staticmethod
+    def create_A(frame_cfg: FrameConfig, start: float, end: float) -> 'MouthCueFrames':
+        return MouthCueFrames(cue=MouthCue(MouthShapeInfos.A.value.key, start, end), frame_cfg=frame_cfg)
+
     @property
     def is_X(self) -> bool:
         return self.cue.key == MouthShapeInfos.X.value.key
+
+    @property
+    def is_A(self) -> bool:
+        return self.cue.key == MouthShapeInfos.A.value.key
 
     @docstring_from(MouthCue.get_start_frame_float)  # type: ignore[misc]
     @property

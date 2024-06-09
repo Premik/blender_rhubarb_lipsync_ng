@@ -125,6 +125,14 @@ class MouthShapeInfos(Enum):
         return [mi for mi in MouthShapeInfos.all() if mi.extended]
 
     @staticmethod
+    def extended_keys() -> list[str]:
+        return [mi.key for mi in MouthShapeInfos.extended()]
+
+    @staticmethod
+    def is_key_extended(key: str) -> bool:
+        return bool(key in MouthShapeInfos.extended_keys())
+
+    @staticmethod
     def key2index(key: str) -> int:
         i = ord(key) - ord('A')
         all = MouthShapeInfos.all()
