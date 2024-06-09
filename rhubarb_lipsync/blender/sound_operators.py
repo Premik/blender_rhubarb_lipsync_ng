@@ -22,7 +22,7 @@ def find_strips_of_sound(context: Context, limit=0) -> list[SoundSequence]:
     ret: list[SoundSequence] = []
     props = CaptureListProperties.capture_from_context(context)
     sound: Sound = props.sound
-    if not sound:
+    if not sound or not context.scene.sequence_editor:
         return []
 
     for i, sq in enumerate(context.scene.sequence_editor.sequences_all):
@@ -85,6 +85,10 @@ class CreateSoundStripWithSound(bpy.types.Operator):
 
     def invoke(self, context: Context, event: bpy.types.Event) -> set[int] | set[str]:
         # Open dialog
+        if not context.scene.sequence_editor:
+            log.info("No sequence editor found in the Scene context. Creating a new one.")
+            context.scene.sequence_editor_create()
+
         wm = context.window_manager
         return wm.invoke_props_dialog(self, width=500)
 

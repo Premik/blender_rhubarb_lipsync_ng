@@ -1,3 +1,4 @@
+import logging
 import pathlib
 import re
 import traceback
@@ -7,6 +8,8 @@ from typing import Any, Callable, Iterator, Sequence, Type
 import bpy
 import bpy.utils.previews
 from bpy.types import Area, Context, UILayout, Window
+
+log = logging.getLogger(__name__)
 
 
 class IconsManager:
@@ -173,16 +176,23 @@ def to_abs_path(blender_path: str) -> str:
 
 def validation_poll(cls: Type, context: Context, disabled_reason: Callable[[Context], str] = None) -> bool:
     """Helper method to show a validation error of an operator to user in a popup."""
-    assert cls
-    if not disabled_reason:  # Locate the 'disabled_reason' as the validation fn if no one is provided
-        assert hasattr(cls, 'disabled_reason'), f"No validation function provided and the {cls} has no 'disabled_reason' class method"
-        disabled_reason = cls.disabled_reason
-    ret = disabled_reason(context)
-    if not ret:  # No validation errors
-        return True
-    # Following is not a class method per doc. But seems to work like it
-    cls.poll_message_set(ret)  # type: ignore
-    return False
+    try:
+        assert cls
+        if not disabled_reason:  # Locate the 'disabled_reason' as the validation fn if no one is provided
+            assert hasattr(cls, 'disabled_reason'), f"No validation function provided and the {cls} has no 'disabled_reason' class method"
+            disabled_reason = cls.disabled_reason
+        ret = disabled_reason(context)
+        if not ret:  # No validation errors
+            return True
+        # Following is not a class method per doc. But seems to work like it
+        cls.poll_message_set(ret)  # type: ignore
+        return False
+    except Exception as e:
+        msg = f"Unexpected error occured when validating operator: {e}"
+        log.error(msg)
+        log.debug(traceback.format_exc())
+        cls.poll_message_set(msg)  # type: ignore
+        return False
 
 
 def func_fqname(fn: Callable) -> str:
