@@ -369,9 +369,10 @@ class BakingContext:
             # Non-extended cues has to be mapped, as well the extended cues when used
             if not is_extended or self.prefs.use_extended_shapes:
                 return "{} {} no Action mapped"
-        else:  # There is an Action mapped
-            if not self.prefs.use_extended_shapes and is_extended:
-                return "Not using extended shapes but {} {} mapping"
+            return ""
+        # There is an Action mapped
+        if not self.prefs.use_extended_shapes and is_extended:
+            return "Not using extended shapes but {} {} mapping"
         if not mi.action.fcurves:
             return "{} {} Action with no keyframes"
         if mapping_utils.is_action_shape_key_action(mi.action):
