@@ -43,8 +43,8 @@ class StripPlacementPreferences(PropertyGroup):
         override={'LIBRARY_OVERRIDABLE'},
     )
 
-    blend_type: EnumProperty(  # type: ignore
-        name="Blend Type",
+    strip_blend_type: EnumProperty(  # type: ignore
+        name="Strip Blend Type",
         description=textwrap.dedent(
             """\
             Method used for combining the strip's result with accumulated result.
@@ -144,10 +144,46 @@ class StripPlacementPreferences(PropertyGroup):
         options={'LIBRARY_EDITABLE'},
         override={'LIBRARY_OVERRIDABLE'},
     )
-    use_auto_blend: BoolProperty(  # type: ignore
-        default=False,
-        description="Number of frames for Blending In/Out is automatically determined from overlapping strips",
-        name="Auto Blend In/Out",
+
+    inout_blend_type: EnumProperty(  # type: ignore
+        name="In Out Blend Type",
+        description=textwrap.dedent(
+            """\
+            Method used for blend in/blend out strip options. I.e. how the strips influence changes over time.             
+            """
+        ),
+        items=[
+            (
+                "NO_BLENDING",
+                "No blending",
+                textwrap.dedent(
+                    """\
+                    
+                    Strip influence is always set to 1. Use this for 2D animations where blending is not desired"""
+                ),
+            ),
+            (
+                "BY_RATIO",
+                "By ratio",
+                textwrap.dedent(
+                    """\
+                    
+                    The Blend in/out values are calculated by the addon based on Blend in/out ratio. Only strips indicating
+                    silence (Ⓧ or Ⓐ) has Auto-blend enabled."""
+                ),
+            ),
+            (
+                "ALWAYS_AUTOBLEND",
+                "Always auto-blend",
+                textwrap.dedent(
+                    """\
+                    
+                    Same as for the By-Ratio option, but the Blender's inbuilt autoblending is always enabled for all Strips.
+                    This should ease futher tweaking of the NLA strip ends."""
+                ),
+            ),
+        ],
+        default="BY_RATIO",
         options={'LIBRARY_EDITABLE'},
         override={'LIBRARY_OVERRIDABLE'},
     )

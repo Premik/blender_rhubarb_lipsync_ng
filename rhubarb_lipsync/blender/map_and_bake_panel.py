@@ -137,16 +137,9 @@ class MappingAndBakingPanel(bpy.types.Panel):
         # row.template_image(tex, "image", tex.image_user)
 
         self.layout.use_property_decorate = False
-        row = self.layout.row(align=True)
-
-        row.prop(strip_placement, 'blend_inout_ratio', text="Blend In-Out Ratio")
-        id = baking_operators.PlacementBlendInOutRatioPreset.bl_idname
-        row.operator_menu_enum(id, "ratio_type", text="", icon="DOWNARROW_HLT")
-
-        if strip_placement.use_auto_blend:
-            row.enabled = False
 
         row = self.layout.row(align=True)
+
         row.label(text="Trim cues longer than")
         row.prop(clp, "highlight_long_cues")
         id = baking_operators.PlacementCueTrimFromPreset.bl_idname
@@ -174,7 +167,15 @@ class MappingAndBakingPanel(bpy.types.Panel):
         #     return
         col = self.layout.column(align=False)
         col.use_property_split = True
-        col.prop(strip_placement, 'blend_type')
+        col.prop(strip_placement, 'strip_blend_type')
+
+        col.prop(strip_placement, 'inout_blend_type')
+
+        row = self.layout.row(align=True)
+        if strip_placement.inout_blend_type == "BY_RATIO":
+            row.prop(strip_placement, 'blend_inout_ratio', text="Blend In-Out Ratio")
+            id = baking_operators.PlacementBlendInOutRatioPreset.bl_idname
+            row.operator_menu_enum(id, "ratio_type", text="", icon="DOWNARROW_HLT")
 
         # row = self.layout.row(align=True)
         # row.prop(strip_placement, 'blend_mode', expand=True)
@@ -184,8 +185,6 @@ class MappingAndBakingPanel(bpy.types.Panel):
         # row = self.layout.row(align=True)
         # id = baking_operators.PlacementBlendInOutFromOverlap.bl_idname
         # row.operator_menu_enum(id, "sync_type", text="", icon="DOWNARROW_HLT")
-
-        self.layout.prop(strip_placement, 'use_auto_blend')
 
     def draw(self, context: Context) -> None:
         try:

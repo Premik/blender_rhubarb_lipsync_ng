@@ -296,12 +296,18 @@ class BakeToNLA(bpy.types.Operator):
         strip.frame_end = end
         self.strips_added += 1
         strip.name = name
-        strip.blend_type = b.strip_placement_props.blend_type
+        strip.blend_type = b.strip_placement_props.strip_blend_type
         strip.extrapolation = b.strip_placement_props.extrapolation
         strip.use_sync_length = b.strip_placement_props.use_sync_length
-        strip.use_auto_blend = b.strip_placement_props.use_auto_blend or b.cue_processor.is_cue_silence(cf)
-        strip.blend_in = blend_in
-        strip.blend_out = blend_out
+        # Autoblend when forced by option, otherwise only autobled the silence cues (X or A)
+        if b.strip_placement_props.inout_blend_type == "ALWAYS_AUTOBLEND" or b.cue_processor.is_cue_silence(cf):
+            strip.use_auto_blend = True
+            strip.frame_end = strip.frame_end - 0.001  # To avoid strips touching, which would effectivelly disable autoblend
+        else:
+            # No autoblending
+            if b.strip_placement_props.inout_blend_type == "BY_RATIO":
+                strip.blend_in = blend_in
+                strip.blend_out = blend_out
 
     def bake_cue_on_object(self, obj: Object) -> None:
         b = self.bctx
