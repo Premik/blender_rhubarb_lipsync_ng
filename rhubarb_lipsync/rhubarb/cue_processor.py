@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Iterable, Optional
+from typing import Callable, Iterable, Optional
 
 from rhubarb_lipsync.rhubarb.mouth_cues import FrameConfig, MouthCueFrames, docstring_from, frame2time, log, time2frame_float
 
@@ -13,11 +13,11 @@ class CueProcessor:
     trim_tolerance: float = 0.05
     use_extended_shapes: bool = True
 
-    @docstring_from(frame2time)  # type: ignore[misc]
+    # @docstring_from(frame2time)  # type: ignore[misc]
     def frame2time(self, frame: float) -> float:
         return frame2time(frame - self.frame_cfg.offset, self.frame_cfg.fps, self.frame_cfg.fps_base)
 
-    @docstring_from(time2frame_float)  # type: ignore[misc]
+    # @docstring_from(time2frame_float)  # type: ignore[misc]
     def time2frame_float(self, t: float) -> float:
         return time2frame_float(t, self.frame_cfg.fps, self.frame_cfg.fps_base) + self.frame_cfg.offset
 
@@ -34,7 +34,7 @@ class CueProcessor:
 
     @property
     def pre_start_cue(self) -> MouthCueFrames:
-        s = 0
+        s = 0.0
         if self.cue_frames:
             s = self.cue_frames[0].cue.start
         return self.create_silence_cue(s - 10, s)
@@ -50,7 +50,7 @@ class CueProcessor:
 
     @property
     def post_end_cue(self) -> MouthCueFrames:
-        s = 0
+        s = 0.0
         if self.cue_frames:
             s = self.cue_frames[-1].cue.end
         return self.create_silence_cue(s, s + 10)
@@ -61,7 +61,7 @@ class CueProcessor:
             return None
         return self.cue_frames[-1]
 
-    def find_cues_by_duration(self, min_dur: float = -1, max_dur: float = -1, tol_max: float = 0.05, tol_min: float = 0.001) -> Iterable[MouthCueFrames]:
+    def find_cues_by_duration(self, min_dur=-1.0, max_dur=-1.0, tol_max=0.05, tol_min=0.001) -> Iterable[tuple[int, MouthCueFrames]]:
         """Finds cues with duration shorter than min_dur (-1 to ignore) or longer than max_dur (-1 to ignore).
         The X (silence) is ignored. Only cues which are significantly (driven by two tolerance params) longer/short are returned"""
         for i, cf in enumerate(list(self.cue_frames)):
@@ -130,7 +130,7 @@ class CueProcessor:
         return modified
 
     def optimize_cues(self, max_cue_duration=0.2) -> str:
-        steps = [
+        steps: list[tuple[Callable[[], int], str]] = [
             (lambda: self.trim_long_cues(max_cue_duration), "ends trimmed"),
             (self.ensure_frame_intersection, "duration enlarged"),
             (self.merge_double_x, "double X removed"),

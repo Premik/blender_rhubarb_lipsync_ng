@@ -4,6 +4,7 @@ import json
 import os
 import platform
 import sys
+from typing import Any
 import unittest
 from pathlib import Path
 
@@ -75,7 +76,7 @@ for module_name in test_modules:
 print(f"Running tests {all_tests}")
 
 
-def create_test_report(result):
+def create_test_report(result) -> dict[str, Any]:
     report = {
         "blender_version": bpy.app.version_string,
         "system": platform.system(),

@@ -16,15 +16,15 @@ from rhubarb_lipsync.rhubarb.mouth_cues import MouthCue, frame2time, time2frame_
 log = logging.getLogger(__name__)
 
 
-def time_frame_predefined_vals(ctx: Context, times: list[float], frames: list[float]) -> tuple[str, str, str, str, int]:
+def time_frame_predefined_vals(ctx: Context, times: list[float], frames: list[float]) -> list[tuple[str, str, str, str, int]]:
     fps = ctx.scene.render.fps
     fps_base = ctx.scene.render.fps_base
-    frames = [(frame2time(f, fps, fps_base) * 1000, f, "SNAP_INCREMENT") for f in frames]
+    frame_vals = [(frame2time(f, fps, fps_base) * 1000, f, "SNAP_INCREMENT") for f in frames]
     mss = [(s, time2frame_float(s / 1000, fps, fps_base), "TIME") for s in times]
-    vals = frames + mss
+    vals = frame_vals + mss
 
     def fields(i: int, ms: float, frame: float, ico: str) -> tuple[str, str, str, str, int]:
-        return (f"{frame}", f"{ms:02}ms ({frame:0.2f} frames)", "", ico, i)
+        return (f"{frame}", f"{ms:02}ms ({frame:0.2f} frame_vals)", "", ico, i)
 
     return [fields(i, int(v[0]), v[1], v[2]) for i, v in enumerate(vals)]
 

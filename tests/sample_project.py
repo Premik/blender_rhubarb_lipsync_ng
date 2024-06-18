@@ -133,6 +133,7 @@ class SampleProject:
             strips = int(m.groupdict()["strips"])
             return cues, strips
         assert m is not None, f"{info} not matching {SampleProject.bake_result_info_line}"
+        return None
 
     @property
     def cprops(self) -> CaptureProperties:

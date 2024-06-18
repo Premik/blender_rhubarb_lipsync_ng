@@ -35,13 +35,13 @@ class BlenderSetup:
         os.environ[env_var] = str(xdg_config_home)
         # os.environ['TEST_RESULTS_PATH'] = str(self.test_results_path)
 
-    def install_addon(self):
+    def install_addon(self) -> None:
         self.addons_path.mkdir(parents=True, exist_ok=True)
         target = self.addons_path / "rhubarb_lipsync"
         if not target.exists():
             os.symlink(self.addon_src / "rhubarb_lipsync", target)
 
-    def install_tests(self):
+    def install_tests(self) -> None:
         test_files = list(self.addon_src.glob("tests/*.py"))
         for test_file in test_files:
             shutil.copy(test_file, self.addons_path)
@@ -56,20 +56,20 @@ class BlenderSetup:
         if aud_file.exists():
             aud_file.unlink()
 
-    def setup_config(self):
+    def setup_config(self) -> None:
         config_dir = self.user_dir / "config"
         config_dir.mkdir(parents=True, exist_ok=True)
 
-    def run_blender(self):
-        script = self.addons_path / "run_within_blender.py"
+    def run_blender(self) -> None:
+        script_path = self.addons_path / "run_within_blender.py"
         # exe = 'blender-4.2'
         exe = 'wine "/var/wine/64loc/drive_c/Program Files/Blender Foundation/Blender 3.5/blender.exe"'
-        script = subprocess.check_output(['winepath', '-w', str(script)]).decode().strip()
+        script = subprocess.check_output(['winepath', '-w', str(script_path)]).decode().strip()
         cmd = f'''{exe} --background --python "{script}"'''
         print(cmd)
         os.system(cmd)
 
-    def verify_result(self):
+    def verify_result(self) -> None:
         if not self.test_results_path.exists():
             raise FileNotFoundError(f"Test results file not found at {self.test_results_path}")
 
@@ -87,7 +87,7 @@ class BlenderSetup:
 
         print("All checks passed.")
 
-    def install_and_run(self):
+    def install_and_run(self) -> None:
         self.setup_config()
         self.install_addon()
         self.install_tests()
