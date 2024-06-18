@@ -3,7 +3,7 @@ import shutil
 from functools import cached_property
 from pathlib import Path
 
-from config import project_cfg, rhubarb_cfg, dist_zip_name
+from config import dist_zip_name, project_cfg, rhubarb_cfg
 from rhubarb_bin import RhubarbBinary
 
 

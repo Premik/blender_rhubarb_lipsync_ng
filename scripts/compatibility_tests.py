@@ -1,13 +1,13 @@
-from functools import cached_property
 import json
 import os
 import pathlib
 import platform
 import shutil
-from dataclasses import dataclass, field
-from pathlib import Path
 import subprocess
 import tempfile
+from dataclasses import dataclass, field
+from functools import cached_property
+from pathlib import Path
 
 
 @dataclass
@@ -27,7 +27,7 @@ class BlenderSetup:
 
     @cached_property
     def test_results_path(self) -> Path:
-        return self.addons_path / f"test_results.json"
+        return self.addons_path / "test_results.json"
 
     def set_blender_user_data(self) -> None:
         xdg_config_home = self.root_path

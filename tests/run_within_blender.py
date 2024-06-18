@@ -1,13 +1,15 @@
-import os
-from pathlib import Path
-import platform
-import unittest
-import sample_data
-import inspect
 import importlib
+import inspect
 import json
-import bpy
+import os
+import platform
 import sys
+import unittest
+from pathlib import Path
+
+import bpy
+
+import sample_data
 
 for p in sys.path:
     print(p)
