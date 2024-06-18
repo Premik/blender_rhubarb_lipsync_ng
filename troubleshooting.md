@@ -1,24 +1,25 @@
-# Basic addon troubleshoting guide
+# Basic Addon Troubleshooting Guide
 
-## Determine at which stage the problem occures
+## Determine at Which Stage the Problem Occurs
 
 <details>
-  <summary> <b>Was the addon installed sucessfully ?</b> </summary>
+  <summary> <b>Was the addon installed successfully?</b> </summary>
 
 
-When the addon was installed from the `zip` file it should show up in the preferences:
+When the addon is installed from the `zip` file, it should show up in the preferences:
 
 - Go to `Main menu/Edit/Preferences/Add-ons`
-- Search addond by name. Type `rh` into the search box
+- Search for the addon by name. Type `rh` into the search box
 
-If you can see `Animations: Rhubarb Lipsync NG` item the plugin has been installed sucessfully and you can proceed to the next section.
+If you can see the Animations: Rhubarb Lipsync NG item, the plugin has been installed successfully, and you can proceed to the next section.
 
 ![Check installed](doc/img/checkPuginInstalled.png)
 
 If the installation failed:
-- Make sure the Blender version is compatible with the addon version. Each Blender version comes with it's own Python version on older version might not work.
-- The addon `zip-file` used for the installation was incorrect. Make soure you have downloaded the correct zip file (and not for instance sources snapshot). Don't unzip the file. Ensure the file is not corrupted because of download error.
-- There could be some problem access the `addons` folder. Like permission issues.
+- Ensure the Blender version is compatible with the addon version. Each Blender version comes with its own Python version, and older versions might not work.
+
+- Verify the addon `zip-file` used for the installation is correct. Make sure you have downloaded the correct zip file (and not, for instance, a source snapshot). Don't unzip the file. Ensure the file is not corrupted due to a download error.
+There could be problems accessing the `addons` folder, such as permission issues.
 
 
 - Try to [fully reinstall the addon](#reinstalling-the-addon).
@@ -31,85 +32,89 @@ If the installation failed:
 </details>
 
 <details>
-  <summary> <b>Was the addon enabled/registered sucessfully ?</b> </summary>
+  <summary> <b>Was the addon enabled/registered successfully?</b> </summary>
 
-After addon is installed it should get registered. This happends after the addon is enabled in the preferences:
+After the addon is installed, it should get registered. This happens after the addon is enabled in the preferences:
 
-- Again go to the `Main menu/Edit/Preferences/Add-ons`
-- Search addond by name. Type `rh` into the search box
-- Check the checkbox in front of addon name.
+- Again, go to `Main menu/Edit/Preferences/Add-ons`
+- Search for the addon by name. Type `rh` into the search box
+- Check the checkbox in front of the addon name.
 
-If no errors should get shown and you see the addon preferences below the addon details, then the addon has been registered/enabled sucessfully. Proceed to the next section.
+If no errors are shown and you see the addon preferences below the addon details, then the addon has been registered/enabled successfully. Proceed to the next section.
 
 ![Check installed](doc/img/checkPluginRegistered.png)
 
-When addon fails to install or register Blender often shows a popup with Python error and stacktrace. Unfortunately very often this error is a generic one with no useful details. For example:
+When the addon fails to install or register, Blender often shows a popup with a Python error and stack trace. Unfortunately, this error is often generic and not useful. For example:
 
-Where the actual useful error details ( root cause) was printed earlier to the system console.
+```
+AttributeError: partially initialized module 'rhubarb_lipsync' has no attribute 'blender' (most likely due to a circular import)
+```
+
+The actual useful error details (root cause) might have been printed earlier to the system console.
 
 ---
 
 </details>
 
-## Enable verbose log messages
+## Enable Verbose Log Messages
 
-Collecting log messages before an issue happens if very useful for further troubleshooting. There are two options how to enable verbose logging.
+Collecting log messages before an issue happens is very useful for further troubleshooting. There are two options for enabling verbose logging:
 
-1. [Start Blender with debug flag from shell/console](#collecting-debug-messages-for-console). This is the only option if the plugin won't install/register.
+1. [Start Blender with the debug flag from shell/console](#collecting-debug-messages-for-console). This is the only option if the plugin won't install/register.
 1. Set the log verbosity and log file in the addon preferences:
 
 
 
-## Reinstalling the addon
+## Reinstalling the Addon
 
-Sometimes where there is an unexpected error the addon classes might still be registered in memory even thought the addon is disabled/removed. Until Blender is restarted. So first try the following steps:
+Sometimes, when there is an unexpected error, the addon classes might still be registered in memory even though the addon is disabled/removed. Until Blender is restarted, try the following steps:
 
-- Disable the addon by unchecking the addon in the preferences.
-- Click `Remove` botton to make Blender delete the addon.
+- Disable the addon by unchecking it in the preferences.
+- Click the Remove button to make Blender delete the addon.
 - Restart Blender by closing and reopening it.
 - Install and enable the addon again.
 
 
-If still no luck try to ensure there are no files left over the addon was removed. 
-Sometimes Blender fails to properly remove the addon files when the plugin is uninstalled. For example when some file is locked by os or because of a bug. Then the addon could be in a strange state where it won't show up in the addons list but there still might be some files on the disk.
+If still no luck, ensure there are no files left over after the addon was removed. 
+Sometimes Blender fails to properly remove the addon files when the plugin is uninstalled, for example, when some file is locked by the OS or because of a bug. The addon could then be in a strange state where it won't show up in the addons list, but there might still be some files on the disk.
 
-To recover, try to following steps:
-- First make sure the addon is removed and doesn't show up in the addon list in the preferences.
+To recover, try the following steps:
+- First, make sure the addon is removed and doesn't show up in the addon list in the preferences.
 - Stop Blender.
-- Navigate to the [Blender's user folder](https://docs.blender.org/manual/en/latest/advanced/blender_directory_layout.html) inside your home folder. And then to the `scripts/addons` subfolder.
-- Inspect the `addons` folder content. If you could see any `rhubarb_lipsync` folder or files there **remove it** completly.
-- You can also easily find the path at the addon preferences page in the `File:` label:
+- Navigate to the [Blender's user folder](https://docs.blender.org/manual/en/latest/advanced/blender_directory_layout.html) inside your home folder. Then go to the `scripts/addons` subfolder.
+- Inspect the `addons` folder content. If you see any  `rhubarb_lipsync` folder or files, **remove them** completly.
+- You can also easily find the path in the addon preferences page in the `File:` label:
 
 ![Check installed](doc/img/addonPath.png)
 
-- Start Blender
+- Start Blender.
 - Install and enable the addon again.
 
-If still not luck follow the next section and run Blender with a fresh profile.
+If still no luck, follow the next section and run Blender with a fresh profile.
 
-## Run Blender with fresh profile (factory settings)
+## Run Blender with a Fresh Profile (Factory Settings)
 
-In some rare circumstances there could be some inference with other add-ons or something Blender customization which might be causing troubles. To rule this possibilty out start Blender with Factor settings. This can be done by settings some environment variables to a temporary folder so your original profile can be left intact.
+In some rare circumstances, there could be interference with other add-ons or Blender customizations that might be causing troubles. To rule this possibility out, start Blender with factory settings. This can be done by setting some environment variables to a temporary folder so your original profile can be left intact.
 
-On windows:
+On Windows:
 
 ```sh
 set BLENDER_USER_RESOURCES=%TEMP%
 blender --debug
 ```
 
-On linux/mac:
+On Linux/Mac:
 
 ```sh
 XDG_CONFIG_HOME="/tmp/blenderFresh" blender --debug
 ```
 
-Then install the plugin as the usuall way.
+Then install the plugin as usual.
 
 
-## Collecting debug messages for console
+## Collecting Debug Messages for Console
 
-Start Blender with `--debug` flag. This will make the addon to log additional information to console at the very early stage of registration. This might contain crucial clues about why the issue is happening or at least help narrowing it down. You can also add `--debug-python` to get even more details related to addon registration and python in general.
+Start Blender with the `--debug` flag. This will make the addon to log additional information to the console at the very early stage of registration. This might contain crucial clues about why the issue is happening or at least help narrowing it down. You can also add `--debug-python` to get even more details related to addon registration and Python in general.
 
 ```sh
 > blender --debug
@@ -121,7 +126,7 @@ argv[1] = --debug
 Read prefs: C:\users\premik\AppData\Roaming\Blender Foundation\Blender\3.5\config\userpref.blend
 ```
 
-Note there might be some additional log lines. For example messages from other plugins.
+Note there might be some additional log lines, for example, messages from other plugins.
 
 ```sh
 addon_utils.disable: rhubarb_lipsync not disabled
@@ -152,7 +157,7 @@ OSError: Cannot call rmtree on a symbolic link
 ```
 
 - Search [Opened issues](https://github.com/Premik/blender_rhubarb_lipsync_ng/issues?q=is%3Aopen). Maybe somebody has already reported the same issue.
-- Also search already [Closed issues](https://github.com/Premik/blender_rhubarb_lipsync_ng/issues?q=is%3Aclosed). There might be similar issue with a solution from the past.
+- Also search already [Closed issues](https://github.com/Premik/blender_rhubarb_lipsync_ng/issues?q=is%3Aclosed). There might be a similar issue with a solution from the past.
 
 - The addon has several automated unit tests and integration tests. Those verifies the basic addon operators in a headless Blender (Blender as module) environment. Tests are ran automatically after each change on GitHub for all three supported platforms. You can see them on the [Github Actions](https://github.com/Premik/blender_rhubarb_lipsync_ng/actions/workflows/unit-tests.yml). There shouldn't be any tests failing.
 

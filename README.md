@@ -115,6 +115,11 @@ If needed, the `NLA Tracks` can be baked into a single new `Action`. Note, if yo
 
 A new `Action` will be created and selected in the `Action Editor`. The two RLPS tracks can now be disabled or removed (mouse-hover on the track name and press `x`).
 
+## More details
+
+- [FAQ](faq.md)
+- [Troubleshooting Guide](troubleshooting.md)
+
 ## Contributions
 
 * Inspired by the [scaredyfish/blender-rhubarb-lipsync](https://github.com/scaredyfish/blender-rhubarb-lipsync).
