@@ -168,8 +168,8 @@ class StripPlacementPreferences(PropertyGroup):
                 textwrap.dedent(
                     """\
                     
-                    The Blend in/out values are calculated by the addon based on Blend in/out ratio. Only strips indicating
-                    silence (Ⓧ or Ⓐ) has Auto-blend enabled."""
+                    The Blend in/out values are calculated by the addon based on the provided Blend in/out ratio value. 
+                    Only strips indicating silence (Ⓧ or Ⓐ) has Auto-blend enabled."""
                 ),
             ),
             (

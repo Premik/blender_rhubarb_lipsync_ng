@@ -66,7 +66,7 @@ class CueProcessor:
         The X (silence) is ignored. Only cues which are significantly (driven by two tolerance params) longer/short are returned"""
         for i, cf in enumerate(list(self.cue_frames)):
             d = cf.cue.duration
-            if cf.cue.key == 'X':
+            if self.is_cue_silence(cf):
                 continue  # Ignore X (silence)
             if max_dur > 0 and d <= max_dur + tol_max:
                 continue

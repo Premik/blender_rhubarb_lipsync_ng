@@ -250,8 +250,8 @@ class BakeToNLA(bpy.types.Operator):
         bir: float = b.strip_placement_props.blend_inout_ratio
         prev_cf = b.preceding_cue
 
-        if b.cue_processor.is_cue_silence(prev_cf):
-            # When the previous cue is silence, this cue should blend in without overlap
+        if b.cue_processor.is_cue_silence(prev_cf) or b.strip_placement_props.inout_blend_type == "NO_BLENDING":
+            # When the previous cue is silence, this cue should blend-in without overlap
             start = cf.start_frame_float
             blend_in = cf.get_middle_start_frame(bir) - start
         else:
@@ -260,7 +260,7 @@ class BakeToNLA(bpy.types.Operator):
             blend_in = cf.get_middle_start_frame(bir) - start
 
         next_cf = b.following_cue
-        if b.cue_processor.is_cue_silence(next_cf):
+        if b.cue_processor.is_cue_silence(next_cf) or b.strip_placement_props.inout_blend_type == "NO_BLENDING":
             # When the following cue is silence, this cue should blend out without overlap
             end = cf.end_frame_float
             blend_out = cf.end_frame_float - cf.get_middle_end_frame_float(bir)
@@ -300,7 +300,13 @@ class BakeToNLA(bpy.types.Operator):
         strip.extrapolation = b.strip_placement_props.extrapolation
         strip.use_sync_length = b.strip_placement_props.use_sync_length
         # Autoblend when forced by option, otherwise only autobled the silence cues (X or A)
-        if b.strip_placement_props.inout_blend_type == "ALWAYS_AUTOBLEND" or b.cue_processor.is_cue_silence(cf):
+        auto_blend = b.cue_processor.is_cue_silence(cf)  # Silence auto-blend by default
+        if b.strip_placement_props.inout_blend_type == "ALWAYS_AUTOBLEND":
+            auto_blend = True  # Auto-blend is forced
+        if b.strip_placement_props.inout_blend_type == "NO_BLENDING":
+            auto_blend = False  # Auto-blend disabled for all (even silence)
+
+        if auto_blend:
             strip.use_auto_blend = True
             strip.frame_end = strip.frame_end - 0.001  # To avoid strips touching, which would effectivelly disable autoblend
         else:
