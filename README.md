@@ -64,11 +64,11 @@ Note: Generally, each time you see a button is disabled, hover the mouse cursor 
 
      ![ActionFilters](doc/img/ActionFilters.png)
 
-1. Select or create `NLA Track` pair. It is possible to place the mapped Cue actions on a single track. But **two tracks** are preferable since it allows the placed `Action strips` to interleave and fluently blend their influence.
+1. Select or create `NLA Track`. For 2D animation use a single track. But for 3D **two tracks** are preferable since it allows the placed `Action strips` to interleave and fluently blend their influence.
 
    ![Frame range](doc/img/NLATrackSelection.png)
 
-1. You can tweak the `Strip placement settings`. Note this section is currently being redesigned and will be simplified in the future.
+1. You can tweak the `Strip placement settings`. For 2D animation the `In Out Blend Type` should be `No Blending`
 
    ![Placement Settings](doc/img/placementSettings.png)
 

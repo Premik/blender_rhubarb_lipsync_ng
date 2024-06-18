@@ -91,7 +91,21 @@ If still not luck follow the next section and run Blender with a fresh profile.
 
 In some rare circumstances there could be some inference with other add-ons or something Blender customization which might be causing troubles. To rule this possibilty out start Blender with Factor settings. This can be done by settings some environment variables to a temporary folder so your original profile can be left intact.
 
-There is also a script for power users which does this automatically (including downloading and registering the addon into this sandbox
+On windows:
+
+```sh
+set BLENDER_USER_RESOURCES=%TEMP%
+blender --debug
+```
+
+On linux/mac:
+
+```sh
+XDG_CONFIG_HOME="/tmp/blenderFresh" blender --debug
+```
+
+Then install the plugin as the usuall way.
+
 
 ## Collecting debug messages for console
 
@@ -137,9 +151,10 @@ Traceback (most recent call last):
 OSError: Cannot call rmtree on a symbolic link
 ```
 
-- if you see the addon listed, try to remove it complete and install.
+- Search [Opened issues](https://github.com/Premik/blender_rhubarb_lipsync_ng/issues?q=is%3Aopen). Maybe somebody has already reported the same issue.
+- Also search already [Closed issues](https://github.com/Premik/blender_rhubarb_lipsync_ng/issues?q=is%3Aclosed). There might be similar issue with a solution from the past.
 
-- note the addon has several automated unit tests and integration tests. Those run the basic addon operators in a headless blender (blender as module). Tests are ran automatically after each change on GitHub for all three supported platforms.
-- check the GitHub issues, including the closed tickets. Maybe so
+- The addon has several automated unit tests and integration tests. Those verifies the basic addon operators in a headless Blender (Blender as module) environment. Tests are ran automatically after each change on GitHub for all three supported platforms. You can see them on the [Github Actions](https://github.com/Premik/blender_rhubarb_lipsync_ng/actions/workflows/unit-tests.yml). There shouldn't be any tests failing.
 
+![Check installed](doc/img/GithubActions.png)
 
