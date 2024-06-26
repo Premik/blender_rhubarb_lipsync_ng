@@ -7,9 +7,19 @@ import sys
 from typing import Any
 import unittest
 from pathlib import Path
-
 import bpy
+import sys
 
+print("-----------------------------------------------------")
+print("Python version:", sys.version)
+print("Python executable:", sys.executable)
+
+# for p in sys.path:
+#     print(f" {p}")
+
+
+print(f"User dir: {os.environ['BLENDER_USER_RESOURCES']}")
+print("-----------------------------------------------------")
 import sample_data
 
 for p in sys.path:
