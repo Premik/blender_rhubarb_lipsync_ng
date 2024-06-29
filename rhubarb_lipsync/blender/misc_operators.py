@@ -2,6 +2,7 @@ import json
 import logging
 import re
 import traceback
+from typing import Optional
 from urllib import request
 
 import bpy
@@ -75,7 +76,7 @@ class CheckForUpdates(bpy.types.Operator):
             return f"Your version {version_str(cv)} is actually newer than the one released {version_str(av)}."
         return f"You are using the latest {version_str(av)} version."
 
-    def get_latest_release_info_from_github(self) -> str | None:
+    def get_latest_release_info_from_github(self) -> Optional[str]:
         url = f"https://api.github.com/repos/{self.github_owner}/{self.github_repo}/releases/latest"
         log.info(f"Opening: {url}")
         try:
@@ -161,7 +162,7 @@ class ShowResultLogDetails(bpy.types.Operator):
                 icon = "INFO"
             row.label(text=log.msg, icon=icon)
 
-    def invoke(self, context: Context, event: bpy.types.Event) -> set[int] | set[str]:
+    def invoke(self, context: Context, event: bpy.types.Event) -> set:
         return context.window_manager.invoke_props_dialog(self, width=1000)
 
     def execute(self, ctx: Context) -> set[str]:
@@ -182,7 +183,7 @@ class ShowResultLogDetails(bpy.types.Operator):
 #     msg: StringProperty()  # type: ignore
 #     op_id: StringProperty()  # type: ignore
 
-#     def invoke(self, context: Context, event) -> set[int] | set[str]:
+#     def invoke(self, context: Context, event) -> set:
 #         ret = context.window_manager.invoke_confirm(self, event)
 #         return ret
 

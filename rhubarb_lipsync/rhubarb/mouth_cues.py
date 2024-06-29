@@ -2,7 +2,7 @@ import logging
 import math
 from dataclasses import dataclass, field
 from functools import cached_property
-from typing import Any, Callable, ParamSpec, TypeAlias, TypeVar
+from typing import Any, Callable, TypeVar
 
 from rhubarb_lipsync.rhubarb.mouth_shape_info import MouthShapeInfo, MouthShapeInfos
 
@@ -49,14 +49,13 @@ def duration_scale(current_len: float, desired_len: float, scale_min: float, sca
 
 
 T = TypeVar('T')
-P = ParamSpec('P')
-WrappedFuncDeco: TypeAlias = Callable[[Callable[P, T]], Callable[P, T]]
+WrappedFuncDeco = Callable[[Callable[..., T]], Callable[..., T]]
 
 
-def docstring_from(copy_func: Callable[..., Any]) -> WrappedFuncDeco[P, T]:
+def docstring_from(copy_func: Callable[..., Any]) -> WrappedFuncDeco:
     """Copies the doc string of the given function to another."""
 
-    def wrapped(func: Callable[P, T]) -> Callable[P, T]:
+    def wrapped(func: Callable[..., T]) -> Callable[..., T]:
         func.__doc__ = copy_func.__doc__
         return func
 

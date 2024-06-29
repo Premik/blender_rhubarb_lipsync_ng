@@ -146,7 +146,7 @@ class RhubarbAddonPreferences(AddonPreferences):
     )
 
     @property
-    def executable_path(self) -> pathlib.Path | None:
+    def executable_path(self) -> Optional[pathlib.Path]:
         if not self.executable_path_string:
             return None
         return pathlib.Path(self.executable_path_string)

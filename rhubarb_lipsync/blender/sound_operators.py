@@ -83,7 +83,7 @@ class CreateSoundStripWithSound(bpy.types.Operator):
     def poll(cls, context: Context) -> bool:
         return ui_utils.validation_poll(cls, context)
 
-    def invoke(self, context: Context, event: bpy.types.Event) -> set[int] | set[str]:
+    def invoke(self, context: Context, event: bpy.types.Event) -> set:
         # Open dialog
         if not context.scene.sequence_editor:
             log.info("No sequence editor found in the Scene context. Creating a new one.")
@@ -327,7 +327,7 @@ class ConvertSoundFromat(bpy.types.Operator):
             ui_utils.draw_error(self.layout, f"The file exists and will be overwritten:\n{self.target_path_full}")
             # ui_utils.draw_error(self.layout, f"exists and will be overwritten.")
 
-    def invoke(self, context: Context, event: bpy.types.Event) -> set[int] | set[str]:
+    def invoke(self, context: Context, event: bpy.types.Event) -> set:
         # Open dialog
         wm = context.window_manager
         return wm.invoke_props_dialog(self)

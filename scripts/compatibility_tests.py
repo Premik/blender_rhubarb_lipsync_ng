@@ -1,22 +1,19 @@
 import hashlib
-from itertools import groupby
 import json
 import os
 import pathlib
-import platform
 import re
 import shutil
 import subprocess
-import tempfile
+import zipfile
 from dataclasses import dataclass, field
 from functools import cached_property
+from itertools import groupby
 from pathlib import Path
 from typing import Optional
-from altair import Iterable
-from bs4 import BeautifulSoup
-from bs4.element import Tag
+
 import requests
-import zipfile
+from bs4 import BeautifulSoup
 
 
 def to_wine_path(path: Path) -> str:
@@ -130,7 +127,7 @@ class BlenderInstallation:
         return (int(mj), int(mv), self.ver_minor)
 
     @cached_property
-    def ver_str(self) -> tuple[int, int, int]:
+    def ver_str(self) -> str:
         return ".".join([str(v) for v in self.ver])
 
     @property
@@ -145,7 +142,7 @@ class BlenderInstallation:
         return url_cache.get_file(self.url, f".{self.file_ext}")
 
     @staticmethod
-    def parse_main_version(name: str) -> str:
+    def parse_main_version(name: str) -> tuple[str, str]:
         pattern = re.compile(r"blender(?:-|)(?P<ver_main>\d+\.\d+)")
         match = pattern.search(name)
         if not match:
@@ -222,7 +219,7 @@ class BlenderInstallator:
     def versions_for_test(self) -> list[BlenderInstallation]:
         bis: list[BlenderInstallation] = []
         for bv in bi.list_all_available_versions(bi.list_available_main_versions()):
-            if not "win" in bv.platform_str:
+            if "win" not in bv.platform_str:
                 continue
             if bv.file_ext != "zip":
                 continue
@@ -324,15 +321,19 @@ class BlenderSetup:
     def __post_init__(self) -> None:
         pf = f"blender_cfg-{self.installation.ver_str}-{self.installation.platform_str}_"
         # self.config_root_path = Path(tempfile.mkdtemp(prefix=pf))
-        self.config_root_path = Path("/tmp/work/") / pf
+        self.config_root_path = Path("/tmp/work/blender_cfg") / pf
 
     @cached_property
     def user_dir(self) -> Path:
         return self.config_root_path / "blender" / self.installation.ver_main_str
 
     @cached_property
+    def scripts_path(self) -> Path:
+        return self.user_dir / "scripts"
+
+    @cached_property
     def addons_path(self) -> Path:
-        return self.user_dir / "scripts" / "addons"
+        return self.scripts_path / "addons"
 
     @cached_property
     def test_results_path(self) -> Path:
@@ -349,19 +350,39 @@ class BlenderSetup:
             self.set_blender_user_data_nix()
 
     def set_blender_user_data_windows(self) -> None:
-        windows_path = to_wine_path(self.user_dir)
-        os.environ["BLENDER_USER_RESOURCES"] = windows_path
-        print(f"User dir: {windows_path}")
+        os.environ["BLENDER_USER_RESOURCES"] = to_wine_path(self.user_dir)
+        # Version <3.6 doesn't support BLENDER_USER_RESOURCES
+        os.environ["BLENDER_USER_CONFIG"] = to_wine_path(self.user_dir / "config")
+        os.environ["BLENDER_USER_SCRIPTS"] = to_wine_path(self.scripts_path)
+
+        # print(f"User dir: {windows_path}")
 
     def set_blender_user_data_nix(self) -> None:
         os.environ["XDG_CONFIG_HOME"] = str(self.config_root_path)
         print(f"User dir: {self.config_root_path}")
 
-    def install_addon(self) -> None:
+    def install_addon_symlink(self) -> None:
         self.addons_path.mkdir(parents=True, exist_ok=True)
         target = self.addons_path / "rhubarb_lipsync"
         if not target.exists():
             os.symlink(self.addon_src / "rhubarb_lipsync", target)
+
+    def install_addon(self) -> None:
+        self.addons_path.mkdir(parents=True, exist_ok=True)
+        target = self.addons_path / "rhubarb_lipsync"
+        dist = self.addon_src / 'dist'
+
+        platform_str = self.installation.platform_str.lower()[:5]
+        zip_files = [file for file in dist.glob("rhubarb_lipsync_ng-*.zip") if platform_str in file.name.lower()]
+
+        if len(zip_files) == 0:
+            raise RuntimeError(f"No zip file found for platform {platform_str} in the {dist}")
+        elif len(zip_files) > 1:
+            raise RuntimeError(f"Multiple zip files found for platform {platform_str}: {zip_files} in the {dist}.")
+
+        zip_file = zip_files[0]
+        with zipfile.ZipFile(zip_file, 'r') as zip_ref:
+            zip_ref.extractall(target.parent)
 
     def install_tests(self) -> None:
         test_files = list(self.addon_src.glob("tests/*.py"))
@@ -382,7 +403,7 @@ class BlenderSetup:
         config_dir = self.user_dir / "config"
         config_dir.mkdir(parents=True, exist_ok=True)
 
-    def print_banner(self):
+    def print_banner(self) -> None:
         print(" ---------------------------------------------  ")
 
     def run_blender_win(self) -> None:
@@ -455,12 +476,9 @@ class BlenderSetup:
         self.run_blender()
 
 
-ansi_escape = re.compile(r'\x1B[@-_][0-?]*[ -/]*[@-~]')
-
-
 def strip_ansi_sequences(text: str) -> str:
+    ansi_escape = re.compile(r'\x1B[@-_][0-?]*[ -/]*[@-~]')
     return ansi_escape.sub('', text)
-    return text
 
 
 def print_test_results_table(results_table: list[list[str]]) -> None:
@@ -503,7 +521,7 @@ if __name__ == "__main__":
 
     bi = BlenderInstallator()
     l = bi.versions_for_test()
-    l.reverse()
+    # l.reverse()
     results_table: list[list[str]] = []
     for v in l:
         # print(f"{v.ver} {v.platform_str} {v.file_ext} {v.install_file_name}")
@@ -514,5 +532,5 @@ if __name__ == "__main__":
         bs = BlenderSetup(bi, v)
         bs.install_and_run()
         bs.collect_result(results_table)
-        break
+        # break
     print_test_results_table(results_table)

@@ -64,7 +64,7 @@ class MouthCueList(PropertyGroup):
     items: CollectionProperty(type=MouthCueListItem, name="Cue items")  # type: ignore
 
     # Autoload would fail in the typing reflection because of the 'MouthCueList' being unknown
-    # index_changed: Callable[['MouthCueList', Context, MouthCueListItem], None] | None
+    # index_changed: Callable[['MouthCueList', Context, MouthCueListItem], None]
     index_changed: Callable[[PropertyGroup, Context, MouthCueListItem], None]
 
     def add_cues(self, cues: list[MouthCue]) -> None:
@@ -182,14 +182,14 @@ class CaptureProperties(PropertyGroup):
         return ""
 
     @property
-    def end_frame_time(self) -> float | None:
+    def end_frame_time(self) -> Optional[float]:
         cl: MouthCueList = self.cue_list
         if not cl or not cl.last_item:
             return None
         return cl.last_item.end
 
     @property
-    def sound_file_path(self) -> pathlib.Path | None:
+    def sound_file_path(self) -> Optional[pathlib.Path]:
         s: Sound = self.sound
         if not s or not s.filepath or s.packed_file:
             return None

@@ -77,7 +77,7 @@ class ClearCueList(bpy.types.Operator):
     def poll(cls, context: Context) -> bool:
         return ui_utils.validation_poll(cls, context)
 
-    # def invoke(self, context: Context, event) -> set[int] | set[str]:
+    # def invoke(self, context: Context, event) -> set:
     #    wm = context.window_manager
     #    return wm.invoke_confirm(self, event)
 
@@ -109,7 +109,7 @@ class ExportCueList2Json(bpy.types.Operator):
     def poll(cls, context: Context) -> bool:
         return ui_utils.validation_poll(cls, context)
 
-    def invoke(self, context: Context, event) -> set[int] | set[str]:
+    def invoke(self, context: Context, event) -> set:
         rootProps = CaptureListProperties.from_context(context)
         if not self.filepath:
             n = rootProps.name
@@ -156,7 +156,7 @@ class ImportJsonCueList(bpy.types.Operator):
     def poll(cls, context: Context) -> bool:
         return ui_utils.validation_poll(cls, context)
 
-    def invoke(self, context: Context, event) -> set[int] | set[str]:
+    def invoke(self, context: Context, event) -> set:
         context.window_manager.fileselect_add(self)
         return {'RUNNING_MODAL'}
 

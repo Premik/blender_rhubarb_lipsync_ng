@@ -27,7 +27,7 @@ class NlaTrackRef(PropertyGroup):
     def name_updated(self, ctx: Context) -> None:
         self.dropdown_helper.name2index()
 
-    def items(self) -> Generator[NlaTrack | Any, Any, None]:
+    def items(self) -> Generator[NlaTrack, Any, None]:
         o = self.object
         if not o:
             return
@@ -44,7 +44,7 @@ class NlaTrackRef(PropertyGroup):
         for t in o.animation_data.nla_tracks:
             yield t
 
-    def search_names(self, ctx: Context, edit_text) -> Generator[str | Any, Any, None]:
+    def search_names(self, ctx: Context, edit_text) -> Generator[str, Any, None]:
         for i, t in enumerate(self.items()):
             yield f"{str(i).zfill(3)} {t.name}"
 
@@ -69,6 +69,8 @@ class NlaTrackRef(PropertyGroup):
 
     @property
     def selected_item(self) -> Optional[NlaTrack]:
+        if not hasattr(self, 'index'):
+            return None
         items = list(self.items())
         if self.index < 0 or self.index >= len(items):
             return None
@@ -155,7 +157,7 @@ class MappingItem(PropertyGroup):
         return f"[{c(self.frame_range[0])}]...[{c(self.frame_range[1])}]"
 
     @cached_property
-    def cue_info(self) -> MouthShapeInfo | None:
+    def cue_info(self) -> Optional[MouthShapeInfo]:
         if not self.key:
             return None
         return MouthShapeInfos[self.key].value

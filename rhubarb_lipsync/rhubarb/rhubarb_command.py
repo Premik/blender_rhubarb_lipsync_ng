@@ -18,6 +18,30 @@ from rhubarb_lipsync.rhubarb.mouth_cues import MouthCue
 log = logging.getLogger(__name__)
 
 
+def thread_loop(func):
+    @functools.wraps(func)
+    def wrapper(self):
+        log.trace(f"Entered {func.__name__} reader thread")  # type: ignore
+        while True:
+            try:
+                if self.cmd.has_finished:
+                    log.trace("Process finished")  # type: ignore
+                    break
+                if self.stop_event.is_set():
+                    log.trace("Stop event received")  # type: ignore
+                    break  # Cancelled
+                func(self)
+            except Exception as e:
+                log.error(f"Unexpected error in the {func.__name__} thread {e}")
+                self.last_exception = e
+                traceback.print_exc()
+                self.queue.put(("EXCEPTION", e))
+                raise
+        log.debug(f"{func.__name__} thread exit")
+
+    return wrapper  # Apply staticmethod here
+
+
 class RhubarbParser:
     version_info_rx = re.compile(r"version\s+(?P<ver>\d+\.\d+\.\d+)")
 
@@ -201,7 +225,7 @@ class RhubarbCommandWrapper:
         args = self.build_lipsync_args(input_file, dialog_file)
         self.open_process(args)
 
-    def lipsync_check_progress(self) -> int | None:
+    def lipsync_check_progress(self) -> Optional[int]:
         """Reads the stderr of the lipsync command where the progress and status in being reported.
         Note this call blocks until there is status update available on stderr.
         The rhubarb binary provides the status update few times per seconds typically.
@@ -324,30 +348,6 @@ class RhubarbCommandAsyncJob:
         self.last_cues: list[MouthCue] = []
         self.stop_event = Event()
 
-    @staticmethod
-    def thread_loop(func):
-        @functools.wraps(func)
-        def wrapper(self):
-            log.trace(f"Entered {func.__name__}  reader thread")  # type: ignore
-            while True:
-                try:
-                    if self.cmd.has_finished:
-                        log.trace("Process finished")  # type: ignore
-                        break
-                    if self.stop_event.is_set():
-                        log.trace("Stop event received")  # type: ignore
-                        break  # Cancelled
-                    func(self)
-                except Exception as e:
-                    log.error(f"Unexpected error in the {func.__name__} thread  {e}")
-                    self.last_exception = e
-                    traceback.print_exc()
-                    self.queue.put(("EXCEPTION", e))
-                    raise
-            log.debug(f"{func.__name__} thread exit")
-
-        return wrapper
-
     @thread_loop
     def _stderr_thread_run(self) -> None:
         """Stderror reader. Runs on a separate thread, pushing progress message via Q"""
@@ -367,7 +367,7 @@ class RhubarbCommandAsyncJob:
         """
         self.cmd.read_process_stdout()
 
-    def _join_thread(self, t: Thread | None) -> None:
+    def _join_thread(self, t: Optional[Thread]) -> None:
         if not t:
             return
 
@@ -387,7 +387,7 @@ class RhubarbCommandAsyncJob:
         self.stdout_thread = None
         self.stderr_thread = None
 
-    def lipsync_check_progress_async(self) -> int | None:
+    def lipsync_check_progress_async(self) -> Optional[int]:
         if self.cmd.has_finished:  # Finished, do some auto-cleanup a process output
             self.join_threads()
             self.cmd.collect_output_sync(ignore_timeout_error=True)

@@ -4,11 +4,11 @@ import json
 import os
 import platform
 import sys
-from typing import Any
 import unittest
 from pathlib import Path
+from typing import Any
+
 import bpy
-import sys
 
 print("-----------------------------------------------------")
 print("Python version:", sys.version)

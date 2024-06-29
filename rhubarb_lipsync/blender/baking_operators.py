@@ -228,7 +228,7 @@ class BakeToNLA(bpy.types.Operator):
     def poll(cls, context: Context) -> bool:
         return ui_utils.validation_poll(cls, context)
 
-    def invoke(self, context: Context, event: bpy.types.Event) -> set[int] | set[str]:
+    def invoke(self, context: Context, event: bpy.types.Event) -> set:
         # Open dialog
 
         rll: ResultLogListProperties = CaptureListProperties.from_context(context).last_resut_log

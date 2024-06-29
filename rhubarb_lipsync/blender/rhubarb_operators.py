@@ -1,6 +1,7 @@
 import logging
 import os
 import pathlib
+from typing import Any
 
 import bpy
 from bpy.types import Context, Sound
@@ -56,7 +57,7 @@ class ProcessSoundFile(bpy.types.Operator):
     def poll(cls, context: Context) -> bool:
         return ui_utils.validation_poll(cls, context)
 
-    def invoke(self, context: Context, event: bpy.types.Event) -> set[int] | set[str]:
+    def invoke(self, context: Context, event: bpy.types.Event) -> set[Any]:
         props = CaptureListProperties.capture_from_context(context)
         cl: MouthCueList = props.cue_list
         if len(cl.items) > 0:

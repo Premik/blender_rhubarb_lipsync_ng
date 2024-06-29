@@ -1,4 +1,6 @@
 print("RLSP: enter __init__")
+from typing import Optional
+
 import bpy
 from bpy.props import PointerProperty
 
@@ -28,7 +30,7 @@ def is_blender_in_debug() -> bool:
     return bpy.app.debug or bpy.app.debug_python
 
 
-def init_loggers(prefs: RhubarbAddonPreferences | None) -> None:
+def init_loggers(prefs: Optional[RhubarbAddonPreferences]) -> None:
     if is_blender_in_debug():
         print("RLPS: enter init_loggers() ")
     logManager.init(rhubarb_lipsync.blender.auto_load.modules)

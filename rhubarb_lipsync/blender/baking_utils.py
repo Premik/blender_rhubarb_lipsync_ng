@@ -33,7 +33,10 @@ def find_strip_at(track: NlaTrack, at_frame: float) -> tuple[int, NlaStrip]:
     """Finds the strip at the given frame. Effectively utilizing the fact the strips are always ordered and can't overlap"""
     if not track or not track.strips:
         return -1, None
-    index = bisect_left(track.strips, at_frame, key=lambda strip: strip.frame_start)
+    # index = bisect_left(track.strips, at_frame, key=lambda strip: strip.frame_start)
+    frame_starts = [strip.frame_start for strip in track.strips]  # Old python
+    index = bisect_left(frame_starts, at_frame)
+
     if index > 0:  # After the first
         index -= 1
     assert len(track.strips) > index >= 0
