@@ -14,8 +14,8 @@ print("-----------------------------------------------------")
 print("Python version:", sys.version)
 print("Python executable:", sys.executable)
 
-# for p in sys.path:
-#     print(f" {p}")
+for p in sys.path:
+    print(f" {p}")
 
 
 print(f"User dir: {os.environ['BLENDER_USER_RESOURCES']}")
