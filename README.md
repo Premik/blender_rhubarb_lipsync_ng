@@ -120,6 +120,24 @@ A new `Action` will be created and selected in the `Action Editor`. The two RLPS
 - [FAQ](faq.md)
 - [Troubleshooting Guide](troubleshooting.md)
 
+### Supported Blender versions
+
+Any Blender version newer than **v3.2**. Test results:
+
+| Version     | System  | Total | Passed | Failed | Errors | Skipped | Status |
+|-------------|---------|-------|--------|--------|--------|---------|--------|
+| **4.1**.1   | Windows | 44    | 42     | 0      | 0      | 2       | ✔️     |
+| **4.0**.2   | Windows | 44    | 42     | 0      | 0      | 2       | ✔️     |
+| **3.6**.13  | Windows | 44    | 42     | 0      | 0      | 2       | ✔️     |
+| **3.5**.1   | Windows | 44    | 42     | 0      | 0      | 2       | ✔️     |
+| **3.4**.1   | Windows | 44    | 42     | 0      | 0      | 2       | ✔️     |
+| **3.3**.20  | Windows | 44    | 42     | 0      | 0      | 2       | ✔️     |
+| **3.2**.2   | Windows | 44    | 33     | 7      | 2      | 2       | ❌     |
+| **3.1**.2   | Windows | 44    | 33     | 7      | 2      | 2       | ❌     |
+| **3.0**.1   | Windows | 44    | 33     | 7      | 2      | 2       | ❌     |
+
+
+
 ## Contributions
 
 * Inspired by the [scaredyfish/blender-rhubarb-lipsync](https://github.com/scaredyfish/blender-rhubarb-lipsync).
