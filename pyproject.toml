@@ -4,7 +4,6 @@ version = "1.4.1"
 license = { file = "LISENSE" }
 
 
-
 [tool.rhubarb_lipsync.download]
 base_url = "https://github.com/DanielSWolf/rhubarb-lip-sync/releases/download"            
 base_name = "Rhubarb-Lip-Sync"

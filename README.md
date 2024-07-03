@@ -4,11 +4,12 @@
 
 ## Video tutorials
 
+### Quick Intro
+[![Quick Intro](doc/img/demo0Thumb.jpeg)](https://lbry.tv/@OwlGear:8/rhubarbng-quick-intro:d)
+
+
 ### Combining Armature Actions with Shape Keys
 [![Combining Armature Actions with Shape Keys](doc/img/demo2Thumb.jpeg)](https://odysee.com/@OwlGear:8/rhubarblipsync-ng-shape-keys:6)
-
-### Start from scratch
-[![Start from scratch](doc/img/demo1Thumb.jpeg)](https://odysee.com/@OwlGear:8/RhubarbLipsyncNGBlenderplugin-fromScratch:7)
 
 ## Quick start
 
