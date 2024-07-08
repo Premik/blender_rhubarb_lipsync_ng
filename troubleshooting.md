@@ -96,10 +96,18 @@ If still no luck, follow the next section and run Blender with a fresh profile.
 
 In some rare circumstances, there could be interference with other add-ons or Blender customizations that might be causing troubles. To rule this possibility out, start Blender with factory settings. This can be done by setting some environment variables to a temporary folder so your original profile can be left intact.
 
-On Windows:
+On Windows (Blender newer > `3.5`):
 
 ```sh
 set BLENDER_USER_RESOURCES=%TEMP%
+blender --debug
+```
+
+On Windows (Blender < `3.6`):
+
+```sh
+set BLENDER_USER_CONFIG=%TEMP%
+set BLENDER_USER_SCRIPTS=%TEMP%
 blender --debug
 ```
 
@@ -108,6 +116,8 @@ On Linux/Mac:
 ```sh
 XDG_CONFIG_HOME="/tmp/blenderFresh" blender --debug
 ```
+
+Note you can use any other folder instead of the `TEMP` or `/tmp`.
 
 Then install the plugin as usual.
 
@@ -133,6 +143,8 @@ addon_utils.disable: rhubarb_lipsync not disabled
 Modules Installed (rhubarb_lipsync) from 'C:\dist\rhubarb_lipsync_ng-Windows-1.3.1.zip' into 'C:\users\premik\AppData\Roaming\Blender Foundation\Blender\3.5\scripts\addons'
 ```
 
+There should be some entries with `RLSP:` in case the addon was installed successfully:
+
 ```sh
 RLPS: enter register()
 RLPS: enter init_loggers()
@@ -142,6 +154,10 @@ Added console handler on 0 loggers.
 RLPS: exit register()
 Warning: This script was written Blender version 4.0.2 and might not function (correctly), though it is enabled
 ```
+
+The RLSP: exit register() indicates the plugin has been successfully registered.
+
+Example of a **useful** traceback/stack trace. The last line indicates the root cause:
 
 ```
 Traceback (most recent call last):
@@ -155,6 +171,25 @@ Traceback (most recent call last):
     raise OSError("Cannot call rmtree on a symbolic link")
 OSError: Cannot call rmtree on a symbolic link
 ```
+
+Example of a generic traceback/stack trace. This is a catch-all exception only indicating there was some issue earlier but not showing the root cause (not very useful):
+```
+Traceback (most recent call last):
+  File "C:\\Program Files\\Blender Foundation\\Blender 4.0\\4.0\\scripts\\modules\\addon_utils.py", line 364, in enable
+   mod = importlib.import_module(module_name)
+  File "C:\\Program Files\\Blender Foundation\\Blender 4.0\\4.0\\python\\lib\\importlib\\__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1050, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1027, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1006, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 688, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 883, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames removed
+  File "C:\\Users\\foo\\AppData\\Roaming\\Blender Foundation\\Blender\\4.0\\scripts\\addons\\rhubarb_lipsync\\__init__.py", line 34, in <module>
+    rhubarb_lipsync.blender.auto_load.init(__file__)
+AttributeError: partially initialized module 'rhubarb_lipsync' has no attribute 'blender' (most likely due to a circular import)
+```
+
 
 - Search [Opened issues](https://github.com/Premik/blender_rhubarb_lipsync_ng/issues?q=is%3Aopen). Maybe somebody has already reported the same issue.
 - Also search already [Closed issues](https://github.com/Premik/blender_rhubarb_lipsync_ng/issues?q=is%3Aclosed). There might be a similar issue with a solution from the past.
