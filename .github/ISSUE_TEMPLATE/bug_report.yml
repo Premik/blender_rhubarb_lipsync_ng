@@ -5,6 +5,8 @@ body:
   - type: markdown
     attributes:
       value: |
+        💡 Check the [Troubleshooting guide](troubleshooting.md).
+
         💡 Start Blender in debug mode from the command line: `blender --debug`. This will make the addon log messages with maximal verbosity, possibly giving more clues about the issue.
 
         💡 On Windows, go to the main menu: `Window/Toggle System Console` to open the console window.
@@ -13,6 +15,17 @@ body:
               - Go to the main menu: `Edit/Preferences/Add-ons`.
               - Find and expand `Animation: Rhubarb Lipsync NG`.
               - Set `Log File` to file-path. For example, `C:\temp\rhubarb.log`.
+
+        
+
+  - type: checkboxes
+    attributes:
+      label: Confirmation
+      description: Please confirm you have followed the [Troubleshooting guide](troubleshooting.md).
+      options:
+        - label: I have followed the troubleshooting guide.
+          required: true
+
 
   - type: textarea
     attributes:
@@ -37,9 +50,10 @@ body:
   - type: input
     attributes:
       label: Blender Version
-      placeholder: "3.5, 3.8, 4.0, 4.2.0"
+      placeholder: "3.3.20, 3.4, 3.5, 3.6, 4.0, 4.1, 4.2"
 
   - type: input
     attributes:
       label: Operating System
       placeholder: Windows, Linux, macOS
+
