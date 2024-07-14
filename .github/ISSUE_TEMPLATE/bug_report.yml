@@ -16,7 +16,7 @@ body:
               - Find and expand `Animation: Rhubarb Lipsync NG`.
               - Set `Log File` to file-path. For example, `C:\temp\rhubarb.log`.
 
-        
+
 
   - type: checkboxes
     attributes:

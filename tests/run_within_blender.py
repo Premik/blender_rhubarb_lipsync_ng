@@ -14,19 +14,20 @@ print("-----------------------------------------------------")
 print("Python version:", sys.version)
 print("Python executable:", sys.executable)
 
+print("Python paths:")
 for p in sys.path:
-    print(f" {p}")
+     print(f" {p}")
 
 
-print(f"User dir: {os.environ['BLENDER_USER_RESOURCES']}")
+
+user_dirs = ['BLENDER_USER_RESOURCES', 'BLENDER_USER_CONFIG', 'BLENDER_USER_SCRIPTS', 'XDG_CONFIG_HOME']
+print("USER DIR:")
+print('\n'.join(filter(None, [os.environ.get(var, '') for var in user_dirs])))
+
 print("-----------------------------------------------------")
 import sample_data
 
-for p in sys.path:
-    print(p)
 
-for p in sys.path:
-    print(p, file=sys.stderr)
 
 # sample_project.SampleProject.blender_as_module = False
 
