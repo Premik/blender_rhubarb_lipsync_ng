@@ -28,6 +28,9 @@ class PackagePlugin:
 
     readme_version_pattern = r'-\d+\.\d+\.\d+\.zip'
     readme_version_rx = re.compile(f"(.*)({readme_version_pattern})(.*)", re.DOTALL)
+    
+    blender_manifest_pattern = r'version\s*=\s*["]\d+\.\d+\.\d+["]'
+    blender_manifest_rx = re.compile(f"(.*)({blender_manifest_pattern})(.*)", re.DOTALL)
 
     main_package_name = 'rhubarb_lipsync'
 
@@ -56,6 +59,11 @@ class PackagePlugin:
     @cached_property
     def readme_md_path(self) -> Path:
         return self.project_dir / "README.md"
+    
+    @cached_property
+    def blender_manifest_path(self) -> Path:
+        return self.project_dir / "blender_manifest.toml"
+
 
     @cached_property
     def dist_dir(self) -> Path:
@@ -76,6 +84,7 @@ class PackagePlugin:
     def update_version_files(self) -> None:
         self.update_version_in_file(PackagePlugin.bl_info_version_rx, self.main__init__path, f"'version': {self.version_tuple}")
         self.update_version_in_file(PackagePlugin.readme_version_rx, self.readme_md_path, f"-{self.version_str}.zip")
+        self.update_version_in_file(PackagePlugin.blender_manifest_rx, self.blender_manifest_path, f'version = "{self.version_str}"')
 
     def clean_temp_files(self) -> None:
         d = clean_temp_files_at(self.project_dir)
