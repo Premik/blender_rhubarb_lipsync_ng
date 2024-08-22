@@ -11,6 +11,7 @@ from rhubarb_lipsync.blender.mapping_properties import MappingItem, MappingPrope
 from rhubarb_lipsync.blender.preferences import MappingPreferences, RhubarbAddonPreferences
 from rhubarb_lipsync.blender.ui_utils import IconsManager
 from rhubarb_lipsync.rhubarb.mouth_shape_info import MouthShapeInfo, MouthShapeInfos
+from itertools import islice
 
 log = logging.getLogger(__name__)
 
@@ -331,11 +332,17 @@ class PreviewMappingAction(bpy.types.Operator):
         return mapping_utils.objects_with_mapping(obj_sel)
 
     @classmethod
-    def disabled_reason(cls, context: Context, limit=0) -> str:
+    def disabled_reason(cls, context: Context, limit=100) -> str:
         if not context.scene:
             return "No active scene"
-        if not PreviewMappingAction.objects_with_mapping(context):
+        objs = list(islice(PreviewMappingAction.objects_with_mapping(context), limit if limit else None))
+        if not objs:
             return "No object with mapping selected"
+        for o in objs:
+            if not o.animation_data:
+                return f"The object '{o.name}' has no animation data."
+            if o.animation_data.is_property_readonly("action"):
+                return f"The 'action' attribute of the object '{o.name}' is readonly. Are you tweaking a NLA strip?"
         return ""
 
     @classmethod
@@ -345,6 +352,11 @@ class PreviewMappingAction(bpy.types.Operator):
     def execute(self, context: Context) -> set[str]:
         # prefs = RhubarbAddonPreferences.from_context(context)
         # mlp: MappingPreferences = prefs.mapping_prefs
+
+        error = PreviewMappingAction.disabled_reason(context, 0)
+        if error:
+            self.report({"ERROR"}, error)
+            return {'CANCELLED'}
 
         cue_index: int = self.target_cue_index
         active_mi: MappingItem = MappingItem.from_object(context.object, cue_index)
