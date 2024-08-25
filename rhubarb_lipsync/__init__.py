@@ -4,7 +4,7 @@ from typing import Optional
 import bpy
 from bpy.props import PointerProperty
 
-import rhubarb_lipsync.blender.auto_load
+from rhubarb_lipsync.blender.auto_load import AutoLoader
 from rhubarb_lipsync.blender.capture_properties import CaptureListProperties
 from rhubarb_lipsync.blender.mapping_properties import MappingProperties
 from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences
@@ -24,6 +24,8 @@ bl_info = {
     'category': 'Animation',
 }
 
+autoloader: Optional[AutoLoader]
+
 
 def is_blender_in_debug() -> bool:
     '''Whether Blender was started with --debug or --debug-python flags'''
@@ -31,9 +33,10 @@ def is_blender_in_debug() -> bool:
 
 
 def init_loggers(prefs: Optional[RhubarbAddonPreferences]) -> None:
+    global autoloader
     if is_blender_in_debug():
         print("RLPS: enter init_loggers() ")
-    logManager.init(rhubarb_lipsync.blender.auto_load.modules)
+    logManager.init(autoloader.modules)
 
     if is_blender_in_debug():  # If Blender is in debug, force TRACE loglevel
         logManager.set_trace()
@@ -50,12 +53,14 @@ def init_loggers(prefs: Optional[RhubarbAddonPreferences]) -> None:
 
 
 def register() -> None:
+    global autoloader
     # import rhubarb_lipsync.blender.auto_load
 
     if is_blender_in_debug():
         print("RLPS: enter register() ")
-    rhubarb_lipsync.blender.auto_load.init(__file__)
-    rhubarb_lipsync.blender.auto_load.register()
+    autoloader = AutoLoader(root=__file__)
+    autoloader.register()
+
     bpy.types.Scene.rhubarb_lipsync_captures = PointerProperty(type=CaptureListProperties)
     bpy.types.Object.rhubarb_lipsync_mapping = PointerProperty(
         type=MappingProperties,
@@ -73,11 +78,12 @@ def register() -> None:
 
 
 def unregister() -> None:
+    global autoloader
     IconsManager.unregister()
     # if 'logManager' in globals():
     #     global logManager
     #     del logManager
-    rhubarb_lipsync.blender.auto_load.unregister()
+    autoloader.unregister()
     del bpy.types.Scene.rhubarb_lipsync_captures
     del bpy.types.Object.rhubarb_lipsync_mapping
 
