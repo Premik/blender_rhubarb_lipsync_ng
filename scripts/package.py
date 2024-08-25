@@ -28,7 +28,7 @@ class PackagePlugin:
 
     readme_version_pattern = r'-\d+\.\d+\.\d+\.zip'
     readme_version_rx = re.compile(f"(.*)({readme_version_pattern})(.*)", re.DOTALL)
-    
+
     blender_manifest_pattern = r'version\s*=\s*["]\d+\.\d+\.\d+["]'
     blender_manifest_rx = re.compile(f"(.*)({blender_manifest_pattern})(.*)", re.DOTALL)
 
@@ -59,11 +59,10 @@ class PackagePlugin:
     @cached_property
     def readme_md_path(self) -> Path:
         return self.project_dir / "README.md"
-    
+
     @cached_property
     def blender_manifest_path(self) -> Path:
-        return self.project_dir / "blender_manifest.toml"
-
+        return self.project_dir / PackagePlugin.main_package_name / "blender_manifest.toml"
 
     @cached_property
     def dist_dir(self) -> Path:
