@@ -57,8 +57,12 @@ def register() -> None:
 
     if is_blender_in_debug():
         print("RLPS: enter register() ")
-    autoloader = AutoLoader(root=__file__)
-    autoloader.register()
+    autoloader = AutoLoader(root_init_file=__file__, root_package_name=__package__)
+    try:
+        autoloader.find_classes()
+        autoloader.register()
+    finally:
+        autoloader.print_str()
 
     bpy.types.Scene.rhubarb_lipsync_captures = PointerProperty(type=CaptureListProperties)
     bpy.types.Object.rhubarb_lipsync_mapping = PointerProperty(
