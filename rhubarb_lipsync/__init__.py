@@ -4,14 +4,8 @@ from typing import Optional
 import bpy
 from bpy.props import PointerProperty
 
-# import rhubarb_lipsync.blender.auto_load
-# from rhubarb_lipsync.blender.capture_properties import CaptureListProperties
-# from rhubarb_lipsync.blender.mapping_properties import MappingProperties
-# from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences
-# from rhubarb_lipsync.blender.ui_utils import IconsManager
-# from rhubarb_lipsync.rhubarb.log_manager import logManager
 
-from .blender import auto_load
+from .blender.auto_load import AutoLoader
 from .blender.capture_properties import CaptureListProperties
 from .blender.mapping_properties import MappingProperties
 from .blender.preferences import RhubarbAddonPreferences
@@ -52,7 +46,6 @@ def init_loggers(prefs: Optional[RhubarbAddonPreferences]) -> None:
     else:
         if hasattr(prefs, 'log_level') and prefs.log_level != 0:  # 0 default level
             logManager.set_level(prefs.log_level)
-    logManager.ensure_console_handler
 
 
 # print(f"FILE:  {__file__}")
@@ -61,7 +54,6 @@ def init_loggers(prefs: Optional[RhubarbAddonPreferences]) -> None:
 
 def register() -> None:
     global autoloader
-    # import rhubarb_lipsync.blender.auto_load
 
     if is_blender_in_debug():
         print("RLPS: enter register() ")

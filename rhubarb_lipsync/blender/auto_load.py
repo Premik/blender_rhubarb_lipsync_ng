@@ -1,13 +1,47 @@
 ## https://devtalk.blender.org/t/batch-registering-multiple-classes-in-blender-2-8/3253/8
 
+import contextlib
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Generator, Iterator, Type, get_type_hints
 import importlib
 import inspect
 import pkgutil
+
 import bpy
 from types import ModuleType
+
+
+def reraise_with_msg(e: Exception, extra_msg: str) -> None:
+
+    __tracebackhide__ = True
+
+    class WrappedException(type(e)):
+
+        def __init__(self, msg) -> None:
+            Exception.__init__(self, msg)
+
+        def __getattr__(self, name: str):
+            return getattr(e, name)
+
+        __repr__ = BaseException.__repr__
+        __str__ = BaseException.__str__
+
+    WrappedException.__name__ = type(e).__name__
+    WrappedException.__qualname__ = type(e).__qualname__
+    WrappedException.__module__ = type(e).__module__
+    wrapped_exception = WrappedException(f"{extra_msg}/{e}")
+
+    raise wrapped_exception.with_traceback(e.__traceback__) from e.__cause__
+
+
+@contextlib.contextmanager
+def wrap_stacktrace_msg(extra_msg: str) -> Iterator[None]:
+    __tracebackhide__ = True
+    try:
+        yield
+    except Exception as e:  # pylint: disable=broad-except
+        reraise_with_msg(e, extra_msg)
 
 
 @dataclass
@@ -22,13 +56,15 @@ class AutoLoader:
 
     def register(self) -> None:
         for cls in self.ordered_classes:
-            bpy.utils.register_class(cls)
+            with wrap_stacktrace_msg(cls.__name__):
+                bpy.utils.register_class(cls)
 
         for module in self.modules:
             if module.__name__ == __name__:
                 continue
             if hasattr(module, "register"):
-                module.register()
+                with wrap_stacktrace_msg(module.__name__):
+                    module.register()
 
     def unregister(self) -> None:
         for cls in reversed(self.ordered_classes):
@@ -46,7 +82,8 @@ class AutoLoader:
 
     def iter_submodules(self, path: Path, package_name: str) -> Iterator[ModuleType]:
         for name in sorted(self.iter_submodule_names(path)):
-            yield importlib.import_module("." + name, package_name)
+            with wrap_stacktrace_msg(name):
+                yield importlib.import_module("." + name, package_name)
 
     def iter_submodule_names(self, path: Path, root="") -> Iterator[str]:
         for _, module_name, is_package in pkgutil.iter_modules([str(path)]):
@@ -55,13 +92,16 @@ class AutoLoader:
                 sub_root = root + module_name + "."
                 yield from self.iter_submodule_names(sub_path, sub_root)
             else:
-                yield root + module_name
+                mn = root + module_name
+                with wrap_stacktrace_msg(mn):
+                    yield mn
 
     def get_register_deps_dict(self) -> dict[Type, set[Type]]:
         my_classes = set(self.iter_my_classes())
         deps_dict = {}
         for cls in my_classes:
-            deps_dict[cls] = set(self.iter_my_register_deps(cls, my_classes))
+            with wrap_stacktrace_msg(cls.__name__):
+                deps_dict[cls] = set(self.iter_my_register_deps(cls, my_classes))
         return deps_dict
 
     def iter_my_register_deps(self, cls: Type, my_classes: set[Type]) -> Generator[Type, None, None]:
@@ -147,3 +187,12 @@ class AutoLoader:
                     unsorted.append(value)
             deps_dict = {value: deps_dict[value] - sorted_values for value in unsorted}
         return self.ordered_classes
+
+
+if __name__ == '__main__':
+
+    with wrap_stacktrace_msg('Root'):
+        with wrap_stacktrace_msg('First1'):
+            pass
+        with wrap_stacktrace_msg('First2'):
+            raise Exception("Original message.")
