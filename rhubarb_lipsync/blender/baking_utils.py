@@ -8,15 +8,14 @@ from typing import Iterator, List, Optional, Tuple
 import bpy
 from bpy.types import Context, NlaStrip, NlaTrack, Object
 
-import rhubarb_lipsync.blender.mapping_utils as mapping_utils
-import rhubarb_lipsync.blender.ui_utils as ui_utils
-from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, MouthCueList, MouthCueListItem, ResultLogListProperties
-from rhubarb_lipsync.blender.mapping_properties import MappingItem, MappingProperties, NlaTrackRef
-from rhubarb_lipsync.blender.preferences import CueListPreferences, MappingPreferences, RhubarbAddonPreferences
-from rhubarb_lipsync.blender.strip_placement_preferences import StripPlacementPreferences
-from rhubarb_lipsync.rhubarb.cue_processor import CueProcessor
-from rhubarb_lipsync.rhubarb.mouth_cues import FrameConfig, MouthCueFrames, duration_scale_rate, frame2time, time2frame_float
-from rhubarb_lipsync.rhubarb.mouth_shape_info import MouthShapeInfos
+from ..rhubarb.cue_processor import CueProcessor
+from ..rhubarb.mouth_cues import FrameConfig, MouthCueFrames, duration_scale_rate, frame2time, time2frame_float
+from ..rhubarb.mouth_shape_info import MouthShapeInfos
+from . import mapping_utils, ui_utils
+from .capture_properties import CaptureListProperties, CaptureProperties, MouthCueList, MouthCueListItem, ResultLogListProperties
+from .mapping_properties import MappingItem, MappingProperties, NlaTrackRef
+from .preferences import CueListPreferences, MappingPreferences, RhubarbAddonPreferences
+from .strip_placement_preferences import StripPlacementPreferences
 
 log = logging.getLogger(__name__)
 

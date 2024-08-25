@@ -1,9 +1,9 @@
 from bpy.types import Context, UI_UL_list, UILayout, UIList
 
-from . import mapping_operators
-from . import mapping_utils
+from . import mapping_operators, mapping_utils
 from .mapping_properties import MappingItem, MappingProperties
 from .preferences import CueListPreferences, MappingPreferences, RhubarbAddonPreferences
+
 
 def draw_mapping_item(ctx: Context, layout: UILayout, mp: MappingProperties, itemIndex: int) -> None:
     prefs = RhubarbAddonPreferences.from_context(ctx)

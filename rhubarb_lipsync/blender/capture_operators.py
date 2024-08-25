@@ -4,9 +4,9 @@ import bpy
 from bpy.props import StringProperty
 from bpy.types import Context
 
-import rhubarb_lipsync.blender.ui_utils as ui_utils
-from .capture_properties import CaptureListProperties, MouthCueList
 from ..rhubarb.rhubarb_command import RhubarbParser
+from . import ui_utils
+from .capture_properties import CaptureListProperties, MouthCueList
 
 log = logging.getLogger(__name__)
 

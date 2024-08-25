@@ -1,17 +1,16 @@
 import logging
+from itertools import islice
 from typing import Iterator, Optional
 
 import bpy
 from bpy.props import EnumProperty, FloatProperty, IntProperty, StringProperty
 from bpy.types import Context, Object
 
-import rhubarb_lipsync.blender.mapping_utils as mapping_utils
-import rhubarb_lipsync.blender.ui_utils as ui_utils
-from rhubarb_lipsync.blender.mapping_properties import MappingItem, MappingProperties, NlaTrackRef
-from rhubarb_lipsync.blender.preferences import MappingPreferences, RhubarbAddonPreferences
-from rhubarb_lipsync.blender.ui_utils import IconsManager
-from rhubarb_lipsync.rhubarb.mouth_shape_info import MouthShapeInfo, MouthShapeInfos
-from itertools import islice
+from ..rhubarb.mouth_shape_info import MouthShapeInfo, MouthShapeInfos
+from . import mapping_utils, ui_utils
+from .mapping_properties import MappingItem, MappingProperties, NlaTrackRef
+from .preferences import MappingPreferences, RhubarbAddonPreferences
+from .ui_utils import IconsManager
 
 log = logging.getLogger(__name__)
 

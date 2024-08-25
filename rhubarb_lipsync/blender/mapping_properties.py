@@ -7,9 +7,9 @@ import bpy.utils.previews
 from bpy.props import BoolProperty, CollectionProperty, FloatProperty, IntProperty, PointerProperty, StringProperty
 from bpy.types import Context, NlaTrack, PropertyGroup
 
+from ..rhubarb.mouth_shape_info import MouthShapeInfo, MouthShapeInfos
 from . import mapping_utils
 from .ui_utils import DropdownHelper
-from ..rhubarb.mouth_shape_info import MouthShapeInfo, MouthShapeInfos
 
 log = logging.getLogger(__name__)
 

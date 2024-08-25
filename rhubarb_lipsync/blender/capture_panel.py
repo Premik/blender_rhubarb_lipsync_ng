@@ -4,15 +4,12 @@ import pathlib
 import bpy
 from bpy.types import Context, Sound
 
-import rhubarb_lipsync.blender.capture_operators as capture_operators
-import rhubarb_lipsync.blender.rhubarb_operators as rhubarb_operators
-import rhubarb_lipsync.blender.sound_operators as sound_operators
-import rhubarb_lipsync.blender.ui_utils as ui_utils
-import rhubarb_lipsync.rhubarb.mouth_cues as shape_data
-from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, JobProperties, MouthCueList, MouthCueListItem
-from rhubarb_lipsync.blender.cue_uilist import MouthCueUIList
-from rhubarb_lipsync.blender.preferences import CueListPreferences, RhubarbAddonPreferences
-from rhubarb_lipsync.blender.ui_utils import IconsManager
+from ..rhubarb import mouth_cues
+from . import capture_operators, rhubarb_operators, sound_operators, ui_utils
+from .capture_properties import CaptureListProperties, JobProperties, MouthCueList, MouthCueListItem
+from .cue_uilist import MouthCueUIList
+from .preferences import CueListPreferences, RhubarbAddonPreferences
+from .ui_utils import IconsManager
 
 log = logging.getLogger(__name__)
 
@@ -232,7 +229,7 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
             # self.ctx.area.tag_redraw()  # Force redraw
             ui_utils.redraw_3dviews(self.ctx)
             f = self.ctx.scene.frame_current_final
-            t = shape_data.frame2time(f, self.ctx.scene.render.fps, self.ctx.scene.render.fps_base)
+            t = mouth_cues.frame2time(f, self.ctx.scene.render.fps, self.ctx.scene.render.fps_base)
             cue = cue_list.find_cue_by_time(t)
             if cue:  # Time resolved to a cue, show its icon
                 return IconsManager.cue_icon(cue.key)

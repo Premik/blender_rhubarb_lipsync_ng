@@ -1,15 +1,14 @@
 ## https://devtalk.blender.org/t/batch-registering-multiple-classes-in-blender-2-8/3253/8
 
-import contextlib
-from dataclasses import dataclass, field
-from pathlib import Path
-from typing import Any, Generator, Iterable, Iterator, Type, get_type_hints
 import importlib
 import inspect
 import pkgutil
+from dataclasses import dataclass, field
+from pathlib import Path
+from types import ModuleType
+from typing import Any, Generator, Iterable, Iterator, Type, get_type_hints
 
 import bpy
-from types import ModuleType
 
 
 @dataclass
@@ -49,11 +48,11 @@ class AutoLoader:
         pairs = [f"{self.trace[i]}={self.trace[i + 1]}" for i in range(0, len(self.trace), 2)]
         return "/".join(pairs)
 
-    def print_str(self) -> str:
-        print('-'*80)
-        print(f"- {self.trace_str()}")
-        print('-' * 80)
-
+    def trace_print_str(self) -> str:
+        if self.trace:
+            print('-' * 80)
+            print(f"- {self.trace_str()}")
+            print('-' * 80)
 
     def find_classes(self) -> None:
         self.collect_all_submodules()

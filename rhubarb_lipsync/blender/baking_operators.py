@@ -5,13 +5,12 @@ import bpy
 from bpy.props import BoolProperty, EnumProperty
 from bpy.types import Context, Object, UILayout
 
-from . import baking_utils
-from . import ui_utils
+from ..rhubarb.mouth_cues import MouthCue, frame2time, time2frame_float
+from . import baking_utils, ui_utils
 from .capture_properties import CaptureListProperties, CaptureProperties, ResultLogListProperties
 from .mapping_properties import MappingProperties
 from .preferences import CueListPreferences, RhubarbAddonPreferences, StripPlacementPreferences
 from .ui_utils import IconsManager
-from ..rhubarb.mouth_cues import MouthCue, frame2time, time2frame_float
 
 log = logging.getLogger(__name__)
 

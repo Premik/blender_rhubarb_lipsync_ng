@@ -7,9 +7,10 @@ from bpy.props import BoolProperty, EnumProperty, IntProperty, StringProperty
 from bpy.types import Context, Sound, SoundSequence
 
 import aud
-import rhubarb_lipsync.blender.ui_utils as ui_utils
-from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties
-from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences
+
+from . import ui_utils
+from .capture_properties import CaptureListProperties, CaptureProperties
+from .preferences import RhubarbAddonPreferences
 
 log = logging.getLogger(__name__)
 

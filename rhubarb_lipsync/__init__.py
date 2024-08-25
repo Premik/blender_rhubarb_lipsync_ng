@@ -4,7 +4,6 @@ from typing import Optional
 import bpy
 from bpy.props import PointerProperty
 
-
 from .blender.auto_load import AutoLoader
 from .blender.capture_properties import CaptureListProperties
 from .blender.mapping_properties import MappingProperties
@@ -62,7 +61,7 @@ def register() -> None:
         autoloader.find_classes()
         autoloader.register()
     finally:
-        autoloader.print_str()
+        autoloader.trace_print_str()
 
     bpy.types.Scene.rhubarb_lipsync_captures = PointerProperty(type=CaptureListProperties)
     bpy.types.Object.rhubarb_lipsync_mapping = PointerProperty(

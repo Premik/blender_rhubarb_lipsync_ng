@@ -6,9 +6,9 @@ from typing import Iterator, Optional, cast
 from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty, PointerProperty, StringProperty
 from bpy.types import AddonPreferences, Context, Object, PropertyGroup, UILayout
 
+from ..rhubarb.rhubarb_command import RhubarbCommandWrapper
 from . import ui_utils
 from .strip_placement_preferences import StripPlacementPreferences
-from ..rhubarb.rhubarb_command import RhubarbCommandWrapper
 
 
 def default_executable_path() -> pathlib.Path:

@@ -9,16 +9,17 @@ import bpy
 from bpy.props import EnumProperty, IntProperty, StringProperty
 from bpy.types import Context
 
-import rhubarb_lipsync.blender.ui_utils as ui_utils
-from rhubarb_lipsync import bl_info
-from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, ResultLogItemProperties, ResultLogListProperties
-from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences
-from rhubarb_lipsync.rhubarb.log_manager import logManager
+from ..rhubarb.log_manager import logManager
+from . import ui_utils
+from .capture_properties import CaptureListProperties, ResultLogItemProperties, ResultLogListProperties
+from .preferences import RhubarbAddonPreferences
 
 log = logging.getLogger(__name__)
 
 
 def current_version() -> tuple[int, int, int]:
+    from .. import bl_info
+
     return bl_info['version']  # type: ignore
 
 

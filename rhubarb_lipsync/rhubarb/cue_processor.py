@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Callable, Iterable, Optional
 
-from rhubarb_lipsync.rhubarb.mouth_cues import FrameConfig, MouthCueFrames, frame2time, log, time2frame_float
+from .mouth_cues import FrameConfig, MouthCueFrames, frame2time, log, time2frame_float
 
 
 @dataclass

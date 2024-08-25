@@ -6,10 +6,10 @@ from typing import Any
 import bpy
 from bpy.types import Context, Sound
 
-import rhubarb_lipsync.blender.ui_utils as ui_utils
-from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, CaptureProperties, JobProperties, MouthCueList
-from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences
-from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandAsyncJob
+from ..rhubarb.rhubarb_command import RhubarbCommandAsyncJob
+from . import ui_utils
+from .capture_properties import CaptureListProperties, CaptureProperties, JobProperties, MouthCueList
+from .preferences import RhubarbAddonPreferences
 
 log = logging.getLogger(__name__)
 

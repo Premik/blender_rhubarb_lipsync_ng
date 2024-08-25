@@ -3,16 +3,12 @@ import logging
 import bpy
 from bpy.types import Context
 
-import rhubarb_lipsync.blender.baking_operators as baking_operators
-import rhubarb_lipsync.blender.mapping_operators as mapping_operators
-import rhubarb_lipsync.blender.mapping_uilist as mapping_list
-import rhubarb_lipsync.blender.mapping_utils as mapping_utils
-import rhubarb_lipsync.blender.ui_utils as ui_utils
-from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, ResultLogListProperties
-from rhubarb_lipsync.blender.mapping_properties import MappingProperties, NlaTrackRef
-from rhubarb_lipsync.blender.misc_operators import ShowResultLogDetails
-from rhubarb_lipsync.blender.preferences import CueListPreferences, MappingPreferences, RhubarbAddonPreferences, StripPlacementPreferences
-from rhubarb_lipsync.rhubarb.mouth_shape_info import MouthShapeInfos
+from ..rhubarb.mouth_shape_info import MouthShapeInfos
+from . import baking_operators, mapping_operators, mapping_uilist, mapping_utils, ui_utils
+from .capture_properties import CaptureListProperties, ResultLogListProperties
+from .mapping_properties import MappingProperties, NlaTrackRef
+from .misc_operators import ShowResultLogDetails
+from .preferences import CueListPreferences, MappingPreferences, RhubarbAddonPreferences, StripPlacementPreferences
 
 log = logging.getLogger(__name__)
 
@@ -86,7 +82,7 @@ class MappingAndBakingPanel(bpy.types.Panel):
         layout = self.layout
 
         layout.row(align=True)
-        layout.template_list(mapping_list.MappingUIList.bl_idname, "Mapping", mprops, "items", mprops, "index")
+        layout.template_list(mapping_uilist.MappingUIList.bl_idname, "Mapping", mprops, "items", mprops, "index")
         # i=mprops.index
         # mapping_list.draw_mapping_item_multiline(self.ctx, layout, mprops, i)
         return True
