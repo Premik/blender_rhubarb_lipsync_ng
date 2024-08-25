@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from functools import cached_property
 from typing import Any, Callable, TypeVar
 
-from rhubarb_lipsync.rhubarb.mouth_shape_info import MouthShapeInfo, MouthShapeInfos
+from .mouth_shape_info import MouthShapeInfo, MouthShapeInfos
 
 log = logging.getLogger(__name__)
 

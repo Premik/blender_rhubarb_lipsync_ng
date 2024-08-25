@@ -5,8 +5,8 @@ from bpy.props import StringProperty
 from bpy.types import Context
 
 import rhubarb_lipsync.blender.ui_utils as ui_utils
-from rhubarb_lipsync.blender.capture_properties import CaptureListProperties, MouthCueList
-from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbParser
+from .capture_properties import CaptureListProperties, MouthCueList
+from ..rhubarb.rhubarb_command import RhubarbParser
 
 log = logging.getLogger(__name__)
 

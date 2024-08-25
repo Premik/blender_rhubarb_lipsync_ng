@@ -4,17 +4,24 @@ from typing import Optional
 import bpy
 from bpy.props import PointerProperty
 
-from rhubarb_lipsync.blender.auto_load import AutoLoader
-from rhubarb_lipsync.blender.capture_properties import CaptureListProperties
-from rhubarb_lipsync.blender.mapping_properties import MappingProperties
-from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences
-from rhubarb_lipsync.blender.ui_utils import IconsManager
-from rhubarb_lipsync.rhubarb.log_manager import logManager
+# import rhubarb_lipsync.blender.auto_load
+# from rhubarb_lipsync.blender.capture_properties import CaptureListProperties
+# from rhubarb_lipsync.blender.mapping_properties import MappingProperties
+# from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences
+# from rhubarb_lipsync.blender.ui_utils import IconsManager
+# from rhubarb_lipsync.rhubarb.log_manager import logManager
+
+from .blender import auto_load
+from .blender.capture_properties import CaptureListProperties
+from .blender.mapping_properties import MappingProperties
+from .blender.preferences import RhubarbAddonPreferences
+from .blender.ui_utils import IconsManager
+from .rhubarb.log_manager import logManager
 
 bl_info = {
     'name': 'Rhubarb Lipsync NG',
     'author': 'Premysl Srubar. Inspired by the original version by Andrew Charlton. Includes Rhubarb Lip Sync by Daniel S. Wolf',
-    'version': (1, 4, 2),
+    'version': (1, 5, 0),
     'blender': (4, 0, 2),
     'location': '3d View > Sidebar',
     'description': 'Integrate Rhubarb Lipsync into Blender',

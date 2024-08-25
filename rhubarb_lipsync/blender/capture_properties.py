@@ -11,9 +11,9 @@ import bpy.utils.previews
 from bpy.props import BoolProperty, CollectionProperty, EnumProperty, FloatProperty, IntProperty, PointerProperty, StringProperty
 from bpy.types import Context, PropertyGroup, Sound
 
-from rhubarb_lipsync.blender.ui_utils import DropdownHelper
-from rhubarb_lipsync.rhubarb.mouth_cues import FrameConfig, MouthCue, MouthCueFrames
-from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbCommandAsyncJob
+from .ui_utils import DropdownHelper
+from ..rhubarb.mouth_cues import FrameConfig, MouthCue, MouthCueFrames
+from ..rhubarb.rhubarb_command import RhubarbCommandAsyncJob
 
 log = logging.getLogger(__name__)
 

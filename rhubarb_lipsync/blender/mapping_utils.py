@@ -5,7 +5,7 @@ from typing import Iterator
 import bpy
 from bpy.types import Object
 
-import rhubarb_lipsync.blender.mapping_properties as mapping_properties
+from . import mapping_properties
 
 log = logging.getLogger(__name__)
 

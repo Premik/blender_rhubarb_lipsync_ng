@@ -13,7 +13,7 @@ from threading import Event, Thread
 from time import sleep
 from typing import Any, Dict, List, Optional
 
-from rhubarb_lipsync.rhubarb.mouth_cues import MouthCue
+from .mouth_cues import MouthCue
 
 log = logging.getLogger(__name__)
 
