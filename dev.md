@@ -163,7 +163,11 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 ## Todo
 
 ### High
-* Troubleshooting guide
+* Migrate to new extension api
+ - Images/Icons not loaded (location changed)
+ - defaul executable path is incorrect (location changed)
+ - Pref. are blank after startup. Enable/disable addon brings them up but they are not persisted.
+
 * Mapping wizards
   * Clear - will remove the mapping (delete from the object completly?)
   * Face-it - From Test rig - Normal actions+shape-key corrections? 2) From shape-key test action 3) The final control rig (doesn't need a wizard)
@@ -171,14 +175,16 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 
 
 ### Normal
+* In prefs, when executable doesn't exist make the control red
 * Add warning (in the baking validation popup?) when any selected object has an active Action (seems to be confusing for NLA newbies when the rig doesn't animate after bake because of that)
 * Integrate with: https://mecabricks.com/en/shop/product/6
-* Create aur package
 * Add "auto-remove" checkbox on the Bake confirmation dialog (so one doesn'thave to press "remove cues")
-* When tracks are alraedy selected and new NLA track is added sometimes this disturbs the track selection and wrong tracks get used.
+* When tracks are already selected and new NLA track is added sometimes this disturbs the track selection and wrong tracks get used.
 * Make a Capture operation dialog (now only confirmation), put the dialog-file, recognizer and start frame there?
+* Bring some of the old baking method back with fixed lengths
 
 ### Low
+* Create aur package
 * Add [speaker](https://docs.blender.org/manual/en/latest/render/output/audio/speaker.html) as an alternative to Sequencer audio clip
 * The scaled down icons (32x32) still hard to see. Pre-scale different set icons?
 * Verify the Dialog file is working
@@ -186,6 +192,7 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 * Add some simple blender sample file
 * There are still some ogg unsupported format - could have been an user error (ogg file was not really an ogg?)
 * Workflow from Sequencer - Paste sound_strip first, create captures of them and render to NLA,
+* Integrate with Parrot lipsync backend (when already installed)
 * When dialog file is specified but file doesn;t exists rhubar_cli ends with `error-code` but not much clue. Add check for dialog file.
 
 ## Check
