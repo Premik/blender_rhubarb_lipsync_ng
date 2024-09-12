@@ -181,13 +181,13 @@ class RhubarbAddonPreferences(AddonPreferences):
 
     def capture_tab_name_updated(self, ctx: Context):
         # To workaround circular dependency
-        from rhubarb_lipsync.blender.capture_panel import CaptureMouthCuesPanel
+        from .capture_panel import CaptureMouthCuesPanel
 
         ui_utils.set_panel_category(CaptureMouthCuesPanel, self.capture_tab_name)
 
     def map_tab_name_updated(self, ctx: Context):
         # To workaround circular dependency
-        from rhubarb_lipsync.blender.map_and_bake_panel import MappingAndBakingPanel
+        from .map_and_bake_panel import MappingAndBakingPanel
 
         ui_utils.set_panel_category(MappingAndBakingPanel, self.capture_tab_name)
 
@@ -209,7 +209,7 @@ class RhubarbAddonPreferences(AddonPreferences):
 
     def log_file_updated(self, ctx: Context):
         try:
-            from rhubarb_lipsync.rhubarb.log_manager import logManager
+            from ..rhubarb.log_manager import logManager
 
             logManager.disable_log_file()
             if self.log_file:  # Enable
@@ -251,7 +251,7 @@ class RhubarbAddonPreferences(AddonPreferences):
         # split = layout.row(heading="Label")
 
         # Hack to circumvent circular imports
-        import rhubarb_lipsync.blender.misc_operators as misc_operators
+        from . import misc_operators
 
         row.label(text="Check for updates:")
         if misc_operators.CheckForUpdates.has_checked():
@@ -264,7 +264,7 @@ class RhubarbAddonPreferences(AddonPreferences):
         # split = layout.row(heading="Label")
         row.label(text="Rhubarb executable version:")
         # Hack to circumvent circular imports
-        import rhubarb_lipsync.blender.rhubarb_operators as rhubarb_operators
+        from . import rhubarb_operators
 
         ver = rhubarb_operators.GetRhubarbExecutableVersion.get_cached_value(context)
 
@@ -286,8 +286,8 @@ class RhubarbAddonPreferences(AddonPreferences):
         layout.prop(self, 'default_converted_output_folder')
         layout.prop(self, 'always_show_conver')
 
-        from rhubarb_lipsync.blender.misc_operators import SetLogLevel
-        from rhubarb_lipsync.rhubarb.log_manager import logManager
+        from .misc_operators import SetLogLevel
+        from ..rhubarb.log_manager import logManager
 
         layout.separator()
         layout.prop(self, "capture_tab_name")

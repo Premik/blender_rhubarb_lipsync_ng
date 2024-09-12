@@ -13,3 +13,4 @@ download/
 settings.json
 .blenderFresh
 *junit*.xml
+dist

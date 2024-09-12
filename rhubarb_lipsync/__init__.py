@@ -11,7 +11,7 @@ from .blender.preferences import RhubarbAddonPreferences
 from .blender.ui_utils import IconsManager
 from .rhubarb.log_manager import logManager
 
-bl_info = {
+legacy_info = {
     'name': 'Rhubarb Lipsync NG',
     'author': 'Premysl Srubar. Inspired by the original version by Andrew Charlton. Includes Rhubarb Lip Sync by Daniel S. Wolf',
     'version': (1, 5, 0),
@@ -24,11 +24,15 @@ bl_info = {
     'category': 'Animation',
 }
 
+# bl_info gets deleted by Blender when installed a new extension
+bl_info = legacy_info
+
+
 autoloader: Optional[AutoLoader]
 
 
 def is_blender_in_debug() -> bool:
-    '''Whether Blender was started with --debug or --debug-python flags'''
+    """Whether Blender was started with --debug or --debug-python flags"""
     return bpy.app.debug or bpy.app.debug_python
 
 
@@ -90,17 +94,5 @@ def unregister() -> None:
     del bpy.types.Scene.rhubarb_lipsync_captures
     del bpy.types.Object.rhubarb_lipsync_mapping
 
-
-# bpy.utils.register_classes_factory
-
-# from rhubarb_lipsync.blender.testing_panel import ExamplePanel, TestOpOperator
-# from rhubarb_lipsync.blender.capture_properties import LipsyncProperties
-
-# register2, unregister = bpy.utils.register_classes_factory([LipsyncProperties, ExamplePanel, TestOpOperator])
-
-# from bpy.props import FloatProperty, StringProperty, BoolProperty, PointerProperty
-# def register():
-#    register2()
-#    bpy.types.Object.rhubarb_lipsync=PointerProperty(type=LipsyncProperties)
 
 print("RLSP: exit __init__")
