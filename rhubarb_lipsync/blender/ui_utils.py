@@ -180,5 +180,3 @@ def len_limited(iterator: Iterator, max_count=1000) -> int:
         if count >= max_count:
             break
     return count
-
-

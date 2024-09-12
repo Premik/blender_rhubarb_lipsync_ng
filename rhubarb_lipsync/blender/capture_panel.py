@@ -4,12 +4,12 @@ import pathlib
 import bpy
 from bpy.types import Context, Sound
 
+from .. import IconsManager
 from ..rhubarb import mouth_cues
 from . import capture_operators, rhubarb_operators, sound_operators, ui_utils
 from .capture_properties import CaptureListProperties, JobProperties, MouthCueList, MouthCueListItem
 from .cue_uilist import MouthCueUIList
 from .preferences import CueListPreferences, RhubarbAddonPreferences
-from .. import IconsManager
 
 log = logging.getLogger(__name__)
 

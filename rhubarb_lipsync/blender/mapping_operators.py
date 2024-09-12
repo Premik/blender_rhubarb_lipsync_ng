@@ -6,11 +6,11 @@ import bpy
 from bpy.props import EnumProperty, FloatProperty, IntProperty, StringProperty
 from bpy.types import Context, Object
 
+from .. import IconsManager
 from ..rhubarb.mouth_shape_info import MouthShapeInfo, MouthShapeInfos
 from . import mapping_utils, ui_utils
 from .mapping_properties import MappingItem, MappingProperties, NlaTrackRef
 from .preferences import MappingPreferences, RhubarbAddonPreferences
-from .. import IconsManager
 
 log = logging.getLogger(__name__)
 

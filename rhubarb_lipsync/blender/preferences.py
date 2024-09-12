@@ -286,8 +286,8 @@ class RhubarbAddonPreferences(AddonPreferences):
         layout.prop(self, 'default_converted_output_folder')
         layout.prop(self, 'always_show_conver')
 
-        from .misc_operators import SetLogLevel
         from ..rhubarb.log_manager import logManager
+        from .misc_operators import SetLogLevel
 
         layout.separator()
         layout.prop(self, "capture_tab_name")

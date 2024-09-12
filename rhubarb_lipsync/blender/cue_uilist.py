@@ -1,9 +1,9 @@
 from bpy.types import Context, UI_UL_list, UILayout, UIList
 
+from .. import IconsManager
 from .capture_properties import MouthCueList, MouthCueListItem
 from .misc_operators import PlayRange
 from .preferences import CueListPreferences, RhubarbAddonPreferences
-from .. import IconsManager
 
 
 class MouthCueUIList(UIList):

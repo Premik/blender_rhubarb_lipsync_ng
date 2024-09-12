@@ -4,7 +4,6 @@ import sample_project
 from rhubarb_lipsync import IconsManager
 from rhubarb_lipsync.blender.dropdown_helper import DropdownHelper
 
-
 # def setUpModule():
 #    rhubarb_lipsync.register()  # Simulate blender register call
 

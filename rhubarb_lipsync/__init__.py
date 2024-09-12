@@ -6,9 +6,9 @@ from bpy.props import PointerProperty
 
 from .blender.auto_load import AutoLoader
 from .blender.capture_properties import CaptureListProperties
+from .blender.icons_manager import IconsManager
 from .blender.mapping_properties import MappingProperties
 from .blender.preferences import RhubarbAddonPreferences
-from .blender.icons_manager import IconsManager
 from .rhubarb.log_manager import logManager
 
 legacy_info = {
