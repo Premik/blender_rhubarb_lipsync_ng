@@ -14,7 +14,7 @@ class IconsManagerTest(unittest.TestCase):
 
     @unittest.skip("Seems not working for bpy as module")
     def testGetIcon(self) -> None:
-        assert IconsManager.logo_icon(), f"Icon id is zero. Icons loading is probably broken."
+        assert IconsManager.logo_icon(), "Icon id is zero. Icons loading is probably broken."
 
 
 class MockDropdown:

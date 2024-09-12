@@ -1,5 +1,6 @@
 import re
 import shutil
+import sys
 from functools import cached_property
 from pathlib import Path
 
@@ -99,12 +100,14 @@ class PackagePlugin:
 
 
 if __name__ == '__main__':
+    platform_name = sys.argv[1] if len(sys.argv) > 1 else ""
     pp = PackagePlugin(project_cfg)
     pp.update_version_files()
     pp.clean_temp_files()
     current = RhubarbBinary.currently_deployed_platform(rhubarb_cfg)  # Keep the current platform bin
-    for b in RhubarbBinary.all_platforms(rhubarb_cfg):
-        b.deploy_to_bin()  # Deploy the correct platfrom before zipping
-        pp.zip_dist(b.platform_name)
+    for b in RhubarbBinary.platforms_by_name(platform_name, rhubarb_cfg):
+        if not b.is_deployed_to_bin():
+            b.deploy_to_bin()  # Deploy the correct platfrom before zipping
+            pp.zip_dist(b.platform_name)
     if current:  # Recover the previously deployed platform, if any
         current.deploy_to_bin()

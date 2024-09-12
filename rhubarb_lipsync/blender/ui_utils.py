@@ -115,7 +115,7 @@ def draw_expandable_header(props: Any, property_name: str, label: str, layout: U
     """Draws a checkbox which looks like collapsable sub-panel's header.
     Expanded/collapsed state is driven by the provided property.
     Returns the expanded status. Inspired by GameRigtTool plugin"""
-    assert props and property_name
+    assert props and property_name, f"Blank '{property_name}' or '{props}'"
     row = layout.row(align=True)
     row.alignment = "LEFT"
 

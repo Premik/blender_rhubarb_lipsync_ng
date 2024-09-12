@@ -55,6 +55,11 @@ class RhubarbBinary:
                 return b
         return None
 
+    @staticmethod
+    def platforms_by_name(name: str, cfg: dict) -> list['RhubarbBinary']:
+        """All platforms matching a substring in the platform's name"""
+        return [b for b in RhubarbBinary.all_platforms(cfg) if name.lower() in b.platform_name.lower()]
+
     @property
     def base_url(self) -> str:
         return self.cfg["download"]["base_url"]

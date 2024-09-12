@@ -56,6 +56,7 @@ def register() -> None:
 
     if is_blender_in_debug():
         print("RLPS: enter register() ")
+    RhubarbAddonPreferences.bl_idname = __package__
     autoloader = AutoLoader(root_init_file=__file__, root_package_name=__package__)
     try:
         autoloader.find_classes()
