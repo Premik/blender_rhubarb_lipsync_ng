@@ -10,7 +10,7 @@ from ..rhubarb.mouth_shape_info import MouthShapeInfo, MouthShapeInfos
 from . import mapping_utils, ui_utils
 from .mapping_properties import MappingItem, MappingProperties, NlaTrackRef
 from .preferences import MappingPreferences, RhubarbAddonPreferences
-from .ui_utils import IconsManager
+from .. import IconsManager
 
 log = logging.getLogger(__name__)
 

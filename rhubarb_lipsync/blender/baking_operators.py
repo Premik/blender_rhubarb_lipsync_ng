@@ -10,7 +10,7 @@ from . import baking_utils, ui_utils
 from .capture_properties import CaptureListProperties, CaptureProperties, ResultLogListProperties
 from .mapping_properties import MappingProperties
 from .preferences import CueListPreferences, RhubarbAddonPreferences, StripPlacementPreferences
-from .ui_utils import IconsManager
+from .. import IconsManager
 
 log = logging.getLogger(__name__)
 

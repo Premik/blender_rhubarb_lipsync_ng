@@ -9,7 +9,7 @@ from . import capture_operators, rhubarb_operators, sound_operators, ui_utils
 from .capture_properties import CaptureListProperties, JobProperties, MouthCueList, MouthCueListItem
 from .cue_uilist import MouthCueUIList
 from .preferences import CueListPreferences, RhubarbAddonPreferences
-from .ui_utils import IconsManager
+from .. import IconsManager
 
 log = logging.getLogger(__name__)
 
