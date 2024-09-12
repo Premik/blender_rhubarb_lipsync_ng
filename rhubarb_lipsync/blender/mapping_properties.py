@@ -9,7 +9,7 @@ from bpy.types import Context, NlaTrack, PropertyGroup
 
 from ..rhubarb.mouth_shape_info import MouthShapeInfo, MouthShapeInfos
 from . import mapping_utils
-from .ui_utils import DropdownHelper
+from .dropdown_helper import DropdownHelper
 
 log = logging.getLogger(__name__)
 

@@ -13,7 +13,7 @@ from bpy.types import Context, PropertyGroup, Sound
 
 from ..rhubarb.mouth_cues import FrameConfig, MouthCue, MouthCueFrames
 from ..rhubarb.rhubarb_command import RhubarbCommandAsyncJob
-from .ui_utils import DropdownHelper
+from .dropdown_helper import DropdownHelper
 
 log = logging.getLogger(__name__)
 
