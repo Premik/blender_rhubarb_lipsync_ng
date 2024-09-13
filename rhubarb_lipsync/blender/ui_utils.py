@@ -9,16 +9,12 @@ from bpy.types import Area, Context, UILayout, Window
 
 log = logging.getLogger(__name__)
 
-
-def addons_path() -> pathlib.Path:
-    ap = bpy.utils.user_resource('SCRIPTS', path="addons")
-    if not ap:
-        return pathlib.Path()
-    return pathlib.Path(ap)
+def addon_path() -> pathlib.Path:
+    return pathlib.Path(__file__).parent.parent
 
 
 def resources_path() -> pathlib.Path:
-    return addons_path() / 'rhubarb_lipsync' / 'resources'
+    return addon_path() / 'resources'
 
 
 def find_areas_by_type(context: Context, area_type: str) -> Iterator[tuple[Window, Area]]:

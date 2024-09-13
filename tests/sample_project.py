@@ -23,7 +23,7 @@ from rhubarb_lipsync.blender.capture_properties import (
     ResultLogListProperties,
 )
 from rhubarb_lipsync.blender.mapping_properties import MappingItem, MappingProperties, NlaTrackRef
-from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences, local_executable_path
+from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences, default_executable_path
 from rhubarb_lipsync.rhubarb.log_manager import logManager
 
 
@@ -80,7 +80,7 @@ class SampleProject:
         assert props
         p1 = self.prefs.executable_path
         if not p1.exists():
-            p2 = local_executable_path()
+            p2 = default_executable_path()
             print(f"The {p1} doesn't exist. Changed to {p2} ")
             self.prefs.executable_path_string = str(p2)
 

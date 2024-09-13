@@ -4,7 +4,7 @@ import bpy
 import bpy.types
 import bpy.utils
 
-from rhubarb_lipsync.blender.ui_utils import resources_path
+from .ui_utils import resources_path
 
 
 class IconsManager:

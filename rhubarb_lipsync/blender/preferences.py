@@ -11,15 +11,9 @@ from . import ui_utils
 from .strip_placement_preferences import StripPlacementPreferences
 
 
-def default_executable_path() -> pathlib.Path:
-    """Path where the rhubarb executable is expected by default. When the addon is installed"""
-    exe = RhubarbCommandWrapper.executable_default_filename()
-    return ui_utils.addons_path() / 'rhubarb_lipsync' / 'bin' / exe
-
-
-def local_executable_path(verify=True) -> pathlib.Path:
+def default_executable_path(verify=True) -> pathlib.Path:
     """Rhubarb executable path relative to this source file. Should work even when the plugin is not installed."""
-    bin_path = pathlib.Path(__file__).parent.parent / "bin"
+    bin_path = ui_utils.addon_path() / "bin"
     exe = bin_path / RhubarbCommandWrapper.executable_default_filename()
     if verify:
         assert bin_path.exists(), f"{bin_path} doesn't exists"
