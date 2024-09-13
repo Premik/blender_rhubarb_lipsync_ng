@@ -13,6 +13,7 @@ version="1.13.0"
 [[tool.rhubarb_lipsync.platforms]]
 name="Linux"
 system_names=["Linux"] # To map from platform.system() values
+blender_name="linux-x64"
 download_sha256="bd260905e88d0bdadbd4d7b452cae3b78a880fe27d10d51586772f84aac69f71"
 executable_name="rhubarb"
 
@@ -20,6 +21,7 @@ executable_name="rhubarb"
 [[tool.rhubarb_lipsync.platforms]]
 name="macOS"
 system_names=["Darwin"] #TODO Verify
+blender_name="macos-x64"
 download_sha256="2d25c0ad89c0435d864a0f9ddb9d44757def8bf354b86be28eb3b5e7e9d78f62"
 executable_name="rhubarb"
 
@@ -27,6 +29,7 @@ executable_name="rhubarb"
 [[tool.rhubarb_lipsync.platforms]]
 name="Windows"
 system_names=["Windows"] #TODO Verify
+blender_name="windows-x64"
 download_sha256="189ac55dae253dba3994d4075b8375b615f255759c105c7ed21bd88ad7728386"
 executable_name="rhubarb.exe"
 

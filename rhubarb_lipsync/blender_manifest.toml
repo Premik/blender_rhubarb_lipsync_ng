@@ -12,5 +12,5 @@ tags = ["Animation"]
 blender_version_min = "4.2.0"
 license = ["SPDX:MIT"]
 
-[permissions]
+platforms = ["linux-x64"]
 files = "Import/export sound files and captures, execute rhubarb cli file"
