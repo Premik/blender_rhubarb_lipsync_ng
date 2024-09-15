@@ -187,7 +187,7 @@ class MappingProperties(PropertyGroup):
         type=MappingItem,
         name="Mapping items",
         options={'LIBRARY_EDITABLE'},
-        override={'LIBRARY_OVERRIDABLE', 'USE_INSERTION'},
+        override={'LIBRARY_OVERRIDABLE', 'USE_INSERTION', 'NO_PROPERTY_NAME'},
     )
     index: IntProperty(name="Selected mapping index")  # type: ignore
     # nla_track1: PointerProperty(type=bpy.types.NlaTrack, name="Tract 1")  # type: ignore

@@ -195,7 +195,9 @@ class MappingAndBakingPanel(bpy.types.Panel):
             if len(mprops.items) != len(MouthShapeInfos.all()):
                 layout.alert = True
                 layout.operator(mapping_operators.BuildCueInfoUIList.bl_idname)
-                return
+                layout.alert = False
+                if len(mprops.items) <= 0:
+                    return
 
             if self.draw_mapping_list():
                 self.draw_nla_setup()
