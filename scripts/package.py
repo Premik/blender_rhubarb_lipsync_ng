@@ -27,10 +27,13 @@ class PackagePlugin:
     bl_info_version_pattern = r'''['"]version["']\s*:\s*\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*\)'''
     bl_info_version_rx = re.compile(f"(.*)({bl_info_version_pattern})(.*)", re.DOTALL)
 
-    readme_version_pattern = r'-\d+\.\d+\.\d+\.zip'
-    readme_version_rx = re.compile(f"(.*)({readme_version_pattern})(.*)", re.DOTALL)
+    readme_version_zip_pattern = r'-\d+\.\d+\.\d+\.zip'
+    readme_version_zip_rx = re.compile(f"(.*)({readme_version_zip_pattern})(.*)", re.DOTALL)
 
-    blender_manifest_pattern = r'version\s*=\s*["]\d+\.\d+\.\d+["]'
+    readme_version_release_url_pattern = r'/v\d+\.\d+\.\d+/'
+    readme_version_release_url_rx = re.compile(f"(.*)({readme_version_release_url_pattern})(.*)", re.DOTALL)
+
+    blender_manifest_pattern = r'^\s*version\s*=\s*["]\d+\.\d+\.\d+["]'
     blender_manifest_rx = re.compile(f"(.*)({blender_manifest_pattern})(.*)", re.DOTALL)
 
     main_package_name = 'rhubarb_lipsync'
@@ -70,32 +73,50 @@ class PackagePlugin:
         return self.project_dir / "dist"
 
     def update_version_in_file(self, rx: re.Pattern[str], p: Path, new_ver: str) -> None:
-        print(f"Updating version string to '{new_ver}' in the {p}")
         assert p.exists(), f"The {p} doesn't exist"
+
+        replacement_count = 0
+        updated_lines = []
+
         with open(p, 'r', encoding='utf-8') as s:
-            text = s.read()
-        m = rx.match(text)
-        assert m is not None, f"Failed to find version string in the {p}. Pattern\n{rx}"
-        text = f"{m.groups()[0]}{new_ver}{m.groups()[2]}"
+            for line in s:
+                m = rx.match(line)
+                if m:
+                    line = f"{m.groups()[0]}{new_ver}{m.groups()[2]}"
+                    replacement_count += 1
+                updated_lines.append(line)
+
+        assert replacement_count > 0, f"Failed to update any lines in the {p}. Pattern\n{rx}"
 
         with open(p, 'w', encoding='utf-8') as s:
-            s.write(text)
+            s.writelines(updated_lines)
+
+        print(f"Updated {replacement_count} version string(s) to '{new_ver}' in the {p}")
 
     def update_version_files(self) -> None:
         self.update_version_in_file(PackagePlugin.bl_info_version_rx, self.main__init__path, f"'version': {self.version_tuple}")
-        self.update_version_in_file(PackagePlugin.readme_version_rx, self.readme_md_path, f"-{self.version_str}.zip")
+        self.update_version_in_file(PackagePlugin.readme_version_zip_rx, self.readme_md_path, f"-{self.version_str}.zip")
+        self.update_version_in_file(PackagePlugin.readme_version_release_url_rx, self.readme_md_path, f"/v{self.version_str}/")
         self.update_version_in_file(PackagePlugin.blender_manifest_rx, self.blender_manifest_path, f'version = "{self.version_str}"')
 
     def clean_temp_files(self) -> None:
         d = clean_temp_files_at(self.project_dir)
         print(f"Deleted {d} temp/cache files/dirs from the {self.project_dir}")
 
+    def dist_zip_path(self, platform: str) -> Path:
+        return self.dist_dir / dist_zip_name(platform, self.version_str)
+
+    def github_release_url(self, platform: str) -> str:
+        zip = self.dist_zip_path(platform).name
+        #  https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v1.5.0/rhubarb_lipsync_ng-Windows-1.5.0
+
+        return f"https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v{self.version_str}/{zip}"
+
     def zip_dist(self, platform: str) -> None:
         """Creates the zip for distribution. Assumes the correct binaries are already deployed in the bin_dir subfolder"""
-        zip = self.dist_dir / dist_zip_name(platform, self.version_str)
+        zip = self.dist_zip_path(platform)
         # https://stackoverflow.com/questions/1855095/how-to-create-a-zip-archive-of-a-directory#
         print(f"Creating {zip}.")
-
         shutil.make_archive(str(zip), 'zip', self.project_dir, PackagePlugin.main_package_name)
 
 
@@ -103,11 +124,13 @@ if __name__ == '__main__':
     platform_name = sys.argv[1] if len(sys.argv) > 1 else ""
     pp = PackagePlugin(project_cfg)
     pp.update_version_files()
+
     pp.clean_temp_files()
     current = RhubarbBinary.currently_deployed_platform(rhubarb_cfg)  # Keep the current platform bin
     for b in RhubarbBinary.platforms_by_name(platform_name, rhubarb_cfg):
         if not b.is_deployed_to_bin():
             b.deploy_to_bin()  # Deploy the correct platfrom before zipping
         pp.zip_dist(b.platform_name)
+
     if current:  # Recover the previously deployed platform, if any
         current.deploy_to_bin()

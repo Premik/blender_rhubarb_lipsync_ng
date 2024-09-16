@@ -11,10 +11,27 @@
 ### Combining Armature Actions with Shape Keys
 [![Combining Armature Actions with Shape Keys](doc/img/demo2Thumb.jpeg)](https://odysee.com/@OwlGear:8/rhubarblipsync-ng-shape-keys:6)
 
-## Quick start
+## Installation
 
-### Installation
+### Blender 4.2+
+Install as a Blender extension. Download the file for your platform from the link below, and simply drag and drop the `.zip` file into the Blender window.
 
+| Platform | Release Link |
+|----------|--------------|
+| 🪟 Windows | [Download](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v1.5.0/rhubarb_lipsync_ng-Windows-1.5.0.zip) |
+| 🍏 macOS  | [Download](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v1.5.0/rhubarb_lipsync_ng-macOS-1.5.0.zip)  |
+| 🐧 Linux  | [Download](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v1.5.0/rhubarb_lipsync_ng-Linux-1.5.0.zip)   |
+
+
+| [🪟 Windows](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v1.5.0/rhubarb_lipsync_ng-Windows-1.5.0.zip) | [🍏 macOS](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v1.5.0/rhubarb_lipsync_ng-macOS-1.5.0.zip) | [🐧 Linux](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v1.5.0/rhubarb_lipsync_ng-Linux-1.5.0.zip) |
+|----------|--------------|------|
+
+
+![InstallDisk](doc/img/ExtensionInstallDisk.gif)
+
+<details>
+  <summary> <b>Was the addon installed successfully?</b> </summary>
+</details>  
 1. Go to the [releases page](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/latest) and download the `rhubarb_lipsync_ng<your_system>*.zip` file to your PC. For example: `rhubarb_lipsync_ng-Windows-1.5.0.zip` for Windows.
 
 2. Run Blender, go to the `Main menu/Edit/Preferences/Addons`. Click the **Install** button (top right) and select the downloaded zip file (don't unzip the file).
@@ -29,6 +46,7 @@
 
 Note: Generally, each time you see a button is disabled, hover the mouse cursor over the button and a popup will show the reason.
 
+## Quick start
 
 ### Create Capture
 
