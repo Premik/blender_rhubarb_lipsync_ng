@@ -14,24 +14,28 @@
 ## Installation
 
 ### Blender 4.2+
-Install as a Blender extension. Download the file for your platform from the link below, and simply drag and drop the `.zip` file into the Blender window.
+Install as a Blender extension.
 
-| Platform | Release Link |
-|----------|--------------|
-| 🪟 Windows | [Download](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v1.5.0/rhubarb_lipsync_ng-Windows-1.5.0.zip) |
-| 🍏 macOS  | [Download](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v1.5.0/rhubarb_lipsync_ng-macOS-1.5.0.zip)  |
-| 🐧 Linux  | [Download](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v1.5.0/rhubarb_lipsync_ng-Linux-1.5.0.zip)   |
+1. Download the file for your platform:
 
 
-| [🪟 Windows](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v1.5.0/rhubarb_lipsync_ng-Windows-1.5.0.zip) | [🍏 macOS](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v1.5.0/rhubarb_lipsync_ng-macOS-1.5.0.zip) | [🐧 Linux](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v1.5.0/rhubarb_lipsync_ng-Linux-1.5.0.zip) |
-|----------|--------------|------|
+   | [🪟 Windows](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v1.5.0/rhubarb_lipsync_ng-Windows-1.5.0.zip) | [🍏 macOS](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v1.5.0/rhubarb_lipsync_ng-macOS-1.5.0.zip) | [🐧 Linux](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v1.5.0/rhubarb_lipsync_ng-Linux-1.5.0.zip) |
+   |----------|--------------|------|
 
+
+2. Drag and drop the `.zip` file into the Blender window.
 
 ![InstallDisk](doc/img/ExtensionInstallDisk.gif)
 
+3. Verify that the `rhubarb` executable is working by pressing the **Check rhubarb version** button:
+
+![CheckVersion](doc/img/checkVersion.png)
+
+### Blender before 4.2
 <details>
-  <summary> <b>Was the addon installed successfully?</b> </summary>
-</details>  
+  <summary> <b>As Legacy Addon</b> </summary>
+
+
 1. Go to the [releases page](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/latest) and download the `rhubarb_lipsync_ng<your_system>*.zip` file to your PC. For example: `rhubarb_lipsync_ng-Windows-1.5.0.zip` for Windows.
 
 2. Run Blender, go to the `Main menu/Edit/Preferences/Addons`. Click the **Install** button (top right) and select the downloaded zip file (don't unzip the file).
@@ -44,13 +48,15 @@ Install as a Blender extension. Download the file for your platform from the lin
 
 ![Version check](doc/img/rhubarbVersion.gif)
 
-Note: Generally, each time you see a button is disabled, hover the mouse cursor over the button and a popup will show the reason.
+</details>  
 
 ## Quick start
 
 ### Create Capture
 
 1. There should now be a new ***RLSP*** tab visible in the 3D view with two panels. First, create a new `Capture` in the current scene by pressing the **Create capture** button in the `RLSP: Sound setup and cues capture` panel.
+
+Note: Generally, each time you see a button is disabled, hover the mouse cursor over the button and a popup will show the reason.
 
 1. Select a sound file.
    * Note the plugin can convert sound files to the supported formats.
