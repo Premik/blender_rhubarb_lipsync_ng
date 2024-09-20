@@ -77,10 +77,6 @@ class RhubarbBinary:
         return self.platform_cfg["name"]
 
     @property
-    def platform_blender_name(self) -> str:
-        return self.platform_cfg["blender_name"]
-
-    @property
     def expected_download_sha256(self) -> str:
         return self.platform_cfg["download_sha256"]
 
@@ -103,9 +99,9 @@ class RhubarbBinary:
         return self.platform_cfg['system_names']
 
     @cached_property
-    def blender_name(self) -> str:
+    def platform_blender_names(self) -> list[str]:
         """Mapping to the platform name used by Blender for Extensions."""
-        return self.platform_cfg['blender_name']
+        return self.platform_cfg['blender_names']
 
     @cached_property
     def zip_file_name(self) -> str:
@@ -211,14 +207,14 @@ class RhubarbBinary:
         return filecmp.cmp(self.executable_path, self.executable_path_unzipped)
 
     def update_blender_manifest_platforms(self) -> None:
-        print(f"Updating manifest platforms list to ['{self.platform_blender_name}'] in the {self.manifest_path}")
+        print(f"Updating manifest platforms list to '{self.platform_blender_names}' in the {self.manifest_path}")
         assert self.manifest_path.exists(), f"The {self.manifest_path} doesn't exist"
         with open(self.manifest_path, 'r', encoding='utf-8') as s:
             text = s.read()
         m = self.manifest_platforms_rx.match(text)
-        assert m is not None, f"Failed to find platforms array the manifes {self.manifest_path}. Pattern\n{self.manifest_platforms_rx}"
-        platforms = '"' + self.platform_blender_name + '"'
-        text = f"{m.groups()[0]}platforms = [{platforms}]{m.groups()[2]}"
+        assert m is not None, f"Failed to find platforms array the manifest {self.manifest_path}. Pattern\n{self.manifest_platforms_rx}"
+        platforms = ['"' + p + '"' for p in self.platform_blender_names]
+        text = f"{m.groups()[0]}platforms = [{', '.join(platforms)}]{m.groups()[2]}"
 
         with open(self.manifest_path, 'w', encoding='utf-8') as s:
             s.write(text)

@@ -137,7 +137,7 @@ if __name__ == '__main__':
     current = RhubarbBinary.currently_deployed_platform(rhubarb_cfg)  # Keep the current platform bin
     for b in RhubarbBinary.platforms_by_name(platform_name, rhubarb_cfg):
         if not b.is_deployed_to_bin():
-            b.deploy_to_bin()  # Deploy the correct platfrom before zipping
+            b.deploy_to_bin()  # Deploy the correct platform before zipping
         pp.zip_dist(b.platform_name)
 
     if current:  # Recover the previously deployed platform, if any
