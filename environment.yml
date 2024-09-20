@@ -18,6 +18,8 @@ dependencies:
   #- numpy
   - black
   - ruff
+  - bs4 # Only for compa. tests
+  - html5lib # Only for compa. tests
   - pip:
     - -e .
     #- bpy>=3.2 # Official blender-as-module, only since 3.4 (no Audaspace)

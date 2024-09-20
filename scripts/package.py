@@ -27,6 +27,9 @@ class PackagePlugin:
     bl_info_version_pattern = r'''['"]version["']\s*:\s*\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*\)'''
     bl_info_version_rx = re.compile(f"(.*)({bl_info_version_pattern})(.*)", re.DOTALL)
 
+    misc_ops_pattern = r'''return\s*\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*\)'''
+    misc_ops_version_rx = re.compile(f"(.*)({misc_ops_pattern})(.*)", re.DOTALL)
+
     readme_version_zip_pattern = r'-\d+\.\d+\.\d+\.zip'
     readme_version_zip_rx = re.compile(f"(.*)({readme_version_zip_pattern})(.*)", re.DOTALL)
 
@@ -57,8 +60,12 @@ class PackagePlugin:
         return Path(__file__).parents[1]
 
     @cached_property
-    def main__init__path(self) -> Path:
+    def main__init_path(self) -> Path:
         return self.project_dir / PackagePlugin.main_package_name / "__init__.py"
+
+    @cached_property
+    def misc_ops_path(self) -> Path:
+        return self.project_dir / PackagePlugin.main_package_name / "blender" / "misc_operators.py"
 
     @cached_property
     def readme_md_path(self) -> Path:
@@ -94,7 +101,8 @@ class PackagePlugin:
         print(f"Updated {replacement_count} version string(s) to '{new_ver}' in the {p}")
 
     def update_version_files(self) -> None:
-        self.update_version_in_file(PackagePlugin.bl_info_version_rx, self.main__init__path, f"'version': {self.version_tuple}")
+        self.update_version_in_file(PackagePlugin.bl_info_version_rx, self.main__init_path, f"'version': {self.version_tuple}")
+        self.update_version_in_file(PackagePlugin.misc_ops_version_rx, self.misc_ops_path, f'return {self.version_tuple}')
         self.update_version_in_file(PackagePlugin.readme_version_zip_rx, self.readme_md_path, f"-{self.version_str}.zip")
         self.update_version_in_file(PackagePlugin.readme_version_release_url_rx, self.readme_md_path, f"/v{self.version_str}/")
         self.update_version_in_file(PackagePlugin.blender_manifest_rx, self.blender_manifest_path, f'version = "{self.version_str}"')

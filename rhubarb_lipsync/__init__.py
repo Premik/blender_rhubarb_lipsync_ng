@@ -11,7 +11,7 @@ from .blender.mapping_properties import MappingProperties
 from .blender.preferences import RhubarbAddonPreferences
 from .rhubarb.log_manager import logManager
 
-legacy_info = {
+bl_info = {
     'name': 'Rhubarb Lipsync NG',
     'author': 'Premysl Srubar. Inspired by the original version by Andrew Charlton. Includes Rhubarb Lip Sync by Daniel S. Wolf',
     'version': (1, 5, 0),
@@ -23,10 +23,6 @@ legacy_info = {
     'support': 'COMMUNITY',
     'category': 'Animation',
 }
-
-# bl_info gets deleted by Blender when installed a new extension
-bl_info = legacy_info
-
 
 autoloader: Optional[AutoLoader]
 
