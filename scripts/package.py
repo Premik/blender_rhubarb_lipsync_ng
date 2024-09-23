@@ -25,19 +25,19 @@ class PackagePlugin:
 
     # 'version': (4, 0, 0),
     bl_info_version_pattern = r'''['"]version["']\s*:\s*\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*\)'''
-    bl_info_version_rx = re.compile(f"(.*)({bl_info_version_pattern})(.*)", re.DOTALL)
+    bl_info_version_rx = re.compile(bl_info_version_pattern)
 
     misc_ops_pattern = r'''return\s*\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*\)'''
-    misc_ops_version_rx = re.compile(f"(.*)({misc_ops_pattern})(.*)", re.DOTALL)
+    misc_ops_version_rx = re.compile(misc_ops_pattern)
 
     readme_version_zip_pattern = r'-\d+\.\d+\.\d+\.zip'
-    readme_version_zip_rx = re.compile(f"(.*)({readme_version_zip_pattern})(.*)", re.DOTALL)
+    readme_version_zip_rx = re.compile(readme_version_zip_pattern)
 
     readme_version_release_url_pattern = r'/v\d+\.\d+\.\d+/'
-    readme_version_release_url_rx = re.compile(f"(.*)({readme_version_release_url_pattern})(.*)", re.DOTALL)
+    readme_version_release_url_rx = re.compile(readme_version_release_url_pattern)
 
     blender_manifest_pattern = r'^\s*version\s*=\s*["]\d+\.\d+\.\d+["]'
-    blender_manifest_rx = re.compile(f"(.*)({blender_manifest_pattern})(.*)", re.DOTALL)
+    blender_manifest_rx = re.compile(blender_manifest_pattern)
 
     main_package_name = 'rhubarb_lipsync'
 
@@ -85,13 +85,15 @@ class PackagePlugin:
         replacement_count = 0
         updated_lines = []
 
+        def replace_match(m) -> str:
+            return new_ver
+
         with open(p, 'r', encoding='utf-8') as s:
             for line in s:
-                m = rx.match(line)
-                if m:
-                    line = f"{m.groups()[0]}{new_ver}{m.groups()[2]}"
-                    replacement_count += 1
-                updated_lines.append(line)
+                new_line = rx.sub(replace_match, line)  # Replaces all occurrences
+                num_replacements = len(re.findall(rx, line))  # Count how many replacements were made
+                replacement_count += num_replacements
+                updated_lines.append(new_line)
 
         assert replacement_count > 0, f"Failed to update any lines in the {p}. Pattern\n{rx}"
 
