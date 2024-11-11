@@ -338,10 +338,15 @@ class PreviewMappingAction(bpy.types.Operator):
         if not objs:
             return "No object with mapping selected"
         for o in objs:
-            if not o.animation_data:
+            if mapping_utils.does_object_support_shapekey_actions(o):
+                ad = o.data.shape_keys.animation_data
+            else:
+                ad = o.animation_data
+
+            if not ad:
                 return f"The object '{o.name}' has no animation data."
-            if o.animation_data.is_property_readonly("action"):
-                return f"The 'action' attribute of the object '{o.name}' is readonly. Are you tweaking a NLA strip?"
+            if ad.is_property_readonly("action"):
+                return f"The 'action' attribute of the object '{o.name}' animation data is readonly. Are you tweaking a NLA strip?"
         return ""
 
     @classmethod

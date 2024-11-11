@@ -35,7 +35,7 @@ def is_action_shape_key_action(action: bpy.types.Action) -> bool:
 
 
 def does_object_support_shapekey_actions(o: bpy.types.Object) -> bool:
-    """Whether it is currently possible to assigne a shape-key action to the provided object.
+    """Whether it is currently possible to assign a shape-key action to the provided object.
     Object has to be a Mesh with some shape-keys already created"""
     if not o:
         return False
