@@ -1,3 +1,4 @@
+from typing import Any
 from bpy.types import Context, UI_UL_list, UILayout, UIList
 
 from .. import IconsManager
@@ -13,7 +14,7 @@ class MouthCueUIList(UIList):
         prefs = RhubarbAddonPreferences.from_context(ctx)
         return prefs.cue_list_prefs
 
-    def filter_items(self, context: Context, data: MouthCueList, propname: str):
+    def filter_items(self, context: Context, data: MouthCueList, propname: str) -> tuple[Any, list]:
         f = self.filter_name.upper()
         filtered = UI_UL_list.filter_items_by_name(f, self.bitflag_filter_item, data.items, "key", reverse=False)
         return filtered, []

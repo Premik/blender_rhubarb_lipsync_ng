@@ -336,7 +336,7 @@ class PreviewMappingAction(bpy.types.Operator):
             return "No active scene"
         objs = list(islice(PreviewMappingAction.objects_with_mapping(context), limit if limit else None))
         if not objs:
-            return "No object with mapping selected"
+            return "No object with (non-empty) mapping selected"
         for o in objs:
             if mapping_utils.does_object_support_shapekey_actions(o):
                 ad = o.data.shape_keys.animation_data

@@ -15,3 +15,4 @@ settings.json
 *junit*.xml
 dist
 .crossnote
+summary.py.txt
