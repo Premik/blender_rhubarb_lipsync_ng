@@ -337,6 +337,18 @@ class BakeToNLA(bpy.types.Operator):
         self.strips_added = 0
         b = self.bctx
 
+        # Check strip removal mode and perform auto-removal if needed
+        prefs = RhubarbAddonPreferences.from_context(ctx)
+        strip_placement: StripPlacementPreferences = prefs.strip_placement
+        if strip_placement.strip_removal_mode == "AUTO":
+            log.info("Auto-removing existing NLA strips before baking")
+
+            # bpy.ops.rhubarb.remove_captured_nla_strips()
+            # strips_removed, tracks_cleaned = RemoveCapturedNlaStrips.remove_strips(ctx)
+            # if strips_removed > 0:
+            #     self.bctx.rlog.info(f"Auto-removed {strips_removed} strips from {tracks_cleaned} tracks", "Pre-bake cleanup")
+            #     log.info(f"Auto-removed {strips_removed} strips from {tracks_cleaned} tracks")
+
         wm = ctx.window_manager
         l = len(b.mouth_cue_items)
         log.info(f"About to optimize {l} cues")
@@ -407,6 +419,34 @@ class BakeToNLA(bpy.types.Operator):
         else:
             self.draw_error_inbox(line, "None of the selected")
 
+    def draw_validation_msg(self, box, msg: str) -> None:
+        """Parse and display validation message with optional UI elements based on tags"""
+        # Parse out UI tags from error message
+        tag = None
+        if "#!" in msg:
+            parts = msg.split("#!")
+            msg = parts[0].strip()
+            tag = parts[1].strip() if len(parts) > 1 else None
+
+        # Display the error message without the tag
+        err_row = box.row()
+        self.draw_error_inbox(err_row, msg)
+
+        # Add specific UI elements based on the tag
+        if tag == "RemoveStrips":
+            # Get strip removal preferences
+            prefs = RhubarbAddonPreferences.from_context(self.bctx.ctx)
+            strip_placement: StripPlacementPreferences = prefs.strip_placement
+
+            # Add checkbox for auto-removal mode
+            auto_row = box.row()
+            auto_row.prop(strip_placement, "strip_removal_mode", text="Auto-remove strips")
+
+            # When in MANUAL mode, show the remove button
+            if strip_placement.strip_removal_mode == "MANUAL":
+                op_row = box.row()
+                op_row.operator(RemoveCapturedNlaStrips.bl_idname)
+
     def draw_validation(self) -> None:
         b = self.bctx
         if not b.objects:
@@ -415,15 +455,16 @@ class BakeToNLA(bpy.types.Operator):
         for o in b.object_iter():
             errs = b.validate_current_object()
 
-            if errs:
-                if not box:
-                    box = self.layout.box().column(align=True)
-                box.separator()
-                row = box.row()
-                row.label(text=o.name)
+            if not errs:
+                continue
+            if not box:
+                box = self.layout.box().column(align=True)
+            box.separator()
+            row = box.row()
+            row.label(text=o.name)
 
-                for e in errs:
-                    self.draw_error_inbox(box.row(), e)
+            for e in errs:
+                self.draw_validation_msg(box, e)
 
     def draw(self, ctx: Context) -> None:
         self.bctx = baking_utils.BakingContext(ctx)
@@ -431,13 +472,13 @@ class BakeToNLA(bpy.types.Operator):
         layout = self.layout
         rootProps = self.bctx.clist_props
         row = self.layout.row(align=True)
-        row.prop(rootProps, 'name', text="Capture")
+        row.prop(rootProps, 'name', text="Capture")  # type: ignore
         layout.separator()
         row = layout.row(align=False)
-        row.prop(self.bctx.cprops, "start_frame")
+        row.prop(self.bctx.cprops, "start_frame")  # type: ignore
         if self.bctx.cue_processor.the_last_cue:
             row.label(text=f"End frame: {self.bctx.cue_processor.the_last_cue.end_frame_str}")
-        layout.prop(self.bctx.mprefs, "object_selection_filter_type", text="Objects to bake")
+        layout.prop(self.bctx.mprefs, "object_selection_filter_type", text="Objects to bake")  # type: ignore
         self.draw_info()
         self.draw_validation()
         layout.operator(RemoveCapturedNlaStrips.bl_idname)

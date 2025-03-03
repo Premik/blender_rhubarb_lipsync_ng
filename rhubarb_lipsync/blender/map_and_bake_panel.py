@@ -203,6 +203,21 @@ class MappingAndBakingPanel(bpy.types.Panel):
                 self.draw_nla_setup()
             self.draw_strip_placement_settings()
 
+            # Add strip removal mode dropdown before the bake button
+            # prefs = RhubarbAddonPreferences.from_context(context)
+            # strip_placement: StripPlacementPreferences = prefs.strip_placement
+
+            # layout.separator()
+
+            # # Display strip removal mode dropdown
+            # row = layout.row()
+            # row.prop(strip_placement, "strip_removal_mode")
+
+            # # When manual mode is selected, show the button
+            # if strip_placement.strip_removal_mode == "MANUAL":
+            #     row = layout.row()
+            #     row.operator(baking_operators.RemoveCapturedNlaStrips.bl_idname)
+
             layout.separator()
             row = layout.row()
             row.scale_y = 2

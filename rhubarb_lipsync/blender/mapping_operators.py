@@ -186,7 +186,7 @@ class ClearMappedActions(bpy.types.Operator):
     bl_label = "Clear the mapped action"
     bl_options = {'UNDO'}
 
-    target_cue_index: IntProperty(name="index", description="Mouth cue index to remote the Action from")  # type: ignore
+    target_cue_index: IntProperty(name="index", description="Mouth cue index to remove the Action from")  # type: ignore
 
     @classmethod
     def poll(cls, context: Context) -> bool:

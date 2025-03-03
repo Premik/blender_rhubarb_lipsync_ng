@@ -350,7 +350,7 @@ class BakingContext:
 
         if strips > 0:
             extra = "+" if strips >= limit else ""
-            ret += [f"Clash with {strips}{extra} existing strips. Press the (Remove Strips) button"]
+            ret += [f"Clash with {strips}{extra} existing strips. #!RemoveStrips"]
         return ret
 
     def validate_selection(self) -> str:
@@ -385,6 +385,9 @@ class BakingContext:
         else:  # A normal action
             if self.mprops.only_shapekeys:
                 return "{} {} a normal Action while a shape-key Action is expected"
+
+        if mapping_utils.is_mapping_item_active(self.ctx, mi, self.current_object):
+            return "{} {} has an active Action that takes precedence over NLA tracks. #!StopAction"
 
         return ""
 

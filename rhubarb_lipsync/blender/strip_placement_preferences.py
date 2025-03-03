@@ -10,6 +10,18 @@ log = logging.getLogger(__name__)
 class StripPlacementPreferences(PropertyGroup):
     """Defines how to fit an action strip to the track constrained by the cue start and cue length"""
 
+    strip_removal_mode: EnumProperty(  # type: ignore
+        name="Strip Removal Mode",
+        description="Determines how clashing NLA strips should be removed before baking.",
+        items=[
+            ("MANUAL", "Remove baked strips now", "Remove strips manually when button is pressed."),
+            ("AUTO", "Remove baked strips each time ok is pressed", "Automatically remove already baked strips before new bake."),
+        ],
+        default="MANUAL",
+        options={'LIBRARY_EDITABLE'},
+        override={'LIBRARY_OVERRIDABLE'},
+    )
+
     scale_min: FloatProperty(  # type: ignore
         "Scale Min",
         description=textwrap.dedent(
