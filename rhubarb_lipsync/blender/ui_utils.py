@@ -9,6 +9,7 @@ from bpy.types import Area, Context, UILayout, Window
 
 log = logging.getLogger(__name__)
 
+
 def addon_path() -> pathlib.Path:
     return pathlib.Path(__file__).parent.parent
 
@@ -77,8 +78,11 @@ def draw_prop_with_label(props: Any, property_name: str, label, layout: UILayout
     split.prop(props, property_name, text="")
 
 
-def draw_error(layout, msg: str) -> None:
-    box = layout.box()
+def draw_error(layout: bpy.types.UILayout, msg: str, wrap_bo=True) -> None:
+    if wrap_bo:
+        box = layout.box()
+    else:
+        box = layout
     box.alert = True
     lines = msg.splitlines()
     if not lines:

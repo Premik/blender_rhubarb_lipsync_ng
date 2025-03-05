@@ -109,7 +109,7 @@ class MappingItem(PropertyGroup):
         name="Frames count",
         description="Number of frames of the Action used to create the Action Clip",
         step=100,
-        default=0,
+        default=1,
         min=0,
         soft_min=1,
         soft_max=100,

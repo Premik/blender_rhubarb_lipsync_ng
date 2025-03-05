@@ -380,8 +380,7 @@ class BakeToNLA(bpy.types.Operator):
         return {'FINISHED'}
 
     def draw_error_inbox(self, l: UILayout, text: str) -> None:
-        l.alert = True
-        l.label(text=text, icon="ERROR")
+        ui_utils.draw_error(l, text, False)
 
     def draw_info(self) -> None:
         b = self.bctx
@@ -390,7 +389,7 @@ class BakeToNLA(bpy.types.Operator):
         selected_objects = list(b.mprefs.object_selection_filtered(b.ctx))
 
         errors = not b.cprops or not b.mouth_cue_items or not selected_objects or not b.objects
-        if not ui_utils.draw_expandable_header(b.prefs, "bake_info_panel_expanded", "Info", self.layout, errors):
+        if not ui_utils.draw_expandable_header(b.prefs, "bake_info_panel_expanded", "Selection Info", self.layout, errors):
             return
 
         # layout.prop(rootProps, 'name', text="")
@@ -419,33 +418,42 @@ class BakeToNLA(bpy.types.Operator):
         else:
             self.draw_error_inbox(line, "None of the selected")
 
-    def draw_validation_msg(self, box, msg: str) -> None:
-        """Parse and display validation message with optional UI elements based on tags"""
-        # Parse out UI tags from error message
+    def draw_validation_msg(self, box: UILayout, msg: str) -> None:
         tag = None
-        if "#!" in msg:
+        if "#!" in msg:  # Parse out UI tags from error message
             parts = msg.split("#!")
             msg = parts[0].strip()
             tag = parts[1].strip() if len(parts) > 1 else None
 
         # Display the error message without the tag
-        err_row = box.row()
-        self.draw_error_inbox(err_row, msg)
+
+        if not tag:
+            self.draw_error_inbox(box.row(), msg)
+            return
+        inner_box: UILayout = box.box()
+        self.draw_error_inbox(inner_box.row(), msg)
 
         # Add specific UI elements based on the tag
         if tag == "RemoveStrips":
+
+            # err_row.alert = False
             # Get strip removal preferences
             prefs = RhubarbAddonPreferences.from_context(self.bctx.ctx)
             strip_placement: StripPlacementPreferences = prefs.strip_placement
 
-            # Add checkbox for auto-removal mode
-            auto_row = box.row()
-            auto_row.prop(strip_placement, "strip_removal_mode", text="Auto-remove strips")
+            col = inner_box.column(align=False)
+            col.use_property_split = True
+            line = col.split()
+            line.prop(strip_placement, "strip_removal_mode", text="Remove clashing strips: ")
 
             # When in MANUAL mode, show the remove button
             if strip_placement.strip_removal_mode == "MANUAL":
-                op_row = box.row()
-                op_row.operator(RemoveCapturedNlaStrips.bl_idname)
+                line = col.split()
+                # line.separator()
+                line.operator(RemoveCapturedNlaStrips.bl_idname, text="Remove clashing strips now")
+
+        if tag == "StopAction":
+            inner_box.operator(RemoveCapturedNlaStrips.bl_idname, text="Remove clashing strips now")
 
     def draw_validation(self) -> None:
         b = self.bctx
@@ -481,5 +489,3 @@ class BakeToNLA(bpy.types.Operator):
         layout.prop(self.bctx.mprefs, "object_selection_filter_type", text="Objects to bake")  # type: ignore
         self.draw_info()
         self.draw_validation()
-        layout.operator(RemoveCapturedNlaStrips.bl_idname)
-        # ui_utils.draw_prop_with_label(m, "rate", "Rate", layout)

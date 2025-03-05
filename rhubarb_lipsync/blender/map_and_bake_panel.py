@@ -161,8 +161,6 @@ class MappingAndBakingPanel(bpy.types.Panel):
 
         # if not ui_utils.draw_expandable_header(prefs, "strip_blending_panel_expanded", "Strip in/out blending", self.layout):
         #     return
-        col = self.layout.column(align=False)
-        col.use_property_split = True
         col.prop(strip_placement, 'strip_blend_type')
 
         col.prop(strip_placement, 'inout_blend_type')

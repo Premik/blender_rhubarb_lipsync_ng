@@ -12,10 +12,10 @@ class StripPlacementPreferences(PropertyGroup):
 
     strip_removal_mode: EnumProperty(  # type: ignore
         name="Strip Removal Mode",
-        description="Determines how clashing NLA strips should be removed before baking.",
+        description="Determines how already baked or clashing NLA strips should be removed before baking.",
         items=[
-            ("MANUAL", "Remove baked strips now", "Remove strips manually when button is pressed."),
-            ("AUTO", "Remove baked strips each time ok is pressed", "Automatically remove already baked strips before new bake."),
+            ("MANUAL", "Manually using Remove button", "Remove strips manually when button is pressed."),
+            ("AUTO", "Automatically after Ok button is pressed", "Automatically remove already baked strips before new bake."),
         ],
         default="MANUAL",
         options={'LIBRARY_EDITABLE'},
@@ -26,8 +26,8 @@ class StripPlacementPreferences(PropertyGroup):
         "Scale Min",
         description=textwrap.dedent(
             """\
-            Scale down minimal value. Slow down the clip playback speed up to this fraction when the action is too short. 
-            Has no effect when set to 1. Has no effect on Actions with a single keyframe only (aka poses). 
+            Scale down minimum value. Reduces the clip playback seep up to this fraction when the action is too long.
+            Has no effect when set to 1. Does not affect Actions with only a single keyframe (poses).
             """
         ),
         min=0.01,
@@ -41,9 +41,9 @@ class StripPlacementPreferences(PropertyGroup):
     scale_max: FloatProperty(  # type: ignore
         "Scale Max",
         description=textwrap.dedent(
-            """\
-            Scale up maximal value. Speed up the clip playback speed up to this fraction when the action is too long. 
-            Has no effect when set to 1. Has no effect on Actions with a single keyframe only (aka poses). 
+            """\            
+            Scale up maximum value. Increases the clip playback speed up to this fraction when the action is too short.
+            Has no effect when set to 1. Does not affect Actions with only a single keyframe (poses).
             """
         ),
         min=1,

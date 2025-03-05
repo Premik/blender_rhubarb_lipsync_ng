@@ -229,8 +229,8 @@ class RhubarbAddonPreferences(AddonPreferences):
     caputre_panel_expanded: BoolProperty(default=True)  # type: ignore
     strip_placement_setting_panel_expanded: BoolProperty(default=False)  # type: ignore
     mapping_list_panel_expanded: BoolProperty(default=True)  # type: ignore
-    bake_info_panel_expanded: BoolProperty(default=True)  # type: ignore
-    bake_errors_panel_expanded: BoolProperty(default=True)  # type: ignore
+    bake_info_panel_expanded: BoolProperty(default=False)  # type: ignore
+    bake_validation_panel_expanded: BoolProperty(default=True)  # type: ignore
 
     cue_list_prefs: PointerProperty(type=CueListPreferences, name="Cues list preferences")  # type: ignore
     mapping_prefs: PointerProperty(type=MappingPreferences, name="Mapping list preferences")  # type: ignore

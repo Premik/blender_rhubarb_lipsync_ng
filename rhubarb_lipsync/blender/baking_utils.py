@@ -387,7 +387,7 @@ class BakingContext:
                 return "{} {} a normal Action while a shape-key Action is expected"
 
         if mapping_utils.is_mapping_item_active(self.ctx, mi, self.current_object):
-            return "{} {} has an active Action that takes precedence over NLA tracks. #!StopAction"
+            return "{} {} has an active Action overriding the baked animation. #!StopAction"
 
         return ""
 
