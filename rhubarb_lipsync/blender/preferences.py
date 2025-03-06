@@ -174,7 +174,7 @@ class RhubarbAddonPreferences(AddonPreferences):
     )
 
     strip_removal_mode: EnumProperty(  # type: ignore
-        name="Remove clashing strips",
+        name="Remove clashing Strips",
         description="Determines how already baked or clashing NLA strips should be removed before baking.",
         items=[
             ("MANUAL", "manually using the Remove button", "Remove strips manually when button is pressed."),
@@ -184,7 +184,7 @@ class RhubarbAddonPreferences(AddonPreferences):
     )
 
     stop_preview_mode: EnumProperty(  # type: ignore
-        name="Deactivate action ",
+        name="Deactivate Action ",
         description="Determines how to handle an active Action before before baking.",
         items=[
             ("MANUAL", "manually using the Stop button", "Stops/deactivate the active Action on the Object/Mesh by manually presssing the Stop button."),

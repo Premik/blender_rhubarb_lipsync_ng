@@ -384,3 +384,28 @@ class PreviewMappingAction(bpy.types.Operator):
             bpy.ops.rhubarb.play_range(play_frames=int(frame_count), start_frame=int(active_mi.frame_range[0]))
 
         return {'FINISHED'}
+
+
+class StopAllPreview(bpy.types.Operator):
+    """Disable any active Action(s) on objects with mapping"""
+
+    bl_idname = "rhubarb.stop_all_preview"
+    bl_label = "StopAll"
+
+    @classmethod
+    def poll(cls, context: Context) -> bool:
+        return ui_utils.validation_poll(
+            cls,
+            context,
+            PreviewMappingAction.disabled_reason,
+        )  # Same validation as Preview/Stop
+
+    def execute(self, context: Context) -> set[str]:
+        error = PreviewMappingAction.disabled_reason(context, 0)
+        if error:
+            self.report({"ERROR"}, error)
+            return {'CANCELLED'}
+
+        for o in objects_with_mapping_filtered(context):
+            mapping_utils.deactivate_mapping_item(context, o)
+        return {'FINISHED'}

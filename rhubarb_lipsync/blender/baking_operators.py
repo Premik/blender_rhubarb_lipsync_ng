@@ -11,7 +11,7 @@ from . import baking_utils, ui_utils
 from .capture_properties import CaptureListProperties, CaptureProperties, ResultLogListProperties
 from .mapping_properties import MappingProperties
 from .preferences import CueListPreferences, RhubarbAddonPreferences, StripPlacementPreferences
-from .mapping_operators import PreviewMappingAction
+from .mapping_operators import StopAllPreview
 
 log = logging.getLogger(__name__)
 
@@ -350,15 +350,11 @@ class BakeToNLA(bpy.types.Operator):
 
         # Check strip removal mode and perform auto-removal if needed
         prefs = RhubarbAddonPreferences.from_context(ctx)
-        strip_placement: StripPlacementPreferences = prefs.strip_placement
-        if strip_placement.strip_removal_mode == "AUTO":
+        if prefs.strip_removal_mode == "AUTO":
             log.info("Auto-removing existing NLA strips before baking")
-
-            # bpy.ops.rhubarb.remove_captured_nla_strips()
-            # strips_removed, tracks_cleaned = RemoveCapturedNlaStrips.remove_strips(ctx)
-            # if strips_removed > 0:
-            #     self.bctx.rlog.info(f"Auto-removed {strips_removed} strips from {tracks_cleaned} tracks", "Pre-bake cleanup")
-            #     log.info(f"Auto-removed {strips_removed} strips from {tracks_cleaned} tracks")
+            bpy.ops.rhubarb.remove_captured_nla_strips()
+        if prefs.stop_preview_mode == "AUTO":
+            bpy.ops.rhubarb.stop_all_preview()
 
         wm = ctx.window_manager
         l = len(b.mouth_cue_items)
@@ -442,29 +438,37 @@ class BakeToNLA(bpy.types.Operator):
             self.draw_error_inbox(box.row(), msg)
             return
         inner_box: UILayout = box.box()
-        self.draw_error_inbox(inner_box.row(), msg)
         prefs = RhubarbAddonPreferences.from_context(self.bctx.ctx)
         col = inner_box.column(align=False)
+        col.use_property_split = True
 
         def draw_dropdown(pref_key: str) -> UILayout:
-            col.use_property_split = True
+
             line = col.split()
             line.prop(prefs, pref_key)  # type: ignore
             return line
 
         # Add specific UI elements based on the tag
         if tag == "RemoveStrips":
-            line = draw_dropdown("strip_removal_mode")
             if prefs.strip_removal_mode == "MANUAL":
+                self.draw_error_inbox(col.row(), msg)
+                line = draw_dropdown("strip_removal_mode")
                 line = col.split()
                 line.operator(RemoveCapturedNlaStrips.bl_idname, text="Remove clashing strips now")
+            else:
+                col.row().label(text=msg)
+                line = draw_dropdown("strip_removal_mode")
 
         if tag == "StopAction":
-            line = draw_dropdown("stop_preview_mode")
+
             if prefs.stop_preview_mode == "MANUAL":
+                self.draw_error_inbox(col.row(), msg)
+                line = draw_dropdown("stop_preview_mode")
                 line = col.split()
-                blid = PreviewMappingAction.bl_idname
-                inner_box.operator(blid, text="Stop preview").target_cue_index = 0
+                inner_box.operator(StopAllPreview.bl_idname, text="Stop preview")
+            else:
+                col.row().label(text=msg)
+                line = draw_dropdown("stop_preview_mode")
 
     def draw_validation(self) -> None:
         b = self.bctx
