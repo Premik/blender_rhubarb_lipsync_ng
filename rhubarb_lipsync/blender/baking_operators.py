@@ -11,6 +11,7 @@ from . import baking_utils, ui_utils
 from .capture_properties import CaptureListProperties, CaptureProperties, ResultLogListProperties
 from .mapping_properties import MappingProperties
 from .preferences import CueListPreferences, RhubarbAddonPreferences, StripPlacementPreferences
+from .mapping_operators import PreviewMappingAction
 
 log = logging.getLogger(__name__)
 
@@ -210,6 +211,16 @@ class BakeToNLA(bpy.types.Operator):
             """
         ),
         default=True,
+    )
+
+    preview_mapping_action: EnumProperty(  # type: ignore
+        name="Preview Mapping Action",
+        description="Determines how to handle preview mapping action when baking.",
+        items=[
+            ("MANUAL", "Manually using Preview button", "Preview mapping action manually when button is pressed."),
+            ("AUTO", "Automatically after Ok button is pressed", "Automatically preview mapping action before new bake."),
+        ],
+        default="MANUAL",
     )
 
     @classmethod
@@ -432,28 +443,28 @@ class BakeToNLA(bpy.types.Operator):
             return
         inner_box: UILayout = box.box()
         self.draw_error_inbox(inner_box.row(), msg)
+        prefs = RhubarbAddonPreferences.from_context(self.bctx.ctx)
+        col = inner_box.column(align=False)
+
+        def draw_dropdown(pref_key: str) -> UILayout:
+            col.use_property_split = True
+            line = col.split()
+            line.prop(prefs, pref_key)  # type: ignore
+            return line
 
         # Add specific UI elements based on the tag
         if tag == "RemoveStrips":
-
-            # err_row.alert = False
-            # Get strip removal preferences
-            prefs = RhubarbAddonPreferences.from_context(self.bctx.ctx)
-            strip_placement: StripPlacementPreferences = prefs.strip_placement
-
-            col = inner_box.column(align=False)
-            col.use_property_split = True
-            line = col.split()
-            line.prop(strip_placement, "strip_removal_mode", text="Remove clashing strips: ")
-
-            # When in MANUAL mode, show the remove button
-            if strip_placement.strip_removal_mode == "MANUAL":
+            line = draw_dropdown("strip_removal_mode")
+            if prefs.strip_removal_mode == "MANUAL":
                 line = col.split()
-                # line.separator()
                 line.operator(RemoveCapturedNlaStrips.bl_idname, text="Remove clashing strips now")
 
         if tag == "StopAction":
-            inner_box.operator(RemoveCapturedNlaStrips.bl_idname, text="Remove clashing strips now")
+            line = draw_dropdown("stop_preview_mode")
+            if prefs.stop_preview_mode == "MANUAL":
+                line = col.split()
+                blid = PreviewMappingAction.bl_idname
+                inner_box.operator(blid, text="Stop preview").target_cue_index = 0
 
     def draw_validation(self) -> None:
         b = self.bctx

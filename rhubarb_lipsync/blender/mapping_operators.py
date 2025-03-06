@@ -39,6 +39,13 @@ def filtered_actions_enum(prop_group: 'ListFilteredActions', ctx: Context) -> li
         return [('error', f"FAILED: {e}", 'error', 'CANCEL', 1)]
 
 
+def objects_with_mapping_filtered(context: Context) -> Iterator[Object]:
+    prefs = RhubarbAddonPreferences.from_context(context)
+    mlp: MappingPreferences = prefs.mapping_prefs
+    obj_sel = mlp.object_selection_filtered(context)
+    return mapping_utils.objects_with_mapping(obj_sel)
+
+
 class ListFilteredActions(bpy.types.Operator):
     bl_idname = "rhubarb.list_filtered_actions"
     bl_label = "Select target Action"
@@ -323,18 +330,11 @@ class PreviewMappingAction(bpy.types.Operator):
 
     target_cue_index: IntProperty(name="index", description="Mouth cue index to preview", default=-1)  # type: ignore
 
-    @staticmethod
-    def objects_with_mapping(context: Context) -> Iterator[Object]:
-        prefs = RhubarbAddonPreferences.from_context(context)
-        mlp: MappingPreferences = prefs.mapping_prefs
-        obj_sel = mlp.object_selection_filtered(context)
-        return mapping_utils.objects_with_mapping(obj_sel)
-
     @classmethod
     def disabled_reason(cls, context: Context, limit=100) -> str:
         if not context.scene:
             return "No active scene"
-        objs = list(islice(PreviewMappingAction.objects_with_mapping(context), limit if limit else None))
+        objs = list(islice(objects_with_mapping_filtered(context), limit if limit else None))
         if not objs:
             return "No object with (non-empty) mapping selected"
         for o in objs:
@@ -367,10 +367,10 @@ class PreviewMappingAction(bpy.types.Operator):
 
         # Play or Stop depends on the selected active Object
         is_active_active = mapping_utils.is_mapping_item_active(context, active_mi, context.object)
-        for o in PreviewMappingAction.objects_with_mapping(context):
+        for o in objects_with_mapping_filtered(context):
             mi: MappingItem = MappingItem.from_object(o, cue_index)
             if not mi:
-                self.report(type={"ERROR"}, message="Invalid target cue index. Object has not mapping item.")
+                self.report(type={"ERROR"}, message=f"Invalid target cue index {cue_index}. Object has not mapping item.")
                 return {'CANCELLED'}
 
             if is_active_active:  # Active object has the Mapping Item Active, stop all previews

@@ -16,16 +16,9 @@ from .capture_properties import CaptureListProperties, CaptureProperties, MouthC
 from .mapping_properties import MappingItem, MappingProperties, NlaTrackRef
 from .preferences import CueListPreferences, MappingPreferences, RhubarbAddonPreferences
 from .strip_placement_preferences import StripPlacementPreferences
+from .mapping_utils import objects_with_mapping
 
 log = logging.getLogger(__name__)
-
-
-def objects_with_mapping(objects: Iterator[Object]) -> Iterator[Object]:
-    """Filter all objects with non-blank mapping properties"""
-    for o in objects or []:
-        mp = MappingProperties.from_object(o)
-        if mp and mp.has_any_mapping:
-            yield o
 
 
 def find_strip_at(track: NlaTrack, at_frame: float) -> tuple[int, NlaStrip]:

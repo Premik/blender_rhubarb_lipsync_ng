@@ -173,6 +173,26 @@ class RhubarbAddonPreferences(AddonPreferences):
         default=False,
     )
 
+    strip_removal_mode: EnumProperty(  # type: ignore
+        name="Remove clashing strips",
+        description="Determines how already baked or clashing NLA strips should be removed before baking.",
+        items=[
+            ("MANUAL", "manually using the Remove button", "Remove strips manually when button is pressed."),
+            ("AUTO", "automatically after the Ok button is pressed", "Automatically remove already baked strips before new bake."),
+        ],
+        default="MANUAL",
+    )
+
+    stop_preview_mode: EnumProperty(  # type: ignore
+        name="Deactivate action ",
+        description="Determines how to handle an active Action before before baking.",
+        items=[
+            ("MANUAL", "manually using the Stop button", "Stops/deactivate the active Action on the Object/Mesh by manually presssing the Stop button."),
+            ("AUTO", "automatically after the Ok button is pressed", "Automatically deactivate active Actions before new bake."),
+        ],
+        default="MANUAL",
+    )
+
     def capture_tab_name_updated(self, ctx: Context):
         # To workaround circular dependency
         from .capture_panel import CaptureMouthCuesPanel
