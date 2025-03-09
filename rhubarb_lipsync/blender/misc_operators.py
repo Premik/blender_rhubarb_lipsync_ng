@@ -18,7 +18,7 @@ log = logging.getLogger(__name__)
 
 
 def current_version() -> tuple[int, int, int]:
-    return (1, 5, 2)
+    return (1, 5, 3)
 
 
 def version_str(ver: tuple[int, int, int]) -> str:
