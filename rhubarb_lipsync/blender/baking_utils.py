@@ -14,9 +14,9 @@ from ..rhubarb.mouth_shape_info import MouthShapeInfos
 from . import mapping_utils, ui_utils
 from .capture_properties import CaptureListProperties, CaptureProperties, MouthCueList, MouthCueListItem, ResultLogListProperties
 from .mapping_properties import MappingItem, MappingProperties, NlaTrackRef
+from .mapping_utils import objects_with_mapping
 from .preferences import CueListPreferences, MappingPreferences, RhubarbAddonPreferences
 from .strip_placement_preferences import StripPlacementPreferences
-from .mapping_utils import objects_with_mapping
 
 log = logging.getLogger(__name__)
 

@@ -9,9 +9,9 @@ from .. import IconsManager
 from ..rhubarb.mouth_cues import MouthCue, frame2time, time2frame_float
 from . import baking_utils, ui_utils
 from .capture_properties import CaptureListProperties, CaptureProperties, ResultLogListProperties
+from .mapping_operators import StopAllPreview
 from .mapping_properties import MappingProperties
 from .preferences import CueListPreferences, RhubarbAddonPreferences, StripPlacementPreferences
-from .mapping_operators import StopAllPreview
 
 log = logging.getLogger(__name__)
 
