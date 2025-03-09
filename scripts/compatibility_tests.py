@@ -221,6 +221,8 @@ class BlenderInstallator:
         for bv in bi.list_all_available_versions(bi.list_available_main_versions()):
             if "win" not in bv.platform_str:
                 continue
+            if "arm" in bv.platform_str:
+                continue
             if bv.file_ext != "zip":
                 continue
             v = bv.ver
@@ -521,7 +523,7 @@ if __name__ == "__main__":
 
     bi = BlenderInstallator()
     l = bi.versions_for_test()
-    # l.reverse()
+    l.reverse()
     results_table: list[list[str]] = []
     for v in l:
         # print(f"{v.ver} {v.platform_str} {v.file_ext} {v.install_file_name}")
@@ -532,5 +534,5 @@ if __name__ == "__main__":
         bs = BlenderSetup(bi, v)
         bs.install_and_run()
         bs.collect_result(results_table)
-        # break
+        break
     print_test_results_table(results_table)
