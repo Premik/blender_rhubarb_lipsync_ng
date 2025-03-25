@@ -535,6 +535,6 @@ if __name__ == "__main__":
         bs = BlenderSetup(bi, v)
         bs.install_and_run()
         bs.collect_result(results_table)
-        # if i == 1:  # Break after testing 2 versions
-        #     break
+        if i == 1:  # Break after testing 2 versions
+            break
     print_test_results_table(results_table)

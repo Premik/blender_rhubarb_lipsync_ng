@@ -29,7 +29,7 @@ class StripPlacementPreferences(PropertyGroup):
     scale_max: FloatProperty(  # type: ignore
         "Scale Max",
         description=textwrap.dedent(
-            """\            
+            """\
             Scale up maximum value. Increases the clip playback speed up to this fraction when the action is too short.
             Has no effect when set to 1. Does not affect Actions with only a single keyframe (poses).
             """

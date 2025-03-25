@@ -19,7 +19,7 @@ Install as a Blender extension.
 1. Download the file for your platform:
 
 
-   | [🪟 Windows](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v1.5.3/rhubarb_lipsync_ng-Windows-1.5.3.zip) | [🍏 macOS](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v1.5.3/rhubarb_lipsync_ng-macOS-1.5.3.zip) | [🐧 Linux](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v1.5.3/rhubarb_lipsync_ng-Linux-1.5.3.zip) |
+   | [🪟 Windows](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v1.5.4/rhubarb_lipsync_ng-Windows-1.5.4.zip) | [🍏 macOS](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v1.5.4/rhubarb_lipsync_ng-macOS-1.5.4.zip) | [🐧 Linux](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v1.5.4/rhubarb_lipsync_ng-Linux-1.5.4.zip) |
    |----------|--------------|------|
 
 
@@ -36,7 +36,7 @@ Install as a Blender extension.
   <summary> <b>As Legacy Addon</b> </summary>
 
 
-1. Go to the [releases page](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/latest) and download the `rhubarb_lipsync_ng<your_system>*.zip` file to your PC. For example: `rhubarb_lipsync_ng-Windows-1.5.3.zip` for Windows.
+1. Go to the [releases page](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/latest) and download the `rhubarb_lipsync_ng<your_system>*.zip` file to your PC. For example: `rhubarb_lipsync_ng-Windows-1.5.4.zip` for Windows.
 
 2. Run Blender, go to the `Main menu/Edit/Preferences/Addons`. Click the **Install** button (top right) and select the downloaded zip file (don't unzip the file).
 
@@ -151,17 +151,18 @@ Any Blender version newer than **v3.2**. Test results:
 
 | Version      | System  | Total | Passed | Failed | Errors | Skipped | Status |
 |--------------|---------|-------|--------|--------|--------|---------|--------|
+| **4.4**.0    | Windows | 45    | 42     | 0      | 0      | 3       | ✔️     |
 | **4.3**.2    | Windows | 45    | 42     | 0      | 0      | 3       | ✔️     |
-| **4.2**.1 LTS| Windows | 44    | 42     | 0      | 0      | 2       | ✔️     |
-| **4.1**.1    | Windows | 44    | 42     | 0      | 0      | 2       | ✔️     |
-| **4.0**.2    | Windows | 44    | 42     | 0      | 0      | 2       | ✔️     |
-| **3.6**.13   | Windows | 44    | 42     | 0      | 0      | 2       | ✔️     |
-| **3.5**.1    | Windows | 44    | 42     | 0      | 0      | 2       | ✔️     |
-| **3.4**.1    | Windows | 44    | 42     | 0      | 0      | 2       | ✔️     |
-| **3.3**.20   | Windows | 44    | 42     | 0      | 0      | 2       | ✔️     |
-| **3.2**.2    | Windows | 44    | 33     | 7      | 2      | 2       | ❌     |
-| **3.1**.2    | Windows | 44    | 33     | 7      | 2      | 2       | ❌     |
-| **3.0**.1    | Windows | 44    | 33     | 7      | 2      | 2       | ❌     |
+| **4.2**.1 LTS| Windows | 45    | 42     | 0      | 0      | 3       | ✔️     |
+| **4.1**.1    | Windows | 45    | 42     | 0      | 0      | 3       | ✔️     |
+| **4.0**.2    | Windows | 45    | 42     | 0      | 0      | 3       | ✔️     |
+| **3.6**.13   | Windows | 45    | 42     | 0      | 0      | 3       | ✔️     |
+| **3.5**.1    | Windows | 45    | 42     | 0      | 0      | 3       | ✔️     |
+| **3.4**.1    | Windows | 45    | 42     | 0      | 0      | 3       | ✔️     |
+| **3.3**.20   | Windows | 45    | 42     | 0      | 0      | 3       | ✔️     |
+| **3.2**.2    | Windows | 45    | 33     | 7      | 2      | 3       | ❌     |
+| **3.1**.2    | Windows | 45    | 33     | 7      | 2      | 3       | ❌     |
+| **3.0**.1    | Windows | 45    | 33     | 7      | 2      | 3       | ❌     |
 
 
 
