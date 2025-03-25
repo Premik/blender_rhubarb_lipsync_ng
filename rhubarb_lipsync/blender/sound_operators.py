@@ -4,7 +4,7 @@ from typing import cast
 
 import bpy
 from bpy.props import BoolProperty, EnumProperty, IntProperty, StringProperty
-from bpy.types import Context, Sound, SoundSequence
+from bpy.types import Context, Sound
 
 import aud
 
@@ -12,15 +12,20 @@ from . import ui_utils
 from .capture_properties import CaptureListProperties, CaptureProperties
 from .preferences import RhubarbAddonPreferences
 
+try:
+    from bpy.types import Strip  # Since v4.4
+except ImportError:  # Fall back to old API
+    from bpy.types import SoundSequence as Strip
+
 log = logging.getLogger(__name__)
 
 # Limit the strip-search on the poll methods. When limit is reach the op would be enabled but fail on execution instead
 poll_search_limit = 50
 
 
-def find_strips_of_sound(context: Context, limit=0) -> list[SoundSequence]:
+def find_strips_of_sound(context: Context, limit=0) -> list[Strip]:
     '''Finds a sound strip which is using the selected sounds.'''
-    ret: list[SoundSequence] = []
+    ret: list[Strip] = []
     props = CaptureListProperties.capture_from_context(context)
     sound: Sound = props.sound
     if not sound or not context.scene.sequence_editor:
@@ -31,7 +36,7 @@ def find_strips_of_sound(context: Context, limit=0) -> list[SoundSequence]:
             break  # Limit reached, break the search (for performance reasons)
         if not hasattr(sq, "sound"):
             continue  # Not a sound strip
-        ssq = cast(SoundSequence, sq)
+        ssq = cast(Strip, sq)
         foundSnd = ssq.sound
         if foundSnd is None:
             continue  # An empty strip

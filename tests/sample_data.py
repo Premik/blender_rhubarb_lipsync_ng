@@ -3,10 +3,15 @@ from functools import cached_property
 from pathlib import Path
 from typing import cast
 
-from bpy.types import Context, Sound, SoundSequence
+from bpy.types import Context, Sound
 
 from rhubarb_lipsync.rhubarb.mouth_cues import MouthCue
 from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbParser
+
+try:
+    from bpy.types import Strip  # Since v4.4
+except ImportError:  # Fall back to old API
+    from bpy.types import SoundSequence as Strip
 
 sample_data_path = Path(__file__).parent / "data"
 
@@ -47,7 +52,7 @@ class SampleData:
     def to_sound(self, ctx: Context) -> Sound:
         se = ctx.scene.sequence_editor
         sq = se.sequences.new_sound(self.name, str(self.snd_file_path), 1, 1)
-        return cast(SoundSequence, sq).sound
+        return cast(Strip, sq).sound
 
     @staticmethod
     def compare_cues(a_cues: list[MouthCue], b_cues: list[MouthCue]) -> str:

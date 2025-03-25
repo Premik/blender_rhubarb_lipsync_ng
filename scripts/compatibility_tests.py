@@ -525,7 +525,8 @@ if __name__ == "__main__":
     l = bi.versions_for_test()
     l.reverse()
     results_table: list[list[str]] = []
-    for v in l:
+    # Test the 2 most recent versions only
+    for i, v in enumerate(l):
         # print(f"{v.ver} {v.platform_str} {v.file_ext} {v.install_file_name}")
         # print(v.download_blender_install_file_path())
         # print(f"{v.ver} {bi.is_installed(v)} {bi.exe_path(v)}")
@@ -534,5 +535,6 @@ if __name__ == "__main__":
         bs = BlenderSetup(bi, v)
         bs.install_and_run()
         bs.collect_result(results_table)
-        break
+        # if i == 1:  # Break after testing 2 versions
+        #     break
     print_test_results_table(results_table)
