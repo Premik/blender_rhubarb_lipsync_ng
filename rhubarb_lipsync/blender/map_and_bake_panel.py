@@ -47,6 +47,8 @@ class MappingListOptionsPanel(bpy.types.Panel):
         layout.label(text="Mapping preview on objects", icon="PLAY")
         layout.prop(prefs.mapping_prefs, "object_selection_filter_type", text="")
         layout.separator()
+        layout.prop(prefs, "use_extended_shapes")
+        layout.separator()
         layout.label(text="Action filters")
         draw_action_filters(layout, mprops, False)
         # layout.prop(mlp, "actions_multiline_view")
