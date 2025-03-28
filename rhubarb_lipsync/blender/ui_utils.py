@@ -5,7 +5,12 @@ from typing import Any, Callable, Iterator, Type
 
 import bpy
 import bpy.utils.previews
-from bpy.types import Area, Context, UILayout, Window
+from bpy.types import Area, Context, Sound, UILayout, Window
+
+try:
+    from bpy.types import Strip  # Since v4.4
+except ImportError:  # Fall back to old API
+    from bpy.types import SoundSequence as Strip
 
 log = logging.getLogger(__name__)
 
@@ -180,3 +185,26 @@ def len_limited(iterator: Iterator, max_count=1000) -> int:
         if count >= max_count:
             break
     return count
+
+
+def find_sound_strips_by_sound(context: Context, sound: Sound, limit=0) -> list[Strip]:
+    '''Finds sound strips which are using the specified sound.'''
+    ret: list[Strip] = []
+    if not sound or not context.scene.sequence_editor:
+        return []
+
+    for i, sq in enumerate(context.scene.sequence_editor.sequences_all):
+        if limit > 0 and i > limit:
+            break  # Limit reached, break the search (for performance reasons)
+        if not hasattr(sq, "sound"):
+            continue  # Not a sound strip
+        ssq: Strip = sq
+        foundSnd = ssq.sound
+        if foundSnd is None:
+            continue  # An empty strip
+        if sound == foundSnd:
+            ret.insert(0, ssq)  # At the top, priority
+            continue
+        if bpy.path.abspath(sound.filepath) == bpy.path.abspath(foundSnd.filepath):
+            ret.append(ssq)  # Match by name, append to end
+    return ret

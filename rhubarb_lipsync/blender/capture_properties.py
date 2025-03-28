@@ -13,6 +13,7 @@ from bpy.types import Context, PropertyGroup, Sound
 
 from ..rhubarb.mouth_cues import FrameConfig, MouthCue, MouthCueFrames
 from ..rhubarb.rhubarb_command import RhubarbCommandAsyncJob
+from . import ui_utils
 from .dropdown_helper import DropdownHelper
 
 log = logging.getLogger(__name__)
@@ -155,8 +156,18 @@ class CaptureProperties(PropertyGroup):
         rootProps.name = self.short_desc(rootProps.index)
 
     sound: PointerProperty(type=bpy.types.Sound, name="Sound", update=on_sound_update)  # type: ignore
-    start_frame: IntProperty(name="Start Frame", description="Used when placing the sound strip and when baking NLA clip.", default=1)  # type: ignore
-    # start_frame: FloatProperty(name="Start frame", default=0)  # type: ignore
+
+    def on_start_frame_update(self, ctx: Context) -> None:
+        strips = ui_utils.find_sound_strips_by_sound(ctx, self.sound)
+        if not strips:
+            return
+        strip = strips[0]
+        if strip.frame_start == self.start_frame:
+            return
+        strip.frame_start = self.start_frame
+
+    start_frame: IntProperty(name="Start Frame", description="Used when placing the sound strip and when baking NLA clip.", default=1, update=on_start_frame_update)  # type: ignore
+    sync_start_frame: BoolProperty(default=False, name="Synchronize the start_frame of the Capture with the sound Strip")  # type: ignore
     dialog_file: StringProperty(  # type: ignore
         name="Dialog file",
         description="Additional plain-text file with transcription of the sound file to improve accuracy. Works for english only",

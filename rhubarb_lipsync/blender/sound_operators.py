@@ -17,35 +17,21 @@ try:
 except ImportError:  # Fall back to old API
     from bpy.types import SoundSequence as Strip
 
+
 log = logging.getLogger(__name__)
 
 # Limit the strip-search on the poll methods. When limit is reach the op would be enabled but fail on execution instead
 poll_search_limit = 50
 
 
-def find_strips_of_sound(context: Context, limit=0) -> list[Strip]:
-    '''Finds a sound strip which is using the selected sounds.'''
-    ret: list[Strip] = []
+def find_sound_strips_by_sound(context: Context, limit=0) -> list[Strip]:
+    '''Finds sound strips which are using the selected sound.'''
     props = CaptureListProperties.capture_from_context(context)
     sound: Sound = props.sound
-    if not sound or not context.scene.sequence_editor:
+    if not sound:
         return []
 
-    for i, sq in enumerate(context.scene.sequence_editor.sequences_all):
-        if limit > 0 and i > limit:
-            break  # Limit reached, break the search (for performance reasons)
-        if not hasattr(sq, "sound"):
-            continue  # Not a sound strip
-        ssq = cast(Strip, sq)
-        foundSnd = ssq.sound
-        if foundSnd is None:
-            continue  # An empty strip
-        if sound == foundSnd:
-            ret.insert(0, ssq)  # At the top, priority
-            continue
-        if bpy.path.abspath(sound.filepath) == bpy.path.abspath(foundSnd.filepath):
-            ret.append(ssq)  # Match by name, append to end
-    return ret
+    return ui_utils.find_sound_strips_by_sound(context, sound, limit)
 
 
 def find_sounds_by_path(sound_path: str) -> list[Sound]:
@@ -80,7 +66,7 @@ class CreateSoundStripWithSound(bpy.types.Operator):
         error_common = CaptureProperties.sound_selection_validation(context, False)
         if error_common:
             return error_common
-        strip = find_strips_of_sound(context, limit)
+        strip = find_sound_strips_by_sound(context, limit)
         if strip:
             return f"Already placed on a strip on the channel {strip[0].channel} at frame {strip[0].frame_start}."
         return ""
@@ -123,7 +109,7 @@ class CreateSoundStripWithSound(bpy.types.Operator):
 
         # The above op always create a new sound, even when there is the same one already imported.
         # Find the newly created strip and change its sound back to the selected one
-        strips = find_strips_of_sound(context)
+        strips = find_sound_strips_by_sound(context)
         assert strips, f"Was not able to locate the newly placed sound strip with the '{sound.filepath}'."
         if len(strips) > 1:
             self.report({"ERROR"}, f"There is more than one sound strips using the sound with '{sound.filepath}'.")
@@ -164,7 +150,7 @@ class RemoveSoundStripWithSound(bpy.types.Operator):
         error_common = CaptureProperties.sound_selection_validation(context, False)
         if error_common:
             return error_common
-        strip = find_strips_of_sound(context, limit)
+        strip = find_sound_strips_by_sound(context, limit)
         if not strip:
             return "No strip using the current sound found."
         return ""
@@ -180,7 +166,7 @@ class RemoveSoundStripWithSound(bpy.types.Operator):
             return {'CANCELLED'}
         props = CaptureListProperties.capture_from_context(context)
         sound: Sound = props.sound
-        strips = find_strips_of_sound(context)
+        strips = find_sound_strips_by_sound(context)
         assert strips
         if len(strips) > 1:
             m = f"There is more than one sound strips using the sound with '{sound.filepath}'. Don't know which one to remove."
