@@ -187,7 +187,7 @@ class SetShiftActionFrameRangeStart(bpy.types.Operator):
 
 
 class ClearMappedActions(bpy.types.Operator):
-    """Remove the mapped Action for this Cue type"""
+    """Remove custom frame-range and the mapped Action for this Cue type"""
 
     bl_idname = "rhubarb.clear_mapped_action"
     bl_label = "Clear the mapped action"
@@ -199,14 +199,24 @@ class ClearMappedActions(bpy.types.Operator):
     def poll(cls, context: Context) -> bool:
         return ui_utils.validation_poll(cls, context, MappingProperties.context_selection_validation)
 
-    def execute(self, context: Context) -> set[str]:
+    def mapping_item(self, context: Context) -> Optional[MappingItem]:
         mprops: MappingProperties = MappingProperties.from_context(context)
         mi = mprops[self.target_cue_index]
         mprops.index = self.target_cue_index
+        return mi
+
+    def execute(self, context: Context) -> set[str]:
+        mi = self.mapping_item(context)
         if not mi:
-            self.report(type={"INFO"}, message="There is no Action mapped")
+            self.report(type={"WARN"}, message=f"There is mapping item/slot created for cue at index: {self.target_cue_index} ")
             return {'CANCELLED'}
-        mi.action = None
+        if not mi.action and not mi.custom_frame_ranage:
+            self.report(type={"INFO"}, message="There is no Action mapped and neither custom frame-range is set.")
+            return {'CANCELLED'}
+        if mi.custom_frame_ranage:
+            mi.custom_frame_ranage = False
+            return {'FINISHED'}  # First trash-button press only removes the custom-frame range
+        mi.action = None  # Second also clears the mapped Action
         ui_utils.redraw_3dviews(context)
 
         return {'FINISHED'}

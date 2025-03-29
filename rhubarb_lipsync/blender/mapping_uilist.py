@@ -1,3 +1,4 @@
+from typing import Any
 from bpy.types import Context, UI_UL_list, UILayout, UIList
 
 from . import mapping_operators, mapping_utils
@@ -55,13 +56,16 @@ def draw_mapping_item(ctx: Context, layout: UILayout, mp: MappingProperties, ite
     col2.operator(blid, text="", emboss=emboss, icon=icon).target_cue_index = itemIndex
 
     blid = mapping_operators.ClearMappedActions.bl_idname
-    col2.operator(blid, text="", emboss=emboss, icon="TRASH").target_cue_index = itemIndex
+    row = col2.row()
+    row.operator(blid, text="", emboss=emboss, icon="TRASH").target_cue_index = itemIndex
+    if mi.action is None and not mi.custom_frame_ranage:
+        row.enabled = False
 
 
 class MappingUIList(UIList):
     bl_idname = "RLPS_UL_mapping"
 
-    def filter_items(self, context: Context, data: MappingProperties, propname: str):
+    def filter_items(self, context: Context, data: MappingProperties, propname: str) -> tuple[Any, list]:
         f = self.filter_name.upper()
         filtered = UI_UL_list.filter_items_by_name(f, self.bitflag_filter_item, data.items, "key", reverse=False)
         return filtered, []

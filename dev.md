@@ -213,6 +213,41 @@ NLA shape-key tracks:
 [t.name for t in C.object.data.shape_keys.animation_data.nla_tracks]
 ```
 
+### Depsgraph updates:
+
+
+```python
+
+def on_depsgraph_update_post(scene, depsgraph):
+    """
+    Checks if relevant data (sequences) have been updated.
+    """
+    # Check if any Sequence data block was updated. This is more direct.
+    #print_update_properties(scene)
+    #print_update_properties(depsgraph)    
+    sequence_updated = False
+    for update in depsgraph.updates:
+        #print(f"{dir(update)}")
+        #print_update_properties(update)
+        print(f"{update.id}\n")
+
+bpy.app.handlers.depsgraph_update_post.append(on_depsgraph_update_post)
+bpy.app.handlers.depsgraph_update_post.remove(on_depsgraph_update_post)
+```
+
+
+Nla track added/removed:
+```
+<bpy_struct, Scene("Scene") at 0x7015c03d3008, evaluated>
+<bpy_struct, Object("Light") at 0x70166c0e3d08, evaluated>
+<bpy_struct, Object("Camera") at 0x70166ea03f08, evaluated>
+<bpy_struct, Object("Cube") at 0x7016f975d208, evaluated>
+<bpy_struct, Object("Sphere") at 0x701716e8a208, evaluated>
+```
+
+ Strip moved: Only Scene
+```
+
 
 
 https://docs.blender.org/manual/en/latest/files/data_blocks.html
