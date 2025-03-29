@@ -7,6 +7,7 @@ from bpy.props import PointerProperty
 from .blender.auto_load import AutoLoader
 from .blender.capture_properties import CaptureListProperties
 from .blender.icons_manager import IconsManager
+from .blender.depsgraph_handler import DepsgraphHandler
 from .blender.mapping_properties import MappingProperties
 from .blender.preferences import RhubarbAddonPreferences
 from .rhubarb.log_manager import logManager
@@ -76,6 +77,7 @@ def register() -> None:
     if hasattr(prefs, 'capture_tab_name'):  # Re-set the tab names in case they differ from defaults
         prefs.capture_tab_name_updated(bpy.context)
         prefs.map_tab_name_updated(bpy.context)
+    DepsgraphHandler.register()
     if is_blender_in_debug():
         print("RLPS: exit register() ")
 
@@ -87,6 +89,7 @@ def unregister() -> None:
     #     global logManager
     #     del logManager
     autoloader.unregister()
+    DepsgraphHandler.unregister()
     del bpy.types.Scene.rhubarb_lipsync_captures
     del bpy.types.Object.rhubarb_lipsync_mapping
 
