@@ -1,6 +1,6 @@
 import re
 from enum import Enum
-from typing import Sequence
+from typing import Sequence, Tuple, Optional
 
 
 class DropdownHelper:
@@ -11,6 +11,7 @@ class DropdownHelper:
 
     numbered_item_re = re.compile(r"^(?:(?P<idx>\d+)\s+)?(?P<track_name>\S.*\S|\S)$")
     NameNotFoundHandling = Enum('NameNotFoundHandling', ['SELECT_ANY', 'UNSELECT'])
+    ChangeStatus = Enum('ChangeStatus', ['UNCHANGED', 'MOVED_TO', 'REMOVED'])
 
     def __init__(self, dropdown, names: Sequence[str], nameNotFoundHandling=NameNotFoundHandling.SELECT_ANY) -> None:
         self.obj = dropdown
@@ -75,55 +76,70 @@ class DropdownHelper:
     def track_name_from_name(self) -> str:
         return DropdownHelper.parse_name(self.name)[1]
 
-    def is_track_name_match(self, index: int, track_name: str) -> bool:
+    def track_name_match(self, index: int, track_name: str) -> bool:
         """Check if item at index has matching track name."""
         if index < 0 or index >= len(self.names):
             return False
         _, item_track_name = DropdownHelper.parse_name(self.names[index])
         return item_track_name == track_name
 
-    def sync_from_items(self) -> None:
-        """Sync index based on track name, trying to maintain position or adjust minimally. Used when tracks changes (add/delete..)"""
-        if len(self.names) == 0:  # No more track left
-            self.index = -1
-            self.name = ""
-            return
+    def detect_item_changes(self) -> Tuple[ChangeStatus, int]:
+        """Detects changes in the items collection relative to the current selection.
+
+        Returns: Tuple (ChangeStatus, New/Current index)
+        """
+        if len(self.names) == 0:  # No tracks
+            if self.index < 0:  # Nothing was selected, so no change
+                return (DropdownHelper.ChangeStatus.UNCHANGED, self.index)
+            else:  # Something was selected so it was removed
+                return (DropdownHelper.ChangeStatus.REMOVED, -1)
 
         current_track_name = self.track_name_from_name
         if not current_track_name:
-            self.ensure_index_bounds()
-            self.index2name()
-            return
+            # No valid track name to search for
+            new_index = self.index_within_bounds()
+            if new_index == self.index and new_index >= 0:
+                return (DropdownHelper.ChangeStatus.UNCHANGED, new_index)
+            elif new_index >= 0:
+                return (DropdownHelper.ChangeStatus.MOVED_TO, new_index)
+            else:
+                return (DropdownHelper.ChangeStatus.REMOVED, self.index_within_bounds(-1))
 
         # Check if current index still matches
         current_index = self.index
-        if self.is_track_name_match(current_index, current_track_name):
-            self.index2name()  # Just update name format
-            return
+        if self.track_name_match(current_index, current_track_name):
+            return (DropdownHelper.ChangeStatus.UNCHANGED, current_index)
 
-        # Try adjacent indices first (handle insertion/deletion)
-        if self.is_track_name_match(current_index + 1, current_track_name):
-            self.index = current_index + 1
-            self.index2name()
-            return
+        # Try adjacent indices first (handle single insertion/deletion)
+        if self.track_name_match(current_index + 1, current_track_name):
+            return (DropdownHelper.ChangeStatus.MOVED_TO, current_index + 1)
 
-        if self.is_track_name_match(current_index - 1, current_track_name):
-            self.index = current_index - 1
-            self.index2name()
-            return
+        if self.track_name_match(current_index - 1, current_track_name):
+            return (DropdownHelper.ChangeStatus.MOVED_TO, current_index - 1)
 
         # Scan all items for matching track name
         for i, name in enumerate(self.names):
             _, item_track_name = DropdownHelper.parse_name(name)
             if item_track_name == current_track_name:
-                self.index = i
-                self.index2name()
-                return
+                return (DropdownHelper.ChangeStatus.MOVED_TO, i)
 
-        # No match found, apply nameNotFoundHandling
+        # No match found
         if self.nameNotFoundHandling == DropdownHelper.NameNotFoundHandling.SELECT_ANY:
-            self.ensure_index_bounds()
+            new_index = self.index_within_bounds()
+            return (DropdownHelper.ChangeStatus.MOVED_TO, new_index)
         else:
+            return (DropdownHelper.ChangeStatus.REMOVED, self.index_within_bounds(-1))
+
+    def sync_from_items(self) -> None:
+        """Sync index based on track name, trying to maintain position or adjust minimally. Used when tracks changes (add/delete..)"""
+        status, new_index = self.detect_item_changes()
+
+        if status == DropdownHelper.ChangeStatus.UNCHANGED:
+            self.index2name()  # Just update name format
+        elif status == DropdownHelper.ChangeStatus.MOVED_TO and new_index is not None:
+            self.index = new_index
+            self.index2name()
+        else:  # REMOVED
             self.index = -1
             self.name = ""
 
