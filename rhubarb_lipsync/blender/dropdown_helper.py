@@ -9,7 +9,7 @@ class DropdownHelper:
     For example: `001 First item`.
     """
 
-    numbered_item_re = re.compile(r"^(?P<idx>\d+)\s.*")
+    numbered_item_re = re.compile(r"^(?:(?P<idx>\d+)\s+)?(?P<track_name>\S.*\S|\S)$")
     NameNotFoundHandling = Enum('NameNotFoundHandling', ['SELECT_ANY', 'UNSELECT'])
 
     def __init__(self, dropdown, names: Sequence[str], nameNotFoundHandling=NameNotFoundHandling.SELECT_ANY) -> None:
@@ -42,19 +42,90 @@ class DropdownHelper:
             self.name2index()
 
     @staticmethod
-    def index_from_name(numbered_item: str) -> int:
-        """Returns an index of a numbered item. Or -1 when not matching the pattern.
-        For example '001 The item'  => 1
+    def parse_name(numbered_item: str) -> tuple[int, str]:
+        """Parses a numbered item and returns a tuple containing the index and track name part.
+        For example '001 The item' => (1, ' The item')
+        If the item doesn't match the pattern, returns (-1, "")
         """
         if not numbered_item:
-            return -1
+            return (-1, "")
         m = DropdownHelper.numbered_item_re.search(numbered_item)
         if m is None:
-            return -1
-        idx = m.groupdict()["idx"]
+            return (-1, "")
+
+        groups = m.groupdict()
+        idx = groups["idx"]
+        track_name = groups["track_name"]
+
         if idx is None:
-            return -1
-        return int(idx)
+            idx = -1
+        else:
+            idx = int(idx)
+
+        if track_name is None:
+            track_name = ""
+
+        return (idx, track_name)
+
+    @property
+    def index_from_name(self) -> str:
+        return DropdownHelper.parse_name(self.name)[0]
+
+    @property
+    def track_name_from_name(self) -> str:
+        return DropdownHelper.parse_name(self.name)[1]
+
+    def is_track_name_match(self, index: int, track_name: str) -> bool:
+        """Check if item at index has matching track name."""
+        if index < 0 or index >= len(self.names):
+            return False
+        _, item_track_name = DropdownHelper.parse_name(self.names[index])
+        return item_track_name == track_name
+
+    def sync_from_items(self) -> None:
+        """Sync index based on track name, trying to maintain position or adjust minimally. Used when tracks changes (add/delete..)"""
+        if len(self.names) == 0:  # No more track left
+            self.index = -1
+            self.name = ""
+            return
+
+        current_track_name = self.track_name_from_name
+        if not current_track_name:
+            self.ensure_index_bounds()
+            self.index2name()
+            return
+
+        # Check if current index still matches
+        current_index = self.index
+        if self.is_track_name_match(current_index, current_track_name):
+            self.index2name()  # Just update name format
+            return
+
+        # Try adjacent indices first (handle insertion/deletion)
+        if self.is_track_name_match(current_index + 1, current_track_name):
+            self.index = current_index + 1
+            self.index2name()
+            return
+
+        if self.is_track_name_match(current_index - 1, current_track_name):
+            self.index = current_index - 1
+            self.index2name()
+            return
+
+        # Scan all items for matching track name
+        for i, name in enumerate(self.names):
+            _, item_track_name = DropdownHelper.parse_name(name)
+            if item_track_name == current_track_name:
+                self.index = i
+                self.index2name()
+                return
+
+        # No match found, apply nameNotFoundHandling
+        if self.nameNotFoundHandling == DropdownHelper.NameNotFoundHandling.SELECT_ANY:
+            self.ensure_index_bounds()
+        else:
+            self.index = -1
+            self.name = ""
 
     def index_within_bounds(self, index=None) -> int:
         """Returns index bounded to the names length without changing the `index` attr.
@@ -91,7 +162,7 @@ class DropdownHelper:
 
     def name2index(self) -> None:
         """Changes the index property based on the name property. Takes index from the name prefix"""
-        index = DropdownHelper.index_from_name(self.name)
+        index = self.index_from_name
         index = self.index_within_bounds(index)
         if self.index != index:
             self.index = index  # Change

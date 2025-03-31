@@ -1,5 +1,4 @@
 import logging
-from argparse import Action
 from typing import Iterator
 
 import bpy
@@ -152,3 +151,20 @@ def deactivate_mapping_item(ctx: bpy.types.Context, on_object: Object) -> None:
         shape_keys = on_object.data.shape_keys
         if shape_keys and bool(shape_keys.animation_data):
             shape_keys.animation_data.action = None
+
+
+def list_nla_tracks_of_object(o: bpy.types.Object) -> Iterator[bpy.types.NlaTrack]:
+    if not o:
+        return
+    # For mesh provide shape-key tracks only. But only if the object has any shape-keys created
+    if does_object_support_shapekey_actions(o):
+        if not o.data or not o.data.shape_keys or not o.data.shape_keys.animation_data:
+            return
+        for t in o.data.shape_keys.animation_data.nla_tracks:
+            yield t
+        return
+
+    if not o.animation_data or not o.animation_data.nla_tracks:
+        return
+    for t in o.animation_data.nla_tracks:
+        yield t

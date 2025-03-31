@@ -28,21 +28,7 @@ class NlaTrackRef(PropertyGroup):
         self.dropdown_helper.name2index()
 
     def items(self) -> Generator[NlaTrack, Any, None]:
-        o = self.object
-        if not o:
-            return
-        # For mesh provide shape-key actions only. But only if the object has any shape-keys created
-        if mapping_utils.does_object_support_shapekey_actions(o):
-            if not o.data or not o.data.shape_keys or not o.data.shape_keys.animation_data:
-                return
-            for t in o.data.shape_keys.animation_data.nla_tracks:
-                yield t
-            return
-
-        if not o.animation_data or not o.animation_data.nla_tracks:
-            return
-        for t in o.animation_data.nla_tracks:
-            yield t
+        yield from mapping_utils.list_nla_tracks_of_object(self.object)
 
     def search_names(self, ctx: Context, edit_text) -> Generator[str, Any, None]:
         for i, t in enumerate(self.items()):
