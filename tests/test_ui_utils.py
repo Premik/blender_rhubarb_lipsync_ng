@@ -130,7 +130,7 @@ class DrowpdownHelperUnselectTest(unittest.TestCase):
     #     d.index = 1
     #     d.ensure_index_bounds()
     #     self.assertEqual(d.index_from_name, 1)
-    #     self.assertEqual(d.track_name_from_name, "bb")
+    #     self.assertEqual(d.item_name_from_name, "bb")
 
     def testIndex2Name(self) -> None:
         d = self.create_dropdown(["0 aa", "bb", "cc"])
@@ -202,7 +202,7 @@ class DropdownHelperChangeDetectionTest(unittest.TestCase):
     def test_detect_moved_right(self) -> None:
         d = self.create_dropdown(["0 item1", "1 item2", "2 item3"])
         d.index = 1
-        self.assertEqual(d.track_name_from_name, "item2")
+        self.assertEqual(d.item_name_from_name, "item2")
 
         # Change list: insert new item before item2
         d.names = ["0 item1", "1 newitem", "2 item2", "3 item3"]
@@ -214,7 +214,7 @@ class DropdownHelperChangeDetectionTest(unittest.TestCase):
     def test_detect_moved_left(self) -> None:
         d = self.create_dropdown(["0 item1", "1 newitem", "2 item2", "3 item3"])
         d.index = 2
-        self.assertEqual(d.track_name_from_name, "item2")
+        self.assertEqual(d.item_name_from_name, "item2")
 
         d.names = ["0 item1", "1 item2", "2 item3"]
 

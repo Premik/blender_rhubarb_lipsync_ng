@@ -2,6 +2,7 @@ import bpy
 from bpy.types import Context, Depsgraph, Object, Scene
 
 from . import mapping_properties
+from .mapping_properties import NlaTrackRef
 
 
 class DepsgraphHandler:
@@ -12,6 +13,9 @@ class DepsgraphHandler:
 
     @staticmethod
     def object_with_mapping_updated(ctx: Context, obj: Object, mp: mapping_properties.MappingProperties) -> None:
+        if mp.nla_track1:
+            t1: NlaTrackRef = mp.nla_track1
+            t1.name_updated(ctx)
         print(f"Object with mapping updated: {obj.name}")
 
     @staticmethod
