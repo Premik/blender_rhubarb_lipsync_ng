@@ -21,6 +21,7 @@ class MockDropdown:
     def __init__(self) -> None:
         self.index = -1
         self.name = ""
+        self.last_length = 0
 
     def item2str(self, item) -> str:
         return str(item)
@@ -241,6 +242,35 @@ class DropdownHelperChangeDetectionTest(unittest.TestCase):
 
         status, _ = d.detect_item_changes()
         self.assertEqual(status, DropdownHelper.ChangeStatus.REMOVED)
+
+    def test_detect_renamed(self) -> None:
+        mock = MockDropdown()
+
+        d = DropdownHelper(mock, ["0 item1", "1 item2", "2 item3"], DropdownHelper.NameNotFoundHandling.UNSELECT)
+        d.index = 1
+        d.last_length = 3
+        self.assertEqual(d.item_name_from_name, "item2")
+
+        # Keep same length but rename item at index 1
+        d.names = ["0 item1", "1 renamed_item", "2 item3"]
+        status, new_index = d.detect_item_changes()
+        self.assertEqual(status, DropdownHelper.ChangeStatus.RENAMED)
+        self.assertEqual(new_index, 1)  # Same index but renamed
+
+    def test_detect_renamed_with_multiple_changes(self) -> None:
+        mock = MockDropdown()
+
+        d = DropdownHelper(mock, ["0 item1", "1 item2", "2 item3"], DropdownHelper.NameNotFoundHandling.UNSELECT)
+        d.last_length = 3
+        d.index = 1
+
+        # Change other items but keep same length and rename item at index 1
+        d.names = ["0 changed1", "1 renamed_item", "2 changed3"]
+
+        # Detect changes
+        status, new_index = d.detect_item_changes()
+        self.assertEqual(status, DropdownHelper.ChangeStatus.RENAMED)
+        self.assertEqual(new_index, 1)
 
 
 if __name__ == '__main__':

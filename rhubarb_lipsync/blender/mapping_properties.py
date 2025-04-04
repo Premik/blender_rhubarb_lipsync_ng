@@ -52,6 +52,12 @@ class NlaTrackRef(PropertyGroup):
         options={'LIBRARY_EDITABLE'},
         override={'LIBRARY_OVERRIDABLE'},
     )
+    last_length: IntProperty(  # type: ignore
+        name="Last known length of the items",
+        default=-1,
+        options={'LIBRARY_EDITABLE'},
+        override={'LIBRARY_OVERRIDABLE'},
+    )
 
     @property
     def selected_item(self) -> Optional[NlaTrack]:
