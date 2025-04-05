@@ -172,6 +172,7 @@ class DropdownHelper:
             return
         if status == DropdownHelper.ChangeStatus.RENAMED:
             self.index2name()  # Update the name with new one from the same current index
+            return
         # Removed
         if self.nameNotFoundHandling == DropdownHelper.NameNotFoundHandling.SELECT_ANY:
             new_index = self.index_within_bounds(max(0, self.index - 1))  # Try to select a nearby item if available
