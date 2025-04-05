@@ -15,7 +15,12 @@ class DepsgraphHandler:
     def object_with_mapping_updated(ctx: Context, obj: Object, mp: mapping_properties.MappingProperties) -> None:
         if mp.nla_track1:
             t1: NlaTrackRef = mp.nla_track1
-            t1.name_updated(ctx)
+            t1.dropdown_helper.sync_from_items()
+
+        if mp.nla_track2:
+            t2: NlaTrackRef = mp.nla_track2
+            t2.dropdown_helper.sync_from_items()
+
         print(f"Object with mapping updated: {obj.name}")
 
     @staticmethod
@@ -24,7 +29,6 @@ class DepsgraphHandler:
 
     @staticmethod
     def on_depsgraph_update_post(scene: Scene, depsgraph: Depsgraph) -> None:
-
         ctx: Context = bpy.context
         if not ctx:
             return

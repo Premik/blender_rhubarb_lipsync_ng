@@ -1,6 +1,9 @@
+import logging
 import re
 from enum import Enum
 from typing import Sequence, Tuple
+
+log = logging.getLogger(__name__)
 
 
 class DropdownHelper:
@@ -161,6 +164,7 @@ class DropdownHelper:
     def sync_from_items(self) -> None:
         """Sync index based on item name, trying to maintain position or adjust minimally. Used when items changes (add/delete..)"""
         status, new_index = self.detect_item_changes()
+        log.trace(f"Dropdown change detected: {status}@{new_index} on {self.obj}")
         if status == DropdownHelper.ChangeStatus.UNCHANGED:
             return
         if status == DropdownHelper.ChangeStatus.MOVED_TO:
