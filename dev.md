@@ -168,18 +168,35 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
   * Face-it - From Test rig - Normal actions+shape-key corrections? 2) From shape-key test action 3) The final control rig (doesn't need a wizard)
   * By name - More instances (alow user defined) - will map action by matching name patterns (should provide some placeholder/expansions in the expression for objectName, etc)
 
-* Multi character/dialogs workflow
-  * Start-frame - flag to make it sync from SoundStrip (to support multiple dialogs better)
-  * Workflow from Sequencer - Paste sound_strip first, create captures of them and render to NLA,
+## Multi character/dialogs workflow
+  * Start-frame 
+     - [ ] Sync from SoundStrip 
+     - [x] Sync from start-frame to SoundStrip
+     - [ ] Include channel number (and StripName?) to the Capture name?
+  * Workflow from Sequencer 
+    - [ ] Make a Capture operation dialog (now only confirmation)
+    - [ ] Put the dialog-file, recognizer
+    - [ ] "Capture source is" drop-down in this new Capture Op dialog:
+       - [ ] The sound of the selected
+       - [ ] Selected SoundStrips in Video sequences
+       - [ ] All Sounds without Capture
+       - [ ] All SoundStrips without capture
+    - [ ] Check box - regenerate existing Captures
+    - [ ] Ordering - Selection order/SoundStrip start time/Channel-Start Time
+    - [ ] Number of parallel processed = 1
+  - [ ] Paste sound_strip first, create captures of them and render to NLA
+    
 
-
-```
 
 ### Normal
+* `is_fcurve_for_shapekey` 
+  - there is actually better way, the Action has targe_type/id or similar 
+  - Add support for other action types , like material/shader graph
+  - Refacotr the action filtering toolbar, have the action-types like a dropdown with checkable action types,
 * In prefs, when executable doesn't exist make the control red
 * Integrate with: https://mecabricks.com/en/shop/product/6
 * When tracks are already selected and new NLA track is added sometimes this disturbs the track selection and wrong tracks get used.
-* Make a Capture operation dialog (now only confirmation), put the dialog-file, recognizer and start frame there?
+
 * Bring some of the old baking method back with fixed lengths
 
 ### Low

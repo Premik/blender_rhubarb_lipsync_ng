@@ -202,6 +202,7 @@ class BakeToNLA(bpy.types.Operator):
 
     bl_idname = "rhubarb.bake_to_nla"
     bl_label = "Bake to NLA"
+    bl_options = {'UNDO'}
     trim_cue_excess: BoolProperty(  # type: ignore
         name="Trim excess Cue length",
         description=textwrap.dedent(

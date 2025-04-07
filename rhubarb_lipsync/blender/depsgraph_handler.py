@@ -13,13 +13,9 @@ class DepsgraphHandler:
 
     @staticmethod
     def object_with_mapping_updated(ctx: Context, obj: Object, mp: mapping_properties.MappingProperties) -> None:
-        if mp.nla_track1:
-            t1: NlaTrackRef = mp.nla_track1
-            t1.dropdown_helper.sync_from_items()
-
-        if mp.nla_track2:
-            t2: NlaTrackRef = mp.nla_track2
-            t2.dropdown_helper.sync_from_items()
+        if not mp.has_NLA_track_selected:
+            return
+        mp.sync_NLA_track_refs_from_scene()
 
         print(f"Object with mapping updated: {obj.name}")
 

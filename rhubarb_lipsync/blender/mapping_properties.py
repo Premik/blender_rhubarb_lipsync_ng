@@ -69,6 +69,12 @@ class NlaTrackRef(PropertyGroup):
         # self.dropdown_helper(ctx).index2name()
         return items[self.index]
 
+    def __str__(self) -> str:
+        d = self.dropdown_helper
+        items_count = len(d.names)
+        obj_name = self.object.name if self.object and hasattr(self.object, 'name') else ""
+        return f"NlaTrackRef(name='{d.name}', index={d.index}, last_length={d.last_length}, items_count={items_count}, object='{obj_name}')"
+
 
 class MappingItem(PropertyGroup):
     """Mapping of a single mouth shape type to action(s)"""
@@ -257,8 +263,23 @@ class MappingProperties(PropertyGroup):
         return False
 
     @property
+    def has_NLA_track_selected(self) -> bool:
+        def has_it(t: NlaTrackRef) -> bool:
+            return bool(t.selected_item)
+
+        return has_it(self.nla_track1) or has_it(self.nla_track2)
+
+    @property
     def blank_keys(self) -> list[str]:
         return [mi.key for mi in self.items or [] if not mi.action]
+
+    def sync_NLA_track_refs_from_scene(self) -> None:
+        t1: NlaTrackRef = self.nla_track1
+        if t1:
+            t1.dropdown_helper.sync_from_items()
+        t2: NlaTrackRef = self.nla_track2
+        if t2:
+            t2.dropdown_helper.sync_from_items()
 
     @staticmethod
     def from_context(ctx: Context) -> Optional['MappingProperties']:

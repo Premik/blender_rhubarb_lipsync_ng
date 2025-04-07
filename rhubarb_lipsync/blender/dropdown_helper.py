@@ -54,13 +54,13 @@ class DropdownHelper:
 
     @last_length.setter
     def last_length(self, length: int) -> None:
-        if hasattr(self.obj, 'last_length'):
+        if self.last_length_supported:
             setattr(self.obj, 'last_length', length)
 
     @property
     def last_length_supported(self) -> bool:
         """Check if the underlying object supports storing the last length."""
-        return self.last_length >= 0
+        return hasattr(self.obj, 'last_length')
 
     @staticmethod
     def parse_name(numbered_item: str) -> tuple[int, str]:
@@ -100,7 +100,9 @@ class DropdownHelper:
 
     def item_name_match(self, index: int, item_name_to_match: str) -> bool:
         """Check if the item at the given index in the current list has a matching item name part."""
-        if not (0 <= index < len(self.names)):
+        if index == -1:  # Unselected, empty name expected
+            return bool(item_name_to_match == "")
+        if index >= len(self.names):
             return False
         _, current_item_name = DropdownHelper.parse_name(self.names[index])
         return current_item_name == item_name_to_match
