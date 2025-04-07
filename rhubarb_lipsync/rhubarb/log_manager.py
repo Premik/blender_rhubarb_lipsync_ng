@@ -189,6 +189,15 @@ class LogManager:
                 added += 1
         print(f"Added console handler on {added} loggers.")
 
+    def remove_console_handler(self) -> None:
+        """Removes the console handler from all loggers."""
+        removed = 0
+        for logger in self.logs:
+            if any(handler == self.console_handler for handler in logger.handlers):
+                logger.removeHandler(self.console_handler)
+                removed += 1
+        print(f"Removed console handler from {removed} loggers.")
+
     @staticmethod
     def level2name(level: int) -> str:
         return logging._levelToName.get(level, "?")

@@ -11,6 +11,7 @@ from .blender.icons_manager import IconsManager
 from .blender.mapping_properties import MappingProperties
 from .blender.preferences import RhubarbAddonPreferences
 from .rhubarb.log_manager import logManager
+from .rhubarb import log_manager
 
 bl_info = {
     'name': 'Rhubarb Lipsync NG',
@@ -90,6 +91,8 @@ def unregister() -> None:
     #     del logManager
     autoloader.unregister()
     DepsgraphHandler.unregister()
+    logManager.remove_console_handler()
+    #del log_manager.logManager
     del bpy.types.Scene.rhubarb_lipsync_captures
     del bpy.types.Object.rhubarb_lipsync_mapping
 
