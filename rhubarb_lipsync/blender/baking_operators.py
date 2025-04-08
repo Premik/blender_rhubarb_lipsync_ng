@@ -444,7 +444,6 @@ class BakeToNLA(bpy.types.Operator):
         col.use_property_split = True
 
         def draw_dropdown(pref_key: str) -> UILayout:
-
             line = col.split()
             line.prop(prefs, pref_key)  # type: ignore
             return line
@@ -461,7 +460,6 @@ class BakeToNLA(bpy.types.Operator):
                 line = draw_dropdown("strip_removal_mode")
 
         if tag == "StopAction":
-
             if prefs.stop_preview_mode == "MANUAL":
                 self.draw_error_inbox(col.row(), msg)
                 line = draw_dropdown("stop_preview_mode")

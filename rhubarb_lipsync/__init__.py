@@ -11,7 +11,6 @@ from .blender.icons_manager import IconsManager
 from .blender.mapping_properties import MappingProperties
 from .blender.preferences import RhubarbAddonPreferences
 from .rhubarb.log_manager import logManager
-from .rhubarb import log_manager
 
 bl_info = {
     'name': 'Rhubarb Lipsync NG',

@@ -1,8 +1,30 @@
 import bpy
-from bpy.types import Context, Depsgraph, Object, Scene
+from bpy.types import Context, Depsgraph, Object, Operator, Scene
 
-from . import mapping_properties
-from .mapping_properties import NlaTrackRef
+from . import mapping_properties, ui_utils
+
+
+class SyncNlaTrackRefs(Operator):
+    """Synchronize NLA track references from scene"""
+
+    bl_idname = "rhubarb.sync_nla_track_refs"
+    bl_label = "Sync NLA Track References"
+    bl_options = {'INTERNAL'}
+
+    object_name: bpy.props.StringProperty()
+
+    def execute(self, context: Context) -> set[str]:
+        obj = bpy.data.objects.get(self.object_name)
+        if not obj:
+            return {'CANCELLED'}
+
+        mp = mapping_properties.MappingProperties.from_object(obj)
+        if not mp or not mp.has_NLA_track_selected:
+            return {'CANCELLED'}
+
+        mp.sync_NLA_track_refs_from_scene()
+        ui_utils.redraw_3dviews(context)
+        return {'FINISHED'}
 
 
 class DepsgraphHandler:
@@ -15,7 +37,8 @@ class DepsgraphHandler:
     def object_with_mapping_updated(ctx: Context, obj: Object, mp: mapping_properties.MappingProperties) -> None:
         if not mp.has_NLA_track_selected:
             return
-        mp.sync_NLA_track_refs_from_scene()
+        # mp.sync_NLA_track_refs_from_scene()
+        bpy.ops.rhubarb.sync_nla_track_refs(object_name=obj.name)
 
         print(f"Object with mapping updated: {obj.name}")
 

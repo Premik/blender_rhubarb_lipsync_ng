@@ -1,7 +1,7 @@
 import logging
 import re
 from enum import Enum
-from typing import Sequence, Tuple
+from typing import Optional, Sequence, Tuple
 
 log = logging.getLogger(__name__)
 
@@ -125,16 +125,6 @@ class DropdownHelper:
             else:  # Something was selected so it means it was removed
                 return (DropdownHelper.ChangeStatus.REMOVED, -1)
 
-        # Something was selected (index >= 0)
-        # Use the item_name derived from the stored self.name property
-        # if not item_name: # If the stored name was invalid or empty
-        #     # Treat as if the item was removed, force selection/unselection based on policy
-        #     if self.nameNotFoundHandling == DropdownHelper.NameNotFoundHandling.SELECT_ANY:
-        #         new_index = self.index_within_bounds(0) # Try selecting first item
-        #         return (DropdownHelper.ChangeStatus.MOVED_TO, new_index)
-        #     else:
-        #         return (DropdownHelper.ChangeStatus.REMOVED, -1)
-
         # Is item still at the same index with the same name?
         if self.item_name_match(index, item_name):
             return (DropdownHelper.ChangeStatus.UNCHANGED, index)
@@ -154,8 +144,7 @@ class DropdownHelper:
 
         # No item with matching name not found. Could be REMOVED or RENAMED. Use last_length to deduce.
         if self.last_length_supported and previous_length == current_length and 0 <= index < current_length:
-            # Length is the same, index is still valid, and name didn't match anywhere.
-            # Assume item at `index` was renamed in place.
+            # Length is the same, index is still valid, and name didn't match anywhere. Assume item at `index` was renamed in place.
             return (DropdownHelper.ChangeStatus.RENAMED, index)
         if self.nameNotFoundHandling == DropdownHelper.NameNotFoundHandling.SELECT_ANY:
             index = self.index_within_bounds()
@@ -163,10 +152,17 @@ class DropdownHelper:
         else:
             return (DropdownHelper.ChangeStatus.REMOVED, self.index_within_bounds(-1))
 
-    def sync_from_items(self) -> None:
+    def sync_from_items(self, change: Optional[Tuple[ChangeStatus, int]] = None) -> None:
         """Sync index based on item name, trying to maintain position or adjust minimally. Used when items changes (add/delete..)"""
-        status, new_index = self.detect_item_changes()
+        if change:
+            status, new_index = change
+        else:  # Only detect if change is not explicitly provided already
+            status, new_index = self.detect_item_changes()
+
         log.trace(f"Dropdown change detected: {status}@{new_index} on {self.obj}")
+        setattr(self.obj, "test", f"{status}@{new_index}")  # REMOVE..
+        # log.trace(f"{self.name}@{self.index}| `{getattr(self.obj, 'test', "")}` ")
+
         if status == DropdownHelper.ChangeStatus.UNCHANGED:
             return
         if status == DropdownHelper.ChangeStatus.MOVED_TO:
