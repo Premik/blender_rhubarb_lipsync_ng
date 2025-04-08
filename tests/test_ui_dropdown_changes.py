@@ -68,7 +68,7 @@ class DropdownHelperChangeDetectionTest(unittest.TestCase):
         self.assertEqual(new_index, 4)  # item2 moved to index 4
 
     def test_detect_removed(self) -> None:
-        d = self.create_dropdown(["0 item1", "2 item2", "3 item3"])
+        d = self.create_dropdown(["0 item1", "1 item2", "2 item3"])
         d.index = 1
         d.names = ["1 item1", "2 item3"]  # Remove item2 from the list
 
@@ -192,7 +192,7 @@ class DropdownHelperSyncTest(unittest.TestCase):
 
     def test_sync_new_items_added_when_unselected(self) -> None:
         """Test that sync maintains unselected state when new items are added"""
-        d = self.create_dropdown([])
+        d = self.create_dropdown([], DropdownHelper.NameNotFoundHandling.SELECT_ANY)
         d.index = -1  # Explicitly unselected
 
         # Add new items

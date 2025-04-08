@@ -119,11 +119,16 @@ class DropdownHelper:
             self.last_length = current_length
         index = self.index
         item_name = self.item_name_from_name
-        if current_length == 0:
+        if current_length == 0:  # No items
             if self.index < 0:  # Nothing was selected, so no change
                 return (DropdownHelper.ChangeStatus.UNCHANGED, self.index)
             else:  # Something was selected so it means it was removed
                 return (DropdownHelper.ChangeStatus.REMOVED, -1)
+        if self.index < 0:  # No selection
+            if self.nameNotFoundHandling == DropdownHelper.NameNotFoundHandling.UNSELECT:
+                return (DropdownHelper.ChangeStatus.UNCHANGED, self.index)  # Simple keep no-selection
+            # Select any strategy. There is at least one item, so try to select it by faking "move_to"
+            return (DropdownHelper.ChangeStatus.MOVED_TO, self.index_within_bounds())
 
         # Is item still at the same index with the same name?
         if self.item_name_match(index, item_name):
