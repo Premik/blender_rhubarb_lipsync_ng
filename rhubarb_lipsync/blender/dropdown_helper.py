@@ -165,8 +165,6 @@ class DropdownHelper:
             status, new_index = self.detect_item_changes()
 
         log.trace(f"Dropdown change detected: {status}@{new_index} on {self.obj}")
-        setattr(self.obj, "test", f"{status}@{new_index}")  # REMOVE..
-        # log.trace(f"{self.name}@{self.index}| `{getattr(self.obj, 'test', "")}` ")
 
         if status == DropdownHelper.ChangeStatus.UNCHANGED:
             return
