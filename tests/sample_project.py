@@ -50,7 +50,7 @@ class SampleProject:
             addon_utils._addon_ensure(RhubarbAddonPreferences.bl_idname)
             return
         rhubarb_lipsync.register()  # Simulate blender register call
-        logManager.set_debug()
+        logManager.set_trace()
 
         # bpy.context.preferences.addons['rhubarb_lipsync'].preferences = bpy.context.preferences.addons['rhubarb_lipsync'].preferences
         # Make sure the addon gets listed in the ctx.addons preferences. This is probably a hack
@@ -265,7 +265,7 @@ class SampleProject:
 
     @property
     def armature1(self) -> bpy.types.Object:
-        """Ensure Armature Object with `Sphere` name exists in the scene"""
+        """Ensure Armature Object with `Armature` name exists in the scene"""
         if "Armature" in bpy.data.objects.keys():
             ret = bpy.data.objects["Armature"]
             self.make_object_active(ret)
