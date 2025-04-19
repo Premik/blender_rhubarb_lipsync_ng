@@ -89,9 +89,10 @@ def unregister() -> None:
     #     global logManager
     #     del logManager
     autoloader.unregister()
+    DepsgraphHandler.pending_count = 0
     DepsgraphHandler.unregister()
     logManager.remove_console_handler()
-    #del log_manager.logManager
+    # del log_manager.logManager
     del bpy.types.Scene.rhubarb_lipsync_captures
     del bpy.types.Object.rhubarb_lipsync_mapping
 

@@ -1,11 +1,10 @@
-from time import sleep
 import unittest
-from dataclasses import dataclass
 
-import rhubarb_lipsync.blender.baking_utils as baking_utils
-from rhubarb_lipsync.blender.mapping_properties import NlaTrackRef
-import sample_project
 import bpy
+
+import rhubarb_lipsync.blender.ui_utils as ui_utils
+import sample_project
+from rhubarb_lipsync.blender.mapping_properties import NlaTrackRef
 from rhubarb_lipsync.rhubarb.log_manager import logManager
 
 
@@ -35,6 +34,7 @@ class NLADropdownTest(unittest.TestCase):
         self.create_track("End")
         ad = bpy.context.object.animation_data
         self.assertGreaterEqual(len(ad.nla_tracks), 5)
+        self.trigger_depsgraph()
         self.verify_rlps_tracks(1, 3)
 
     @property
@@ -69,22 +69,20 @@ class NLADropdownTest(unittest.TestCase):
     def testRenameTrack2(self) -> None:
         # Rename track2 but keep RLPS Track in the name
         ad = bpy.context.object.animation_data
+        self.trigger_depsgraph()
         ad.nla_tracks[3].name = "NEW_PREFIX RLPS Track 2"
+
         self.verify_rlps_tracks(1, 3)
 
     def testDeleteLastTrack(self) -> None:
         ad = bpy.context.object.animation_data
-        ad.nla_tracks.remove(ad.nla_tracks[4])  # Remove "End" track
+        # ad.nla_tracks.remove(ad.nla_tracks[4])  # Remove "End" track
+        ui_utils.assert_op_ret(bpy.ops.rhubarb.delete_object_nla_track(object_name=bpy.context.object.name, track_index=4))
         self.verify_rlps_tracks(1, 3)  # Should stay the same
 
     def testDeleteMiddleTrack(self) -> None:
         ad = bpy.context.object.animation_data
-        for i, track in enumerate(ad.nla_tracks):
-            if i != 2:
-                track.select = False
-        bpy.ops.nla.tracks_delete()
-
-        # ad.nla_tracks.remove(ad.nla_tracks[2])
+        ui_utils.assert_op_ret(bpy.ops.rhubarb.delete_object_nla_track(object_name=bpy.context.object.name, track_index=2))
 
         # Verify track references - track1 should still be at index 1,
         # but track2 should now be at index 2 since the track before it was removed
@@ -92,7 +90,7 @@ class NLADropdownTest(unittest.TestCase):
 
     def testDeleteFirstTrack(self) -> None:
         ad = bpy.context.object.animation_data
-        ad.nla_tracks.remove(ad.nla_tracks[0])
+        ui_utils.assert_op_ret(bpy.ops.rhubarb.delete_object_nla_track(object_name=bpy.context.object.name, track_index=0))
         # Verify track references - both should be shifted down by 1
         self.verify_rlps_tracks(0, 2, "After deleting first track")
 
@@ -119,11 +117,16 @@ class NLADropdownTest(unittest.TestCase):
         self.assertEqual(ad.nla_tracks[0].name, self.track1.selected_item.name, "RLPS Track 1 should be at index 0")
         self.assertEqual(ad.nla_tracks[1].name, "VeryFirst", "VeryFirst track should be at index 1")
 
+    def trigger_depsgraph(self) -> None:
+        # ui_utils.assert_op_ret(bpy.ops.rhubarb.show_placement_help())
+        ui_utils.assert_op_ret(bpy.ops.rhubarb.dummy_op())
+
     def testDeleteRLPSTrack(self) -> None:
         # Delete one of the RLPS tracks (track1)
         ad = bpy.context.object.animation_data
         rlps_track_index = self.track1.index
-        ad.nla_tracks.remove(ad.nla_tracks[rlps_track_index])
+
+        ui_utils.assert_op_ret(bpy.ops.rhubarb.delete_object_nla_track(object_name=bpy.context.object.name, track_index=rlps_track_index))
 
         # Now track2 should still exist with adjusted index
         # track1 should be None or invalid

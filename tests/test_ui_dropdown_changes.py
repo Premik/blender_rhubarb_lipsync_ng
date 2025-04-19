@@ -1,4 +1,3 @@
-from operator import index
 import unittest
 
 from rhubarb_lipsync.blender.dropdown_helper import DropdownHelper

@@ -1,6 +1,6 @@
 import logging
 from functools import cached_property
-from typing import Any, Generator, Optional, Tuple
+from typing import Any, Generator, Optional
 
 import bpy
 import bpy.utils.previews
@@ -273,14 +273,6 @@ class MappingProperties(PropertyGroup):
     @property
     def blank_keys(self) -> list[str]:
         return [mi.key for mi in self.items or [] if not mi.action]
-
-    def sync_NLA_track_refs_from_scene(self, change: Optional[Tuple[DropdownHelper.ChangeStatus, int]] = None) -> None:
-        t1: NlaTrackRef = self.nla_track1
-        if t1:
-            t1.dropdown_helper.sync_from_items(change)
-        t2: NlaTrackRef = self.nla_track2
-        if t2:
-            t2.dropdown_helper.sync_from_items(change)
 
     @staticmethod
     def from_context(ctx: Context) -> Optional['MappingProperties']:

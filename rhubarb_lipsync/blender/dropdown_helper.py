@@ -164,7 +164,7 @@ class DropdownHelper:
         else:  # Only detect if change is not explicitly provided already
             status, new_index = self.detect_item_changes()
 
-        log.trace(f"Dropdown change detected: {status}@{new_index} on {self.obj}")
+        log.trace(f"Dropdown change detected: {status}@{new_index} len={self.last_length} on {self.obj}")
 
         if status == DropdownHelper.ChangeStatus.UNCHANGED:
             return

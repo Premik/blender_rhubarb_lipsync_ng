@@ -63,6 +63,10 @@ class SampleProject:
         assert not bool(non_default_objects), f"Unexpected objects in the default scene: {non_default_objects}"
         assert not bool(list(bpy.data.actions)), f"Unexpected actions in the default scene: {list(bpy.data.actions)}"
         assert not self.cprops, f"There is unexpected Capture already created {self.cprops}.  "
+        for obj in bpy.data.objects:
+            if obj.animation_data and obj.animation_data.nla_tracks:
+                assert False, f"Unexpected NLA tracks on object {obj.name}: {[track.name for track in obj.animation_data.nla_tracks]}"
+
         if self.mprops:
             assert not len(self.mprops.items), f"There is unexpected mapping already created on the {bpy.context.object}."
 
