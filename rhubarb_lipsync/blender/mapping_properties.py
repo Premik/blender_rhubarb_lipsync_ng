@@ -26,6 +26,7 @@ class NlaTrackRef(PropertyGroup):
 
     def name_updated(self, ctx: Context) -> None:
         self.dropdown_helper.name2index()
+        _, _ = self.dropdown_helper.detect_item_changes()  # Just to capture the item's length
 
     def items(self) -> Generator[NlaTrack, Any, None]:
         yield from mapping_utils.list_nla_tracks_of_object(self.object)
