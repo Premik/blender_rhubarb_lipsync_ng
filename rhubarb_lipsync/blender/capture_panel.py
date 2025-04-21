@@ -132,7 +132,18 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
 
         op = row.operator(blid, text="", icon="ITALIC").relative = False
 
-        self.layout.separator()
+        return True
+
+    def draw_sequencer_setup(self, sound_errors: bool) -> None:
+        props = CaptureListProperties.capture_from_context(self.ctx)
+        prefs = RhubarbAddonPreferences.from_context(self.ctx)
+
+        if sound_errors:
+            return
+        if not ui_utils.draw_expandable_header(prefs, "sound_sequencer_expanded", "Sequencer Setup", self.layout, sound_errors):
+            return
+        layout = self.layout
+
         row = layout.row(align=True)
         row.operator(sound_operators.CreateSoundStripWithSound.bl_idname, icon='SPEAKER').start_frame = props.start_frame
         row.operator(sound_operators.RemoveSoundStripWithSound.bl_idname, icon='MUTE_IPO_OFF')
@@ -145,6 +156,9 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
         layout.prop(self.ctx.scene, 'use_audio_scrub')
         layout.prop(self.ctx.scene, 'sync_mode')
         # bpy.context.scene.sync_mode = 'AUDIO_SYNC'
+
+        sound: Sound = props and props.sound
+        path = pathlib.Path(sound.filepath)
 
         if sound:
             layout.prop(sound, "use_memory_cache")
@@ -343,7 +357,8 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
             else:
                 layout.operator(capture_operators.CreateCaptureProps.bl_idname, icon="DUPLICATE")
 
-            self.draw_sound_setup()
+            ss_errors = self.draw_sound_setup()
+            self.draw_sequencer_setup(not ss_errors)
             self.draw_info()
 
             self.draw_capture()

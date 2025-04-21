@@ -252,6 +252,7 @@ class RhubarbAddonPreferences(AddonPreferences):
 
     info_panel_expanded: BoolProperty(default=False)  # type: ignore
     sound_source_panel_expanded: BoolProperty(default=True)  # type: ignore
+    sound_sequencer_expanded: BoolProperty(default=True)  # type: ignore
     caputre_panel_expanded: BoolProperty(default=True)  # type: ignore
     strip_placement_setting_panel_expanded: BoolProperty(default=False)  # type: ignore
     mapping_list_panel_expanded: BoolProperty(default=True)  # type: ignore
