@@ -18,6 +18,8 @@ log = logging.getLogger(__name__)
 
 def filtered_actions_enum(prop_group: 'ListFilteredActions', ctx: Context) -> list[tuple[str, str, str, str, int]]:
     try:
+        if not ctx:
+            return []
         o: bpy.types.Object = ctx.object
         mprops = MappingProperties.from_object(o)
 
@@ -333,38 +335,6 @@ class CreateNLATrack(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class SyncNlaTrackRefs(bpy.types.Operator):
-    """Synchronize NLA track references from scene. Has to be done in an operator since changing directly in the call back doesn't persist."""
-
-    bl_idname = "rhubarb.sync_nla_track_refs"
-    bl_label = "Sync NLA Track References"
-    bl_options = {'INTERNAL'}
-
-    object_name: bpy.props.StringProperty()  # type: ignore
-    change_status: bpy.props.StringProperty(default="UNCHANGED")  # type: ignore
-    new_index: bpy.props.IntProperty(default=-1)  # type: ignore
-    track_field_index: bpy.props.IntProperty(default=-1)  # type: ignore
-
-    def execute(self, context: Context) -> set[str]:
-        obj = bpy.data.objects.get(self.object_name)
-        if not obj:
-            return {'CANCELLED'}
-
-        mp = MappingProperties.from_object(obj)
-        if not mp or not mp.has_NLA_track_selected:
-            return {'CANCELLED'}
-
-        status = DropdownHelper.ChangeStatus[self.change_status]
-        change = (status, self.new_index)
-        assert self.track_field_index in [1, 2]
-        t: NlaTrackRef = mp.nla_track1 if self.track_field_index == 1 else mp.nla_track2
-        if t:
-            t.dropdown_helper.sync_from_items(change)
-
-        # ui_utils.redraw_3dviews(context)
-        return {'FINISHED'}
-
-
 class DeleteObjectNLATrack(bpy.types.Operator):
     bl_idname = "rhubarb.delete_object_nla_track"
     bl_label = "Delete a NLA track on an object. Used only by tests."
@@ -386,6 +356,33 @@ class DeleteObjectNLATrack(bpy.types.Operator):
             return {'CANCELLED'}
         ad.nla_tracks.remove(ad.nla_tracks[self.track_index])
         log.debug(f"Removed NLATrack[{self.track_index}] on {self.object_name} ")
+
+        return {'FINISHED'}
+
+
+class CreateObjectNLATrack(bpy.types.Operator):
+    bl_idname = "rhubarb.create_object_nla_track"
+    bl_label = "Create a NLA track on an object. Used only by tests."
+    bl_options = {'INTERNAL'}
+
+    object_name: bpy.props.StringProperty()  # type: ignore
+    track_name: bpy.props.StringProperty(default="New Track")  # type: ignore
+
+    def execute(self, context: Context) -> set[str]:
+        obj = bpy.data.objects.get(self.object_name)
+        if not obj:
+            return {'CANCELLED'}
+
+        ad = obj.animation_data
+        if not ad:
+            obj.animation_data_create()
+            ad = obj.animation_data
+
+        tracks = ad.nla_tracks
+        new_track = tracks.new()
+        new_track.name = self.track_name
+
+        log.debug(f"Created NLATrack '{self.track_name}' on {self.object_name}")
 
         return {'FINISHED'}
 

@@ -17,6 +17,8 @@ log = logging.getLogger(__name__)
 
 
 def time_frame_predefined_vals(ctx: Context, times: list[float], frames: list[float]) -> list[tuple[str, str, str, str, int]]:
+    if not ctx or not ctx.scene:
+        return []
     fps = ctx.scene.render.fps
     fps_base = ctx.scene.render.fps_base
     frame_vals = [(frame2time(f, fps, fps_base) * 1000, f, "SNAP_INCREMENT") for f in frames]

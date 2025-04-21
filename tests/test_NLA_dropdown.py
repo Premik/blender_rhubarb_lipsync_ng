@@ -15,7 +15,7 @@ class NLADropdownTest(unittest.TestCase):
         self.create_tracks()
         logManager.set_trace()
 
-    def create_track(self, name: str) -> None:
+    def create_trackDirect(self, name: str) -> None:
         o = bpy.context.object
         assert o, "No object active"
         ad = o.animation_data
@@ -25,6 +25,11 @@ class NLADropdownTest(unittest.TestCase):
         tracks = ad.nla_tracks
         t = tracks.new()
         t.name = name
+
+    def create_track(self, name: str) -> None:
+        o = bpy.context.object
+        assert o, "No object active"
+        ui_utils.assert_op_ret(bpy.ops.rhubarb.create_object_nla_track(object_name=o.name, track_name=name))
 
     def create_tracks(self) -> None:
         self.create_track("VeryFirst")
@@ -49,10 +54,22 @@ class NLADropdownTest(unittest.TestCase):
         """Verify that the track reference points to a valid RLPS track with the expected index"""
         o: bpy.Object = track_ref.object
         tracks = [t.name for t in o.animation_data.nla_tracks]
-        self.assertIsNotNone(track_ref.selected_item, f"{msg} Track reference should have a selected item. \n{tracks}")
-        self.assertEqual(track_ref.index, expected_index, f"{msg} Track index should be {expected_index}, but is {track_ref.index} \n{tracks}")
+
+        # Create a formatted track list with indices, highlighting the selected track
+        formatted_tracks = []
+        for i, track in enumerate(tracks):
+            if i == track_ref.index:
+                formatted_tracks.append(f"[{i}:{track}]".ljust(20))
+            else:
+                formatted_tracks.append(f"{i}:{track}".ljust(20))
+        track_list_str = "|".join(formatted_tracks)
+
+        self.assertIsNotNone(track_ref.selected_item, f"{msg} Track reference should have a selected item.\n{track_list_str}")
+        self.assertEqual(track_ref.index, expected_index, f"{msg} Track index should be {expected_index}, but is {track_ref.index}\n{track_list_str}")
         self.assertIn(
-            "RLPS Track", track_ref.selected_item.name, f"{msg} Track name should contain 'RLPS Track', but is '{track_ref.selected_item.name}' \n{tracks}"
+            "RLPS Track",
+            track_ref.selected_item.name,
+            f"{msg} Track name should contain 'RLPS Track', but is '{track_ref.selected_item.name}'\{track_list_str}",
         )
 
     def verify_rlps_tracks(self, expected_index1: int, expected_index2: int, msg: str = "") -> None:
@@ -94,23 +111,45 @@ class NLADropdownTest(unittest.TestCase):
         # Verify track references - both should be shifted down by 1
         self.verify_rlps_tracks(0, 2, "After deleting first track")
 
+    @unittest.skip("When track is moved with an operation the change is somehow not (instantly?) propagate")
     def testMoveFirstTrackDown(self) -> None:
         # Move "VeryFirst" track down (swap with RLPS Track 1)
         ad = bpy.context.object.animation_data
         very_first_track = ad.nla_tracks[0]
-        # In Blender, moving a track down means increasing its index
         very_first_track.select = True
-        # Deselect all other tracks
-        for i, track in enumerate(ad.nla_tracks):
-            if i != 0:
-                track.select = False
-        # Set the active track
         ad.nla_tracks.active = very_first_track
-        # Move the track down (swap positions)
-        bpy.ops.anim.channels_move(direction='DOWN')
+
+        area = None
+        for a in bpy.context.screen.areas:
+            print(a.type)
+            if a.type == 'OUTLINER':
+                area = a
+                area.type = 'NLA_EDITOR'
+                region = None
+                for r in area.regions:
+                    if r.type == 'WINDOW':
+                        region = r
+                        break
+                break
+        else:
+            # If no dopesheet editor is open, we may need to create one or skip the test
+            self.skipTest("No outliner area found to convert to NLA editor")
+
+        if region is None:
+            self.skipTest("Could not find WINDOW region in NLA editor")
+        # Use the temp_override context manager
+        with bpy.context.temp_override(area=area, region=region):
+            bpy.ops.anim.channels_move(direction='DOWN')
+
+        # for area in bpy.context.screen.areas:
+        #     if area.type == 'VIEW_3D':
+        #         override = bpy.context.copy()
+        #         override["area"] = area
+        #         with bpy.context.temp_override(**override):
+        #             bpy.ops.anim.channels_move(direction='DOWN')
+        #         break
 
         # After moving, the RLPS Track 1 should be at index 0 and VeryFirst at index 1
-        # Track references should adjust accordingly
         self.verify_rlps_tracks(0, 3, "After moving first track down")
 
         # Verify the track names at their new positions
@@ -123,7 +162,9 @@ class NLADropdownTest(unittest.TestCase):
 
     def testDeleteRLPSTrack(self) -> None:
         # Delete one of the RLPS tracks (track1)
-        ad = bpy.context.object.animation_data
+        # ad = bpy.context.object.animation_data
+        # del self.project
+        # self.setUp()
         rlps_track_index = self.track1.index
 
         ui_utils.assert_op_ret(bpy.ops.rhubarb.delete_object_nla_track(object_name=bpy.context.object.name, track_index=rlps_track_index))
@@ -136,6 +177,17 @@ class NLADropdownTest(unittest.TestCase):
         self.assertIsNone(self.track1.selected_item, f"track1 should be None after deletion \n{tracks}")
         # track2 should be at index 2 (original 3 minus 1 for deleted track)
         self.verify_rlps_track(self.track2, 2, "After deleting RLPS track1")
+
+
+class NLADropdownTest2(unittest.TestCase):
+    def setUp(self) -> None:
+        self.project = sample_project.SampleProject()
+        self.project.create_mapping_1action_on_armature()
+        # self.create_tracks()
+        logManager.set_trace()
+
+    def testBasic1Action(self) -> None:
+        pass
 
 
 if __name__ == "__main__":

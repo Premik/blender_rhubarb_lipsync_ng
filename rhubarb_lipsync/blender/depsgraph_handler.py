@@ -31,10 +31,17 @@ class DepsgraphHandler:
     MAX_PENDING_UPDATES = 2
 
     @staticmethod
-    def handle_track_change(obj: Object, track: NlaTrackRef, track_field_index: int) -> None:
-        status, idx = track.dropdown_helper.detect_item_changes()
+    def handle_track_change(obj: Object, track_field_index: int) -> bool:
+        # Get the actual data object so changes would persist. https://b3d.interplanety.org/en/objects-referring-in-a-depsgraph_update-handler-feature/
+        obj = bpy.data.objects[obj.name]
+        mp = mapping_properties.MappingProperties.from_object(obj)
+        track: NlaTrackRef = mp.nla_track1 if track_field_index == 1 else mp.nla_track2
+        if not track:
+            return False
+        change = track.dropdown_helper.detect_item_changes()
+        status, idx = change
         if status == DropdownHelper.ChangeStatus.UNCHANGED:
-            return  # Don't call the operator when not change was detected
+            return False  # Don't call the operator when not change was detected
 
         # Avoid stack-overflow
         pending = DepsgraphHandler.pending_count
@@ -44,8 +51,10 @@ class DepsgraphHandler:
 
         try:
             DepsgraphHandler.pending_count += 1
-            log.debug(f"Object with mapping updated: {obj.name} changes: {status.name}, {track}_{track_field_index} Synchronization triggerd. ({pending})")
-            bpy.ops.rhubarb.sync_nla_track_refs(object_name=obj.name, change_status=status.name, new_index=idx, track_field_index=track_field_index)
+            log.debug(f"Object: '{obj.name}' changes: {status.name}@{idx}, {track}_{track_field_index} Synchronization triggerd. ({pending})")
+            # bpy.ops.rhubarb.sync_nla_track_refs(object_name=obj.name, change_status=status.name, new_index=idx, track_field_index=track_field_index)
+
+            track.dropdown_helper.sync_from_items(change)
         finally:
             DepsgraphHandler.pending_count -= 1
         return True
@@ -54,10 +63,9 @@ class DepsgraphHandler:
     def object_with_mapping_updated(ctx: Context, obj: Object, mp: mapping_properties.MappingProperties) -> None:
         if not mp.has_NLA_track_selected:
             return
-        changed = False
-        changed = changed or DepsgraphHandler.handle_track_change(obj, mp.nla_track1, 1)
-        changed = changed or DepsgraphHandler.handle_track_change(obj, mp.nla_track2, 2)
-        if log.isEnabledFor(logging.TRACE):  # type: ignore
+        changed = DepsgraphHandler.handle_track_change(obj, 1)
+        changed = DepsgraphHandler.handle_track_change(obj, 2) or changed
+        if not changed and log.isEnabledFor(logging.TRACE):  # type: ignore
             log.trace(f"No changes detected for object: {obj.name}")
 
     @staticmethod
