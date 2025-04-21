@@ -163,15 +163,18 @@ class CaptureProperties(PropertyGroup):
 
     sound: PointerProperty(type=bpy.types.Sound, name="Sound", update=on_sound_update)  # type: ignore
 
+    def get_strip(self, ctx: Context) -> Optional[Strip]:
+        strips = ui_utils.find_sound_strips_by_sound(ctx, self.sound)
+        if not strips:
+            return None
+        return strips[0]
+
     def on_start_frame_update(self, ctx: Context) -> None:
         prefs = RhubarbAddonPreferences.from_context(ctx)
         if not prefs.sync_with_sequencer:
             return False
         # Set the strip start frame based on the Capture start_frame
-        strips = ui_utils.find_sound_strips_by_sound(ctx, self.sound)
-        if not strips:
-            return
-        strip = strips[0]
+        strip = self.get_strip(ctx)
         if strip.frame_start == self.start_frame:
             return
         strip.frame_start = self.start_frame
@@ -181,10 +184,7 @@ class CaptureProperties(PropertyGroup):
         if not prefs.sync_with_sequencer:
             return False
         # Set the strip start frame based on the Capture start_frame
-        strips = ui_utils.find_sound_strips_by_sound(ctx, self.sound)
-        if not strips:
-            return
-        strip = strips[0]
+        strip = self.get_strip(ctx)
         if strip.channel == self.channel_number:
             return
         strip.channel = self.channel_number
@@ -297,7 +297,7 @@ class CaptureProperties(PropertyGroup):
         assert new_ext is not None
         return f"{p}.{new_ext.lower()}"
 
-    def short_desc(self, indx: int):
+    def short_desc(self, indx: int) -> str:
         # jprops: JobProperties = self.job
         # if jprops and jprops.status:
         #     status = f" ({jprops.status})"
@@ -305,7 +305,7 @@ class CaptureProperties(PropertyGroup):
         #     status = ""
 
         if self.sound:
-            fn = f"{self.sound_file_basename}.{self.sound_file_extension}"
+            fn = f"C:{self.channel_number:02} F:{self.start_frame:03} {self.sound_file_basename}.{self.sound_file_extension}"
         else:
             fn = "<No sound selected>"
         # return f"{fn}{status}.{str(indx).zfill(3)}"
@@ -422,16 +422,71 @@ class CaptureListProperties(PropertyGroup):
     def dropdown_helper(self, ctx: Context) -> DropdownHelper:
         return DropdownHelper(self, list(self.search_names(ctx, "")), DropdownHelper.NameNotFoundHandling.SELECT_ANY)
 
-    def name_updated(self, ctx: Context) -> None:
+    def capture_changed(self, ctx: Context) -> None:
         self.dropdown_helper(ctx).name2index()
+        capture = self.selected_item
+        if not capture:
+            return
+        # Select the sound Strip in the Sequencer coresponding to the selected Capture
+        prefs = RhubarbAddonPreferences.from_context(ctx)
+        if not prefs.sync_with_sequencer:
+            return False
+        strip = capture.get_strip(ctx)
+        if not strip:
+            return
+        if ctx.scene.sequence_editor.active_strip == strip:
+            return
+        ctx.scene.sequence_editor.active_strip = strip
 
-    name: StringProperty(name="name", description="Selected capture", search=search_names, update=name_updated)  # type: ignore
+    def find_capture_by_strip(self, strip: Strip) -> Optional['CaptureProperties']:
+        '''Finds a capture that corresponds to the specified sound strip.'''
+        if not strip or not hasattr(strip, "sound") or strip.sound is None:
+            return None
+
+        ret = None
+        for _capture in self.items:
+            capture: CaptureProperties = _capture
+            if not capture.sound:
+                continue
+            if capture.sound == strip.sound:
+                return capture  # Matched exactly by id
+            if bpy.path.abspath(capture.sound.filepath) == bpy.path.abspath(strip.sound.filepath):
+                ret = capture  # Save as the second best candidate
+        return ret
+
+    def sync_selection_from_active_strip(self, ctx: Context) -> None:
+        prefs = RhubarbAddonPreferences.from_context(ctx)
+        if not prefs.sync_with_sequencer:
+            return False
+
+        active_strip = ctx.scene.sequence_editor.active_strip
+        capture = self.find_capture_by_strip(active_strip)
+        if not capture:
+            return
+        self.selected_item = capture
+
+    name: StringProperty(name="name", description="Selected capture", search=search_names, update=capture_changed)  # type: ignore
 
     @property
     def selected_item(self) -> Optional[CaptureProperties]:
         if self.index < 0 or self.index >= len(self.items):
             return None
         return self.items[self.index]
+
+    @selected_item.setter
+    def selected_item(self, capture: Optional[CaptureProperties]) -> None:
+        if capture is None:
+            self.index = -1
+            return
+
+        # Find index of the capture in the collection
+        for i, item in enumerate(self.items):
+            if item == capture:
+                self.index = i
+                return
+
+        # If not found
+        self.index = -1
 
     @staticmethod
     def from_context(ctx: Context) -> Optional['CaptureListProperties']:
