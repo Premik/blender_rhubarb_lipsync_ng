@@ -357,6 +357,17 @@ class DeleteObjectNLATrack(bpy.types.Operator):
         ad.nla_tracks.remove(ad.nla_tracks[self.track_index])
         log.debug(f"Removed NLATrack[{self.track_index}] on {self.object_name} ")
 
+        # Update NlaTrackRef objects - needed to avoid unit-test side effect
+        mprops = MappingProperties.from_object(obj)
+        if mprops:
+            for track_ref in [mprops.nla_track1, mprops.nla_track2]:
+                if track_ref.index == self.track_index:
+                    track_ref.index = -1
+                    track_ref.name = ""
+                elif track_ref.index > self.track_index:
+                    track_ref.index -= 1
+            track_ref.dropdown_helper.detect_item_changes()
+
         return {'FINISHED'}
 
 
