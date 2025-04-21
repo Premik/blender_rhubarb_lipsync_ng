@@ -15,6 +15,7 @@ from ..rhubarb.mouth_cues import FrameConfig, MouthCue, MouthCueFrames
 from ..rhubarb.rhubarb_command import RhubarbCommandAsyncJob
 from . import ui_utils
 from .dropdown_helper import DropdownHelper
+from .preferences import CueListPreferences, RhubarbAddonPreferences
 
 try:
     from bpy.types import Strip  # Since v4.4
@@ -163,8 +164,9 @@ class CaptureProperties(PropertyGroup):
     sound: PointerProperty(type=bpy.types.Sound, name="Sound", update=on_sound_update)  # type: ignore
 
     def on_start_frame_update(self, ctx: Context) -> None:
-        if not self.sync_with_sequencer:
-            return
+        prefs = RhubarbAddonPreferences.from_context(ctx)
+        if not prefs.sync_with_sequencer:
+            return False
         # Set the strip start frame based on the Capture start_frame
         strips = ui_utils.find_sound_strips_by_sound(ctx, self.sound)
         if not strips:
@@ -174,14 +176,32 @@ class CaptureProperties(PropertyGroup):
             return
         strip.frame_start = self.start_frame
 
-    def sync_from_strip(self, strip: Strip) -> bool:
-        if strip.frame_start == self.start_frame:
+    def on_channel_update(self, ctx: Context) -> None:
+        prefs = RhubarbAddonPreferences.from_context(ctx)
+        if not prefs.sync_with_sequencer:
             return False
-        self.start_frame = int(strip.frame_start)
-        return True
+        # Set the strip start frame based on the Capture start_frame
+        strips = ui_utils.find_sound_strips_by_sound(ctx, self.sound)
+        if not strips:
+            return
+        strip = strips[0]
+        if strip.channel == self.channel_number:
+            return
+        strip.channel = self.channel_number
+
+    def sync_from_strip(self, strip: Strip) -> bool:
+        changed = False
+        if strip.frame_start != self.start_frame:
+            self.start_frame = int(strip.frame_start)
+            changed = True
+        if strip.channel != self.channel_number:
+            self.channel_number = strip.channel
+            changed = True
+        return changed
 
     def on_strip_update(self, ctx: Context) -> bool:
-        if not self.sync_with_sequencer:
+        prefs = RhubarbAddonPreferences.from_context(ctx)
+        if not prefs.sync_with_sequencer:
             return False
         # Set the strip start frame based on the Capture start_frame
         strips = ui_utils.find_sound_strips_by_sound(ctx, self.sound)
@@ -189,12 +209,19 @@ class CaptureProperties(PropertyGroup):
             return False
         return self.sync_from_strip(strips[0])
 
-    start_frame: IntProperty(name="Start Frame", description="Used when placing the sound strip and when baking NLA clip.", default=1, update=on_start_frame_update)  # type: ignore
-    sync_with_sequencer: BoolProperty(  # type: ignore
-        default=True,
-        name="Sync with Sequencer",
-        description="Synchronize the Capture properties like start_frame with the sound Strips in the Video Sequencer",
+    start_frame: IntProperty(  # type: ignore
+        name="Start Frame",
+        description="The start frame of the sound strip corresponding to the frame where the sound is placed in the Video Sequencer. Also used as start frame of the NLA strip when baking to the NLA.",
+        default=1,
+        update=on_start_frame_update,
     )
+    channel_number: IntProperty(  # type: ignore
+        name="Channel",
+        description="The channel number of the sound Strip in the sequencer.",
+        default=1,
+        update=on_channel_update,
+    )
+
     dialog_file: StringProperty(  # type: ignore
         name="Dialog file",
         description="Additional plain-text file with transcription of the sound file to improve accuracy. Works for english only",

@@ -193,6 +193,12 @@ class RhubarbAddonPreferences(AddonPreferences):
         default="MANUAL",
     )
 
+    sync_with_sequencer: BoolProperty(  # type: ignore
+        default=True,
+        name="Sync Capture with Sequencer",
+        description="Synchronize the capture start frame and channel with the corresponding sound strips in the Video Sequencer.",
+    )
+
     def capture_tab_name_updated(self, ctx: Context):
         # To workaround circular dependency
         from .capture_panel import CaptureMouthCuesPanel

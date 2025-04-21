@@ -61,7 +61,7 @@ Note: Generally, each time you see a button is disabled, hover the mouse cursor 
 1. Select a sound file.
    * Note the plugin can convert sound files to the supported formats.
    * For a better experience: Enable `Audio Scrubbing` `Cache` and `Sync to Audio`.
-   * Optionally, place the `sound strip` in the `Sequencer` by pressing the **Place as Strip** button. You can set the start frame here, but if you change the start frame later, you need to remove the strip and place it again.
+   * Optionally, place the `sound strip` in the `Sequencer` by pressing the **Place as Strip** button. When the `Sync with Sequencer` button is enabled the start frame is synchronized with the Sound Strip start frame and vice versa.
 
 1. Press the **Capture** button. The list of Cues should get populated. Note:
    * The capture task runs in the background, so you can still use Blender while it is running. You can even create and run another capture(s) concurrently. However, pressing `Esc` will cancel the running operator.
