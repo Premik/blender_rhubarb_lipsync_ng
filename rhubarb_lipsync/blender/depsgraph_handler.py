@@ -1,9 +1,11 @@
 import logging
+import traceback
 
 import bpy
 from bpy.types import Context, Depsgraph, Object, Operator, Scene
 
 from . import mapping_properties
+from . import capture_properties
 from .dropdown_helper import DropdownHelper
 from .mapping_properties import NlaTrackRef
 
@@ -22,8 +24,6 @@ class DepsgraphHandler:
 
     @staticmethod
     def handle_track_change(obj: Object, track_field_index: int) -> bool:
-        # Get the actual data object so changes would persist. https://b3d.interplanety.org/en/objects-referring-in-a-depsgraph_update-handler-feature/
-        obj = bpy.data.objects[obj.name]
         mp = mapping_properties.MappingProperties.from_object(obj)
         track: NlaTrackRef = mp.nla_track1 if track_field_index == 1 else mp.nla_track2
         if not track:
@@ -59,26 +59,46 @@ class DepsgraphHandler:
             log.trace(f"No changes detected for object: {obj.name}")
 
     @staticmethod
+    def sync_capture(ctx: Context, cp: capture_properties.CaptureProperties) -> int:
+        if not cp:
+            return 0
+        if cp.on_strip_update(ctx):
+            return 1
+        return 0
+
+    @staticmethod
     def scene_updated(ctx: Context, scene: Scene) -> None:
         if log.isEnabledFor(logging.TRACE):  # type: ignore
             log.trace("Scene updated")
+        cprops = capture_properties.CaptureListProperties.from_context(ctx)
+        updated_count = 0
+        for cp in cprops.items:
+            updated_count += DepsgraphHandler.sync_capture(ctx, cp)
+        if updated_count > 0 and log.isEnabledFor(logging.DEBUG):
+            log.debug(f"Synced {updated_count} Captures")
 
     @staticmethod
     def on_depsgraph_update_post(scene: Scene, depsgraph: Depsgraph) -> None:
-        ctx: Context = bpy.context
-        if not ctx:
-            return
+        try:
+            ctx: Context = bpy.context
+            if not ctx:
+                return
 
-        for update in depsgraph.updates:
-            if isinstance(update.id, Object):
-                obj: Object = update.id
-                mp = mapping_properties.MappingProperties.from_object(obj)
-                if not mp:  # Object but with no mapping
+            for update in depsgraph.updates:
+                if isinstance(update.id, Object):
+                    # Get the actual data object so changes would persist. https://b3d.interplanety.org/en/objects-referring-in-a-depsgraph_update-handler-feature/
+                    obj = bpy.data.objects[update.id.name]
+                    mp = mapping_properties.MappingProperties.from_object(obj)
+                    if not mp:  # Object but with no mapping
+                        continue
+                    DepsgraphHandler.object_with_mapping_updated(ctx, obj, mp)
                     continue
-                DepsgraphHandler.object_with_mapping_updated(ctx, obj, mp)
-                continue
-            if isinstance(update.id, Scene):
-                DepsgraphHandler.scene_updated(ctx, update.id)
+                if isinstance(update.id, Scene):
+                    DepsgraphHandler.scene_updated(ctx, update.id)
+        except Exception as e:
+            msg = f"Unexpected error occured in depsgraph update post handler: {e}"
+            log.error(msg)
+            log.debug(traceback.format_exc())
 
     @staticmethod
     def register() -> None:

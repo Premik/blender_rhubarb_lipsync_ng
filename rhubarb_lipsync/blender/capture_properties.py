@@ -16,6 +16,11 @@ from ..rhubarb.rhubarb_command import RhubarbCommandAsyncJob
 from . import ui_utils
 from .dropdown_helper import DropdownHelper
 
+try:
+    from bpy.types import Strip  # Since v4.4
+except ImportError:  # Fall back to old API
+    from bpy.types import SoundSequence as Strip
+
 log = logging.getLogger(__name__)
 
 
@@ -158,6 +163,9 @@ class CaptureProperties(PropertyGroup):
     sound: PointerProperty(type=bpy.types.Sound, name="Sound", update=on_sound_update)  # type: ignore
 
     def on_start_frame_update(self, ctx: Context) -> None:
+        if not self.sync_with_sequencer:
+            return
+        # Set the strip start frame based on the Capture start_frame
         strips = ui_utils.find_sound_strips_by_sound(ctx, self.sound)
         if not strips:
             return
@@ -166,8 +174,27 @@ class CaptureProperties(PropertyGroup):
             return
         strip.frame_start = self.start_frame
 
+    def sync_from_strip(self, strip: Strip) -> bool:
+        if strip.frame_start == self.start_frame:
+            return False
+        self.start_frame = int(strip.frame_start)
+        return True
+
+    def on_strip_update(self, ctx: Context) -> bool:
+        if not self.sync_with_sequencer:
+            return False
+        # Set the strip start frame based on the Capture start_frame
+        strips = ui_utils.find_sound_strips_by_sound(ctx, self.sound)
+        if not strips:
+            return False
+        return self.sync_from_strip(strips[0])
+
     start_frame: IntProperty(name="Start Frame", description="Used when placing the sound strip and when baking NLA clip.", default=1, update=on_start_frame_update)  # type: ignore
-    sync_start_frame: BoolProperty(default=False, name="Synchronize the start_frame of the Capture with the sound Strip")  # type: ignore
+    sync_with_sequencer: BoolProperty(  # type: ignore
+        default=True,
+        name="Sync with Sequencer",
+        description="Synchronize the Capture properties like start_frame with the sound Strips in the Video Sequencer",
+    )
     dialog_file: StringProperty(  # type: ignore
         name="Dialog file",
         description="Additional plain-text file with transcription of the sound file to improve accuracy. Works for english only",
