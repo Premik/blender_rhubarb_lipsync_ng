@@ -1,14 +1,47 @@
 import unittest
 from dataclasses import dataclass
 
-from pytest import skip
-
 import bpy
 
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 import sample_project
-from rhubarb_lipsync.blender.mapping_properties import NlaTrackRef
-from rhubarb_lipsync.rhubarb.log_manager import logManager
+from rhubarb_lipsync.blender.mapping_properties import MappingProperties, NlaTrackRef
+
+
+class DeleteObjectNLATrack(bpy.types.Operator):
+    bl_idname = "rhubarb.delete_object_nla_track"
+    bl_label = "Delete a NLA track on an object. Used only by tests."
+    bl_options = {'INTERNAL'}
+
+    object_name: bpy.props.StringProperty()  # type: ignore
+    track_index: bpy.props.IntProperty(default=-1)  # type: ignore
+
+    def execute(self, context: bpy.types.Context) -> set[str]:
+        obj = bpy.data.objects.get(self.object_name)
+        if not obj:
+            return {'CANCELLED'}
+        if self.track_index < 0:
+            return {'CANCELLED'}
+        ad = obj.animation_data
+        if not ad:
+            return {'CANCELLED'}
+        if self.track_index >= len(ad.nla_tracks):
+            return {'CANCELLED'}
+        ad.nla_tracks.remove(ad.nla_tracks[self.track_index])
+        # log.debug(f"Removed NLATrack[{self.track_index}] on {self.object_name} ")
+
+        # Update NlaTrackRef objects - needed to avoid unit-test side effect
+        mprops = MappingProperties.from_object(obj)
+        if mprops:
+            for track_ref in [mprops.nla_track1, mprops.nla_track2]:
+                if track_ref.index == self.track_index:
+                    track_ref.index = -1
+                    track_ref.name = ""
+                elif track_ref.index > self.track_index:
+                    track_ref.index -= 1
+            track_ref.dropdown_helper.detect_item_changes()
+
+        return {'FINISHED'}
 
 
 @dataclass
@@ -18,6 +51,8 @@ class NLATestHelper:
     def __post_init__(self) -> None:
         self.project.create_mapping_1action_on_armature()
         self.create_tracks()
+        if "delete_object_nla_track" not in dir(bpy.ops.rhubarb):
+            bpy.utils.register_class(DeleteObjectNLATrack)
 
     def create_track(self, name: str) -> None:
         o = bpy.context.object
@@ -29,11 +64,6 @@ class NLATestHelper:
         tracks = ad.nla_tracks
         t = tracks.new()
         t.name = name
-
-    def create_track_op(self, name: str) -> None:
-        o = bpy.context.object
-        assert o, "No object active"
-        ui_utils.assert_op_ret(bpy.ops.rhubarb.create_object_nla_track(object_name=o.name, track_name=name))
 
     def create_tracks(self) -> None:
         self.create_track("VeryFirst")

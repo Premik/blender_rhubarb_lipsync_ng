@@ -9,7 +9,6 @@ from bpy.types import Context, Object
 from .. import IconsManager
 from ..rhubarb.mouth_shape_info import MouthShapeInfo, MouthShapeInfos
 from . import mapping_utils, ui_utils
-from .dropdown_helper import DropdownHelper
 from .mapping_properties import MappingItem, MappingProperties, NlaTrackRef
 from .preferences import MappingPreferences, RhubarbAddonPreferences
 
@@ -331,69 +330,6 @@ class CreateNLATrack(bpy.types.Operator):
             trackRef: NlaTrackRef = getattr(mprops, self.track_field_name)
             trackRef.object = o
             trackRef.dropdown_helper.select_last()
-
-        return {'FINISHED'}
-
-
-class DeleteObjectNLATrack(bpy.types.Operator):
-    bl_idname = "rhubarb.delete_object_nla_track"
-    bl_label = "Delete a NLA track on an object. Used only by tests."
-    bl_options = {'INTERNAL'}
-
-    object_name: bpy.props.StringProperty()  # type: ignore
-    track_index: bpy.props.IntProperty(default=-1)  # type: ignore
-
-    def execute(self, context: Context) -> set[str]:
-        obj = bpy.data.objects.get(self.object_name)
-        if not obj:
-            return {'CANCELLED'}
-        if self.track_index < 0:
-            return {'CANCELLED'}
-        ad = obj.animation_data
-        if not ad:
-            return {'CANCELLED'}
-        if self.track_index >= len(ad.nla_tracks):
-            return {'CANCELLED'}
-        ad.nla_tracks.remove(ad.nla_tracks[self.track_index])
-        log.debug(f"Removed NLATrack[{self.track_index}] on {self.object_name} ")
-
-        # Update NlaTrackRef objects - needed to avoid unit-test side effect
-        mprops = MappingProperties.from_object(obj)
-        if mprops:
-            for track_ref in [mprops.nla_track1, mprops.nla_track2]:
-                if track_ref.index == self.track_index:
-                    track_ref.index = -1
-                    track_ref.name = ""
-                elif track_ref.index > self.track_index:
-                    track_ref.index -= 1
-            track_ref.dropdown_helper.detect_item_changes()
-
-        return {'FINISHED'}
-
-
-class CreateObjectNLATrack(bpy.types.Operator):
-    bl_idname = "rhubarb.create_object_nla_track"
-    bl_label = "Create a NLA track on an object. Used only by tests."
-    bl_options = {'INTERNAL'}
-
-    object_name: bpy.props.StringProperty()  # type: ignore
-    track_name: bpy.props.StringProperty(default="New Track")  # type: ignore
-
-    def execute(self, context: Context) -> set[str]:
-        obj = bpy.data.objects.get(self.object_name)
-        if not obj:
-            return {'CANCELLED'}
-
-        ad = obj.animation_data
-        if not ad:
-            obj.animation_data_create()
-            ad = obj.animation_data
-
-        tracks = ad.nla_tracks
-        new_track = tracks.new()
-        new_track.name = self.track_name
-
-        log.debug(f"Created NLATrack '{self.track_name}' on {self.object_name}")
 
         return {'FINISHED'}
 
