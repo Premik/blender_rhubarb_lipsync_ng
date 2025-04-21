@@ -1,3 +1,4 @@
+import logging
 import unittest
 from dataclasses import dataclass
 
@@ -6,6 +7,8 @@ import bpy
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 import sample_project
 from rhubarb_lipsync.blender.mapping_properties import MappingProperties, NlaTrackRef
+
+log = logging.getLogger(__name__)
 
 
 class DeleteObjectNLATrack(bpy.types.Operator):
@@ -28,7 +31,7 @@ class DeleteObjectNLATrack(bpy.types.Operator):
         if self.track_index >= len(ad.nla_tracks):
             return {'CANCELLED'}
         ad.nla_tracks.remove(ad.nla_tracks[self.track_index])
-        # log.debug(f"Removed NLATrack[{self.track_index}] on {self.object_name} ")
+        log.debug(f"Removed NLATrack[{self.track_index}] on {self.object_name} ")
 
         # Update NlaTrackRef objects - needed to avoid unit-test side effect
         mprops = MappingProperties.from_object(obj)
@@ -41,6 +44,16 @@ class DeleteObjectNLATrack(bpy.types.Operator):
                     track_ref.index -= 1
             track_ref.dropdown_helper.detect_item_changes()
 
+        return {'FINISHED'}
+
+
+class DummyOp(bpy.types.Operator):
+    bl_idname = "rhubarb.dummy_op"
+    bl_label = "Helper for unit tests"
+    bl_options = {'INTERNAL'}
+
+    def execute(self, context: bpy.types.Context) -> set[str]:
+        log.warn("\n---------------------\nDummy op\n--------------------\n\n")
         return {'FINISHED'}
 
 
@@ -110,6 +123,8 @@ class NLATestHelper:
         self.verify_rlps_track(self.track2, expected_index2, f"Track2: {msg}")
 
     def trigger_depsgraph(self) -> None:
+        if "dummy_op" not in dir(bpy.ops.rhubarb):
+            bpy.utils.register_class(DummyOp)
         ui_utils.assert_op_ret(bpy.ops.rhubarb.dummy_op())
 
 

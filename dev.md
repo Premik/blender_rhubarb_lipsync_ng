@@ -172,10 +172,11 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
   * Start-frame 
      - [ ] Sync from SoundStrip 
      - [x] Sync from start-frame to SoundStrip
-     - [ ] Include channel number (and StripName?) to the Capture name?
+     - [ ] Include channel number to the Capture and StripName? Also to the Capture name?
   * Workflow from Sequencer 
     - [ ] Make a Capture operation dialog (now only confirmation)
     - [ ] Put the dialog-file, recognizer
+    - [ ] Make the Capture of selected Sound strip visible in the Sequence editor's N panel
     - [ ] "Capture source is" drop-down in this new Capture Op dialog:
        - [ ] The sound of the selected
        - [ ] Selected SoundStrips in Video sequences
@@ -185,6 +186,8 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
     - [ ] Ordering - Selection order/SoundStrip start time/Channel-Start Time
     - [ ] Number of parallel processed = 1
   - [ ] Paste sound_strip first, create captures of them and render to NLA
+  * Bake to NLA - batchmode?
+  - There should be an option to bake multiple captures of the (selected/all objects). Based on the channel or othe crit. So bake can be done 1x for each single character.
     
 
 
@@ -195,8 +198,6 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
   - Refacotr the action filtering toolbar, have the action-types like a dropdown with checkable action types,
 * In prefs, when executable doesn't exist make the control red
 * Integrate with: https://mecabricks.com/en/shop/product/6
-* When tracks are already selected and new NLA track is added sometimes this disturbs the track selection and wrong tracks get used.
-
 * Bring some of the old baking method back with fixed lengths
 
 ### Low

@@ -10,16 +10,6 @@ from .mapping_properties import NlaTrackRef
 log = logging.getLogger(__name__)
 
 
-class DummyOp(Operator):
-    bl_idname = "rhubarb.dummy_op"
-    bl_label = "Helper for unit tests"
-    bl_options = {'INTERNAL'}
-
-    def execute(self, context: Context) -> set[str]:
-        log.warn("\n---------------------\nDummy op\n--------------------\n\n")
-        return {'FINISHED'}
-
-
 class DepsgraphHandler:
     """
     Manages Blender's depsgraph_update_post application handler to trigger
