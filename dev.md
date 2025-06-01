@@ -170,13 +170,14 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 
 ## Multi character/dialogs workflow
   * Start-frame 
-     - [ ] Sync from SoundStrip 
+     - [x] Sync from SoundStrip 
      - [x] Sync from start-frame to SoundStrip
-     - [ ] Include channel number to the Capture and StripName? Also to the Capture name?
+     - [x] Include channel number to the Capture and StripName? Also to the Capture name?
   * Workflow from Sequencer 
     - [ ] Make a Capture operation dialog (now only confirmation)
     - [ ] Put the dialog-file, recognizer
-    - [ ] Make the Capture of selected Sound strip visible in the Sequence editor's N panel
+    - Make the Capture of selected Sound strip visible in the Sequence editor's N panel 
+      -  [ ] - button to create capture from the Script, will turn to button select the capture from the Script (when already has one)
     - [ ] "Capture source is" drop-down in this new Capture Op dialog:
        - [ ] The sound of the selected
        - [ ] Selected SoundStrips in Video sequences
@@ -187,7 +188,7 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
     - [ ] Number of parallel processed = 1
   - [ ] Paste sound_strip first, create captures of them and render to NLA
   * Bake to NLA - batchmode?
-  - There should be an option to bake multiple captures of the (selected/all objects). Based on the channel or othe crit. So bake can be done 1x for each single character.
+    - There should be an option to bake multiple captures of the (selected/all objects). Based on the channel or othe crit. So bake can be done 1x for each single character.
     
 
 

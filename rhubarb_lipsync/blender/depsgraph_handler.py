@@ -71,6 +71,8 @@ class DepsgraphHandler:
         if log.isEnabledFor(logging.TRACE):  # type: ignore
             log.trace("Scene updated")
         cprops = capture_properties.CaptureListProperties.from_context(ctx)
+        # TODO Active strip selection change doesn't generate any events so the sync happens too late and is confusing
+        # cprops.sync_selection_from_active_strip(ctx)
         updated_count = 0
         for cp in cprops.items:
             updated_count += DepsgraphHandler.sync_capture(ctx, cp)
@@ -86,7 +88,7 @@ class DepsgraphHandler:
 
             for update in depsgraph.updates:
                 if isinstance(update.id, Object):
-                    # Get the actual data object so changes would persist. https://b3d.interplanety.org/en/objects-referring-in-a-depsgraph_update-handler-feature/
+                    # Get the actual data object so any changes would persist. https://b3d.interplanety.org/en/objects-referring-in-a-depsgraph_update-handler-feature/
                     obj = bpy.data.objects[update.id.name]
                     mp = mapping_properties.MappingProperties.from_object(obj)
                     if not mp:  # Object but with no mapping

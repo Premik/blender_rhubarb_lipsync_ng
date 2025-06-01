@@ -75,6 +75,37 @@ class CueListColsVisibilityPanel(bpy.types.Panel):
             layout.prop(o, name)
 
 
+# class CaptureMouthCuesSequencerPanel(bpy.types.Panel):
+#     bl_idname = "RLPS_PT_capture_sequencer"
+#     bl_label = "RLPS: Sound Setup and Cues Capture"
+#     bl_space_type = "SEQUENCE_EDITOR"
+#     bl_region_type = "UI"
+#     bl_category = "RLPS"
+#     # bl_description = "Tool tip"
+
+#     def draw(self, context) -> None:
+#         layout = self.layout
+
+#         # Simple dummy content
+#         layout.label(text="Sound Capture Controls")
+
+#         # Add a button
+#         row = layout.row()
+#         row.operator("sound.open", text="Select Sound File", icon="SOUND")
+
+#         # Add a separator
+#         layout.separator()
+
+#         # Add some more UI elements
+#         box = layout.box()
+#         box.label(text="Capture Settings")
+#         box.prop(context.scene, "frame_start")
+
+#         row = layout.row()
+#         row.scale_y = 2.0
+#         row.operator("screen.animation_play", text="Preview", icon="PLAY")
+
+
 class CaptureMouthCuesPanel(bpy.types.Panel):
     bl_idname = "RLPS_PT_capture"
     bl_label = "RLPS: Sound Setup and Cues Capture"
