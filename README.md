@@ -144,6 +144,7 @@ A new `Action` will be created and selected in the `Action Editor`. The two RLPS
 
 - [FAQ](faq.md)
 - [Troubleshooting Guide](troubleshooting.md)
+- [Release Notes](release_notes.md)
 
 ### Supported Blender versions
 
