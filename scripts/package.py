@@ -11,10 +11,13 @@ from rhubarb_bin import RhubarbBinary
 def clean_temp_files_at(start_path: Path) -> int:
     # https://stackoverflow.com/questions/28991015/python3-project-remove-pycache-folders-and-pyc-files
     deleted = 0
-    for p in start_path.rglob('*.py[co]'):
+    for p in start_path.rglob('*.py[cod]'):
         p.unlink()
         deleted += 1
     for p in start_path.rglob('__pycache__'):
+        p.rmdir()
+        deleted += 1
+    for p in start_path.rglob('.mypy_cache'):
         p.rmdir()
         deleted += 1
     return deleted
