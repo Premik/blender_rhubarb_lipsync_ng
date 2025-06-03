@@ -16,3 +16,4 @@ settings.json
 dist
 .crossnote
 summary.py.txt
+sphinx/build/
