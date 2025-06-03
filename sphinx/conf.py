@@ -12,6 +12,11 @@ project = 'Rhubarb Lip Sync NG'
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions: list[str] = ['myst_parser']
+source_suffix = {
+    '.rst': 'restructuredtext',
+    '.txt': 'markdown',
+    '.md': 'markdown',
+}
 
 templates_path = ['templates']
 exclude_patterns = ['build', 'Thumbs.db', '.DS_Store']

@@ -20,6 +20,10 @@ def clean_temp_files_at(start_path: Path) -> int:
     for p in start_path.rglob('.mypy_cache'):
         p.rmdir()
         deleted += 1
+    for p in start_path.rglob('.ruff_cache'):
+        p.rmdir()
+        deleted += 1
+
     return deleted
 
 
