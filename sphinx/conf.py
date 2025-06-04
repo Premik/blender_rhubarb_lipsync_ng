@@ -14,11 +14,11 @@ project = 'Rhubarb Lip Sync NG'
 extensions: list[str] = ['myst_parser']
 source_suffix = {
     '.rst': 'restructuredtext',
-    '.txt': 'markdown',
     '.md': 'markdown',
 }
-
+# root_doc = "../index"
 templates_path = ['templates']
+# include_patterns = [""]
 exclude_patterns = ['build', 'Thumbs.db', '.DS_Store']
 
 

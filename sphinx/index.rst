@@ -10,8 +10,8 @@ Welcome to Rhubarb Lip Sync NG's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   ../README.md
-   ../faq.md
-   ../release_notes.md
-   ../sphinx.md
-   ../troubleshooting.md
+   README.md
+   troubleshooting.md
+   faq.md
+   release_notes.md
+   

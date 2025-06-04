@@ -13,21 +13,21 @@
 
 ## Installation
 
-### Blender 4.2+
-Install as a Blender extension.
+### Get the correct zip file
 
-1. Download the file for your platform:
-
+Download the zip file specifically for your platform. The zip file format is `rhubarb_lipsync_ng-<your_system>-<version>.zip`. For example: `rhubarb_lipsync_ng-Windows-1.5.4.zip` for Windows.
 
    | [🪟 Windows](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v1.5.4/rhubarb_lipsync_ng-Windows-1.5.4.zip) | [🍏 macOS](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v1.5.4/rhubarb_lipsync_ng-macOS-1.5.4.zip) | [🐧 Linux](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v1.5.4/rhubarb_lipsync_ng-Linux-1.5.4.zip) |
    |----------|--------------|------|
 
+### Blender 4.2+
+Install as a Blender extension.
 
-2. Drag and drop the `.zip` file into the Blender window.
+1. Drag and drop the `.zip` file into the Blender window.
 
 ![InstallDisk](doc/img/ExtensionInstallDisk.gif)
 
-3. Verify that the `rhubarb` executable is working by pressing the **Check rhubarb version** button:
+2. Verify that the `rhubarb` executable is working by pressing the **Check rhubarb version** button:
 
 ![CheckVersion](doc/img/checkVersion.png)
 
@@ -36,15 +36,13 @@ Install as a Blender extension.
   <summary> <b>As Legacy Addon</b> </summary>
 
 
-1. Go to the [releases page](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/latest) and download the `rhubarb_lipsync_ng<your_system>*.zip` file to your PC. For example: `rhubarb_lipsync_ng-Windows-1.5.4.zip` for Windows.
-
-2. Run Blender, go to the `Main menu/Edit/Preferences/Addons`. Click the **Install** button (top right) and select the downloaded zip file (don't unzip the file).
+1. Run Blender, go to the `Main menu/Edit/Preferences/Addons`. Click the **Install** button (top right) and select the downloaded zip file (don't unzip the file).
 
 ![Install plugin](doc/img/PluginInstall.png)
 
-3. After a short moment, the plugin will install and show up. **Enable the plugin** by ticking the checkbox in front of the plugin name.
+2. After a short moment, the plugin will install and show up. **Enable the plugin** by ticking the checkbox in front of the plugin name.
 
-4. Verify the `rhubarb` executable is working by pressing the **Check rhubarb version** button. Note the plugin wraps the executable from the [rhubarb-lip-sync](https://github.com/DanielSWolf/rhubarb-lip-sync) project.
+3. Verify the `rhubarb` executable is working by pressing the **Check rhubarb version** button. Note the plugin wraps the executable from the [rhubarb-lip-sync](https://github.com/DanielSWolf/rhubarb-lip-sync) project.
 
 ![Version check](doc/img/rhubarbVersion.gif)
 
