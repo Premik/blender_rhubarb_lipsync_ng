@@ -11,47 +11,9 @@ from typing import Any, List  # Make sure 'Any' is kept if used elsewhere, other
 
 from markdown_it import MarkdownIt
 from markdown_it.token import Token
-from markdown_it.utils import OptionsDict
+from markdown_it.renderer import RendererHTML
 
 from pathlib import Path
-
-
-@dataclass(frozen=True)
-class MarkdownDoc:
-    md_path: Path
-
-    @cached_property
-    def md_text(self) -> str:
-        return self.md_path.read_text(encoding="utf8")
-
-    @cached_property
-    def md_parser(self) -> MarkdownIt:
-        return MarkdownIt()
-
-    @cached_property
-    def tokens(self) -> List[Token]:  # Updated type hint from List[Any]
-        return self.md_parser.parse(self.md_text)
-
-    def debug_print(self) -> None:
-        for idx, token in enumerate(self.tokens):
-            content_preview = ""
-            if token.content:
-                content_preview = token.content[:50].replace("\n", "\\n")
-            print(
-                f"{idx}: type={getattr(token, 'type', None)} "
-                f"tag={getattr(token, 'tag', None)} "
-                f"nesting={getattr(token, 'nesting', None)} "
-                f"content='{content_preview}...'"
-            )
-
-    def to_markdown(self) -> str:
-        options = self.md_parser.options
-        env: dict = {}
-        return self.md_parser.renderer.render(self.tokens, options, env)
-
-    def save_to(self, p: Path) -> None:
-        markdown_content = self.to_markdown()
-        p.write_text(markdown_content, encoding="utf8")
 
 
 class SphinxBuilder:
@@ -116,7 +78,4 @@ class SphinxBuilder:
 
 if __name__ == '__main__':
     builder = SphinxBuilder(project_cfg)
-    # builder.build_docs()
-    md = MarkdownDoc(Path("README.md"))
-    md.debug_print()
-    md.save_to(Path("sphinx/README.md"))
+    builder.build_docs()
