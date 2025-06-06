@@ -163,6 +163,11 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 ## Todo
 
 ### High
+* Offline doc:
+  * Image width - fixed
+  * Animated gifs- reorder to avoid black-images
+  * Download images (from releases)
+  
 * Mapping wizards
   * Clear - will remove the mapping (delete from the object completly?)
   * Face-it - From Test rig - Normal actions+shape-key corrections? 2) From shape-key test action 3) The final control rig (doesn't need a wizard)

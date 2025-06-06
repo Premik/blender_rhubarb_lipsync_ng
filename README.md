@@ -54,7 +54,7 @@ Install as a Blender extension.
 
 1. There should now be a new ***RLSP*** tab visible in the 3D view with two panels. First, create a new `Capture` in the current scene by pressing the **Create capture** button in the `RLSP: Sound setup and cues capture` panel.
 
-Note: Generally, each time you see a button is disabled, hover the mouse cursor over the button and a popup will show the reason.
+   Note: Generally, each time you see a button is disabled, hover the mouse cursor over the button and a popup will show the reason.
 
 1. Select a sound file.
    * Note the plugin can convert sound files to the supported formats.
