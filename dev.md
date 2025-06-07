@@ -167,6 +167,7 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
   * Image width - fixed
   * Animated gifs- reorder to avoid black-images
   * Download images (from releases)
+  * Fix the video tutorials links, convert to table?
   
 * Mapping wizards
   * Clear - will remove the mapping (delete from the object completly?)

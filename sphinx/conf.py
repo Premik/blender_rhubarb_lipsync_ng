@@ -16,10 +16,9 @@ source_suffix = {
     '.rst': 'restructuredtext',
     '.md': 'markdown',
 }
-# root_doc = "../index"
+root_doc = "index"
 templates_path = ['templates']
-# include_patterns = [""]
-exclude_patterns = ['build', 'Thumbs.db', '.DS_Store']
+# include_patterns = ["root_doc/**"]
 
 
 # -- Options for HTML output -------------------------------------------------

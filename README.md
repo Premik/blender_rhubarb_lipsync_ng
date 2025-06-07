@@ -44,7 +44,7 @@ Install as a Blender extension.
 
 3. Verify the `rhubarb` executable is working by pressing the **Check rhubarb version** button. Note the plugin wraps the executable from the [rhubarb-lip-sync](https://github.com/DanielSWolf/rhubarb-lip-sync) project.
 
-![Version check](doc/img/rhubarbVersion.gif)
+![Version check](doc/img/rhubarbVersion.png)
 
 </details>  
 
