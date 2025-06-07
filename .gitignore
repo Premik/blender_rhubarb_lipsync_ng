@@ -2,7 +2,7 @@
 .vscode
 venv
 __pycache__
-release/
+/release/
 copyfiles.bat
 bin/
 bin

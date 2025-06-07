@@ -13,13 +13,13 @@
 
 **Date:** 2025-03-09
 
-# Maintenance Release
+### Maintenance Release
 
 - The `Remove previous strip` button has been moved to the error report section. An option to enable automatic removal has been added.  
 - A new button has been added to manually or automatically unlink an Active Action (preview) before baking, addressing a common issue where the baked animation would not move.  
 - Improved error handling for the `Object has no animation data` error on the preview buttons when using only Shape Key Actions.
 
-![bakeValidations](https://github.com/user-attachments/assets/fc8e9042-0044-4866-8b59-285426146e90)
+![bakeValidations](doc/img/release/bakeValidations.png)
 
 
 ---
@@ -57,7 +57,7 @@ Fixed legacy installation method broken in 1.5.0.
 
 - Added `In Out Blend Type` to control Strip Blending, including new **No Blending** to better support 2D animations.
 
-![image](https://github.com/Premik/blender_rhubarb_lipsync_ng/assets/842962/e6917836-f740-49dc-90c1-9abbf40207ef)
+![image](doc/img/release/in_out_blend_type.png)
 
 - The basic/non-extended shapes scenario now works correctly.
 - Fixed the `'NoneType' object has no attribute 'fcurve'` error.
@@ -102,30 +102,28 @@ Bug fix release
 
 **Date:** 2024-03-30
 
-# Changes
-
-## Capture
+### Capture
 - Import/Export captured Cues to json file (mainly used by unitests )
 
-![image](https://github.com/Premik/blender_rhubarb_lipsync_ng/assets/842962/ef02780c-63cc-43be-86bb-d7ef54b49bb2)
+![image](doc/img/release/capture_import_export.png)
 
 
-## Mapping
+### Mapping
 - Mapping preview button. Activates the mapped Action on the selected object(s) or all the objects which have mapping.
 - A custom frame-range on the mapped Action can be configured. So it is now possible to use ***pose-sheets*** and it is no longer necessary to slice individual poses out into individual Actions. Like for example the `overwrite_shape_action` from the `Faceit` plugin. This is also prerequisite for more automated Faceit integration (wip).
 
-![image](https://github.com/Premik/blender_rhubarb_lipsync_ng/assets/842962/3c49312f-abf1-4a8a-8480-af09a8ef989a)
+![image](doc/img/release/mapping_preview.png)
 
 
-## NLA Bake dialog
+### NLA Bake dialog
 - Caputre selection can be now changed directly on the bake dialog.
 - Auto-trim too long Cues on the NLA baking. Enabled by default with some reasonable time.
 
 
-![image](https://github.com/Premik/blender_rhubarb_lipsync_ng/assets/842962/848320a4-9094-424f-8837-bcf2728dbe37)
+![image](doc/img/release/nla_bake_dialog.png)
 
 
-## Other
+### Other
 - Several small UI changes and reorganization
 - Unittests on Github works for all three platforms
 
@@ -147,18 +145,18 @@ Bug fix release: the Action dropdown was failing silently where there was any bl
 
 - The dialog file is automatically used if there is `.txt` file beside the `wav/ogg` file. See #7
 - **Up to date** check button in the preferences:
-![image](https://github.com/Premik/blender_rhubarb_lipsync_ng/assets/842962/5f9bfef0-f1c8-40a5-a475-2c47eeba2354)
+![image](doc/img/release/up_to_date_check.png)
 
 
 - Baking **Shape-keys** is now supported.
   - For Armature use normal Actions
   - For Mesh use Shape-key Actions
-![image](https://github.com/Premik/blender_rhubarb_lipsync_ng/assets/842962/938af666-bbd3-466d-b8f5-080803ab6d14)
+![image](doc/img/release/shape_keys_baking.png)
 
 - Mapping section of the panel has been reorganized.
   - Cue-type help button has been moved to the left (click on the A,B,C symbols)
   - Action dropdown is now filtered based on the Flags in the "toolbar". Shape/Normal Actions, Assets only, Only Valid/Matching Actions
-![image](https://github.com/Premik/blender_rhubarb_lipsync_ng/assets/842962/9d007f43-8c8f-4114-9a05-3c11c8111c25)
+![image](doc/img/release/mapping_panel_reorg.png)
 
 
 ---
@@ -214,4 +212,3 @@ Bugfix release, removed stalled imports
 - Setting the start frame works as expected. 
 
 ---
-
