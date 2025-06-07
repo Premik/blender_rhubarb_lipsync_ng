@@ -15,7 +15,7 @@ from ..rhubarb.mouth_cues import FrameConfig, MouthCue, MouthCueFrames
 from ..rhubarb.rhubarb_command import RhubarbCommandAsyncJob
 from . import ui_utils
 from .dropdown_helper import DropdownHelper
-from .preferences import CueListPreferences, RhubarbAddonPreferences
+from .preferences import RhubarbAddonPreferences
 
 try:
     from bpy.types import Strip  # Since v4.4

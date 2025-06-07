@@ -2,10 +2,9 @@ import logging
 import traceback
 
 import bpy
-from bpy.types import Context, Depsgraph, Object, Operator, Scene
+from bpy.types import Context, Depsgraph, Object, Scene
 
-from . import mapping_properties
-from . import capture_properties
+from . import capture_properties, mapping_properties
 from .dropdown_helper import DropdownHelper
 from .mapping_properties import NlaTrackRef
 

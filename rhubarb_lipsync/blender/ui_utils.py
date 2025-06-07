@@ -1,7 +1,7 @@
 import logging
 import pathlib
 import traceback
-from typing import Any, Callable, Iterator, Optional, Type
+from typing import Any, Callable, Iterator, Type
 
 import bpy
 import bpy.utils.previews

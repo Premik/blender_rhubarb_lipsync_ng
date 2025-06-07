@@ -1,20 +1,11 @@
-import shutil
-import subprocess
-import sys
+import re
+from dataclasses import dataclass
 from functools import cached_property
 from pathlib import Path
-import re
-
-from config import project_cfg
-from dataclasses import dataclass
-from typing import Any, List, Optional  # Make sure 'Any' is kept if used elsewhere, otherwise it can be removed.
-
+from typing import List, Optional  # Make sure 'Any' is kept if used elsewhere, otherwise it can be removed.
 
 from markdown_it import MarkdownIt
 from markdown_it.token import Token
-from markdown_it.renderer import RendererHTML
-
-from pathlib import Path
 
 
 @dataclass(frozen=True)

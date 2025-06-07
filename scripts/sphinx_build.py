@@ -1,19 +1,10 @@
 import shutil
 import subprocess
 import sys
+from dataclasses import dataclass
 from functools import cached_property
 from pathlib import Path
 
-from config import project_cfg
-from dataclasses import dataclass
-from typing import Any, List  # Make sure 'Any' is kept if used elsewhere, otherwise it can be removed.
-
-
-from markdown_it import MarkdownIt
-from markdown_it.token import Token
-from markdown_it.renderer import RendererHTML
-
-from pathlib import Path
 from markdown_helper import MarkdownLineEditor
 
 
@@ -78,10 +69,9 @@ class SphinxBuilder:
         shutil.copy(src, dest)
 
     def copy_troubleshooting(self) -> None:
-        src = self.project_dir / "troubleshooting.md"
-        dest = self.doc_root_dir / "troubleshooting.md"
-        print(f"Copying {src} to {dest}")
-        shutil.copy(src, dest)
+        md = MarkdownLineEditor(self.project_dir / "troubleshooting.md")
+        md.delete_chapter("Additional detail", keep_heading=False)
+        md.save_to(self.doc_root_dir / "troubleshooting.md")
 
     def copy_release_notes(self) -> None:
         src = self.project_dir / "release_notes.md"

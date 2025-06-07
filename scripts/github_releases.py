@@ -1,8 +1,7 @@
-from pathlib import Path
 from dataclasses import dataclass
 from functools import cached_property
+from pathlib import Path
 from typing import Iterator
-from datetime import datetime
 
 from github import Github
 from github.GitRelease import GitRelease
