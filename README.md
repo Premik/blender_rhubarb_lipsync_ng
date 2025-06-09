@@ -4,12 +4,22 @@
 
 ## Video tutorials
 
-### Quick Intro
+
 [![Quick Intro](doc/img/demo0Thumb.jpeg)](https://lbry.tv/@OwlGear:8/rhubarbng-quick-intro:d)
 
+[![2d Image-Plane](doc/img/demo4Thumb.jpeg)](https://www.youtube.com/watch?v=k0l-bPFl4Jw)
 
-### Combining Armature Actions with Shape Keys
+[![Simple Shape-keys workflow](doc/img/demo3Thumb.jpeg)](https://www.youtube.com/watch?v=JwU52eSVIbE)
+
+
 [![Combining Armature Actions with Shape Keys](doc/img/demo2Thumb.jpeg)](https://odysee.com/@OwlGear:8/rhubarblipsync-ng-shape-keys:6)
+
+## Video Tutorials B
+
+| | |
+|---|---|
+| [![Quick Intro](doc/img/demo0Thumb.jpeg)](https://lbry.tv/@OwlGear:8/rhubarbng-quick-intro:d) | [![2d Image-Plane](doc/img/demo4Thumb.jpeg)](https://www.youtube.com/watch?v=k0l-bPFl4Jw) |
+| [![Simple Shape-keys workflow](doc/img/demo3Thumb.jpeg)](https://www.youtube.com/watch?v=JwU52eSVIbE) | [![Combining Armature Actions with Shape Keys](doc/img/demo2Thumb.jpeg)](https/odysee.com/@OwlGear:8/rhubarblipsync-ng-shape-keys:6) |
 
 ## Installation
 

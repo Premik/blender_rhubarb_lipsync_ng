@@ -210,5 +210,3 @@ Bugfix release, removed stalled imports
 - The Action baking somehow works now. But the Strip Placement needs a rework. Especially the strip-ends placing. Baking of the shape keys actions is not implemented yet.
 - Captures are now bound to `Scene` and only Mapping-settings are bound to individual `Object(s)` (typically armature). So one capture can be used for multiple objects and baked at once.
 - Setting the start frame works as expected. 
-
----

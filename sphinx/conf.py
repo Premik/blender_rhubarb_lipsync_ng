@@ -24,5 +24,6 @@ templates_path = ['templates']
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
+# pip install sphinx-book-theme
 html_theme = 'sphinx_book_theme'
 html_static_path = ['static']

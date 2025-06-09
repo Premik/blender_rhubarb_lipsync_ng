@@ -227,7 +227,8 @@ class MarkdownDoc:
     def find_block(self, block_name: str, content_rx: str, start_line=-1) -> Optional[Token]:
         matches = self.find_in_child_tokens(f"{block_name}_open", content_rx, start_line)
         if len(matches) != 1:
-            raise ValueError(f"Regex matches {len(matches)} {block_name}s, expected exactly 1. \n{'\n'.join([str(m) for m in matches])}")
+            n = '\n'
+            raise ValueError(f"Regex matches {len(matches)} {block_name}s, expected exactly 1. {n}{n.join([str(m) for m in matches])}")
         t = matches[0]
         parent = self.parent_by_token_id.get(id(t))
         if parent is None:

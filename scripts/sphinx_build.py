@@ -104,18 +104,18 @@ class SphinxBuilder:
                 shutil.rmtree(path)
         self.build_dir.mkdir(parents=True, exist_ok=True)
 
-    def sphinx_build(self) -> None:
+    def sphinx_build(self, build_type: str, target_dir: Path) -> None:
         """Builds the Sphinx documentation."""
         print(f"Building Sphinx documentation in {self.doc_root_dir}")
         process = None
         try:
             process = subprocess.run(
-                ["sphinx-build", "-b", "html", str(self.doc_root_dir), str(self.html_dir)],
+                ["sphinx-build", "-b", build_type, str(self.doc_root_dir), str(target_dir)],
                 capture_output=True,
                 text=True,
                 check=True,
             )
-            print(f"Sphinx documentation built successfully in {self.html_dir}")
+            print(f"Sphinx documentation built successfully in {target_dir}")
         except subprocess.CalledProcessError as e:
             print(f"Error building Sphinx documentation: {e}")
             print(e.stdout)
@@ -132,9 +132,16 @@ class SphinxBuilder:
                 if process.stderr:
                     print(process.stderr)
 
+    def sphinx_build_html(self) -> None:
+        self.sphinx_build("html", self.html_dir)
+
+    def sphinx_build_pdf(self) -> None:
+        self.sphinx_build("rinoh", self.pdf_out_dir)
+
 
 if __name__ == '__main__':
     builder = SphinxBuilder()
     builder.clean_build()
     builder.copy_docs_to_root()
-    builder.sphinx_build()
+    builder.sphinx_build_html()
+    builder.sphinx_build_pdf()
