@@ -7,7 +7,7 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'Rhubarb Lip Sync NG'
-
+release = '1.5'
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
@@ -19,7 +19,15 @@ source_suffix = {
 root_doc = "index"
 templates_path = ['templates']
 # include_patterns = ["root_doc/**"]
-
+rinoh_documents = [
+    dict(
+        doc='index',
+        target='Rhubarb Lip Sync NG',
+        logo='doc/img/RLSP-banner.png',
+        # template='sphinx/rinoh_template.rts',  # Article Book
+        template='/wrk/dev/rhubarb-lipsync/sphinx/rinoh_template.rts',  # Article Book
+    )
+]
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
@@ -27,3 +35,6 @@ templates_path = ['templates']
 # pip install sphinx-book-theme
 html_theme = 'sphinx_book_theme'
 html_static_path = ['static']
+
+# -- Options for rinoh output -------------------------------------------------
+rinoh_stylesheets = ["rinoh_style.rts"]

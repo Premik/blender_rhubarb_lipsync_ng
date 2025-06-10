@@ -1,0 +1,10 @@
+[TEMPLATE_CONFIGURATION]
+template = book
+
+parts =
+    title
+    ;front_matter
+    contents
+    ;back_matter
+stylesheet = rinoh_style.rts
+language = en

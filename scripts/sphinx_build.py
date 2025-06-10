@@ -6,11 +6,14 @@ from functools import cached_property
 from pathlib import Path
 
 from markdown_helper import MarkdownLineEditor
+from PIL import Image
 
 
 @dataclass
 class SphinxBuilder:
     """Builds the Sphinx documentation."""
+
+    sanitize: bool = False
 
     @cached_property
     def project_dir(self) -> Path:
@@ -41,7 +44,7 @@ class SphinxBuilder:
         return self.build_dir / "pdf"
 
     def copy_readme(self) -> None:
-        md = MarkdownLineEditor(self.project_dir / "README.md")
+        md = MarkdownLineEditor(self.project_dir / "README.md", self.sanitize)
         md.delete_chapter("Rhubarb Lip.*Blender plugin", keep_heading=True)
 
         # md.delete_chapter("Video tutorials", keep_heading=False)
@@ -61,6 +64,7 @@ class SphinxBuilder:
             shutil.rmtree(dest)
         print(f"Copying {src} to {dest}")
         shutil.copytree(src, dest)
+        shutil.copy(self.project_dir / "support/blendermarket/assetsUp/RLSP-banner.png", dest)
 
     def copy_faq(self) -> None:
         src = self.project_dir / "faq.md"
@@ -69,7 +73,7 @@ class SphinxBuilder:
         shutil.copy(src, dest)
 
     def copy_troubleshooting(self) -> None:
-        md = MarkdownLineEditor(self.project_dir / "troubleshooting.md")
+        md = MarkdownLineEditor(self.project_dir / "troubleshooting.md", self.sanitize)
         md.delete_chapter("Additional detail", keep_heading=False)
         md.save_to(self.doc_root_dir / "troubleshooting.md")
 
@@ -138,10 +142,45 @@ class SphinxBuilder:
     def sphinx_build_pdf(self) -> None:
         self.sphinx_build("rinoh", self.pdf_out_dir)
 
+    def unanime_gif(self, gif_path: Path) -> None:
+        """Takes a path to an (animated) gif, extracts the middle frame, and saves it as a single-frame gif,
+        overwriting the original file."""
+        if not gif_path.exists():
+            print(f"Gif file not found at {gif_path}")
+            return
+        with Image.open(gif_path) as im:
+            if not getattr(im, "is_animated", False):
+                # print(f"Image at {gif_path} is not an animated gif.")
+                return
+            middle_frame_index = im.n_frames // 2
+            im.seek(middle_frame_index)
+            print(f"Unanimating {gif_path}, saving frame {middle_frame_index+1}/{im.n_frames}")
+            # A copy is needed, otherwise the save fails with "cannot write mode P as G"
+            frame = im.copy()
+            frame.save(gif_path)
+
+    def unanime_gifs(self, folder: Path) -> None:
+        """Takes a folder path and recursively finds all .gif files, then calls unanime_gif on each."""
+        if not folder.exists() or not folder.is_dir():
+            print(f"Folder not found at {folder}")
+            return
+        for gif_path in folder.rglob("*.gif"):
+            self.unanime_gif(gif_path)
+
+    def build_html(self) -> None:
+        self.sanitize = False
+        self.copy_docs_to_root()
+        self.sphinx_build_html()
+
+    def build_pdf(self) -> None:
+        self.sanitize = True
+        self.copy_docs_to_root()
+        self.unanime_gifs(builder.media_dir)
+        self.sphinx_build_pdf()
+
 
 if __name__ == '__main__':
     builder = SphinxBuilder()
     builder.clean_build()
-    builder.copy_docs_to_root()
-    builder.sphinx_build_html()
-    builder.sphinx_build_pdf()
+    builder.build_html()
+    builder.build_pdf()

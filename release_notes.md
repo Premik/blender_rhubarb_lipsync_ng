@@ -13,7 +13,7 @@
 
 **Date:** 2025-03-09
 
-### Maintenance Release
+**Maintenance Release**
 
 - The `Remove previous strip` button has been moved to the error report section. An option to enable automatic removal has been added.  
 - A new button has been added to manually or automatically unlink an Active Action (preview) before baking, addressing a common issue where the baked animation would not move.  

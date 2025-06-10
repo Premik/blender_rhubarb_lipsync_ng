@@ -15,13 +15,13 @@ def clean_temp_files_at(start_path: Path) -> int:
         p.unlink()
         deleted += 1
     for p in start_path.rglob('__pycache__'):
-        p.rmdir()
+        shutil.rmtree(p, ignore_errors=True)
         deleted += 1
     for p in start_path.rglob('.mypy_cache'):
-        p.rmdir()
+        shutil.rmtree(p, ignore_errors=True)
         deleted += 1
     for p in start_path.rglob('.ruff_cache'):
-        p.rmdir()
+        shutil.rmtree(p, ignore_errors=True)
         deleted += 1
 
     return deleted
@@ -45,6 +45,9 @@ class PackagePlugin:
 
     blender_manifest_pattern = r'^\s*version\s*=\s*["]\d+\.\d+\.\d+["]'
     blender_manifest_rx = re.compile(blender_manifest_pattern)
+
+    sphinx_conf_pattern = r"^\s*release\s*=\s*[']\d+\.\d+[']"
+    sphinx_conf_rx = re.compile(sphinx_conf_pattern)
 
     main_package_name = 'rhubarb_lipsync'
 
@@ -83,6 +86,10 @@ class PackagePlugin:
         return self.project_dir / PackagePlugin.main_package_name / "blender_manifest.toml"
 
     @cached_property
+    def sphinx_conf_path(self) -> Path:
+        return self.project_dir / "sphinx" / "conf.py"
+
+    @cached_property
     def dist_dir(self) -> Path:
         return self.project_dir / "dist"
 
@@ -115,6 +122,7 @@ class PackagePlugin:
         self.update_version_in_file(PackagePlugin.readme_version_zip_rx, self.readme_md_path, f"-{self.version_str}.zip")
         self.update_version_in_file(PackagePlugin.readme_version_release_url_rx, self.readme_md_path, f"/v{self.version_str}/")
         self.update_version_in_file(PackagePlugin.blender_manifest_rx, self.blender_manifest_path, f'version = "{self.version_str}"')
+        self.update_version_in_file(PackagePlugin.sphinx_conf_rx, self.sphinx_conf_path, f"release = '{self.version_tuple[0]}.{self.version_tuple[1]}'")
 
     def clean_temp_files(self) -> None:
         d = clean_temp_files_at(self.project_dir)

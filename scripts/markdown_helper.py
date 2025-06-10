@@ -263,10 +263,21 @@ class MarkdownDoc:
 @dataclass(frozen=True)
 class MarkdownLineEditor:
     md_path: Path
+    sanitize: bool = False
 
     @cached_property
     def md(self) -> MarkdownDoc:
-        return MarkdownDoc(self.md_path)
+        md = MarkdownDoc(self.md_path)
+        if self.sanitize:
+            for i, l in enumerate(md.md_lines):
+                md.md_lines[i] = self.sanitize_line(l)
+        return md
+
+    def sanitize_line(self, l: str) -> str:
+        # Rinoh doesn't support the doublespace at the end to force newline
+        l = re.sub(r"  $", "\n", l)
+        l = l.replace("✔", "[OK]").replace("❌", "[FAILED]")
+        return l
 
     @cached_property
     def lines_to_include(self) -> List[bool]:
