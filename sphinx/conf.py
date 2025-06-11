@@ -1,4 +1,3 @@
-from pathlib import Path
 
 # Configuration file for the Sphinx documentation builder.
 #
@@ -10,7 +9,7 @@ from pathlib import Path
 
 
 project = 'Rhubarb Lip Sync NG'
-release = '1.5'
+release = '1.6'
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 

@@ -20,9 +20,9 @@
 
 ### Get the correct zip file
 
-Download the zip file specifically for your platform. The zip file format is `rhubarb_lipsync_ng-<your_system>-<version>.zip`. For example: `rhubarb_lipsync_ng-Windows-1.5.4.zip` for Windows.
+Download the zip file specifically for your platform. The zip file format is `rhubarb_lipsync_ng-<your_system>-<version>.zip`. For example: `rhubarb_lipsync_ng-Windows-1.6.0.zip` for Windows.
 
-   | [🪟 Windows](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v1.5.4/rhubarb_lipsync_ng-Windows-1.5.4.zip) | [🍏 macOS](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v1.5.4/rhubarb_lipsync_ng-macOS-1.5.4.zip) | [🐧 Linux](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v1.5.4/rhubarb_lipsync_ng-Linux-1.5.4.zip) |
+   | [🪟 Windows](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v1.6.0/rhubarb_lipsync_ng-Windows-1.6.0.zip) | [🍏 macOS](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v1.6.0/rhubarb_lipsync_ng-macOS-1.6.0.zip) | [🐧 Linux](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v1.6.0/rhubarb_lipsync_ng-Linux-1.6.0.zip) |
    |----------|--------------|------|
 
 ### Blender 4.2+

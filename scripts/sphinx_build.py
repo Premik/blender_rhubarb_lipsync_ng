@@ -5,10 +5,10 @@ from dataclasses import dataclass
 from functools import cached_property
 from pathlib import Path
 
-from markdown_helper import MarkdownLineEditor
 from PIL import Image
 
 from config import project_cfg
+from markdown_helper import MarkdownLineEditor
 from package import PackagePlugin
 
 

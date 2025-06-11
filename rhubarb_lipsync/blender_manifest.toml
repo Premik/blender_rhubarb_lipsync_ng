@@ -1,6 +1,6 @@
 schema_version = "1.0.0"
 id = "rhubarb_lipsync"
-version = "1.5.4"
+version = "1.6.0"
 name = "Rhubarb Lipsync NG"
 tagline = "Integrate Rhubarb Lipsync into Blender"
 maintainer = "Premysl Srubar"

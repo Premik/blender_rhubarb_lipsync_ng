@@ -1,5 +1,21 @@
 # Release Notes
 
+## v1.6.0
+
+**Date:** 2025-06-12
+
+- There is now two-way **synchronization** between the `Sound Strip` in the `Sequencer` and the `Capture` object. The `Start Frame` updates as the `Strip` is being moved and vice versa. Can be enabled/disabled with the chain like button (enabled by default).
+![AudioStripSync](doc/img/release/AudioStrip2WaySync.gif)
+
+
+
+- The `NLA Track` selection dropdowns are now more robust and persists most of the NLA track modifications like track reordering renaming or deletions.
+![NLATrackRef](doc/img/release/NLATrackRef.gif)
+
+- Offline html/pdf documentation is included as a separate zip file.
+---
+
+
 ## v1.5.4
 
 **Date:** 2025-03-25
