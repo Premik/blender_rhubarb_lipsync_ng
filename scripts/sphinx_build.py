@@ -8,6 +8,9 @@ from pathlib import Path
 from markdown_helper import MarkdownLineEditor
 from PIL import Image
 
+from config import project_cfg
+from package import PackagePlugin
+
 
 @dataclass
 class SphinxBuilder:
@@ -18,6 +21,10 @@ class SphinxBuilder:
     @cached_property
     def project_dir(self) -> Path:
         return Path(__file__).parents[1]
+
+    @cached_property
+    def dist_dir(self) -> Path:
+        return self.project_dir / "dist"
 
     @cached_property
     def sphinx_dir(self) -> Path:
@@ -205,9 +212,40 @@ class SphinxBuilder:
         # self.resize_images(max_width=400)
         self.sphinx_build_pdf()
 
+    def get_doc_version(self) -> str:
+        pp = PackagePlugin(project_cfg)
+        t = pp.version_tuple
+        return f"{t[0]}.{t[1]}"
+
+    def zip_docs(self) -> None:
+        version = self.get_doc_version()
+        zip_name = f"rhubarb-lipsync-docs-{version}"
+        zip_path = self.dist_dir / zip_name
+        print(f"Creating documentation package '{zip_path}.zip'")
+
+        # Create a temporary directory to assemble the files to be zipped
+        temp_dir = self.build_dir / "zip_temp"
+        if temp_dir.exists():
+            shutil.rmtree(temp_dir)
+        temp_dir.mkdir()
+
+        # Copy HTML and PDF output to the temporary directory
+        shutil.copytree(self.html_dir, temp_dir / "html")
+        pdf_dest = temp_dir / "pdf"
+        pdf_dest.mkdir()
+        for f in self.pdf_out_dir.glob("*.pdf"):
+            shutil.copy(f, pdf_dest)
+
+        # Create the zip archive
+        shutil.make_archive(str(zip_path), 'zip', root_dir=temp_dir)
+
+        # Clean up the temporary directory
+        shutil.rmtree(temp_dir)
+
 
 if __name__ == '__main__':
     builder = SphinxBuilder()
     builder.clean_build()
     builder.build_html()
     builder.build_pdf()
+    builder.zip_docs()
