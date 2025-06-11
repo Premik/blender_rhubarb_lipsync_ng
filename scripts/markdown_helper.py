@@ -267,36 +267,34 @@ class MarkdownLineEditor:
 
     @cached_property
     def md(self) -> MarkdownDoc:
-        md = MarkdownDoc(self.md_path)
-        if self.sanitize:
-            for i, l in enumerate(md.md_lines):
-                md.md_lines[i] = self.sanitize_line(l)
-        return md
+        return MarkdownDoc(self.md_path)
 
     def sanitize_line(self, l: str) -> str:
         # Rinoh doesn't support the doublespace at the end to force newline
         l = re.sub(r"  $", "\n", l)
         l = l.replace("✔", "[OK]").replace("❌", "[FAILED]")
+        l = l.replace("⌄", "v")
+
         return l
 
     @cached_property
-    def lines_to_include(self) -> List[bool]:
-        # Initially, all lines are included
-        return [True] * len(self.md.md_lines)
+    def edited_lines(self) -> List[Optional[str]]:
+        # Initially, they are filled with exact lines of the md_lines.
+        lines: List[str] = self.md.md_lines.copy()
+        if not self.sanitize:
+            return lines
+        sanitized_lines: List[str] = [self.sanitize_line(line) for line in lines]
+        return sanitized_lines
 
     def delete_lines(self, start: int, end: int) -> None:
-        """Set lines_to_include[start:end] to False (0-based, end exclusive)"""
-        incl = self.lines_to_include  # cached_property, but we must mutate its values
-        # Convert to actual list: workaround for frozen dataclass
-        object.__setattr__((self), "lines_to_include", incl)
+        """Set lines in edited_lines[start:end] to None (0-based, end exclusive)"""
+        edited = self.edited_lines
         for i in range(start, end):
-            if 0 <= i < len(incl):
-                incl[i] = False
+            if 0 <= i < len(edited):
+                edited[i] = None
 
     def edited_markdown(self) -> str:
-        incl = self.lines_to_include
-        lines = self.md.md_lines
-        return "\n".join(line for keep, line in zip(incl, lines) if keep)
+        return "\n".join(line for line in self.edited_lines if line is not None)
 
     def save_to(self, p: Path) -> None:
         markdown_content = self.edited_markdown()

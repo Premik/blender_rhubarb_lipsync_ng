@@ -160,12 +160,21 @@ class SphinxBuilder:
             frame.save(gif_path)
 
     def unanime_gifs(self, folder: Path) -> None:
-        """Takes a folder path and recursively finds all .gif files, then calls unanime_gif on each."""
-        if not folder.exists() or not folder.is_dir():
-            print(f"Folder not found at {folder}")
-            return
         for gif_path in folder.rglob("*.gif"):
             self.unanime_gif(gif_path)
+
+    def resize_images(self, max_width: int) -> None:
+        """Resizes all images in the media directory to a maximum width."""
+        for img_path in self.media_dir.rglob("*"):
+            if not img_path.is_file():
+                continue
+            if img_path.suffix.lower() not in [".png", ".jpg", ".jpeg", ".gif"]:
+                continue
+            with Image.open(img_path) as im:
+                if im.width > max_width:
+                    print(f"Resizing {img_path} from {im.width} to {max_width}")
+                    im.thumbnail((max_width, im.height), Image.Resampling.LANCZOS)
+                    im.save(img_path)
 
     def build_html(self) -> None:
         self.sanitize = False
@@ -175,7 +184,8 @@ class SphinxBuilder:
     def build_pdf(self) -> None:
         self.sanitize = True
         self.copy_docs_to_root()
-        self.unanime_gifs(builder.media_dir)
+        self.unanime_gifs(self.media_dir)
+        # self.resize_images(max_width=400)
         self.sphinx_build_pdf()
 
 

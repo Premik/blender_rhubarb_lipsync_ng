@@ -1,8 +1,9 @@
 [TEMPLATE_CONFIGURATION]
-template = book
+;template = book
+template = article
 
 parts =
-    title
+    ;title
     ;front_matter
     contents
     ;back_matter

@@ -18,7 +18,7 @@ source_suffix = {
 }
 root_doc = "index"
 templates_path = ['templates']
-# include_patterns = ["root_doc/**"]
+# include_patterns = ["md_temp/**"]
 rinoh_documents = [
     dict(
         doc='index',

@@ -1,25 +1,10 @@
 [STYLESHEET]
 base=sphinx_base14
 
+;[default:Paragraph]
+;border=1mm,01A000
 
-[front_matter]
-page_number_format = lowercase roman
-end_at_page = left
-
-[contents]
-page_number_format = number
-
-[title_page]
-top_margin = 2cm
-
-[emphasis]
-font_color=#00a
-
-[figure.image]
-width = 100%
-
-[table]
-width = 100%
-
-[table.cell]
-padding = 2
+[inline image]
+width=100%
+;horizontal_align = center
+border=2mm,A10000

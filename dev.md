@@ -164,11 +164,10 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 
 ### High
 * Offline doc:
-  * Image width - fixed
-  * Animated gifs- reorder to avoid black-images
-  * Download images (from releases)
-  * Fix the video tutorials links, convert to table?
-  
+  * Image width
+  * Fix the video tutorials links, drop or fix the grid view
+  * Drop author from title page (pdf)  
+
 * Mapping wizards
   * Clear - will remove the mapping (delete from the object completly?)
   * Face-it - From Test rig - Normal actions+shape-key corrections? 2) From shape-key test action 3) The final control rig (doesn't need a wizard)
