@@ -151,6 +151,15 @@ class MarkdownDoc:
         blocks = self.block_by_token_id.get(id(topmost_p), [])
         return blocks + parents
 
+    def find_token_lines(self, token: Token) -> Optional[range]:
+        if not token:
+            return None
+        parent_tokens = self.get_parents(token)
+        pts = [t.map for t in reversed(parent_tokens) if t.map]
+        if not pts:
+            return None
+        return range(pts[0][0], pts[0][1])
+
     def find_children(self, content_rx: str, type: str, tokens: List[Token]) -> List[Token]:
         pattern = re.compile(content_rx)
         matches: List[Token] = []
@@ -259,6 +268,10 @@ class MarkdownDoc:
         env: dict = {}
         return self.md_parser.renderer.render(self.tokens, options, env)
 
+    def get_image_tokens(self) -> List[Token]:
+        """Find all image tokens in the document."""
+        return self.tokens_by_type.get("image", [])
+
 
 @dataclass(frozen=True)
 class MarkdownLineEditor:
@@ -327,10 +340,36 @@ class MarkdownLineEditor:
             from_line += 1
         self.delete_to_next_chapter(from_line)
 
+    def create_rst_image(self, img_path: str) -> str:
+        return f"```{{eval-rst}}\n.. image:: {img_path}\n```"
+
+    def replace_images_with_rst(self) -> None:
+        """Replace all markdown-style images with rst-style images."""
+        img_tokens = self.md.get_image_tokens()
+        for token in img_tokens:
+            line_range = self.md.find_token_lines(token)
+            assert line_range is not None
+            line_index = line_range[-1]  # Take the last index or range
+            img_path = token.attrs.get("src")
+            if img_path:
+                rst_img = self.create_rst_image(img_path)
+                # This assumes the image is on a line by itself
+                self.edited_lines[line_index] = rst_img
+
 
 if __name__ == '__main__':
+    # md = MarkdownLineEditor(Path("test.md"))
+    # md.replace_images_with_rst()
+    # md.md.debug_print()
+    # md.save_to(Path("test_out.md"))
+
+    # exit(0)
     md = MarkdownLineEditor(Path("README.md"))
     md.md.debug_print()
+    md.replace_images_with_rst()  # Workaround. Rinoh doesn't size some wide images properly and they'd overflow the page. But not when rst is used
+    md.save_to(Path("sphinx/build/md_temp/README.md"))
+    exit(0)
+
     # print(md.find_block("heading", ".*Rh.*"))
 
     md.delete_chapter("Rhubarb Lip.*Blender plugin", keep_heading=True)

@@ -16,14 +16,6 @@
 [Combining Armature Actions with Shape Keys](https://odysee.com/@OwlGear:8/rhubarblipsync-ng-shape-keys:6)  
 [![Combining Armature Actions with Shape Keys](doc/img/demo2Thumb.jpeg)](https://odysee.com/@OwlGear:8/rhubarblipsync-ng-shape-keys:6)
 
-
-## Video Tutorials B
-
-| | |
-|---|---|
-| [![Quick Intro](doc/img/demo0Thumb.jpeg)](https://lbry.tv/@OwlGear:8/rhubarbng-quick-intro:d) | [![2d Image-Plane](doc/img/demo4Thumb.jpeg)](https://www.youtube.com/watch?v=k0l-bPFl4Jw) |
-| [![Simple Shape-keys workflow](doc/img/demo3Thumb.jpeg)](https://www.youtube.com/watch?v=JwU52eSVIbE) | [![Combining Armature Actions with Shape Keys](doc/img/demo2Thumb.jpeg)](https/odysee.com/@OwlGear:8/rhubarblipsync-ng-shape-keys:6) |
-
 ## Installation
 
 ### Get the correct zip file
@@ -40,7 +32,9 @@ Install as a Blender extension.
 
 ![InstallDisk](doc/img/ExtensionInstallDisk.gif)
 
-2. Verify that the `rhubarb` executable is working by pressing the **Check rhubarb version** button:
+2. The Addon registers a new side-tab `RLSP` (can be renamed in preferences) on the right sidebar of the 3D view. If you don't see this `n-panel` you can show/hide it by pressing the `n` key .
+
+3. Verify that the `rhubarb` executable is working by pressing the **Check rhubarb version** button:
 
 ![CheckVersion](doc/img/checkVersion.png)
 
@@ -139,7 +133,10 @@ Install as a Blender extension.
    * `Alt+click` the `Auto Blend In/Out` to distribute the change to all the selected strips.
 
 ### Bake to Single Action
-If needed, the `NLA Tracks` can be baked into a single new `Action`. Note, if you have both a normal-action track pair and a shapekey-action track pair, they have to be baked one-by-one.
+If needed, the `NLA Tracks` can be baked into a single new `Action`. 
+
+Note: Blender doesn't support baking shape-keys NLA tracks out-of-the-box. So if you have shapekey-actions install the free [Bake Shape Keys ](https://extensions.blender.org/add-ons/bake-shape-keys/) addon first. Then bake shape-key tracks separately.
+
 
 1. Select the Armature and go to `Pose mode` (for normal-action tracks).
 1. Select the Bones you want to bake. For example, press `a` to select all.

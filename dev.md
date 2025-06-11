@@ -163,10 +163,6 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 ## Todo
 
 ### High
-* Offline doc:
-  * Image width
-  * Fix the video tutorials links, drop or fix the grid view
-  * Drop author from title page (pdf)  
 
 * Mapping wizards
   * Clear - will remove the mapping (delete from the object completly?)

@@ -45,6 +45,8 @@ class SphinxBuilder:
 
     def copy_readme(self) -> None:
         md = MarkdownLineEditor(self.project_dir / "README.md", self.sanitize)
+        if self.sanitize:
+            md.replace_images_with_rst()
         md.delete_chapter("Rhubarb Lip.*Blender plugin", keep_heading=True)
 
         # md.delete_chapter("Video tutorials", keep_heading=False)
@@ -54,6 +56,7 @@ class SphinxBuilder:
         md.delete_chapter("More details", keep_heading=False)
         md.delete_chapter("Contributions", keep_heading=False)
         md.delete_table("🪟 Windows")
+
         md.save_to(self.doc_root_dir / "README.md")
 
     def copy_media(self) -> None:
@@ -74,8 +77,17 @@ class SphinxBuilder:
 
     def copy_troubleshooting(self) -> None:
         md = MarkdownLineEditor(self.project_dir / "troubleshooting.md", self.sanitize)
+        if self.sanitize:
+            md.replace_images_with_rst()
         md.delete_chapter("Additional detail", keep_heading=False)
+
         md.save_to(self.doc_root_dir / "troubleshooting.md")
+
+    def copy_test(self) -> None:
+        md = MarkdownLineEditor(self.project_dir / "test.md", self.sanitize)
+        if self.sanitize:
+            md.replace_images_with_rst()
+        md.save_to(self.doc_root_dir / "test.md")
 
     def copy_release_notes(self) -> None:
         src = self.project_dir / "release_notes.md"
@@ -83,10 +95,18 @@ class SphinxBuilder:
         print(f"Copying {src} to {dest}")
         shutil.copy(src, dest)
 
+    def copy_sphinx_files(self) -> None:
+        for f in self.sphinx_dir.glob("*"):
+            if not f.is_file():
+                continue
+            dest_file = self.doc_root_dir / f.name
+            print(f"Copying {f} to {dest_file}")
+            shutil.copy(f, dest_file)
+
     def copy_docs_to_root(self) -> None:
         self.doc_root_dir.mkdir(parents=True, exist_ok=True)
-        shutil.copy(self.sphinx_dir / "index.rst", self.doc_root_dir / "index.rst")
-        shutil.copy(self.sphinx_dir / "conf.py", self.doc_root_dir / "conf.py")
+        # self.copy_test()
+        self.copy_sphinx_files()
         for d in ["static", "templates"]:
             src = self.sphinx_dir / d
             dest = self.doc_root_dir / d
@@ -94,8 +114,8 @@ class SphinxBuilder:
                 shutil.rmtree(dest)
             if src.exists():
                 shutil.copytree(src, dest)
-        self.copy_readme()
         self.copy_media()
+        self.copy_readme()
         self.copy_faq()
         self.copy_troubleshooting()
         self.copy_release_notes()
@@ -145,9 +165,6 @@ class SphinxBuilder:
     def unanime_gif(self, gif_path: Path) -> None:
         """Takes a path to an (animated) gif, extracts the middle frame, and saves it as a single-frame gif,
         overwriting the original file."""
-        if not gif_path.exists():
-            print(f"Gif file not found at {gif_path}")
-            return
         with Image.open(gif_path) as im:
             if not getattr(im, "is_animated", False):
                 # print(f"Image at {gif_path} is not an animated gif.")

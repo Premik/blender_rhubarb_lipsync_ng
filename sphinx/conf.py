@@ -1,3 +1,5 @@
+from pathlib import Path
+
 # Configuration file for the Sphinx documentation builder.
 #
 # For the full list of built-in configuration values, see the documentation:
@@ -5,6 +7,7 @@
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
+
 
 project = 'Rhubarb Lip Sync NG'
 release = '1.5'
@@ -24,8 +27,10 @@ rinoh_documents = [
         doc='index',
         target='Rhubarb Lip Sync NG',
         logo='doc/img/RLSP-banner.png',
-        # template='sphinx/rinoh_template.rts',  # Article Book
-        template='/wrk/dev/rhubarb-lipsync/sphinx/rinoh_template.rts',  # Article Book
+        author="",
+        subtitle=f"For v{release}",
+        template="rinoh_template.rts"
+        # template='/wrk/dev/rhubarb-lipsync/sphinx/rinoh_template.rts',  # Article Book
     )
 ]
 

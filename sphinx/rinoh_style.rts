@@ -1,10 +1,13 @@
 [STYLESHEET]
 base=sphinx_base14
 
+[chapter]
+page_break=none
+
 ;[default:Paragraph]
 ;border=1mm,01A000
 
 [inline image]
-width=100%
+;width=100% ;This sadly doesn't work when image is comming from markdown
 ;horizontal_align = center
-border=2mm,A10000
+;border=2mm,A10000

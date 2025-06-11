@@ -121,6 +121,11 @@ Note you can use any other folder instead of the `TEMP` or `/tmp`.
 
 Then install the plugin as usual.
 
+## Reinstall Blender
+
+This is a last resort if the addon still fails to install/register. There are several other addons which install additional python libraries directly into Blender's python installation using the `pip` command. In some unfortunate situations this could break things to the point where a factory reset won't help and then the easiest remedy is to restore the Blender python installation.
+Note this issue is pretty rare and applies mostly to legacy addons. The new Blender (`v.4.2`+) extension system addresses this issue with better addon isolation and these conflicts should not happen in theory. Note it is still possible to run legacy addons even in the newer Blender.
+
 
 ## Collecting Debug Messages for Console
 
