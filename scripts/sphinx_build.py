@@ -97,10 +97,10 @@ class SphinxBuilder:
         md.save_to(self.doc_root_dir / "test.md")
 
     def copy_release_notes(self) -> None:
-        src = self.project_dir / "release_notes.md"
-        dest = self.doc_root_dir / "release_notes.md"
-        print(f"Copying {src} to {dest}")
-        shutil.copy(src, dest)
+        md = MarkdownLineEditor(self.project_dir / "release_notes.md", self.sanitize)
+        if self.sanitize:
+            md.replace_images_with_rst()
+        md.save_to(self.doc_root_dir / "release_notes.md")
 
     def copy_sphinx_files(self) -> None:
         for f in self.sphinx_dir.glob("*"):
@@ -140,8 +140,10 @@ class SphinxBuilder:
         print(f"Building Sphinx documentation in {self.doc_root_dir}")
         process = None
         try:
+            command = ["sphinx-build", "-b", build_type, str(self.doc_root_dir), str(target_dir)]
+            print(f"Running command: {' '.join(command)}")
             process = subprocess.run(
-                ["sphinx-build", "-b", build_type, str(self.doc_root_dir), str(target_dir)],
+                command,
                 capture_output=True,
                 text=True,
                 check=True,

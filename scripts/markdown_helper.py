@@ -2,9 +2,10 @@ import re
 from dataclasses import dataclass
 from functools import cached_property
 from pathlib import Path
-from typing import List, Optional  # Make sure 'Any' is kept if used elsewhere, otherwise it can be removed.
+from typing import List, Optional
 
 from markdown_it import MarkdownIt
+from PIL import Image
 from markdown_it.token import Token
 
 
@@ -340,21 +341,40 @@ class MarkdownLineEditor:
             from_line += 1
         self.delete_to_next_chapter(from_line)
 
-    def create_rst_image(self, img_path: str) -> str:
-        return f"```{{eval-rst}}\n.. image:: {img_path}\n```"
+    def get_image_scale(self, image_path: Path, max_size: int) -> Optional[int]:
+        """Calculate the scale percentage for an image to fit within a max_size."""
+        if not image_path.exists():
+            print(f"Warning: Image file not found at {image_path}")
+            return None
+        with Image.open(image_path) as img:
+            width, height = img.size
+            if width <= max_size and height <= max_size:
+                return None
+            scale_w = max_size / width if width > 0 else 1
+            scale_h = max_size / height if height > 0 else 1
+            scale = min(scale_w, scale_h)
+            return int(scale * 100)
 
-    def replace_images_with_rst(self) -> None:
-        """Replace all markdown-style images with rst-style images."""
+    def create_rst_image(self, img_path: str, scale: Optional[int] = None) -> str:
+        scale_line = f"\n   :scale: {scale}%" if scale else ""
+        return f"```{{eval-rst}}\n.. image:: {img_path}{scale_line}\n```"
+
+    def replace_images_with_rst(self, max_size: int = 520) -> None:
+        """Replace all markdown-style images with rst-style images, scaling them if they are too large."""
         img_tokens = self.md.get_image_tokens()
         for token in img_tokens:
             line_range = self.md.find_token_lines(token)
             assert line_range is not None
             line_index = line_range[-1]  # Take the last index or range
-            img_path = token.attrs.get("src")
-            if img_path:
-                rst_img = self.create_rst_image(img_path)
-                # This assumes the image is on a line by itself
-                self.edited_lines[line_index] = rst_img
+            img_path_str = token.attrs.get("src")
+            if not img_path_str:
+                continue
+            # Images in md are relative to the md file.
+            img_path = self.md.md_path.parent / Path(img_path_str)
+            scale = self.get_image_scale(img_path, max_size)
+            rst_img = self.create_rst_image(img_path_str, scale)
+            # This assumes the image is on a line by itself
+            self.edited_lines[line_index] = rst_img
 
 
 if __name__ == '__main__':
