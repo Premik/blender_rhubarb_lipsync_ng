@@ -1,12 +1,24 @@
 import logging
 import pathlib
+import traceback
 from typing import cast
 
 import bpy
 from bpy.props import BoolProperty, EnumProperty, IntProperty, StringProperty
 from bpy.types import Context, Sound
 
-import aud
+
+AUD_BROKEN: str | None = None
+try:
+    import aud
+except ImportError as e:
+    AUD_BROKEN = f"Failed to import the 'aud' module: {e}. Sound conversion will not work."
+    print("=" * 80)
+    print("ERROR: Rhubarb Lipsync addon failed to import the 'aud' module. Sound conversion features will be disabled.")
+    traceback.print_exc()
+    print("=" * 80)
+    from . import aud_mock as aud
+
 
 from . import ui_utils
 from .capture_properties import CaptureListProperties, CaptureProperties
@@ -292,12 +304,21 @@ class ConvertSoundFromat(bpy.types.Operator):
         this.target_filename = props.get_sound_name_with_new_extension(this.codec)
 
     @classmethod
+    def disabled_reason(cls, context: Context) -> str:
+        if AUD_BROKEN:
+            return AUD_BROKEN
+        error_common = CaptureProperties.sound_selection_validation(context, False)
+        if error_common:
+            return error_common
+        return ""
+
+    @classmethod
     def description(csl, context: Context, self: 'ConvertSoundFromat') -> str:
         return f"Convert the selected sound to {self.codec}"
 
     @classmethod
     def poll(cls, context: Context) -> bool:
-        return ui_utils.validation_poll(cls, context, CaptureProperties.sound_selection_validation)
+        return ui_utils.validation_poll(cls, context)
 
     def draw(self, context: Context) -> None:
         layout = self.layout

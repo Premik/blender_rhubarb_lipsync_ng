@@ -168,6 +168,7 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
   * Clear - will remove the mapping (delete from the object completly?)
   * Face-it - From Test rig - Normal actions+shape-key corrections? 2) From shape-key test action 3) The final control rig (doesn't need a wizard)
   * By name - More instances (alow user defined) - will map action by matching name patterns (should provide some placeholder/expansions in the expression for objectName, etc)
+  * Copy-paste - special case of the  by name?
 
 ## Multi character/dialogs workflow
   * Start-frame 
@@ -201,6 +202,7 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 * In prefs, when executable doesn't exist make the control red
 * Integrate with: https://mecabricks.com/en/shop/product/6
 * Bring some of the old baking method back with fixed lengths
+* Placing sound-strip for the first time to sequencer, place the seq. start to the curent frame of the timeline?
 
 ### Low
 * Create aur package
