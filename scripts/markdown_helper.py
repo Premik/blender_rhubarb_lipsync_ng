@@ -5,8 +5,8 @@ from pathlib import Path
 from typing import List, Optional
 
 from markdown_it import MarkdownIt
-from PIL import Image
 from markdown_it.token import Token
+from PIL import Image
 
 
 @dataclass(frozen=True)

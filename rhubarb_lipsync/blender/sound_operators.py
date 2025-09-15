@@ -7,7 +7,6 @@ import bpy
 from bpy.props import BoolProperty, EnumProperty, IntProperty, StringProperty
 from bpy.types import Context, Sound
 
-
 AUD_BROKEN: str | None = None
 try:
     import aud
@@ -18,7 +17,6 @@ except ImportError as e:
     traceback.print_exc()
     print("=" * 80)
     from . import aud_mock as aud
-
 
 from . import ui_utils
 from .capture_properties import CaptureListProperties, CaptureProperties
