@@ -20,9 +20,9 @@
 
 ### Get the correct zip file
 
-Download the zip file specifically for your platform. The zip file format is `rhubarb_lipsync_ng-<your_system>-<version>.zip`. For example: `rhubarb_lipsync_ng-Windows-1.6.1.zip` for Windows.
+Download the zip file specifically for your platform. The zip file format is `rhubarb_lipsync_ng-<your_system>-<version>.zip`. For example: `rhubarb_lipsync_ng-Windows-1.6.2.zip` for Windows.
 
-   | [🪟 Windows](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v1.6.1/rhubarb_lipsync_ng-Windows-1.6.1.zip) | [🍏 macOS](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v1.6.1/rhubarb_lipsync_ng-macOS-1.6.1.zip) | [🐧 Linux](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v1.6.1/rhubarb_lipsync_ng-Linux-1.6.1.zip) |
+   | [🪟 Windows](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v1.6.2/rhubarb_lipsync_ng-Windows-1.6.2.zip) | [🍏 macOS](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v1.6.2/rhubarb_lipsync_ng-macOS-1.6.2.zip) | [🐧 Linux](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v1.6.2/rhubarb_lipsync_ng-Linux-1.6.2.zip) |
    |----------|--------------|------|
 
 ### Blender 4.2+
@@ -141,7 +141,7 @@ Note: Blender doesn't support baking shape-keys NLA tracks out-of-the-box. So if
 1. Select the Armature and go to `Pose mode` (for normal-action tracks).
 1. Select the Bones you want to bake. For example, press `a` to select all.
 1. Select the strips in the NLA track you want to bake. Use the `b` key and box-select strips if you don't want to include all tracks.
-1. Then go to `NLA Editor/main menu/Edit/Bake Action`.
+1. Then go to `NLA Editor/main menu/Strip/Bake Action` (or `NLA Editor/main menu/Edit/Bake Action` in older Blender versions).
 1. Consider checking the `Visual Keying` and `Clean Curves` options:
 
 ![Capture](doc/img/BakeNLATracks.png)
