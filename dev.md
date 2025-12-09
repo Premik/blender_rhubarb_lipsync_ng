@@ -164,6 +164,27 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 
 ### High
 
+### v5.0
+
+Legacy now: https://projects.blender.org/blender/blender/issues/146586
+    `action.fcurves`
+    `action.groups`
+    `action.id_root`
+
+```
+Ensuring FCurves Exist:
+obj = bpy.context.object
+action = obj.animation_data.action
+fcurve = action.fcurve_ensure_for_datablock(obj, "location", index=0)
+
+action = D.actions[0]
+for layer in action.layers:
+    for strip in layer.strips:
+        if hasattr(strip, "channelbag"):
+            for fcurve in strip.channelbag.fcurves:
+                print(fcurve)
+```
+
 * Mapping wizards
   * Clear - will remove the mapping (delete from the object completly?)
   * Face-it - From Test rig - Normal actions+shape-key corrections? 2) From shape-key test action 3) The final control rig (doesn't need a wizard)

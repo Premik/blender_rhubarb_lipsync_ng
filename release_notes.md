@@ -1,5 +1,19 @@
 # Release Notes
 
+## v1.6.2 draft
+
+
+
+## v1.6.1
+**Date:** 2025-09-15
+
+Made the `aud` module optional. Sound conversion is disabled when the module is broken or missing. 
+This is a workaround for the #27, #19 and #24 
+
+![AudioStripSync](doc/img/release/aud_disabled.png)
+
+---
+
 ## v1.6.0
 
 **Date:** 2025-06-12

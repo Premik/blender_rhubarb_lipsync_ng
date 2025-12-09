@@ -5,7 +5,8 @@ from typing import Any, Callable, Iterator, Type
 
 import bpy
 import bpy.utils.previews
-from bpy.types import Area, Context, Sound, UILayout, Window
+from bpy.types import Area, Context, Sound, UILayout, Window, bpy_prop_collection
+
 
 try:
     from bpy.types import Strip  # Since v4.4
@@ -187,13 +188,23 @@ def len_limited(iterator: Iterator, max_count=1000) -> int:
     return count
 
 
+def get_strips_from_sequence_editor(context: Context) -> bpy_prop_collection:
+    seq_editor = context.scene.sequence_editor
+    if hasattr(seq_editor, 'sequences'):  # Blender v4
+        return seq_editor.sequences
+    # Blender v5+
+    return seq_editor.strips  # type: ignore
+
+
 def find_sound_strips_by_sound(context: Context, sound: Sound, limit=0) -> list[Strip]:
     '''Finds sound strips which are using the specified sound.'''
     ret: list[Strip] = []
     if not sound or not context.scene.sequence_editor:
         return []
 
-    for i, sq in enumerate(context.scene.sequence_editor.sequences_all):
+    seq_editor = context.scene.sequence_editor
+
+    for i, sq in enumerate(get_strips_from_sequence_editor(context)):
         if limit > 0 and i > limit:
             break  # Limit reached, break the search (for performance reasons)
         if not hasattr(sq, "sound"):

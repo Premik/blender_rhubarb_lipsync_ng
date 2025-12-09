@@ -27,6 +27,8 @@ def is_action_shape_key_action(action: bpy.types.Action) -> bool:
     """Determine whether an action is a shape-key action or a regular one."""
     if not action:
         return False
+    #action_type: str = action.id_type
+    # D.actions[0].id_root
     if not action.fcurves:
         return False  # This is not strictly correct, but seems there is not way to know if a blank action is a shape-key one
     # return any(is_fcurve_for_shapekey(fcurve) for fcurve in action.fcurves)
@@ -45,6 +47,7 @@ def does_object_support_shapekey_actions(o: bpy.types.Object) -> bool:
 
 def does_action_fit_object(o: bpy.types.Object, action: bpy.types.Action) -> bool:
     """Check if all action's F-Curves paths are valid for the provided object."""
+
     if not action.fcurves:  # Blank actions are considered invalid (#8)
         return False
     for fcurve in action.fcurves:
