@@ -7,7 +7,6 @@ import bpy
 import bpy.utils.previews
 from bpy.types import Area, Context, Sound, UILayout, Window, bpy_prop_collection
 
-
 try:
     from bpy.types import Strip  # Since v4.4
 except ImportError:  # Fall back to old API

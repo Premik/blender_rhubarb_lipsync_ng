@@ -12,6 +12,7 @@ from ..rhubarb.cue_processor import CueProcessor
 from ..rhubarb.mouth_cues import FrameConfig, MouthCueFrames, duration_scale_rate, frame2time, time2frame_float
 from ..rhubarb.mouth_shape_info import MouthShapeInfos
 from . import mapping_utils, ui_utils
+from .action_support import is_action_shape_key_action
 from .capture_properties import CaptureListProperties, CaptureProperties, MouthCueList, MouthCueListItem, ResultLogListProperties
 from .mapping_properties import MappingItem, MappingProperties, NlaTrackRef
 from .mapping_utils import objects_with_mapping
@@ -370,7 +371,7 @@ class BakingContext:
             return "Not using extended shapes but {} {} mapping"
         if not mi.action.fcurves:
             return "{} {} Action with no keyframes"
-        if mapping_utils.is_action_shape_key_action(mi.action):
+        if is_action_shape_key_action(mi.action):
             if not mapping_utils.does_object_support_shapekey_actions(self.current_object):
                 return "{} {} a shape-key Action mapped while the Object has no shape-keys"
             if not self.mprops.only_shapekeys:

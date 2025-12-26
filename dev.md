@@ -167,9 +167,31 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 ### v5.0
 
 Legacy now: https://projects.blender.org/blender/blender/issues/146586
-    `action.fcurves`
-    `action.groups`
-    `action.id_root`
+https://code.blender.org/2023/07/animation-workshop-june-2023/
+
+- `action.fcurves` Update the use of Action.fcurves to use channelbag = anim_utils.action_get_channelbag_for_slot(action, action_slot)
+- `action.groups`e
+- `action.id_root`
+
+
+Action 
+---layers->*ActionLayers (only one layer, and one strip?)
+----slots->*ActionSlots
+
+ActionLayer
+----strips->*ActionStrips-->
+
+ActionStrip=>ActionKeyframeStrip
+channelbags--->ActionChannelbags
+
+ActionChannelbag ----fscurves->*ActionChannelbagFCurves
+---slot->ActionSlot 
+
+ActionSlot
+target_id_type (https://upbge.org/docs/latest/api/bpy.types.ActionSlot.html#bpy.types.ActionSlot.target_id_type)
+
+The Channelbag is what contains a set of F-Curves, and so what was the legacy Action data model now is represented by a Channelbag.
+
 
 ```
 Ensuring FCurves Exist:
@@ -220,6 +242,7 @@ for layer in action.layers:
   - there is actually better way, the Action has targe_type/id or similar 
   - Add support for other action types , like material/shader graph
   - Refacotr the action filtering toolbar, have the action-types like a dropdown with checkable action types,
+* The rslp tab name in the preferences has separate entries for mapping/capturing, but renaming them won't make two tabs as expected.
 * In prefs, when executable doesn't exist make the control red
 * Integrate with: https://mecabricks.com/en/shop/product/6
 * Bring some of the old baking method back with fixed lengths
