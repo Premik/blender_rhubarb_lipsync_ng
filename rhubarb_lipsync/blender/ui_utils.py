@@ -1,7 +1,7 @@
 import logging
 import pathlib
 import traceback
-from typing import Any, Callable, Iterator, Type
+from typing import Any, Callable, Iterator, Literal, Type
 
 import bpy
 import bpy.utils.previews
@@ -13,6 +13,9 @@ except ImportError:  # Fall back to old API
     from bpy.types import SoundSequence as Strip
 
 log = logging.getLogger(__name__)
+
+
+OperatorReturnSet = set[Literal['RUNNING_MODAL', 'CANCELLED', 'FINISHED', 'PASS_THROUGH', 'INTERFACE']]
 
 
 def addon_path() -> pathlib.Path:

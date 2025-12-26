@@ -5,7 +5,7 @@ import bpy
 from bpy.types import Object
 
 from . import mapping_properties
-from .action_support import is_action_shape_key_action, is_fcurve_for_shapekey
+from .action_support import is_action_shape_key_action, is_fcurve_for_shapekey, is_action_blank, get_action_fcurves
 
 log = logging.getLogger(__name__)
 
@@ -32,9 +32,9 @@ def does_object_support_shapekey_actions(o: bpy.types.Object) -> bool:
 def does_action_fit_object(o: bpy.types.Object, action: bpy.types.Action) -> bool:
     """Check if all action's F-Curves paths are valid for the provided object."""
 
-    if not action.fcurves:  # Blank actions are considered invalid (#8)
+    if is_action_blank(action):  # Blank actions are considered invalid (#8)
         return False
-    for fcurve in action.fcurves:
+    for fcurve in get_action_fcurves(action):
         try:
             if is_fcurve_for_shapekey(fcurve):
                 if not does_object_support_shapekey_actions(o):
@@ -56,6 +56,22 @@ def does_action_fit_object(o: bpy.types.Object, action: bpy.types.Action) -> boo
 
 def filtered_actions(o: bpy.types.Object, mp: "mapping_properties.MappingProperties") -> Iterator[bpy.types.Action]:
     """Yields all Actions of the current Blender project while applying various filters when enabled in the provided mapping properties"""
+    if not mp:
+        return
+    for action in bpy.data.actions:
+        if not does_action_fit_object(o, action):  # An invalid action
+            if not mp.only_valid_actions:
+                yield action  # Show-invalid-actions take precedence
+            continue
+        # The Only-shape-key is a switch
+        if mp.only_shapekeys != is_action_shape_key_action(action):
+            continue
+        if mp.only_asset_actions and not action.asset_data:
+            continue
+        yield action
+
+
+def filtered_action_slots(o: bpy.types.Object, mp: "mapping_properties.MappingProperties") -> Iterator[tuple[bpy.types.Action, str]]:
     if not mp:
         return
     for action in bpy.data.actions:

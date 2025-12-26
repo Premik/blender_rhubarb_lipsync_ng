@@ -168,11 +168,39 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 
 Legacy now: https://projects.blender.org/blender/blender/issues/146586
 https://code.blender.org/2023/07/animation-workshop-june-2023/
+https://blender.stackexchange.com/questions/339852/how-exactly-do-actionslots-work
 
 - `action.fcurves` Update the use of Action.fcurves to use channelbag = anim_utils.action_get_channelbag_for_slot(action, action_slot)
+```
+action_ensure_channelbag_for_slot( # Blender 5.0+
+    action: bpy.types.Action,
+    slot: bpy.types.ActionSlot
+) -> bpy.types.ActionChannelbag
+    Ensure a layer and a keyframe strip exists, then ensure that strip has a channelbag for the slot.
+    ```
+
+```
+action_get_channelbag_for_slot(
+    action: bpy.types.Action | None,
+    slot: bpy.types.ActionSlot | None
+) -> bpy.types.ActionChannelbag | None
+    Returns the first channelbag found for the slot.
+    In case there are multiple layers or strips they are iterated until a
+    channelbag for that slot is found. In case no matching channelbag is found, returns None.
+```
+
 - `action.groups`e
 - `action.id_root`
 
+`import bpy_extras.anim_utils`
+```
+['Action', 'ActionChannelbag', 
+'ActionSlot', 'AutoKeying', 'BakeOptions', 'Context',
+ 'FCurveKey', 'Iterable', 'Iterator', 'KeyframesCo',
+  'KeyingSet', 'ListKeyframes', 'Mapping', 'Object', 'Optional', 'PoseBone', 'Sequence', 'Union', 
+   'action_ensure_channelbag_for_slot', 'action_get_channelbag_for_slot', 'action_get_first_suitable_slot', 'animdata_get_channelbag_for_assigned_slot',
+    'bake_action', 'bake_action_iter', 'bake_action_objects', 'bake_action_objects_iter', 'bpy', 'contextlib', 'dataclass', 'rna_idprop_value_to_python']
+```
 
 Action 
 ---layers->*ActionLayers (only one layer, and one strip?)
@@ -235,7 +263,7 @@ for layer in action.layers:
   * Bake to NLA - batchmode?
     - There should be an option to bake multiple captures of the (selected/all objects). Based on the channel or othe crit. So bake can be done 1x for each single character.
     
-
+* target_id_types # OBJECT, KEY, NODETREE - replace the only_shapekeys bool in the MappingProperties with generic action type and add support from NODETREE type (animating material properties, like frame offset)
 
 ### Normal
 * `is_fcurve_for_shapekey` 

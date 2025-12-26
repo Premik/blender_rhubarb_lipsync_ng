@@ -9,6 +9,7 @@ from bpy.types import Context, NlaTrack, PropertyGroup
 
 from ..rhubarb.mouth_shape_info import MouthShapeInfo, MouthShapeInfos
 from . import mapping_utils
+from . import action_support
 from .dropdown_helper import DropdownHelper
 
 log = logging.getLogger(__name__)
@@ -89,6 +90,12 @@ class MappingItem(PropertyGroup):
     action: PointerProperty(  # type: ignore
         type=bpy.types.Action,
         name="Action",
+        options={'LIBRARY_EDITABLE'},
+        override={'LIBRARY_OVERRIDABLE'},
+    )
+    slot: StringProperty(  # type: ignore
+        name="Slot",
+        description="Action Slot to use",
         options={'LIBRARY_EDITABLE'},
         override={'LIBRARY_OVERRIDABLE'},
     )
@@ -210,6 +217,8 @@ class MappingProperties(PropertyGroup):
         options={'LIBRARY_EDITABLE'},
         override={'LIBRARY_OVERRIDABLE'},
     )
+
+    # target_id_types # OBJECT, KEY, NODETREE
 
     only_valid_actions: BoolProperty(  # type: ignore
         name="Only Valid Actions",
