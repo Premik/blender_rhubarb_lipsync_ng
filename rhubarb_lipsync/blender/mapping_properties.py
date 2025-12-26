@@ -11,6 +11,7 @@ from ..rhubarb.mouth_shape_info import MouthShapeInfo, MouthShapeInfos
 from . import mapping_utils
 from . import action_support
 from .dropdown_helper import DropdownHelper
+from .action_support import is_action_shape_key_action
 
 log = logging.getLogger(__name__)
 
@@ -176,7 +177,7 @@ class MappingItem(PropertyGroup):
 
     @property
     def maps_to_shapekey(self) -> bool:
-        return mapping_utils.is_action_shape_key_action(self.action)
+        return is_action_shape_key_action(self.action)
 
     @staticmethod
     def from_object(obj: bpy.types.Object, cue_index: int) -> Optional["MappingItem"]:

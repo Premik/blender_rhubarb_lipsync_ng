@@ -38,7 +38,23 @@ def get_target_id_types_for_action(action: bpy.types.Action) -> list[str]:
 def is_action_blank(action: bpy.types.Action) -> bool:
     if not slots_supported_for_action(action):
         return not bool(action.fcurves)
-    return not bool(action.slots) or not bool(action.layers) or not bool(action.layers[0].strips)
+    if not bool(action.slots) or not bool(action.layers) or not bool(action.layers[0].strips):
+        return True
+    return False
+
+
+# def get_slot_ids_by_user(user_object: bpy.types.Object, action: bpy.types.Action) -> list[str]:
+#     if is_action_blank(action):
+#         return []
+#     return [slot.identifier for slot in action.slots if user_object in slot.users()]
+
+
+def get_action_slot_keys(action: bpy.types.Action) -> list[str]:
+    if is_action_blank(action):
+        return []
+    if not slots_supported_for_action(action):
+        return [""]
+    return [slot.identifier for slot in action.slots]
 
 
 def get_action_fcurves(action: bpy.types.Action, slot_key: str | int = 0) -> Any:
@@ -51,4 +67,6 @@ def get_action_fcurves(action: bpy.types.Action, slot_key: str | int = 0) -> Any
 
     first_strip: bpy.types.ActionKeyframeStrip = action.layers[0].strips[0]  # type: ignore
     bag = first_strip.channelbag(action.slots[slot_key])
+    if not bag:
+        return []
     return bag.fcurves  # bpy.types.ActionChannelbagFCurves

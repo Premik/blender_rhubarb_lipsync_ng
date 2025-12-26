@@ -11,6 +11,7 @@ from ..rhubarb.mouth_shape_info import MouthShapeInfo, MouthShapeInfos
 from . import mapping_utils, ui_utils
 from .mapping_properties import MappingItem, MappingProperties, NlaTrackRef
 from .preferences import MappingPreferences, RhubarbAddonPreferences
+from .action_support import is_action_shape_key_action
 
 log = logging.getLogger(__name__)
 
@@ -25,18 +26,21 @@ def filtered_actions_enum(prop_group: 'ListFilteredActions', ctx: Context) -> li
         def action2ico(a: bpy.types.Action):
             if a.asset_data:
                 return "ASSET_MANAGER"
-            if mapping_utils.is_action_shape_key_action(a):
+            if is_action_shape_key_action(a):
                 return "SHAPEKEY_DATA"
             if not mapping_utils.does_action_fit_object(o, a):
                 return "ERROR"
             return "OBJECT_DATAMODE"
 
-        def fields(i, a: bpy.types.Action) -> tuple[str, str, str, str, int]:
+        def fields(i, a: bpy.types.Action, slot_key: str) -> tuple[str, str, str, str, int]:
+            display = f"{a.name} |{slot_key}"
             # (Unique internal ID string, UI display name, Tooltip description, Icon identifier string, Optional integer value)
-            return (a.name, a.name, a.name_full, action2ico(a), i)
+            return (f"{a.name}/{slot_key}", display, a.name_full, action2ico(a), i)
             # return (a.name, a.name, a.name_full)
 
-        return [fields(i, a) for i, a in enumerate(mapping_utils.filtered_actions(o, mprops))]
+        # return [fields(i, a) for i, a in enumerate(mapping_utils.filtered_actions(o, mprops))]
+        return [fields(i, action, slot) for i, (action, slot) in enumerate(mapping_utils.filtered_action_slots(o, mprops))]
+
     except Exception as e:
         log.exception(f"Failed to list actions. {e}")
         return [('error', f"FAILED: {e}", 'error', 'CANCEL', 1)]
@@ -60,7 +64,15 @@ class ListFilteredActions(bpy.types.Operator):
 
     @property
     def action(self) -> Optional[bpy.types.Action]:
-        return bpy.data.actions.get(self.action_name)
+        name = self.action_name.split('/', 1)[0]
+        return bpy.data.actions.get(name)
+
+    @property
+    def slot_key(self) -> str:
+        parts = self.action_name.split('/', 1)
+        if len(parts) > 1:
+            return parts[1]
+        return ""
 
     @classmethod
     def poll(cls, context: Context) -> bool:
@@ -91,6 +103,7 @@ class ListFilteredActions(bpy.types.Operator):
             self.report(type={"ERROR"}, message="Invalid target cue index selected.")
             return {'CANCELLED'}
         mi.action = self.action
+        mi.slot = self.slot_key
         ui_utils.redraw_3dviews(context)
 
         return {'FINISHED'}
