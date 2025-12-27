@@ -262,12 +262,12 @@ for layer in action.layers:
   - [ ] Paste sound_strip first, create captures of them and render to NLA
   * Bake to NLA - batchmode?
     - There should be an option to bake multiple captures of the (selected/all objects). Based on the channel or othe crit. So bake can be done 1x for each single character.
-    
-* target_id_types # OBJECT, KEY, NODETREE - replace the only_shapekeys bool in the MappingProperties with generic action type and add support from NODETREE type (animating material properties, like frame offset)
+
+* preview (play/stop) buttons in the mapping item doesn't always work, in v5, they also need to activate the slot
 
 ### Normal
 * `is_fcurve_for_shapekey` 
-  - there is actually better way, the Action has targe_type/id or similar 
+  - there is actually better way, the Action has targe_type/id or similar: target_id_types # OBJECT, KEY, NODETREE - replace the only_shapekeys bool in the MappingProperties with generic action type and add support from NODETREE type (animating material properties, like frame offset)
   - Add support for other action types , like material/shader graph
   - Refacotr the action filtering toolbar, have the action-types like a dropdown with checkable action types,
 * The rslp tab name in the preferences has separate entries for mapping/capturing, but renaming them won't make two tabs as expected.

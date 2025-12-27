@@ -1,9 +1,22 @@
 import logging
-from typing import Any
-
+from typing import TYPE_CHECKING, Any, Optional
 import bpy
 
 log = logging.getLogger(__name__)
+
+# Whether current Blender version support slotted actions
+HAS_SLOTS = hasattr(bpy.types, "ActionSlot")
+
+if TYPE_CHECKING:
+    try:
+        from bpy.types import ActionSlot
+        from bpy.types import ActionChannelbagFCurves as ActionFCurvesContainer
+    except ImportError:
+        ActionSlot = Any
+        from bpy.types import ActionFCurves as ActionFCurvesContainer
+else:
+    ActionSlot = getattr(bpy.types, "ActionSlot", type("DummyActionSlot", (), {}))
+
 
 # OBJECT, KEY, NODETREE ?MATERIAL, ?GREASEPENCIL, ?GREASEPENCIL_V3
 
@@ -57,7 +70,7 @@ def get_action_slot_keys(action: bpy.types.Action) -> list[str]:
     return [slot.identifier for slot in action.slots]
 
 
-def get_action_fcurves(action: bpy.types.Action, slot_key: str | int = 0) -> Any:
+def get_action_fcurves(action: bpy.types.Action, slot_key: str | int = 0) -> ActionFCurvesContainer:
 
     if is_action_blank(action):
         return []  # type: ignore

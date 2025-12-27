@@ -13,6 +13,7 @@ from . import action_support
 from .dropdown_helper import DropdownHelper
 from .action_support import is_action_shape_key_action
 
+
 log = logging.getLogger(__name__)
 
 
@@ -94,7 +95,7 @@ class MappingItem(PropertyGroup):
         options={'LIBRARY_EDITABLE'},
         override={'LIBRARY_OVERRIDABLE'},
     )
-    slot: StringProperty(  # type: ignore
+    slot_key: StringProperty(  # type: ignore
         name="Slot",
         description="Action Slot to use",
         options={'LIBRARY_EDITABLE'},

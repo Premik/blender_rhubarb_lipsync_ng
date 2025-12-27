@@ -103,7 +103,7 @@ class ListFilteredActions(bpy.types.Operator):
             self.report(type={"ERROR"}, message="Invalid target cue index selected.")
             return {'CANCELLED'}
         mi.action = self.action
-        mi.slot = self.slot_key
+        mi.slot_key = self.slot_key
         ui_utils.redraw_3dviews(context)
 
         return {'FINISHED'}
