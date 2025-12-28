@@ -8,11 +8,9 @@ from bpy.props import BoolProperty, CollectionProperty, FloatProperty, IntProper
 from bpy.types import Context, NlaTrack, PropertyGroup
 
 from ..rhubarb.mouth_shape_info import MouthShapeInfo, MouthShapeInfos
-from . import mapping_utils
-from . import action_support
-from .dropdown_helper import DropdownHelper
+from . import action_support, mapping_utils
 from .action_support import is_action_shape_key_action
-
+from .dropdown_helper import DropdownHelper
 
 log = logging.getLogger(__name__)
 
@@ -303,7 +301,7 @@ class MappingProperties(PropertyGroup):
     def migrate_to_slots(self) -> None:
         """Ensures the slot key/name is set for each mapping item, when Blender vresion supports slots"""
         if len(self.items) == 0:
-            log.error(f"No mapping item creted when slot migration was attempted. Slotted action migration skiped.")
+            log.error("No mapping item creted when slot migration was attempted. Slotted action migration skiped.")
             return
         migrated_count = 0
         for _item in self.items:

@@ -1,6 +1,6 @@
 import logging
 from itertools import islice
-from typing import Iterator, Literal, LiteralString, Optional, Set
+from typing import Iterator, Optional
 
 import bpy
 from bpy.props import EnumProperty, FloatProperty, IntProperty, StringProperty
@@ -9,9 +9,9 @@ from bpy.types import Context, Object
 from .. import IconsManager
 from ..rhubarb.mouth_shape_info import MouthShapeInfo, MouthShapeInfos
 from . import mapping_utils, ui_utils
+from .action_support import is_action_shape_key_action
 from .mapping_properties import MappingItem, MappingProperties, NlaTrackRef
 from .preferences import MappingPreferences, RhubarbAddonPreferences
-from .action_support import is_action_shape_key_action
 
 log = logging.getLogger(__name__)
 

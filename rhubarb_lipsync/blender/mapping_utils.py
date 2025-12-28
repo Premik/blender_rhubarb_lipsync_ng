@@ -4,8 +4,7 @@ from typing import Iterator
 import bpy
 from bpy.types import Object
 
-from . import mapping_properties
-from . import action_support
+from . import action_support, mapping_properties
 
 log = logging.getLogger(__name__)
 

@@ -1,5 +1,6 @@
 import logging
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING
+
 import bpy
 
 log = logging.getLogger(__name__)
