@@ -234,7 +234,7 @@ class SampleProject:
     @property
     def action_shapekey1(self) -> bpy.types.Action:
         """Shape-key Action on `ShapeKey1` sets value1@=1"""
-        created, a = self.ensure_action("action_shapekey1", 'KEY')
+        created, a = self.ensure_action("action_shapekey1")
         if not created:
             return a
         fcurves = action_support.ensure_action_fcurves(a, "slot", 'KEY')

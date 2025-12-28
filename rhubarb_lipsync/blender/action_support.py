@@ -23,9 +23,6 @@ def slots_supported_for_action(action: bpy.types.Action) -> bool:
     return hasattr(action, "slots")
 
 
-# action.slots[ActionSlots] ActionSlot.target_id_type
-
-
 def get_target_id_types_for_action(action: bpy.types.Action) -> list[str]:
     if not slots_supported_for_action(action):
         return [action.id_root]
@@ -38,12 +35,6 @@ def is_action_blank(action: bpy.types.Action) -> bool:
     if not bool(action.slots) or not bool(action.layers) or not bool(action.layers[0].strips):
         return True
     return False
-
-
-# def get_slot_ids_by_user(user_object: bpy.types.Object, action: bpy.types.Action) -> list[str]:
-#     if is_action_blank(action):
-#         return []
-#     return [slot.identifier for slot in action.slots if user_object in slot.users()]
 
 
 def get_action_slot_keys(action: bpy.types.Action, target_id_type: str = None) -> list[str]:
@@ -81,7 +72,6 @@ def set_animdata_slot_key(ad: bpy.types.AnimData, slot_key: str) -> None:
 
 
 def get_action_fcurves(action: bpy.types.Action, slot_key: str | int = 0) -> bpy.types.bpy_prop_collection:
-
     if is_action_blank(action):
         return []  # type: ignore
     if not slots_supported_for_action(action):
