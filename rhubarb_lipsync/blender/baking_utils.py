@@ -12,7 +12,7 @@ from ..rhubarb.cue_processor import CueProcessor
 from ..rhubarb.mouth_cues import FrameConfig, MouthCueFrames, duration_scale_rate, frame2time, time2frame_float
 from ..rhubarb.mouth_shape_info import MouthShapeInfos
 from . import mapping_utils, ui_utils
-from .action_support import is_action_shape_key_action
+from . import action_support
 from .capture_properties import CaptureListProperties, CaptureProperties, MouthCueList, MouthCueListItem, ResultLogListProperties
 from .mapping_properties import MappingItem, MappingProperties, NlaTrackRef
 from .mapping_utils import objects_with_mapping
@@ -100,6 +100,11 @@ class BakingContext:
             obj_sel = self.mprefs.object_selection_filtered(self.ctx)
             self._objs = list(objects_with_mapping(obj_sel))
         return self._objs
+
+    def migrate_obj_mapping_to_slots(self) -> None:
+        for o in self.objects:
+            mp = MappingProperties.from_object(o)
+            mp.migrate_to_slots()
 
     def object_iter(self) -> Iterator[Object]:
         """To iterate over all to-be-baked objects with for each loop.
@@ -369,9 +374,10 @@ class BakingContext:
         # There is an Action mapped
         if not self.prefs.use_extended_shapes and is_extended:
             return "Not using extended shapes but {} {} mapping"
-        if not mi.action.fcurves:
-            return "{} {} Action with no keyframes"
-        if is_action_shape_key_action(mi.action):
+
+        if action_support.is_action_blank(mi.action):
+            return "{} {} no keyframes (blank Action)"
+        if action_support.is_action_shape_key_action(mi.action):
             if not mapping_utils.does_object_support_shapekey_actions(self.current_object):
                 return "{} {} a shape-key Action mapped while the Object has no shape-keys"
             if not self.mprops.only_shapekeys:
@@ -379,6 +385,9 @@ class BakingContext:
         else:  # A normal action
             if self.mprops.only_shapekeys:
                 return "{} {} a normal Action while a shape-key Action is expected"
+        if action_support.slots_supported_for_action(mi.action):
+            if not mi.slot_key:
+                return "{} {} no Slot selected while Blender version supports Action slots."
 
         if mapping_utils.is_mapping_item_active(self.ctx, mi, self.current_object):
             return "{} {} has an active Action overriding the baked animation. #!StopAction"

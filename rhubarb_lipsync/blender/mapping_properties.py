@@ -22,8 +22,6 @@ if TYPE_CHECKING:
         from bpy.types import ActionSlot
     except ImportError:  # Blender <v4.4
         ActionSlot = Any  # type: ignore
-
-
 class NlaTrackRef(PropertyGroup):
     """Reference to an nla track. By name and index since NLA track is a non-ID object"""
 
@@ -147,7 +145,6 @@ class MappingItem(PropertyGroup):
         if not action_support.slots_supported_for_action(self.action):
             return None
         return self.action.slots.get(self.slot_key)
-
     def migrate_to_slots(self) -> bool:
         """Set the slot key/name for this mapping item where not set yet, by simply taking first compatible slot.
         But only if Blender version used supports slots. This would set the slot key/name to the Legacy Slot when an older .blend file is loaded.
@@ -208,7 +205,12 @@ class MappingItem(PropertyGroup):
         if not self.action:
             return " "
         if self.slot_key:
-            slot_str = f" / {self.slot_key}"
+            if len(self.slot_key) > 2:
+                sk = self.slot_key[2:]
+            else:
+                sk = self.slot_key
+
+            slot_str = f" / {sk}"
         else:
             slot_str = ""
         return f"{self.action.name}{slot_str}"

@@ -263,7 +263,6 @@ for layer in action.layers:
   * Bake to NLA - batchmode?
     - There should be an option to bake multiple captures of the (selected/all objects). Based on the channel or othe crit. So bake can be done 1x for each single character.
 
-* preview (play/stop) buttons in the mapping item doesn't always work, in v5, they also need to activate the slot
 
 ### Normal
 * `is_fcurve_for_shapekey` 

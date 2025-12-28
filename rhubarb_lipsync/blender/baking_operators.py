@@ -246,6 +246,8 @@ class BakeToNLA(bpy.types.Operator):
 
         rll: ResultLogListProperties = CaptureListProperties.from_context(context).last_resut_log
         rll.clear()  # Clear log entries from last bake
+        bctx = baking_utils.BakingContext(context)
+        bctx.migrate_obj_mapping_to_slots()
         wm = context.window_manager
         return wm.invoke_props_dialog(self, width=480)
 
@@ -305,6 +307,8 @@ class BakeToNLA(bpy.types.Operator):
             strip.action_frame_end = b.current_mapping_item.frame_end
         strip.frame_start = start  # Set start frame again as float (ctor takes only int)
         strip.scale = scale
+        if b.current_mapping_item.slot:
+            strip.action_slot = b.current_mapping_item.slot
         # if b.ctx.scene.show_subframe:
         strip.frame_end = end
         self.strips_added += 1
