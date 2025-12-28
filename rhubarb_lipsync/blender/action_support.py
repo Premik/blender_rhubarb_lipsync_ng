@@ -9,14 +9,9 @@ HAS_SLOTS = hasattr(bpy.types, "ActionSlot")
 
 if TYPE_CHECKING:
     try:
-        from bpy.types import ActionSlot
         from bpy.types import ActionChannelbagFCurves as ActionFCurvesContainer
     except ImportError:
-        ActionSlot = Any
-        from bpy.types import ActionFCurves as ActionFCurvesContainer
-else:
-    ActionSlot = getattr(bpy.types, "ActionSlot", type("DummyActionSlot", (), {}))
-
+        from bpy.types import ActionFCurves as ActionFCurvesContainer  # type: ignore
 
 # OBJECT, KEY, NODETREE ?MATERIAL, ?GREASEPENCIL, ?GREASEPENCIL_V3
 
@@ -70,7 +65,31 @@ def get_action_slot_keys(action: bpy.types.Action) -> list[str]:
     return [slot.identifier for slot in action.slots]
 
 
-def get_action_fcurves(action: bpy.types.Action, slot_key: str | int = 0) -> ActionFCurvesContainer:
+def get_animdata_slot_key(ad: bpy.types.AnimData) -> str:
+    if not ad:
+        return ""
+    if not hasattr(ad, "action_slot"):
+        return ""  # Old Blender without slots
+    if not ad.action_slot:
+        return ""
+    return ad.action_slot.identifier
+
+
+def set_animdata_slot_key(ad: bpy.types.AnimData, slot_key: str) -> None:
+    if not ad:
+        return
+    if not hasattr(ad, "action_slot"):
+        return
+    if not ad.action:
+        return
+    if not slot_key:
+        slot = ad.action.slots[0]  # The first legacy slot
+    else:
+        slot = ad.action.slots[slot_key]
+    ad.action_slot = slot
+
+
+def get_action_fcurves(action: bpy.types.Action, slot_key: str | int = 0) -> "ActionFCurvesContainer":
 
     if is_action_blank(action):
         return []  # type: ignore

@@ -114,14 +114,18 @@ def is_mapping_item_active(ctx: bpy.types.Context, mi: 'mapping_properties.Mappi
         if (not shape_keys) or (not shape_keys.animation_data):
             return False  # Shape-key Action can't be active on an object without any shape-keys
         active_object_action = shape_keys.animation_data.action
+        active_slot_key = action_support.get_animdata_slot_key(shape_keys.animation_data)
     else:  # Target is a non-mesh object
         if not bool(on_object.animation_data):
             return False
         active_object_action = on_object.animation_data.action
+        active_slot_key = action_support.get_animdata_slot_key(on_object.animation_data)
     if not active_object_action:  # No Action active
         return False
     if mi.action != active_object_action:
         return False  # Object has an Active action but it is not the one mapped
+    if active_slot_key and active_slot_key != mi.slot_key:
+        return False
     if not mi.custom_frame_ranage:
         return True  # When not custom framerange and actions match, any timeline position is cosidered active
     f = ctx.scene.frame_current  # Only active when the timeline position is within the frame sub-range
@@ -145,6 +149,7 @@ def activate_mapping_item(ctx: bpy.types.Context, mi: 'mapping_properties.Mappin
         if not bool(shape_keys.animation_data):
             shape_keys.animation_data_create()
         shape_keys.animation_data.action = mi.action
+        action_support.set_animdata_slot_key(shape_keys.animation_data, mi.slot_key)
         return
     # The Action of the mi is a normal Action
     if on_object.type == 'ARMATURE':  # Ensure Armature is not in the rest pose
@@ -153,6 +158,7 @@ def activate_mapping_item(ctx: bpy.types.Context, mi: 'mapping_properties.Mappin
     if not bool(on_object.animation_data):
         on_object.animation_data_create()  # Ensure the object has animation data
     on_object.animation_data.action = mi.action
+    action_support.set_animdata_slot_key(on_object.animation_data, mi.slot_key)
     # TODO - mute the RLPS (or any track?) which affects the object
 
 

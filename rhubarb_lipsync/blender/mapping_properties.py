@@ -1,6 +1,6 @@
 import logging
 from functools import cached_property
-from typing import Any, Generator, Optional
+from typing import TYPE_CHECKING, Any, Generator, Optional
 
 import bpy
 import bpy.utils.previews
@@ -15,6 +15,13 @@ from .action_support import is_action_shape_key_action
 
 
 log = logging.getLogger(__name__)
+
+
+if TYPE_CHECKING:
+    try:
+        from bpy.types import ActionSlot
+    except ImportError:  # Blender <v4.4
+        ActionSlot = Any  # type: ignore
 
 
 class NlaTrackRef(PropertyGroup):
@@ -134,6 +141,14 @@ class MappingItem(PropertyGroup):
     )
 
     @property
+    def slot(self) -> "ActionSlot":
+        if not self.slot_key:
+            return None
+        if not action_support.slots_supported_for_action(self.action):
+            return None
+        return self.action.slots.get(self.slot_key)
+
+    @property
     def frame_end(self) -> float:
         """Last frame from the Action"""
         if self.custom_frame_ranage:
@@ -174,7 +189,11 @@ class MappingItem(PropertyGroup):
     def action_str(self) -> str:
         if not self.action:
             return " "
-        return self.action.name
+        if self.slot_key:
+            slot_str = f" / {self.slot_key}"
+        else:
+            slot_str = ""
+        return f"{self.action.name}{slot_str}"
 
     @property
     def maps_to_shapekey(self) -> bool:
