@@ -1,16 +1,8 @@
 import logging
-from typing import TYPE_CHECKING
 
 import bpy
 
 log = logging.getLogger(__name__)
-
-
-if TYPE_CHECKING:
-    try:
-        from bpy.types import ActionChannelbagFCurves as ActionFCurvesContainer
-    except ImportError:
-        from bpy.types import ActionFCurves as ActionFCurvesContainer  # type: ignore
 
 
 def is_fcurve_for_shapekey(fcurve: bpy.types.FCurve) -> bool:
@@ -88,7 +80,7 @@ def set_animdata_slot_key(ad: bpy.types.AnimData, slot_key: str) -> None:
     ad.action_slot = slot
 
 
-def get_action_fcurves(action: bpy.types.Action, slot_key: str | int = 0) -> "ActionFCurvesContainer":
+def get_action_fcurves(action: bpy.types.Action, slot_key: str | int = 0) -> bpy.types.bpy_prop_collection:
 
     if is_action_blank(action):
         return []  # type: ignore
@@ -101,3 +93,13 @@ def get_action_fcurves(action: bpy.types.Action, slot_key: str | int = 0) -> "Ac
     if not bag:
         return []
     return bag.fcurves  # bpy.types.ActionChannelbagFCurves
+
+
+def ensure_action_fcurves(action: bpy.types.Action, slot_name: str, slot_type='OBJECT') -> bpy.types.bpy_prop_collection:
+    if not slots_supported_for_action(action):
+        action.id_root = slot_type
+        return action.fcurves
+    layer = action.layers[0] if action.layers else action.layers.new("Layer1")
+    strip = layer.strips[0] if layer.strips else layer.strips.new(type='KEYFRAME')
+    slot = action.slots.new(id_type=slot_type, name=slot_name)
+    return strip.channelbag(slot, ensure=True).fcurves

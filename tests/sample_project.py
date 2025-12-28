@@ -13,8 +13,8 @@ import rhubarb_lipsync.blender.baking_utils as baking_utils
 import rhubarb_lipsync.blender.rhubarb_operators as rhubarb_operators
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 import rhubarb_lipsync.rhubarb.mouth_cues as shape_data
-from rhubarb_lipsync.blender import action_support
 import sample_data
+from rhubarb_lipsync.blender import action_support
 from rhubarb_lipsync.blender.capture_properties import (
     CaptureListProperties,
     CaptureProperties,
@@ -202,7 +202,8 @@ class SampleProject:
         created, a = self.ensure_action("action_single")
         if not created:
             return a
-        fc = a.fcurves.new("location", index=0)
+        fcurves = action_support.ensure_action_fcurves(a, "slot", 'OBJECT')
+        fc = fcurves.new("location", index=0)
         fc.keyframe_points.insert(1, 1)
         return a
 
@@ -213,7 +214,8 @@ class SampleProject:
         if not created:
             return a
         a.asset_mark()
-        fc = a.fcurves.new("location", index=0)
+        fcurves = action_support.ensure_action_fcurves(a, "slot", 'OBJECT')
+        fc = fcurves.new("location", index=0)
         fc.keyframe_points.insert(1, 1)
         fc.keyframe_points.insert(10, 10)
         return a
@@ -224,18 +226,19 @@ class SampleProject:
         created, a = self.ensure_action("action_invalid")
         if not created:
             return a
-        fc = a.fcurves.new('pose.bones["InvalidBone"].location', index=0)
+        fcurves = action_support.ensure_action_fcurves(a, "slot", 'OBJECT')
+        fc = fcurves.new('pose.bones["InvalidBone"].location', index=0)
         fc.keyframe_points.insert(1, 1)
         return a
 
     @property
     def action_shapekey1(self) -> bpy.types.Action:
         """Shape-key Action on `ShapeKey1` sets value1@=1"""
-        created, a = self.ensure_action("action_shapekey1")
+        created, a = self.ensure_action("action_shapekey1", 'KEY')
         if not created:
             return a
-        a.id_root = 'KEY' 
-        fc = a.fcurves.new('key_blocks["ShapeKey1"].value', index=0)
+        fcurves = action_support.ensure_action_fcurves(a, "slot", 'KEY')
+        fc = fcurves.new('key_blocks["ShapeKey1"].value', index=0)
         fc.keyframe_points.insert(1, 1)
         return a
 
@@ -245,7 +248,8 @@ class SampleProject:
         created, a = self.ensure_action("action_sheet")
         if not created:
             return a
-        fc = a.fcurves.new("location", index=1)  # 'index=1' for Y location
+        fcurves = action_support.ensure_action_fcurves(a, "slot", 'OBJECT')
+        fc = fcurves.new("location", index=1)  # 'index=1' for Y location
         for k in range(1, 11):  # Looping from 1 to 10
             kf = fc.keyframe_points.insert(10 * k, k / 10)  # The actual "shape"
             kf.interpolation = 'CONSTANT'
@@ -337,6 +341,7 @@ class SampleProject:
             mi.custom_frame_ranage = True
             mi.frame_start = i * 10
             mi.frame_count = 1
+            mi.migrate_to_slots()
 
         return self.create_baking_context()
 

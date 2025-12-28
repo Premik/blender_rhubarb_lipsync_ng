@@ -5,6 +5,7 @@ from typing import cast
 
 from bpy.types import Context, Sound
 
+from rhubarb_lipsync.blender import ui_utils
 from rhubarb_lipsync.rhubarb.mouth_cues import MouthCue
 from rhubarb_lipsync.rhubarb.rhubarb_command import RhubarbParser
 
@@ -50,8 +51,8 @@ class SampleData:
         return RhubarbParser.lipsync_json2MouthCues(json_parsed)
 
     def to_sound(self, ctx: Context) -> Sound:
-        se = ctx.scene.sequence_editor
-        sq = se.sequences.new_sound(self.name, str(self.snd_file_path), 1, 1)
+        strips_coll = ui_utils.get_strips_from_sequence_editor(ctx)
+        sq = strips_coll.new_sound(self.name, str(self.snd_file_path), 1, 1)
         return cast(Strip, sq).sound
 
     @staticmethod

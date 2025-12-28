@@ -169,6 +169,7 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 Legacy now: https://projects.blender.org/blender/blender/issues/146586
 https://code.blender.org/2023/07/animation-workshop-june-2023/
 https://blender.stackexchange.com/questions/339852/how-exactly-do-actionslots-work
+https://developer.blender.org/docs/release_notes/4.4/python_api/#slotted-actions
 
 - `action.fcurves` Update the use of Action.fcurves to use channelbag = anim_utils.action_get_channelbag_for_slot(action, action_slot)
 ```
