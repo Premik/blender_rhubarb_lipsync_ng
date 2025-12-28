@@ -13,6 +13,7 @@ import rhubarb_lipsync.blender.baking_utils as baking_utils
 import rhubarb_lipsync.blender.rhubarb_operators as rhubarb_operators
 import rhubarb_lipsync.blender.ui_utils as ui_utils
 import rhubarb_lipsync.rhubarb.mouth_cues as shape_data
+from rhubarb_lipsync.blender import action_support
 import sample_data
 from rhubarb_lipsync.blender.capture_properties import (
     CaptureListProperties,
@@ -233,6 +234,7 @@ class SampleProject:
         created, a = self.ensure_action("action_shapekey1")
         if not created:
             return a
+        a.id_root = 'KEY' 
         fc = a.fcurves.new('key_blocks["ShapeKey1"].value', index=0)
         fc.keyframe_points.insert(1, 1)
         return a
@@ -295,6 +297,7 @@ class SampleProject:
         for i, _item in enumerate(self.mprops.items):
             mi: MappingItem = _item
             mi.action = actions[i % alen]
+            mi.migrate_to_slots()
 
     def create_baking_context(self) -> baking_utils.BakingContext:
         bc = baking_utils.BakingContext(bpy.context)
