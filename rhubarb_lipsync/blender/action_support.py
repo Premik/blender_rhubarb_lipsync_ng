@@ -4,16 +4,12 @@ import bpy
 
 log = logging.getLogger(__name__)
 
-# Whether current Blender version support slotted actions
-HAS_SLOTS = hasattr(bpy.types, "ActionSlot")
 
 if TYPE_CHECKING:
     try:
         from bpy.types import ActionChannelbagFCurves as ActionFCurvesContainer
     except ImportError:
         from bpy.types import ActionFCurves as ActionFCurvesContainer  # type: ignore
-
-# OBJECT, KEY, NODETREE ?MATERIAL, ?GREASEPENCIL, ?GREASEPENCIL_V3
 
 
 def is_fcurve_for_shapekey(fcurve: bpy.types.FCurve) -> bool:
@@ -57,12 +53,14 @@ def is_action_blank(action: bpy.types.Action) -> bool:
 #     return [slot.identifier for slot in action.slots if user_object in slot.users()]
 
 
-def get_action_slot_keys(action: bpy.types.Action) -> list[str]:
+def get_action_slot_keys(action: bpy.types.Action, target_id_type: str = None) -> list[str]:
     if is_action_blank(action):
         return []
     if not slots_supported_for_action(action):
         return [""]
-    return [slot.identifier for slot in action.slots]
+    if not target_id_type:
+        return [slot.identifier for slot in action.slots]
+    return [slot.identifier for slot in action.slots if slot.target_id_type == target_id_type]
 
 
 def get_animdata_slot_key(ad: bpy.types.AnimData) -> str:

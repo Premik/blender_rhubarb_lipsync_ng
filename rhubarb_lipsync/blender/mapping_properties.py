@@ -148,6 +148,24 @@ class MappingItem(PropertyGroup):
             return None
         return self.action.slots.get(self.slot_key)
 
+    def migrate_to_slots(self) -> bool:
+        """Set the slot key/name for this mapping item where not set yet, by simply taking first compatible slot.
+        But only if Blender version used supports slots. This would set the slot key/name to the Legacy Slot when an older .blend file is loaded.
+        """
+        if not self.action:
+            return False
+        slot_keys = action_support.get_action_slot_keys(self.action, self.target_id_type)
+        if not slot_keys:
+            return False
+        if self.slot_key in slot_keys:
+            return False  # Already done
+        if len(slot_keys) > 1:
+            log.warning(
+                f"Found {len(slot_keys)}  matching slots when migrating mapping item {self} to slotted Action. Only a ingle match was expected. Taking first one."
+            )
+        self.slot_key = slot_keys[0]
+        return True
+
     @property
     def frame_end(self) -> float:
         """Last frame from the Action"""
@@ -194,6 +212,13 @@ class MappingItem(PropertyGroup):
         else:
             slot_str = ""
         return f"{self.action.name}{slot_str}"
+
+    @property
+    def target_id_type(self) -> str:
+        # TODO: NODETREE ?MATERIAL, ?GREASEPENCIL, ?GREASEPENCIL_V3
+        if self.maps_to_shapekey:
+            return "KEY"
+        return "OBJECT"
 
     @property
     def maps_to_shapekey(self) -> bool:
@@ -272,6 +297,19 @@ class MappingProperties(PropertyGroup):
         # self.only_shapekeys=ui_utils.does_object_support_shapekey_actions(obj)
         # Assume any mesh would use shape-keys by default (even when there are no shape-keys created yet)
         self.only_shapekeys = bool(obj.type == "MESH")
+
+    def migrate_to_slots(self) -> None:
+        """Ensures the slot key/name is set for each mapping item, when Blender vresion supports slots"""
+        if len(self.items) == 0:
+            log.error(f"No mapping item creted when slot migration was attempted. Slotted action migration skiped.")
+            return
+        migrated_count = 0
+        for _item in self.items:
+            item: MappingItem = _item
+            if item.migrate_to_slots():
+                migrated_count += 1
+        if migrated_count > 0:
+            log.info(f"An action slot was automatically assigned to {migrated_count} mapping items. ")
 
     @property
     def selected_item(self) -> Optional[MappingItem]:

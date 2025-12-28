@@ -93,6 +93,7 @@ class ListFilteredActions(bpy.types.Operator):
     def invoke(self, context: Context, event: bpy.types.Event) -> ui_utils.OperatorReturnSet:
         mprops: MappingProperties = MappingProperties.from_context(context)
         mprops.index = self.target_cue_index
+        mprops.migrate_to_slots()
         context.window_manager.invoke_search_popup(self)
         return {'FINISHED'}
 
@@ -391,6 +392,7 @@ class PreviewMappingAction(bpy.types.Operator):
 
         cue_index: int = self.target_cue_index
         active_mi: MappingItem = MappingItem.from_object(context.object, cue_index)
+        active_mi.migrate_to_slots()
 
         # Play or Stop depends on the selected active Object
         is_active_active = mapping_utils.is_mapping_item_active(context, active_mi, context.object)
