@@ -59,7 +59,7 @@ class MouthShapeInfos(Enum):
         'Ⓓ',
         'A sound. Wide opened mouth.',
         '''\
-            Wide open mouth. The widest of them all. This mouth shape is used vowels 
+            Wide open mouth. The widest of them all. This mouth shape is used for vowels 
             like “AA” /ɑ/ as in f[a]ther or h[i]de''',
     )
     E = MouthShapeInfo(
@@ -96,7 +96,7 @@ class MouthShapeInfos(Enum):
         'L sounds. Tongue raised.',
         '''\
             This shape is used for long “L” sounds, with the tongue raised behind the upper teeth. 
-            The mouth should be at least far open as in Ⓒ, but not quite as far as in Ⓓ.
+            The mouth should be at least as far open as in Ⓒ, but not quite as far as in Ⓓ.
             Depending on your art style and the angle of the head, the tongue may not be visible at all. 
             In this case, there is no point in drawing this extra shape.''',
         True,

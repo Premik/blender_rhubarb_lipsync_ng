@@ -164,6 +164,78 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
 
 ### High
 
+### v5.0
+
+Legacy now: https://projects.blender.org/blender/blender/issues/146586
+https://code.blender.org/2023/07/animation-workshop-june-2023/
+https://blender.stackexchange.com/questions/339852/how-exactly-do-actionslots-work
+https://developer.blender.org/docs/release_notes/4.4/python_api/#slotted-actions
+
+- `action.fcurves` Update the use of Action.fcurves to use channelbag = anim_utils.action_get_channelbag_for_slot(action, action_slot)
+```
+action_ensure_channelbag_for_slot( # Blender 5.0+
+    action: bpy.types.Action,
+    slot: bpy.types.ActionSlot
+) -> bpy.types.ActionChannelbag
+    Ensure a layer and a keyframe strip exists, then ensure that strip has a channelbag for the slot.
+    ```
+
+```
+action_get_channelbag_for_slot(
+    action: bpy.types.Action | None,
+    slot: bpy.types.ActionSlot | None
+) -> bpy.types.ActionChannelbag | None
+    Returns the first channelbag found for the slot.
+    In case there are multiple layers or strips they are iterated until a
+    channelbag for that slot is found. In case no matching channelbag is found, returns None.
+```
+
+- `action.groups`e
+- `action.id_root`
+
+`import bpy_extras.anim_utils`
+```
+['Action', 'ActionChannelbag', 
+'ActionSlot', 'AutoKeying', 'BakeOptions', 'Context',
+ 'FCurveKey', 'Iterable', 'Iterator', 'KeyframesCo',
+  'KeyingSet', 'ListKeyframes', 'Mapping', 'Object', 'Optional', 'PoseBone', 'Sequence', 'Union', 
+   'action_ensure_channelbag_for_slot', 'action_get_channelbag_for_slot', 'action_get_first_suitable_slot', 'animdata_get_channelbag_for_assigned_slot',
+    'bake_action', 'bake_action_iter', 'bake_action_objects', 'bake_action_objects_iter', 'bpy', 'contextlib', 'dataclass', 'rna_idprop_value_to_python']
+```
+
+Action 
+---layers->*ActionLayers (only one layer, and one strip?)
+----slots->*ActionSlots
+
+ActionLayer
+----strips->*ActionStrips-->
+
+ActionStrip=>ActionKeyframeStrip
+channelbags--->ActionChannelbags
+
+ActionChannelbag ----fscurves->*ActionChannelbagFCurves
+---slot->ActionSlot 
+
+ActionSlot
+target_id_type (https://upbge.org/docs/latest/api/bpy.types.ActionSlot.html#bpy.types.ActionSlot.target_id_type)
+
+The Channelbag is what contains a set of F-Curves, and so what was the legacy Action data model now is represented by a Channelbag.
+
+
+```
+Ensuring FCurves Exist:
+obj = bpy.context.object
+action = obj.animation_data.action
+fcurve = action.fcurve_ensure_for_datablock(obj, "location", index=0)
+
+action = D.actions[0]
+for layer in action.layers:
+    for strip in layer.strips:
+        if hasattr(strip, "channelbag"):
+            for fcurve in strip.channelbag.fcurves:
+                print(fcurve)
+```
+
 * Mapping wizards
   * Clear - will remove the mapping (delete from the object completly?)
   * Face-it - From Test rig - Normal actions+shape-key corrections? 2) From shape-key test action 3) The final control rig (doesn't need a wizard)
@@ -191,14 +263,14 @@ https://docs.blender.org/api/blender_python_api_master/bpy.props.html?highlight=
   - [ ] Paste sound_strip first, create captures of them and render to NLA
   * Bake to NLA - batchmode?
     - There should be an option to bake multiple captures of the (selected/all objects). Based on the channel or othe crit. So bake can be done 1x for each single character.
-    
 
 
 ### Normal
 * `is_fcurve_for_shapekey` 
-  - there is actually better way, the Action has targe_type/id or similar 
+  - there is actually better way, the Action has targe_type/id or similar: target_id_types # OBJECT, KEY, NODETREE - replace the only_shapekeys bool in the MappingProperties with generic action type and add support from NODETREE type (animating material properties, like frame offset)
   - Add support for other action types , like material/shader graph
   - Refacotr the action filtering toolbar, have the action-types like a dropdown with checkable action types,
+* The rslp tab name in the preferences has separate entries for mapping/capturing, but renaming them won't make two tabs as expected.
 * In prefs, when executable doesn't exist make the control red
 * Integrate with: https://mecabricks.com/en/shop/product/6
 * Bring some of the old baking method back with fixed lengths

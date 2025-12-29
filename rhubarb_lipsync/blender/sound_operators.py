@@ -114,8 +114,8 @@ class CreateSoundStripWithSound(bpy.types.Operator):
         #     )
 
         # https://stackoverflow.com/questions/53215355/whit-python-in-blender-insert-an-effect-strip-as-wipe-in-the-video-sequence-edi
-        se = context.scene.sequence_editor
-        se.sequences.new_sound(sound.name_full, sound.filepath, self.channel, self.start_frame)
+        strips_coll = ui_utils.get_strips_from_sequence_editor(context)
+        strips_coll.new_sound(sound.name_full, sound.filepath, self.channel, self.start_frame)
 
         # The above op always create a new sound, even when there is the same one already imported.
         # Find the newly created strip and change its sound back to the selected one
@@ -182,8 +182,8 @@ class RemoveSoundStripWithSound(bpy.types.Operator):
             m = f"There is more than one sound strips using the sound with '{sound.filepath}'. Don't know which one to remove."
             self.report({"ERROR"}, m)
             return {'CANCELLED'}
-        se = context.scene.sequence_editor
-        se.sequences.remove(strips[0])
+        strips_coll = ui_utils.get_strips_from_sequence_editor(context)
+        strips_coll.remove(strips[0])
         return {'FINISHED'}
 
 

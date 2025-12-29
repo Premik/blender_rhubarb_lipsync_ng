@@ -20,9 +20,9 @@
 
 ### Get the correct zip file
 
-Download the zip file specifically for your platform. The zip file format is `rhubarb_lipsync_ng-<your_system>-<version>.zip`. For example: `rhubarb_lipsync_ng-Windows-1.6.1.zip` for Windows.
+Download the zip file specifically for your platform. The zip file format is `rhubarb_lipsync_ng-<your_system>-<version>.zip`. For example: `rhubarb_lipsync_ng-Windows-1.7.0.zip` for Windows.
 
-   | [🪟 Windows](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v1.6.1/rhubarb_lipsync_ng-Windows-1.6.1.zip) | [🍏 macOS](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v1.6.1/rhubarb_lipsync_ng-macOS-1.6.1.zip) | [🐧 Linux](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v1.6.1/rhubarb_lipsync_ng-Linux-1.6.1.zip) |
+   | [🪟 Windows](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v1.7.0/rhubarb_lipsync_ng-Windows-1.7.0.zip) | [🍏 macOS](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v1.7.0/rhubarb_lipsync_ng-macOS-1.7.0.zip) | [🐧 Linux](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v1.7.0/rhubarb_lipsync_ng-Linux-1.7.0.zip) |
    |----------|--------------|------|
 
 ### Blender 4.2+
@@ -141,7 +141,7 @@ Note: Blender doesn't support baking shape-keys NLA tracks out-of-the-box. So if
 1. Select the Armature and go to `Pose mode` (for normal-action tracks).
 1. Select the Bones you want to bake. For example, press `a` to select all.
 1. Select the strips in the NLA track you want to bake. Use the `b` key and box-select strips if you don't want to include all tracks.
-1. Then go to `NLA Editor/main menu/Edit/Bake Action`.
+1. Then go to `NLA Editor/main menu/Strip/Bake Action` (or `NLA Editor/main menu/Edit/Bake Action` in older Blender versions).
 1. Consider checking the `Visual Keying` and `Clean Curves` options:
 
 ![Capture](doc/img/BakeNLATracks.png)
@@ -158,21 +158,21 @@ A new `Action` will be created and selected in the `Action Editor`. The two RLPS
 
 Any Blender version newer than **v3.2**. Test results:
 
-| Version      | System  | Total | Passed | Failed | Errors | Skipped | Status |
-|--------------|---------|-------|--------|--------|--------|---------|--------|
-| **4.5**.3 LTS| Windows | 70    | 66     | 0      | 0      | 4       | ✔️     |
-| **4.4**.0    | Windows | 70    | 66     | 0      | 0      | 4       | ✔️     |
-| **4.3**.2    | Windows | 70    | 66     | 0      | 0      | 4       | ✔️     |
-| **4.2**.1 LTS| Windows | 70    | 66     | 0      | 0      | 4       | ✔️     |
-| **4.1**.1    | Windows | 70    | 66     | 0      | 0      | 4       | ✔️     |
-| **4.0**.2    | Windows | 70    | 66     | 0      | 0      | 4       | ✔️     |
-| **3.6**.13   | Windows | 70    | 66     | 0      | 0      | 4       | ✔️     |
-| **3.5**.1    | Windows | 70    | 66     | 0      | 0      | 4       | ✔️     |
-| **3.4**.1    | Windows | 70    | 66     | 0      | 0      | 4       | ✔️     |
-| **3.3**.20   | Windows | 70    | 66     | 0      | 0      | 4       | ✔️     |
-| **3.2**.2    | Windows | 70    | 51     | 7      | 8      | 4       | ❌     |
-| **3.1**.2    | Windows | 70    | 51     | 7      | 8      | 4       | ❌     |
-| **3.0**.1    | Windows | 70    | 42     | 0      | 24     | 4       | ❌     |
+| Version       | System  | Total | Passed | Failed | Errors | Skipped | Status |
+|---------------|---------|-------|--------|--------|--------|---------|--------|
+| **5.0**.1     | Windows | 70    | 66     | 0      | 0      | 4       | ✔️     |
+| **4.5**.5 LTS | Windows | 70    | 66     | 0      | 0      | 4       | ✔️     |
+| **4.4**.3     | Windows | 70    | 66     | 0      | 0      | 4       | ✔️     |
+| **4.3**.2     | Windows | 70    | 66     | 0      | 0      | 4       | ✔️     |
+| **4.2**.16 LTS| Windows | 70    | 66     | 0      | 0      | 4       | ✔️     |
+| **4.1**.1     | Windows | 70    | 66     | 0      | 0      | 4       | ✔️     |
+| **4.0**.2     | Windows | 70    | 66     | 0      | 0      | 4       | ✔️     |
+| **3.6**.23    | Windows | 70    | 66     | 0      | 0      | 4       | ✔️     |
+| **3.5**.1     | Windows | 70    | 66     | 0      | 0      | 4       | ✔️     |
+| **3.4**.1     | Windows | 70    | 66     | 0      | 0      | 4       | ✔️     |
+| **3.3**.21    | Windows | 70    | 66     | 0      | 0      | 4       | ✔️     |
+| **3.2**.2     | Windows | 70    | 51     | 7      | 8      | 4       | ❌     |
+| **3.1**.2     | Windows | 70    | 51     | 7      | 8      | 4       | ❌     |
 
 
 

@@ -1,6 +1,6 @@
 schema_version = "1.0.0"
 id = "rhubarb_lipsync"
-version = "1.6.1"
+version = "1.7.0"
 name = "Rhubarb Lipsync NG"
 tagline = "Integrate Rhubarb Lipsync into Blender"
 maintainer = "Premysl Srubar"
@@ -9,7 +9,7 @@ type = "add-on"
 website = "https://blendermarket.com/products/rhubarb-lipsync-ng"
 tags = ["Animation"]
 
-blender_version_min = "4.2.0"
+blender_version_min = "3.3.0"
 license = ["SPDX:MIT"]
 
 platforms = ["linux-x64"]

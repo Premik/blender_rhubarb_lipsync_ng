@@ -232,7 +232,7 @@ class BlenderInstallator:
 
         bis.sort(key=lambda x: (x.ver[0], x.ver[1], x.ver[2]))
         bis_filtered = []
-        for key, group in groupby(bis, key=lambda x: (x.ver[0], x.ver[1])):
+        for _, group in groupby(bis, key=lambda x: (x.ver[0], x.ver[1])):
             # Latest minor version in each major.main ver
             max_minor = max(group, key=lambda x: (x.ver[1], x.ver[2]))
             bis_filtered.append(max_minor)

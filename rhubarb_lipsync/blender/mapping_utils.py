@@ -4,7 +4,7 @@ from typing import Iterator
 import bpy
 from bpy.types import Object
 
-from . import mapping_properties
+from . import action_support, mapping_properties
 
 log = logging.getLogger(__name__)
 
@@ -18,21 +18,6 @@ def objects_with_mapping(objects: Iterator[Object]) -> Iterator[Object]:
             yield o
 
 
-def is_fcurve_for_shapekey(fcurve: bpy.types.FCurve) -> bool:
-    """Determine if an fcurve is for a shape-key action."""
-    return fcurve.data_path.startswith("key_blocks[")  # There doesn't seems to be a better way that check the data path
-
-
-def is_action_shape_key_action(action: bpy.types.Action) -> bool:
-    """Determine whether an action is a shape-key action or a regular one."""
-    if not action:
-        return False
-    if not action.fcurves:
-        return False  # This is not strictly correct, but seems there is not way to know if a blank action is a shape-key one
-    # return any(is_fcurve_for_shapekey(fcurve) for fcurve in action.fcurves)
-    return is_fcurve_for_shapekey(action.fcurves[0])  # Should be enought to check the first one only
-
-
 def does_object_support_shapekey_actions(o: bpy.types.Object) -> bool:
     """Whether it is currently possible to assign a shape-key action to the provided object.
     Object has to be a Mesh with some shape-keys already created"""
@@ -43,13 +28,11 @@ def does_object_support_shapekey_actions(o: bpy.types.Object) -> bool:
     return bool(o.data and o.data.shape_keys)
 
 
-def does_action_fit_object(o: bpy.types.Object, action: bpy.types.Action) -> bool:
-    """Check if all action's F-Curves paths are valid for the provided object."""
-    if not action.fcurves:  # Blank actions are considered invalid (#8)
-        return False
-    for fcurve in action.fcurves:
+def does_action_slot_fit_object(o: bpy.types.Object, action: bpy.types.Action, slot_key: str = "") -> bool:
+
+    for fcurve in action_support.get_action_fcurves(action, slot_key):
         try:
-            if is_fcurve_for_shapekey(fcurve):
+            if action_support.is_fcurve_for_shapekey(fcurve):
                 if not does_object_support_shapekey_actions(o):
                     return False  # Shape-key action can't fit an object with no shape-key blocks (no-mesh) in the first place
                 # fcurve Action paths are based on the shape_keys data block
@@ -67,6 +50,18 @@ def does_action_fit_object(o: bpy.types.Object, action: bpy.types.Action) -> boo
     return True
 
 
+def does_action_fit_object(o: bpy.types.Object, action: bpy.types.Action) -> bool:
+    """Check if all action's F-Curves paths are valid for the provided object."""
+
+    if action_support.is_action_blank(action):  # Blank actions are considered invalid (#8)
+        return False
+    slot_keys = action_support.get_action_slot_keys(action)
+    for slot_key in slot_keys:
+        if does_action_slot_fit_object(o, action, slot_key):
+            return True  # There is at least one slot (ChannelBag)  with it's fcurves fitting the provided object
+    return False
+
+
 def filtered_actions(o: bpy.types.Object, mp: "mapping_properties.MappingProperties") -> Iterator[bpy.types.Action]:
     """Yields all Actions of the current Blender project while applying various filters when enabled in the provided mapping properties"""
     if not mp:
@@ -77,11 +72,29 @@ def filtered_actions(o: bpy.types.Object, mp: "mapping_properties.MappingPropert
                 yield action  # Show-invalid-actions take precedence
             continue
         # The Only-shape-key is a switch
-        if mp.only_shapekeys != is_action_shape_key_action(action):
+        if mp.only_shapekeys != action_support.is_action_shape_key_action(action):
             continue
         if mp.only_asset_actions and not action.asset_data:
             continue
         yield action
+
+
+def filtered_action_slots(o: bpy.types.Object, mp: "mapping_properties.MappingProperties") -> Iterator[tuple[bpy.types.Action, str]]:
+    if not mp:
+        return
+    for action in bpy.data.actions:
+        slot_keys = action_support.get_action_slot_keys(action)
+        for slot_key in slot_keys:
+            if not does_action_slot_fit_object(o, action, slot_key):  # An invalid action
+                if not mp.only_valid_actions:
+                    yield action, slot_key  # Show-invalid-actions take precedence
+                continue
+            # The Only-shape-key is a switch
+            if mp.only_shapekeys != action_support.is_action_shape_key_action(action):
+                continue
+            if mp.only_asset_actions and not action.asset_data:
+                continue
+            yield action, slot_key
 
 
 def filtered_actions_for_current_object(ctx: bpy.types.Context) -> Iterator[bpy.types.Action]:
@@ -94,20 +107,24 @@ def is_mapping_item_active(ctx: bpy.types.Context, mi: 'mapping_properties.Mappi
     """Indicates whether the provided mapping item's Action is active on the provided Object."""
     if (not mi) or (not mi.action) or (not object):
         return False
-    active_object_action: Action
+    active_object_action: bpy.types.Action
     if mi.maps_to_shapekey:  # There is a shape-key Action on the mapping item
         shape_keys = on_object.data.shape_keys
         if (not shape_keys) or (not shape_keys.animation_data):
             return False  # Shape-key Action can't be active on an object without any shape-keys
         active_object_action = shape_keys.animation_data.action
+        active_slot_key = action_support.get_animdata_slot_key(shape_keys.animation_data)
     else:  # Target is a non-mesh object
         if not bool(on_object.animation_data):
             return False
         active_object_action = on_object.animation_data.action
+        active_slot_key = action_support.get_animdata_slot_key(on_object.animation_data)
     if not active_object_action:  # No Action active
         return False
     if mi.action != active_object_action:
         return False  # Object has an Active action but it is not the one mapped
+    if active_slot_key and active_slot_key != mi.slot_key:
+        return False
     if not mi.custom_frame_ranage:
         return True  # When not custom framerange and actions match, any timeline position is cosidered active
     f = ctx.scene.frame_current  # Only active when the timeline position is within the frame sub-range
@@ -131,6 +148,7 @@ def activate_mapping_item(ctx: bpy.types.Context, mi: 'mapping_properties.Mappin
         if not bool(shape_keys.animation_data):
             shape_keys.animation_data_create()
         shape_keys.animation_data.action = mi.action
+        action_support.set_animdata_slot_key(shape_keys.animation_data, mi.slot_key)
         return
     # The Action of the mi is a normal Action
     if on_object.type == 'ARMATURE':  # Ensure Armature is not in the rest pose
@@ -139,6 +157,7 @@ def activate_mapping_item(ctx: bpy.types.Context, mi: 'mapping_properties.Mappin
     if not bool(on_object.animation_data):
         on_object.animation_data_create()  # Ensure the object has animation data
     on_object.animation_data.action = mi.action
+    action_support.set_animdata_slot_key(on_object.animation_data, mi.slot_key)
     # TODO - mute the RLPS (or any track?) which affects the object
 
 

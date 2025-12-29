@@ -1,6 +1,6 @@
 import logging
 from functools import cached_property
-from typing import Any, Generator, Optional
+from typing import TYPE_CHECKING, Any, Generator, Optional
 
 import bpy
 import bpy.utils.previews
@@ -8,12 +8,18 @@ from bpy.props import BoolProperty, CollectionProperty, FloatProperty, IntProper
 from bpy.types import Context, NlaTrack, PropertyGroup
 
 from ..rhubarb.mouth_shape_info import MouthShapeInfo, MouthShapeInfos
-from . import mapping_utils
+from . import action_support, mapping_utils
+from .action_support import is_action_shape_key_action
 from .dropdown_helper import DropdownHelper
 
 log = logging.getLogger(__name__)
 
 
+if TYPE_CHECKING:
+    try:
+        from bpy.types import ActionSlot
+    except ImportError:  # Blender <v4.4
+        ActionSlot = Any  # type: ignore
 class NlaTrackRef(PropertyGroup):
     """Reference to an nla track. By name and index since NLA track is a non-ID object"""
 
@@ -92,6 +98,12 @@ class MappingItem(PropertyGroup):
         options={'LIBRARY_EDITABLE'},
         override={'LIBRARY_OVERRIDABLE'},
     )
+    slot_key: StringProperty(  # type: ignore
+        name="Slot",
+        description="Action Slot to use",
+        options={'LIBRARY_EDITABLE'},
+        override={'LIBRARY_OVERRIDABLE'},
+    )
 
     frame_start: FloatProperty(  # type: ignore
         name="Frame Start",
@@ -123,6 +135,31 @@ class MappingItem(PropertyGroup):
         options={'LIBRARY_EDITABLE'},
         override={'LIBRARY_OVERRIDABLE'},
     )
+
+    @property
+    def slot(self) -> "ActionSlot":
+        if not self.slot_key:
+            return None
+        if not action_support.slots_supported_for_action(self.action):
+            return None
+        return self.action.slots.get(self.slot_key)
+    def migrate_to_slots(self) -> bool:
+        """Set the slot key/name for this mapping item where not set yet, by simply taking first compatible slot.
+        But only if Blender version used supports slots. This would set the slot key/name to the Legacy Slot when an older .blend file is loaded.
+        """
+        if not self.action:
+            return False
+        slot_keys = action_support.get_action_slot_keys(self.action, self.target_id_type)
+        if not slot_keys:
+            return False
+        if self.slot_key in slot_keys:
+            return False  # Already done
+        if len(slot_keys) > 1:
+            log.warning(
+                f"Found {len(slot_keys)}  matching slots when migrating mapping item {self} to slotted Action. Only a ingle match was expected. Taking first one."
+            )
+        self.slot_key = slot_keys[0]
+        return True
 
     @property
     def frame_end(self) -> float:
@@ -165,11 +202,27 @@ class MappingItem(PropertyGroup):
     def action_str(self) -> str:
         if not self.action:
             return " "
-        return self.action.name
+        if self.slot_key:
+            if len(self.slot_key) > 2:
+                sk = self.slot_key[2:]
+            else:
+                sk = self.slot_key
+
+            slot_str = f" / {sk}"
+        else:
+            slot_str = ""
+        return f"{self.action.name}{slot_str}"
+
+    @property
+    def target_id_type(self) -> str:
+        # TODO: NODETREE ?MATERIAL, ?GREASEPENCIL, ?GREASEPENCIL_V3
+        if self.maps_to_shapekey:
+            return "KEY"
+        return "OBJECT"
 
     @property
     def maps_to_shapekey(self) -> bool:
-        return mapping_utils.is_action_shape_key_action(self.action)
+        return is_action_shape_key_action(self.action)
 
     @staticmethod
     def from_object(obj: bpy.types.Object, cue_index: int) -> Optional["MappingItem"]:
@@ -211,6 +264,8 @@ class MappingProperties(PropertyGroup):
         override={'LIBRARY_OVERRIDABLE'},
     )
 
+    # target_id_types # OBJECT, KEY, NODETREE
+
     only_valid_actions: BoolProperty(  # type: ignore
         name="Only Valid Actions",
         description="When enabled Actions with invalid f-curve keys are filtered out",
@@ -242,6 +297,19 @@ class MappingProperties(PropertyGroup):
         # self.only_shapekeys=ui_utils.does_object_support_shapekey_actions(obj)
         # Assume any mesh would use shape-keys by default (even when there are no shape-keys created yet)
         self.only_shapekeys = bool(obj.type == "MESH")
+
+    def migrate_to_slots(self) -> None:
+        """Ensures the slot key/name is set for each mapping item, when Blender vresion supports slots"""
+        if len(self.items) == 0:
+            log.error("No mapping item creted when slot migration was attempted. Slotted action migration skiped.")
+            return
+        migrated_count = 0
+        for _item in self.items:
+            item: MappingItem = _item
+            if item.migrate_to_slots():
+                migrated_count += 1
+        if migrated_count > 0:
+            log.info(f"An action slot was automatically assigned to {migrated_count} mapping items. ")
 
     @property
     def selected_item(self) -> Optional[MappingItem]:

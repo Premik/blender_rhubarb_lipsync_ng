@@ -9,6 +9,7 @@ from bpy.types import Context, Object
 from .. import IconsManager
 from ..rhubarb.mouth_shape_info import MouthShapeInfo, MouthShapeInfos
 from . import mapping_utils, ui_utils
+from .action_support import is_action_shape_key_action
 from .mapping_properties import MappingItem, MappingProperties, NlaTrackRef
 from .preferences import MappingPreferences, RhubarbAddonPreferences
 
@@ -25,17 +26,21 @@ def filtered_actions_enum(prop_group: 'ListFilteredActions', ctx: Context) -> li
         def action2ico(a: bpy.types.Action):
             if a.asset_data:
                 return "ASSET_MANAGER"
-            if mapping_utils.is_action_shape_key_action(a):
+            if is_action_shape_key_action(a):
                 return "SHAPEKEY_DATA"
             if not mapping_utils.does_action_fit_object(o, a):
                 return "ERROR"
             return "OBJECT_DATAMODE"
 
-        def fields(i, a: bpy.types.Action) -> tuple[str, str, str, str, int]:
-            return (a.name, a.name, a.name_full, action2ico(a), i)
+        def fields(i, a: bpy.types.Action, slot_key: str) -> tuple[str, str, str, str, int]:
+            display = f"{a.name} |{slot_key}"
+            # (Unique internal ID string, UI display name, Tooltip description, Icon identifier string, Optional integer value)
+            return (f"{a.name}/{slot_key}", display, a.name_full, action2ico(a), i)
             # return (a.name, a.name, a.name_full)
 
-        return [fields(i, a) for i, a in enumerate(mapping_utils.filtered_actions(o, mprops))]
+        # return [fields(i, a) for i, a in enumerate(mapping_utils.filtered_actions(o, mprops))]
+        return [fields(i, action, slot) for i, (action, slot) in enumerate(mapping_utils.filtered_action_slots(o, mprops))]
+
     except Exception as e:
         log.exception(f"Failed to list actions. {e}")
         return [('error', f"FAILED: {e}", 'error', 'CANCEL', 1)]
@@ -59,7 +64,15 @@ class ListFilteredActions(bpy.types.Operator):
 
     @property
     def action(self) -> Optional[bpy.types.Action]:
-        return bpy.data.actions.get(self.action_name)
+        name = self.action_name.split('/', 1)[0]
+        return bpy.data.actions.get(name)
+
+    @property
+    def slot_key(self) -> str:
+        parts = self.action_name.split('/', 1)
+        if len(parts) > 1:
+            return parts[1]
+        return ""
 
     @classmethod
     def poll(cls, context: Context) -> bool:
@@ -77,19 +90,21 @@ class ListFilteredActions(bpy.types.Operator):
             return f"'Cue: {mi.key}'"
         return f"Action: {mi.action_str}\nRange: {mi.frame_range_str} \nCue: {mi.key}"
 
-    def invoke(self, context: Context, event: bpy.types.Event) -> set[str]:
+    def invoke(self, context: Context, event: bpy.types.Event) -> ui_utils.OperatorReturnSet:
         mprops: MappingProperties = MappingProperties.from_context(context)
         mprops.index = self.target_cue_index
+        mprops.migrate_to_slots()
         context.window_manager.invoke_search_popup(self)
         return {'FINISHED'}
 
-    def execute(self, context: Context) -> set[str]:
+    def execute(self, context: Context) -> ui_utils.OperatorReturnSet:
         mprops: MappingProperties = MappingProperties.from_context(context)
         mi = mprops[self.target_cue_index]
         if not mi:
             self.report(type={"ERROR"}, message="Invalid target cue index selected.")
             return {'CANCELLED'}
         mi.action = self.action
+        mi.slot_key = self.slot_key
         ui_utils.redraw_3dviews(context)
 
         return {'FINISHED'}
@@ -133,7 +148,7 @@ class SetActionFrameRange(bpy.types.Operator):
         row = self.layout.row(align=True)
         row.enabled = mi.custom_frame_ranage
 
-        def shift_op(sign: str, delta: float, icon: str):
+        def shift_op(sign: str, delta: float, icon: str) -> None:
             blid = SetShiftActionFrameRangeStart.bl_idname
             op: SetShiftActionFrameRangeStart = row.operator(blid, text=f"{sign}{mi.frame_count:.2f}", icon=icon)
             op.delta = delta
@@ -144,12 +159,12 @@ class SetActionFrameRange(bpy.types.Operator):
 
         # row.prop(mi.frame_end, "End")
 
-    def invoke(self, context: Context, event: bpy.types.Event) -> set[str]:
+    def invoke(self, context: Context, event: bpy.types.Event) -> ui_utils.OperatorReturnSet:
         mprops: MappingProperties = MappingProperties.from_context(context)
         mprops.index = self.target_cue_index
         return context.window_manager.invoke_props_dialog(self, width=300)
 
-    def execute(self, context: Context) -> set[str]:
+    def execute(self, context: Context) -> ui_utils.OperatorReturnSet:
         mprops: MappingProperties = MappingProperties.from_context(context)
         mi = mprops[self.target_cue_index]
         if not mi:
@@ -177,7 +192,7 @@ class SetShiftActionFrameRangeStart(bpy.types.Operator):
     def description(csl, context: Context, self: 'ListFilteredActions') -> str:
         return f"Shift the start frame of the custom subrange by {self.delta} frames"
 
-    def execute(self, context: Context) -> set[str]:
+    def execute(self, context: Context) -> ui_utils.OperatorReturnSet:
         mprops: MappingProperties = MappingProperties.from_context(context)
         mi = mprops[self.target_cue_index]
         if not mi:
@@ -207,10 +222,10 @@ class ClearMappedActions(bpy.types.Operator):
         mprops.index = self.target_cue_index
         return mi
 
-    def execute(self, context: Context) -> set[str]:
+    def execute(self, context: Context) -> ui_utils.OperatorReturnSet:
         mi = self.mapping_item(context)
         if not mi:
-            self.report(type={"WARN"}, message=f"There is mapping item/slot created for cue at index: {self.target_cue_index} ")
+            self.report(type={"WARNING"}, message=f"There is mapping item/slot created for cue at index: {self.target_cue_index} ")
             return {'CANCELLED'}
         if not mi.action and not mi.custom_frame_ranage:
             self.report(type={"INFO"}, message="There is no Action mapped and neither custom frame-range is set.")
@@ -242,7 +257,7 @@ class BuildCueInfoUIList(bpy.types.Operator):
     # def poll(cls, context: Context) -> bool:
     #    return ui_utils.validation_poll(cls, context)
 
-    def execute(self, context: Context) -> set[str]:
+    def execute(self, context: Context) -> ui_utils.OperatorReturnSet:
         mprops: MappingProperties = MappingProperties.from_context(context)
         mprops.items.clear()
         mprops.build_items(context.active_object)
@@ -274,7 +289,7 @@ class ShowCueInfoHelp(bpy.types.Operator):
     def poll(cls, context: Context) -> bool:
         return ui_utils.validation_poll(cls, context, MappingProperties.context_selection_validation)
 
-    def execute(self, context: Context) -> set[str]:
+    def execute(self, context: Context) -> ui_utils.OperatorReturnSet:
         mprops: MappingProperties = MappingProperties.from_context(context)
         if not self.key:
             si = mprops.selected_item
@@ -304,11 +319,12 @@ class CreateNLATrack(bpy.types.Operator):
     def poll(cls, context: Context) -> bool:
         return ui_utils.validation_poll(cls, context, MappingProperties.context_selection_validation)
 
-    def execute(self, ctx: Context) -> set[str]:
+    def execute(self, ctx: Context) -> ui_utils.OperatorReturnSet:
         mprops: MappingProperties = MappingProperties.from_context(ctx)
         o = ctx.object
 
         if mapping_utils.does_object_support_shapekey_actions(o):
+            assert o.data
             ad = o.data.shape_keys.animation_data
             if not ad:  # No shapke-key animation data, create them first
                 o.data.shape_keys.animation_data_create()
@@ -365,7 +381,7 @@ class PreviewMappingAction(bpy.types.Operator):
     def poll(cls, context: Context) -> bool:
         return ui_utils.validation_poll(cls, context)
 
-    def execute(self, context: Context) -> set[str]:
+    def execute(self, context: Context) -> ui_utils.OperatorReturnSet:
         # prefs = RhubarbAddonPreferences.from_context(context)
         # mlp: MappingPreferences = prefs.mapping_prefs
 
@@ -376,6 +392,7 @@ class PreviewMappingAction(bpy.types.Operator):
 
         cue_index: int = self.target_cue_index
         active_mi: MappingItem = MappingItem.from_object(context.object, cue_index)
+        active_mi.migrate_to_slots()
 
         # Play or Stop depends on the selected active Object
         is_active_active = mapping_utils.is_mapping_item_active(context, active_mi, context.object)
@@ -412,7 +429,7 @@ class StopAllPreview(bpy.types.Operator):
             PreviewMappingAction.disabled_reason,
         )  # Same validation as Preview/Stop
 
-    def execute(self, context: Context) -> set[str]:
+    def execute(self, context: Context) -> ui_utils.OperatorReturnSet:
         error = PreviewMappingAction.disabled_reason(context, 0)
         if error:
             self.report({"ERROR"}, error)

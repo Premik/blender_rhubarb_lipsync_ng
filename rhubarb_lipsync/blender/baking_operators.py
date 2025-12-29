@@ -64,7 +64,7 @@ class RemoveCapturedNlaStrips(bpy.types.Operator):
         for t in bctx.unique_tracks:
             self.on_track(bctx, t)
 
-    def execute(self, ctx: Context) -> set[str]:
+    def execute(self, ctx: Context) -> ui_utils.OperatorReturnSet:
         b = baking_utils.BakingContext(ctx)
         self.strips_removed = 0
         self.tracks_cleaned = 0
@@ -102,7 +102,7 @@ class PlacementBlendInOutRatioPreset(bpy.types.Operator):
         default='0.5',
     )
 
-    def execute(self, ctx: Context) -> set[str]:
+    def execute(self, ctx: Context) -> ui_utils.OperatorReturnSet:
         prefs = RhubarbAddonPreferences.from_context(ctx)
         sprops: StripPlacementPreferences = prefs.strip_placement
         rate = float(self.ratio_type)
@@ -130,7 +130,7 @@ class PlacementScaleFromPreset(bpy.types.Operator):
         default='1.25',
     )
 
-    def execute(self, ctx: Context) -> set[str]:
+    def execute(self, ctx: Context) -> ui_utils.OperatorReturnSet:
         prefs = RhubarbAddonPreferences.from_context(ctx)
         sprops: StripPlacementPreferences = prefs.strip_placement
         rate = float(self.scale_type)
@@ -159,7 +159,7 @@ class PlacementCueTrimFromPreset(bpy.types.Operator):
         ),
     )
 
-    def execute(self, ctx: Context) -> set[str]:
+    def execute(self, ctx: Context) -> ui_utils.OperatorReturnSet:
         prefs = RhubarbAddonPreferences.from_context(ctx)
         clp: CueListPreferences = prefs.cue_list_prefs
         fps = ctx.scene.render.fps
@@ -190,7 +190,7 @@ class ShowPlacementHelp(bpy.types.Operator):
         row.template_image(tex, "image", tex.image_user)
         # row.label(text=f"{tex.image}")
 
-    def execute(self, context: Context) -> set[str]:
+    def execute(self, context: Context) -> ui_utils.OperatorReturnSet:
         # self.tex=tex
         img, tex = IconsManager.placement_help_image()
         img.preview_ensure()
@@ -246,6 +246,8 @@ class BakeToNLA(bpy.types.Operator):
 
         rll: ResultLogListProperties = CaptureListProperties.from_context(context).last_resut_log
         rll.clear()  # Clear log entries from last bake
+        bctx = baking_utils.BakingContext(context)
+        bctx.migrate_obj_mapping_to_slots()
         wm = context.window_manager
         return wm.invoke_props_dialog(self, width=480)
 
@@ -290,7 +292,7 @@ class BakeToNLA(bpy.types.Operator):
 
         self.place_strip(start, end, blend_in, blend_out, scale)
 
-    def place_strip(self, start: float, end: float, blend_in: float, blend_out: float, scale: float):
+    def place_strip(self, start: float, end: float, blend_in: float, blend_out: float, scale: float) -> None:
         b = self.bctx
         cf = b.current_cue
         cue: MouthCue = cf and cf.cue or None
@@ -305,6 +307,8 @@ class BakeToNLA(bpy.types.Operator):
             strip.action_frame_end = b.current_mapping_item.frame_end
         strip.frame_start = start  # Set start frame again as float (ctor takes only int)
         strip.scale = scale
+        if b.current_mapping_item.slot:
+            strip.action_slot = b.current_mapping_item.slot
         # if b.ctx.scene.show_subframe:
         strip.frame_end = end
         self.strips_added += 1
@@ -346,7 +350,7 @@ class BakeToNLA(bpy.types.Operator):
                 log.trace(f"Baking on object {obj} ")  # type: ignore
             self.bake_cue_on_object(obj)
 
-    def execute(self, ctx: Context) -> set[str]:
+    def execute(self, ctx: Context) -> ui_utils.OperatorReturnSet:
         self.bctx = baking_utils.BakingContext(ctx)
         self.strips_added = 0
         b = self.bctx

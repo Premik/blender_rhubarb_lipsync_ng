@@ -1,5 +1,26 @@
 # Release Notes
 
+## v1.7.0
+**Date:** 2025-12-29
+
+- Action **Slots** are now supported, while maintaining compatibility with older Blender versions. Slots were added in Blender `v4.4`.
+
+![AudioStripSync](doc/img/release/action_slots.png)
+
+- Blender version `v5+` is supported.
+- Fixed the minimal Blender version supported (`v3.3`) in the metadata to avoid warning at the Blender start.
+
+
+## v1.6.1
+**Date:** 2025-09-15
+
+Made the `aud` module optional. Sound conversion is disabled when the module is broken or missing. 
+This is a workaround for the #27, #19 and #24 
+
+![AudioStripSync](doc/img/release/aud_disabled.png)
+
+---
+
 ## v1.6.0
 
 **Date:** 2025-06-12
@@ -225,4 +246,4 @@ Bugfix release, removed stalled imports
 - Project renamed to `rhubarb_lipsync_ng` as there was nothing left from the original code-base. The versioning was reset as well.
 - The Action baking somehow works now. But the Strip Placement needs a rework. Especially the strip-ends placing. Baking of the shape keys actions is not implemented yet.
 - Captures are now bound to `Scene` and only Mapping-settings are bound to individual `Object(s)` (typically armature). So one capture can be used for multiple objects and baked at once.
-- Setting the start frame works as expected. 
+- Setting the start frame works as expected.
