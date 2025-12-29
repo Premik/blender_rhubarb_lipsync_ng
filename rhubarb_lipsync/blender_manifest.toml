@@ -9,7 +9,7 @@ type = "add-on"
 website = "https://blendermarket.com/products/rhubarb-lipsync-ng"
 tags = ["Animation"]
 
-blender_version_min = "4.2.0"
+blender_version_min = "3.3.0"
 license = ["SPDX:MIT"]
 
 platforms = ["linux-x64"]
