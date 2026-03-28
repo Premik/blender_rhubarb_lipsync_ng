@@ -354,9 +354,10 @@ class CaptureMouthCuesPanel(bpy.types.Panel):
         self.draw_job()
         self.draw_capture_toolbar()
 
-        list_type = 'GRID' if prefs.cue_list_prefs.as_grid else 'DEFAULT'
+        #  GRID is no longer supported in more recent Blender versions: https://projects.blender.org/blender/blender/pulls/138395
+        # list_type = 'GRID' if prefs.cue_list_prefs.as_grid else 'DEFAULT'
         lst: MouthCueList = props.cue_list
-        self.layout.template_list(MouthCueUIList.bl_idname, "Mouth cues", lst, "items", lst, "index", type=list_type)
+        self.layout.template_list(MouthCueUIList.bl_idname, "Mouth cues", lst, "items", lst, "index")
 
     def draw(self, context: Context) -> None:
         try:

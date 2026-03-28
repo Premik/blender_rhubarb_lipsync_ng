@@ -242,7 +242,7 @@ class MouthCueFrames:
     @property
     def intersects_frame(self) -> bool:
         """Whether the cue duration is long enough and/or placed so there is an integer frame number
-        intersecting the cue duration interval. When false there this no intersection with a frame at all and a cue would not be visible (outside NLA)"""
+        intersecting the cue duration interval. When false there is no intersection with a frame at all and a cue would not be visible (outside NLA)"""
         s = self.start_frame_right
         e = self.end_frame_left
         return bool(e - s >= 0)  # The cue duration is sorter than a single frame duration and is placed inbetween two frames

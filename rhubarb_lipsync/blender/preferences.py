@@ -47,7 +47,6 @@ class CueListPreferences(PropertyGroup):
     show_col_end_time: BoolProperty(default=False, name="End (seconds)")  # type: ignore
     show_col_play: BoolProperty(default=True, name="Play button")  # type: ignore
 
-    as_grid: BoolProperty(default=False, name="As gird", description="Display the list in the grid mode")  # type: ignore
     as_circle: BoolProperty(default=True, name="Cue key circle font", description="Show the cue keys A,B,C as Ⓐ,Ⓑ,Ⓒ")  # type: ignore
     sync_on_select: BoolProperty(  # type: ignore
         default=True,
@@ -76,7 +75,7 @@ class CueListPreferences(PropertyGroup):
 
     @cached_property
     def props_names(self) -> list[str]:
-        return [k for k in self.__annotations__]
+        return [k for k in CueListPreferences.__annotations__]
 
     @cached_property
     def col_props_names(self) -> list[str]:
