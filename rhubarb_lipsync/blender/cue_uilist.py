@@ -3,6 +3,7 @@ from typing import Any
 from bpy.types import Context, UI_UL_list, UILayout, UIList
 
 from .. import IconsManager
+from . import capture_operators
 from .capture_properties import MouthCueList, MouthCueListItem
 from .misc_operators import PlayRange
 from .preferences import CueListPreferences, RhubarbAddonPreferences
@@ -32,9 +33,9 @@ class MouthCueUIList(UIList):
         index: int,
         flt_flag: int,
     ) -> None:
-        self.draw_compact(layout, item, context)
+        self.draw_compact(layout, item, context, index)
 
-    def draw_compact(self, layout: UILayout, item: MouthCueListItem, context: Context) -> None:
+    def draw_compact(self, layout: UILayout, item: MouthCueListItem, context: Context, index: int) -> None:
         clp = self.cuelist_prefs(context)
         # row = layout.row()
         # prefs = RhubarbAddonPreferences.from_context(context)
@@ -43,17 +44,19 @@ class MouthCueUIList(UIList):
         else:
             split = layout.split(factor=0.1)
 
-        # row.scale_x = 1.15
-        # row.scale_x = 0.95
-
         row = split.row()  # Icon(0.1) and shape key (0.1)
 
         if clp.show_col_icon:
             row.label(icon_value=IconsManager.cue_icon(item.cue.key))
+
+        op_text = ""
         if clp.as_circle:
-            row.label(text=item.cue.info.key_displ)
+            op_text = item.cue.info.key_displ
         else:
-            row.label(text=item.key)
+            op_text = item.key
+
+        op = row.operator(capture_operators.EditCueListItem.bl_idname, text=op_text, emboss=False)
+        op.cue_index = index
 
         row = split.row()  # Times and operators (0.8)
         if clp.show_col_play:
@@ -62,10 +65,7 @@ class MouthCueUIList(UIList):
             subs = row
 
         row = subs.row()  # Times (0.85)
-        # row.active = False
-        # row.enabled = False
-        # row.
-        if item.cue.key == 'X':
+        if item.cue.key == "X":
             row.active = False
         else:
             long = clp.highlight_long_cues

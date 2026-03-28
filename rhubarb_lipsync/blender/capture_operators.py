@@ -1,7 +1,7 @@
 import logging
 
 import bpy
-from bpy.props import StringProperty
+from bpy.props import IntProperty, StringProperty
 from bpy.types import Context
 
 from ..rhubarb.rhubarb_command import RhubarbParser
@@ -86,6 +86,36 @@ class ClearCueList(bpy.types.Operator):
         cl: MouthCueList = props.cue_list
         cl.items.clear()
 
+        return {'FINISHED'}
+
+
+class EditCueListItem(bpy.types.Operator):
+    bl_idname = "rhubarb.edit_cue_list_item"
+    bl_label = "Edit cue item"
+    bl_options = {'UNDO', 'REGISTER'}
+
+    cue_index: IntProperty(name="index", description="Cue item index to edit")
+
+    @classmethod
+    def description(cls, context, properties):
+        props = CaptureListProperties.capture_from_context(context)
+        if not props or properties.cue_index < 0 or properties.cue_index >= len(props.cue_list.items):
+            return "Invalid cue item"
+        item = props.cue_list.items[properties.cue_index]
+        return f"Edit cue '{item.key}'"
+
+    def invoke(self, context: Context, event: bpy.types.Event) -> set:
+        return context.window_manager.invoke_props_dialog(self, width=300)
+
+    def draw(self, context: Context):
+        layout = self.layout
+        props = CaptureListProperties.capture_from_context(context)
+        item = props.cue_list.items[self.cue_index]
+        layout.label(text=f"Editing cue: {item.key}")
+        # For now keep dialog blank, only display the cue type in it.
+
+    def execute(self, context: Context) -> set[str]:
+        # Logic to modify the cue will go here
         return {'FINISHED'}
 
 
