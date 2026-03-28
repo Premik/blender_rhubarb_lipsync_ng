@@ -72,7 +72,7 @@ class SampleProject:
             assert not len(self.mprops.items), f"There is unexpected mapping already created on the {bpy.context.object}."
 
     def make_project_empty(self) -> None:
-        bpy.ops.wm.read_factory_settings(False, use_empty=True)
+        bpy.ops.wm.read_factory_settings(use_factory_startup_app_template_only=False, use_empty=True)
 
     @cached_property
     def sample(self) -> sample_data.SampleData:
