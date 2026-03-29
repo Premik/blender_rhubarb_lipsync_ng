@@ -94,7 +94,7 @@ class CheckForUpdates(bpy.types.Operator):
             log.debug(traceback.format_exc())
             return None
 
-    def execute(self, ctx: Context) -> set[str]:
+    def execute(self, ctx: Context) -> ui_utils.OperatorReturnSet:
         last_tag = self.get_latest_release_info_from_github()
         if last_tag is None:
             return {'CANCELLED'}
@@ -126,7 +126,7 @@ class SetLogLevel(bpy.types.Operator):
         default=str(logging.INFO),
     )
 
-    def execute(self, context: Context) -> set[str]:
+    def execute(self, context: Context) -> ui_utils.OperatorReturnSet:
         level = int(self.level)
         logManager.set_level(level)
         prefs = RhubarbAddonPreferences.from_context(context)
@@ -164,7 +164,7 @@ class ShowResultLogDetails(bpy.types.Operator):
     def invoke(self, context: Context, event: bpy.types.Event) -> set:
         return context.window_manager.invoke_props_dialog(self, width=1000)
 
-    def execute(self, ctx: Context) -> set[str]:
+    def execute(self, ctx: Context) -> ui_utils.OperatorReturnSet:
         rll: ResultLogListProperties = CaptureListProperties.from_context(ctx).last_resut_log
         rll.items.clear()
         ui_utils.redraw_3dviews(ctx)
@@ -187,7 +187,7 @@ class ShowResultLogDetails(bpy.types.Operator):
 #         return ret
 
 
-#     def execute(self, context: Context) -> set[str]:
+#     def execute(self, context: Context) -> ui_utils.OperatorReturnSet:
 #         return {'FINISHED'}
 class PlayRange(bpy.types.Operator):
     """Starts animation playback from the current frame and stops automatically after played certain number of frames."""
@@ -242,7 +242,7 @@ class PlayRange(bpy.types.Operator):
     def poll(cls, context: Context) -> bool:
         return ui_utils.validation_poll(cls, context)
 
-    def execute(self, context: Context) -> set[str]:
+    def execute(self, context: Context) -> ui_utils.OperatorReturnSet:
         PlayRange.frames_left = self.play_frames
         log.debug(f"Starting animation playback from {self.start_frame} frame. Frames to play: {self.play_frames}.")
         PlayRange.remove_handlers()

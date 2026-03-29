@@ -94,7 +94,7 @@ class CreateSoundStripWithSound(bpy.types.Operator):
         wm = context.window_manager
         return wm.invoke_props_dialog(self, width=500)
 
-    def execute(self, context: Context) -> set[str]:
+    def execute(self, context: Context) -> ui_utils.OperatorReturnSet:
         # Run validation again, without the limit this time
         error = CreateSoundStripWithSound.disabled_reason(context, 0)
         if error:
@@ -169,7 +169,7 @@ class RemoveSoundStripWithSound(bpy.types.Operator):
     def poll(cls, context: Context) -> bool:
         return ui_utils.validation_poll(cls, context)
 
-    def execute(self, context: Context) -> set[str]:
+    def execute(self, context: Context) -> ui_utils.OperatorReturnSet:
         error = self.disabled_reason(context, 0)  # Run validation again, without the limit this time
         if error:
             self.report({"ERROR"}, error)
@@ -209,7 +209,7 @@ class ToggleRelativePath(bpy.types.Operator):
         else:
             return ui_utils.to_abs_path(sound.filepath)
 
-    def execute(self, context: Context) -> set[str]:
+    def execute(self, context: Context) -> ui_utils.OperatorReturnSet:
         props = CaptureListProperties.capture_from_context(context)
         sound: Sound = props.sound
         old = sound.filepath
@@ -343,7 +343,7 @@ class ConvertSoundFromat(bpy.types.Operator):
         wm = context.window_manager
         return wm.invoke_props_dialog(self)
 
-    def execute(self, context: Context) -> set[str]:
+    def execute(self, context: Context) -> ui_utils.OperatorReturnSet:
         props = CaptureListProperties.capture_from_context(context)
         sound: Sound = props.sound
         src_path = pathlib.Path(bpy.path.abspath(sound.filepath))

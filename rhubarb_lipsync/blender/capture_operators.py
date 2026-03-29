@@ -18,7 +18,7 @@ class CreateCaptureProps(bpy.types.Operator):
     bl_label = "Create new capture"
     bl_options = {'UNDO', 'REGISTER'}
 
-    def execute(self, context: Context) -> set[str]:
+    def execute(self, context: Context) -> ui_utils.OperatorReturnSet:
         rootProps = CaptureListProperties.from_context(context)
         assert rootProps, "Failed to got root properties from the scene. Registration error?"
         log.trace("Creating new capture properties")  # type: ignore
@@ -48,7 +48,7 @@ class DeleteCaptureProps(bpy.types.Operator):
     def poll(cls, context: Context) -> bool:
         return ui_utils.validation_poll(cls, context)
 
-    def execute(self, context: Context) -> set[str]:
+    def execute(self, context: Context) -> ui_utils.OperatorReturnSet:
         rootProps = CaptureListProperties.from_context(context)
         rootProps.items.remove(rootProps.index)
         rootProps.index = rootProps.index - 1
@@ -81,7 +81,7 @@ class ClearCueList(bpy.types.Operator):
     #    wm = context.window_manager
     #    return wm.invoke_confirm(self, event)
 
-    def execute(self, context: Context) -> set[str]:
+    def execute(self, context: Context) -> ui_utils.OperatorReturnSet:
         props = CaptureListProperties.capture_from_context(context)
         cl: MouthCueList = props.cue_list
         cl.items.clear()
@@ -94,10 +94,10 @@ class EditCueListItem(bpy.types.Operator):
     bl_label = "Edit cue item"
     bl_options = {'UNDO', 'REGISTER'}
 
-    cue_index: IntProperty(name="index", description="Cue item index to edit")
+    cue_index: IntProperty(name="index", description="Cue item index to edit")  # type: ignore
 
     @classmethod
-    def description(cls, context, properties):
+    def description(cls, context, properties) -> str:
         props = CaptureListProperties.capture_from_context(context)
         if not props or properties.cue_index < 0 or properties.cue_index >= len(props.cue_list.items):
             return "Invalid cue item"
@@ -114,7 +114,7 @@ class EditCueListItem(bpy.types.Operator):
         layout.label(text=f"Editing cue: {item.key}")
         # For now keep dialog blank, only display the cue type in it.
 
-    def execute(self, context: Context) -> set[str]:
+    def execute(self, context: Context) -> ui_utils.OperatorReturnSet:
         # Logic to modify the cue will go here
         return {'FINISHED'}
 
@@ -149,7 +149,7 @@ class ExportCueList2Json(bpy.types.Operator):
         context.window_manager.fileselect_add(self)
         return {'RUNNING_MODAL'}
 
-    def execute(self, context: Context) -> set[str]:
+    def execute(self, context: Context) -> ui_utils.OperatorReturnSet:
         cprops = CaptureListProperties.capture_from_context(context)
         cl: MouthCueList = cprops.cue_list
         cues = [c.cue for c in cl.items]
@@ -190,7 +190,7 @@ class ImportJsonCueList(bpy.types.Operator):
         context.window_manager.fileselect_add(self)
         return {'RUNNING_MODAL'}
 
-    def execute(self, context: Context) -> set[str]:
+    def execute(self, context: Context) -> ui_utils.OperatorReturnSet:
         if not (self.filepath):
             return {'CANCELLED'}
 

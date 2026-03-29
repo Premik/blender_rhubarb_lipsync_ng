@@ -66,7 +66,7 @@ class ProcessSoundFile(bpy.types.Operator):
             return wm.invoke_confirm(self, event)
         return self.execute(context)
 
-    def execute(self, context: Context) -> set[str]:
+    def execute(self, context: Context) -> ui_utils.OperatorReturnSet:
         ProcessSoundFile.last_op = self  # type: ignore
         prefs = RhubarbAddonPreferences.from_context(context)
         rootProps = CaptureListProperties.from_context(context)
@@ -236,7 +236,7 @@ class GetRhubarbExecutableVersion(bpy.types.Operator):
     def poll(cls, context: Context) -> bool:
         return ui_utils.validation_poll(cls, context, rhubarcli_validation)
 
-    def execute(self, context: Context) -> set[str]:
+    def execute(self, context: Context) -> ui_utils.OperatorReturnSet:
         prefs = RhubarbAddonPreferences.from_context(context)
         cmd = prefs.new_command_handler()
         GetRhubarbExecutableVersion.executable_version = cmd.get_version()

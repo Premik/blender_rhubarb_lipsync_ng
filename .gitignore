@@ -19,3 +19,4 @@ dist
 summary.py.txt
 sphinx/build/
 sphinx/build
+.mypy_cache
