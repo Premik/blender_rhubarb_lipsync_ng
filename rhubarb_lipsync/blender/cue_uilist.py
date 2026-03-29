@@ -40,9 +40,9 @@ class MouthCueUIList(UIList):
         # row = layout.row()
         # prefs = RhubarbAddonPreferences.from_context(context)
         if clp.show_col_icon:
-            split = layout.split(factor=0.2)
+            split = layout.split(factor=0.3)
         else:
-            split = layout.split(factor=0.1)
+            split = layout.split(factor=0.12)
 
         row = split.row()  # Icon(0.1) and shape key (0.1)
 
@@ -55,12 +55,13 @@ class MouthCueUIList(UIList):
         else:
             op_text = item.key
 
-        op = row.operator(capture_operators.EditCueListItem.bl_idname, text=op_text, emboss=False)
+        op = row.operator(capture_operators.EditCueListItem.bl_idname, text=op_text, emboss=True)
         op.cue_index = index
 
         row = split.row()  # Times and operators (0.8)
         if clp.show_col_play:
-            subs = row.split(factor=0.85)
+            # Alocate just enough space for the play button
+            subs = row.split(factor=0.90)
         else:
             subs = row
 

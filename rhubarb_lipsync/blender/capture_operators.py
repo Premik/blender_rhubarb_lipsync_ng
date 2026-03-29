@@ -1,12 +1,13 @@
 import logging
 
 import bpy
-from bpy.props import IntProperty, StringProperty
+from bpy.props import IntProperty, StringProperty, EnumProperty
 from bpy.types import Context
 
 from ..rhubarb.rhubarb_command import RhubarbParser
 from . import ui_utils
-from .capture_properties import CaptureListProperties, MouthCueList
+from .capture_properties import CaptureListProperties, MouthCueList, MouthCueListItem
+from ..rhubarb.mouth_cues import MouthShapeInfos
 
 log = logging.getLogger(__name__)
 
@@ -91,32 +92,29 @@ class ClearCueList(bpy.types.Operator):
 
 class EditCueListItem(bpy.types.Operator):
     bl_idname = "rhubarb.edit_cue_list_item"
-    bl_label = "Edit cue item"
-    bl_options = {'UNDO', 'REGISTER'}
+    bl_label = "Set cue type"
+    bl_options = {"UNDO", "REGISTER"}
+    bl_property = "key"
 
     cue_index: IntProperty(name="index", description="Cue item index to edit")  # type: ignore
+    key: EnumProperty(  # type: ignore
+        name="New cue key",
+        items=lambda _, __: [(msi.key, msi.key, msi.description) for msi in MouthShapeInfos.all()],
+    )
 
     @classmethod
     def description(cls, context, properties) -> str:
         props = CaptureListProperties.capture_from_context(context)
         if not props or properties.cue_index < 0 or properties.cue_index >= len(props.cue_list.items):
             return "Invalid cue item"
-        item = props.cue_list.items[properties.cue_index]
-        return f"Edit cue '{item.key}'"
-
-    def invoke(self, context: Context, event: bpy.types.Event) -> set:
-        return context.window_manager.invoke_props_dialog(self, width=300)
-
-    def draw(self, context: Context):
-        layout = self.layout
-        props = CaptureListProperties.capture_from_context(context)
-        item = props.cue_list.items[self.cue_index]
-        layout.label(text=f"Editing cue: {item.key}")
-        # For now keep dialog blank, only display the cue type in it.
+        item: MouthCueListItem = props.cue_list.items[properties.cue_index]
+        return f"Change cue type of '{item.key}'"
 
     def execute(self, context: Context) -> ui_utils.OperatorReturnSet:
-        # Logic to modify the cue will go here
-        return {'FINISHED'}
+        props = CaptureListProperties.capture_from_context(context)
+        item: MouthCueListItem = props.cue_list.items[self.cue_index]
+        item.key = self.key
+        return {"FINISHED"}
 
 
 class ExportCueList2Json(bpy.types.Operator):
