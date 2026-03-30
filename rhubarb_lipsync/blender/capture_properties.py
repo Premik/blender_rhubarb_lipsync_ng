@@ -15,7 +15,7 @@ from ..rhubarb.mouth_cues import FrameConfig, MouthCue, MouthCueFrames, MouthSha
 from ..rhubarb.rhubarb_command import RhubarbCommandAsyncJob
 from . import ui_utils
 from .dropdown_helper import DropdownHelper
-from .preferences import RhubarbAddonPreferences
+from .preferences import CueListPreferences, RhubarbAddonPreferences
 
 try:
     from bpy.types import Strip  # Since v4.4
@@ -28,14 +28,37 @@ log = logging.getLogger(__name__)
 class MouthCueListItem(PropertyGroup):
     """A captured mouth cue."""
 
+    def key_search(self, ctx: Context) -> Generator[tuple[str, str, str], None, None]:
+        key_attr = "key"
+        prefs = RhubarbAddonPreferences.from_context(ctx)
+        if prefs:
+            cpref: CueListPreferences = prefs.cue_list_prefs
+            if cpref.as_circle:
+                key_attr = "key_displ"
+        for msi in MouthShapeInfos.all():
+            yield (msi.key, getattr(msi, key_attr), msi.description)
+
+    def key_updated(self, ctx: Context) -> None:
+        new_info = MouthShapeInfos.userkey2info(self.key)
+        if new_info.key != self.key:
+            self.key = new_info.key
+
+    def get_key_enum(self) -> int:
+        raw_val = self.get("key")
+        if isinstance(raw_val, str):
+            info = MouthShapeInfos.userkey2info(raw_val)
+            return MouthShapeInfos.key2index(info.key)
+        return 0  # Default to the first item if the string isn't found or is missing
+
+    def set_key_enum(self, value: int) -> None:
+        info = MouthShapeInfos.index2Info(value)
+        self["key"] = info.key
+
     key: EnumProperty(  # type: ignore
-        items=lambda self, context: [(msi.key, msi.key_displ, msi.description) for msi in MouthShapeInfos.all()],
         name="key",
-        description="Mouth cue key symbol (A,B,C..)",
-    )
-    key_edit: EnumProperty(  # type: ignore
-        items=lambda self, context: [(msi.key, msi.key_displ, msi.description) for msi in MouthShapeInfos.all()],
-        name="key",
+        items=key_search,
+        get=get_key_enum,
+        set=set_key_enum,
         description="Mouth cue key symbol (A,B,C..)",
     )
     start: FloatProperty(  # type: ignore

@@ -3,7 +3,6 @@ from typing import Any
 from bpy.types import Context, UI_UL_list, UILayout, UIList
 
 from .. import IconsManager
-from . import capture_operators
 from .capture_properties import MouthCueList, MouthCueListItem
 from .misc_operators import PlayRange
 from .preferences import CueListPreferences, RhubarbAddonPreferences
@@ -40,9 +39,9 @@ class MouthCueUIList(UIList):
         # row = layout.row()
         # prefs = RhubarbAddonPreferences.from_context(context)
         if clp.show_col_icon:
-            split = layout.split(factor=0.3)
+            split = layout.split(factor=0.3 if clp.allow_edit else 0.45)
         else:
-            split = layout.split(factor=0.12)
+            split = layout.split(factor=0.18 if clp.allow_edit else 0.12)
 
         row = split.row()  # Icon(0.1) and shape key (0.1)
 
@@ -54,14 +53,15 @@ class MouthCueUIList(UIList):
             op_text = item.cue.info.key_displ
         else:
             op_text = item.key
-
-        row.prop(item, "key", text="", emboss=False)
-        # row.label(text=op_text)
+        if clp.allow_edit:
+            row.prop(item, "key", text="", icon_only=False, emboss=False)
+        else:
+            row.label(text=op_text)
 
         row = split.row()  # Times and operators (0.8)
         if clp.show_col_play:
             # Alocate just enough space for the play button
-            subs = row.split(factor=0.90)
+            subs = row.split(factor=0.86)
         else:
             subs = row
 

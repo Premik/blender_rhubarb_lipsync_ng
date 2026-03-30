@@ -1,13 +1,12 @@
 import logging
 
 import bpy
-from bpy.props import IntProperty, StringProperty
+from bpy.props import StringProperty
 from bpy.types import Context
 
 from ..rhubarb.rhubarb_command import RhubarbParser
 from . import ui_utils
-from .capture_properties import CaptureListProperties, MouthCueList, MouthCueListItem
-from ..rhubarb.mouth_cues import MouthShapeInfos
+from .capture_properties import CaptureListProperties, MouthCueList
 
 log = logging.getLogger(__name__)
 

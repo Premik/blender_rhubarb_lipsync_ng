@@ -59,6 +59,12 @@ class CueListPreferences(PropertyGroup):
         description="Animate the icon in the panel while in playback.",
     )
 
+    allow_edit: BoolProperty(  # type: ignore
+        name="Allow editing",
+        description="Allow editing of the cue-type in the list",
+        default=True,
+    )
+
     @property
     def timecols(self) -> list[bool]:
         return [

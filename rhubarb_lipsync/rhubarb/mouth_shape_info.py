@@ -25,6 +25,7 @@ class MouthShapeInfos(Enum):
     """
 
     _all: list[MouthShapeInfo]
+    _userkey_map: dict[str, MouthShapeInfo]
 
     A = MouthShapeInfo(
         'A',
@@ -146,3 +147,23 @@ class MouthShapeInfos(Enum):
         if index >= len(all) or index < 0:
             return all[-1]  # Return 'X' for out-of-range indices
         return all[index]
+
+    @staticmethod
+    def key2info(key: str) -> MouthShapeInfo:
+        indx = MouthShapeInfos.key2index(key)
+        return MouthShapeInfos.index2Info(indx)
+
+    @staticmethod
+    def userkey_map() -> dict[str, MouthShapeInfo]:
+        if not getattr(MouthShapeInfos, '_userkey_map', None):
+            ret: dict[str, MouthShapeInfo] = {}
+            for info in MouthShapeInfos.all():
+                ret[info.key] = info
+                ret[info.key.lower()] = info
+                ret[info.key_displ] = info
+            MouthShapeInfos._userkey_map = ret
+        return MouthShapeInfos._userkey_map  # type: ignore
+
+    @staticmethod
+    def userkey2info(key: str) -> MouthShapeInfo:
+        return MouthShapeInfos.userkey_map().get(key, MouthShapeInfos.X.value)
