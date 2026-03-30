@@ -55,8 +55,8 @@ class MouthCueUIList(UIList):
         else:
             op_text = item.key
 
-        op = row.operator(capture_operators.EditCueListItem.bl_idname, text=op_text, emboss=True)
-        op.cue_index = index
+        row.prop(item, "key", text="", emboss=False)
+        # row.label(text=op_text)
 
         row = split.row()  # Times and operators (0.8)
         if clp.show_col_play:

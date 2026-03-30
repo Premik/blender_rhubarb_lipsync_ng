@@ -11,7 +11,7 @@ import bpy.utils.previews
 from bpy.props import BoolProperty, CollectionProperty, EnumProperty, FloatProperty, IntProperty, PointerProperty, StringProperty
 from bpy.types import Context, PropertyGroup, Sound
 
-from ..rhubarb.mouth_cues import FrameConfig, MouthCue, MouthCueFrames
+from ..rhubarb.mouth_cues import FrameConfig, MouthCue, MouthCueFrames, MouthShapeInfos
 from ..rhubarb.rhubarb_command import RhubarbCommandAsyncJob
 from . import ui_utils
 from .dropdown_helper import DropdownHelper
@@ -28,13 +28,15 @@ log = logging.getLogger(__name__)
 class MouthCueListItem(PropertyGroup):
     """A captured mouth cue."""
 
-    key: StringProperty(  # type: ignore
-        "key",
+    key: EnumProperty(  # type: ignore
+        items=lambda self, context: [(msi.key, msi.key_displ, msi.description) for msi in MouthShapeInfos.all()],
+        name="key",
         description="Mouth cue key symbol (A,B,C..)",
-        # get=lambda s: s.cue.key,
-        # get=lambda s: s['key'],
-        # set=lambda s, v: setattr(s.cue.key, v),
-        # set=lambda s, v: s.gg(v),
+    )
+    key_edit: EnumProperty(  # type: ignore
+        items=lambda self, context: [(msi.key, msi.key_displ, msi.description) for msi in MouthShapeInfos.all()],
+        name="key",
+        description="Mouth cue key symbol (A,B,C..)",
     )
     start: FloatProperty(  # type: ignore
         name="start",
