@@ -1,0 +1,56 @@
+name: "Release"
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+
+jobs:
+  release:
+    name: "Create Release"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0 # Fetch all history for all tags
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install tomli Pillow sphinx rinohtype myst-parser sphinx-book-theme
+
+      - name: Cache Downloads
+        id: cache-download
+        uses: actions/cache@v4
+        with:
+          path: download
+          key: download-${{hashFiles('pyproject.toml')}}
+
+      - name: Download rhubard binaries
+        run: |
+         cd scripts
+         python rhubarb_bin.py
+
+      - name: Run package script
+        run: |
+          cd scripts
+          python package.py
+
+      - name: Build Sphinx documentation
+        run: |
+          cd scripts
+          python sphinx_build.py
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          draft: true
+          files: |
+            dist/*.zip

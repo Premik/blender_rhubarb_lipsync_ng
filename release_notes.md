@@ -1,6 +1,20 @@
 # Release Notes
 
+## v1.8.0
+
+**Date:** 2026-04-01
+
+
+- The cue type (`ABC...`) of the `Capture` can now be directly edited in the `Sound and Setup and Cues Capture` panel. This allows one to fix simple errors prior to NLA baking, which might be more convenient than editing the NLA strips. 
+Editing can be disabled in the `Cue list display options` to return to the slightly more compact view:
+
+
+![CueTypeEditing](doc/img/CueTypeEditing.png) ![CueTypeEditingOption](doc/img/CueTypeEditingOption.png)
+
+- Small tweaks and fixes for better Blender `v5.1.0` compatibility
+
 ## v1.7.0
+
 **Date:** 2025-12-29
 
 - Action **Slots** are now supported, while maintaining compatibility with older Blender versions. Slots were added in Blender `v4.4`.
@@ -12,6 +26,7 @@
 
 
 ## v1.6.1
+
 **Date:** 2025-09-15
 
 Made the `aud` module optional. Sound conversion is disabled when the module is broken or missing. 
