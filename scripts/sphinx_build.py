@@ -74,7 +74,7 @@ class SphinxBuilder:
             shutil.rmtree(dest)
         print(f"Copying {src} to {dest}")
         shutil.copytree(src, dest)
-        shutil.copy(self.project_dir / "support/blendermarket/assetsUp/RLSP-banner.png", dest)
+        # shutil.copy(self.project_dir / "support/blendermarket/assetsUp/RLSP-banner.png", dest)
 
     def copy_faq(self) -> None:
         src = self.project_dir / "faq.md"
