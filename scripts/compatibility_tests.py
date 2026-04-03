@@ -527,7 +527,10 @@ if __name__ == "__main__":
     results_table: list[list[str]] = []
     # Test the 2 most recent versions only
     for i, v in enumerate(l):
-        # print(f"{v.ver} {v.platform_str} {v.file_ext} {v.install_file_name}")
+        print(f"{v.ver} {v.platform_str} {v.file_ext} {v.install_file_name}")
+        # if v.ver != (3, 3, 21):
+        #     continue
+
         # print(v.download_blender_install_file_path())
         # print(f"{v.ver} {bi.is_installed(v)} {bi.exe_path(v)}")
         bi.ensure_installed(v)

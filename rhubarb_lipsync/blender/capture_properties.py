@@ -200,6 +200,8 @@ class CaptureProperties(PropertyGroup):
             return False
         # Set the strip start frame based on the Capture start_frame
         strip = self.get_strip(ctx)
+        if not strip:
+            return False
         if strip.frame_start == self.start_frame:
             return
         strip.frame_start = self.start_frame

@@ -1,5 +1,11 @@
 # Release Notes
 
+## v1.8.1
+
+**Date:** 2026-04-03
+- Fixed the `StructRNA of type Sound has been removed` error when placing a sound strip from the Capture panel. Only Blender `v5.1+` was affected.
+
+
 ## v1.8.0
 
 **Date:** 2026-04-01

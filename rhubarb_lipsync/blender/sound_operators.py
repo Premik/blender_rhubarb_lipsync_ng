@@ -117,7 +117,7 @@ class CreateSoundStripWithSound(bpy.types.Operator):
         strips_coll = ui_utils.get_strips_from_sequence_editor(context)
         strips_coll.new_sound(sound.name_full, sound.filepath, self.channel, self.start_frame)
 
-        # The above op always create a new sound, even when there is the same one already imported.
+        # The above op always create a new sound, even when there is the same one already imported. But only in Blender <=v5.0, probably a bug
         # Find the newly created strip and change its sound back to the selected one
         strips = find_sound_strips_by_sound(context)
         assert strips, f"Was not able to locate the newly placed sound strip with the '{sound.filepath}'."
@@ -136,14 +136,16 @@ class CreateSoundStripWithSound(bpy.types.Operator):
             if context.scene.frame_end < strip.frame_final_end:
                 context.scene.frame_end = strip.frame_final_end
 
-        # Remove the newly created sound sound
-        # https://blender.stackexchange.com/questions/27234/python-how-to-completely-remove-an-object
-        bpy.data.sounds.remove(oldSound, do_unlink=True)
         props.start_frame = self.start_frame
         if self.sync_audio:
             context.scene.use_audio_scrub = True
             context.scene.sync_mode = "AUDIO_SYNC"
             sound.use_memory_cache = True
+
+        # Remove the newly created sound sound
+        # https://blender.stackexchange.com/questions/27234/python-how-to-completely-remove-an-object
+        if oldSound != sound:  # Only remove the oldSound if it actually was duplicated
+            bpy.data.sounds.remove(oldSound, do_unlink=True)
 
         return {'FINISHED'}
 

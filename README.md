@@ -20,9 +20,9 @@
 
 ### Get the correct zip file
 
-Download the zip file specifically for your platform. The zip file format is `rhubarb_lipsync_ng-<your_system>-<version>.zip`. For example: `rhubarb_lipsync_ng-Windows-1.8.0.zip` for Windows.
+Download the zip file specifically for your platform. The zip file format is `rhubarb_lipsync_ng-<your_system>-<version>.zip`. For example: `rhubarb_lipsync_ng-Windows-1.8.1.zip` for Windows.
 
-   | [🪟 Windows](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v1.8.0/rhubarb_lipsync_ng-Windows-1.8.0.zip) | [🍏 macOS](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v1.8.0/rhubarb_lipsync_ng-macOS-1.8.0.zip) | [🐧 Linux](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v1.8.0/rhubarb_lipsync_ng-Linux-1.8.0.zip) |
+   | [🪟 Windows](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v1.8.1/rhubarb_lipsync_ng-Windows-1.8.1.zip) | [🍏 macOS](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v1.8.1/rhubarb_lipsync_ng-macOS-1.8.1.zip) | [🐧 Linux](https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v1.8.1/rhubarb_lipsync_ng-Linux-1.8.1.zip) |
    |----------|--------------|------|
 
 ### Blender 4.2+
@@ -160,20 +160,20 @@ Any Blender version newer than **v3.2**. Test results:
 
 | Version       | System  | Total | Passed | Failed | Errors | Skipped | Status |
 |---------------|---------|-------|--------|--------|--------|---------|--------|
-| **5.1**.0     | Windows | 70    | 66     | 0      | 0      | 4       | ✔️     |
-| **5.0**.1     | Windows | 70    | 66     | 0      | 0      | 4       | ✔️     |
-| **4.5**.5 LTS | Windows | 70    | 66     | 0      | 0      | 4       | ✔️     |
-| **4.4**.3     | Windows | 70    | 66     | 0      | 0      | 4       | ✔️     |
-| **4.3**.2     | Windows | 70    | 66     | 0      | 0      | 4       | ✔️     |
-| **4.2**.16 LTS| Windows | 70    | 66     | 0      | 0      | 4       | ✔️     |
-| **4.1**.1     | Windows | 70    | 66     | 0      | 0      | 4       | ✔️     |
-| **4.0**.2     | Windows | 70    | 66     | 0      | 0      | 4       | ✔️     |
-| **3.6**.23    | Windows | 70    | 66     | 0      | 0      | 4       | ✔️     |
-| **3.5**.1     | Windows | 70    | 66     | 0      | 0      | 4       | ✔️     |
-| **3.4**.1     | Windows | 70    | 66     | 0      | 0      | 4       | ✔️     |
-| **3.3**.21    | Windows | 70    | 66     | 0      | 0      | 4       | ✔️     |
-| **3.2**.2     | Windows | 70    | 51     | 7      | 8      | 4       | ❌     |
-| **3.1**.2     | Windows | 70    | 51     | 7      | 8      | 4       | ❌     |
+| **5.1**.0     | Windows | 71    | 67     | 0      | 0      | 4       | ✔️     |
+| **5.0**.1     | Windows | 71    | 67     | 0      | 0      | 4       | ✔️     |
+| **4.5**.5 LTS | Windows | 71    | 67     | 0      | 0      | 4       | ✔️     |
+| **4.4**.3     | Windows | 71    | 67     | 0      | 0      | 4       | ✔️     |
+| **4.3**.2     | Windows | 71    | 67     | 0      | 0      | 4       | ✔️     |
+| **4.2**.16 LTS| Windows | 71    | 67     | 0      | 0      | 4       | ✔️     |
+| **4.1**.1     | Windows | 71    | 67     | 0      | 0      | 4       | ✔️     |
+| **4.0**.2     | Windows | 71    | 67     | 0      | 0      | 4       | ✔️     |
+| **3.6**.23    | Windows | 71    | 67     | 0      | 0      | 4       | ✔️     |
+| **3.5**.1     | Windows | 71    | 67     | 0      | 0      | 4       | ✔️     |
+| **3.4**.1     | Windows | 71    | 67     | 0      | 0      | 4       | ✔️     |
+| **3.3**.21    | Windows | 71    | 67     | 0      | 0      | 4       | ✔️     |
+| **3.2**.2     | Windows | 71    | 52     | 7      | 8      | 4       | ❌     |
+| **3.1**.2     | Windows | 71    | 52     | 7      | 8      | 4       | ❌     |
 
 
 
