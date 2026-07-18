@@ -160,6 +160,7 @@ Any Blender version newer than **v3.2**. Test results:
 
 | Version       | System  | Total | Passed | Failed | Errors | Skipped | Status |
 |---------------|---------|-------|--------|--------|--------|---------|--------|
+| **5.2**.0 LTS | Windows | 71    | 67     | 0      | 0      | 4       | ✔️     |
 | **5.1**.0     | Windows | 71    | 67     | 0      | 0      | 4       | ✔️     |
 | **5.0**.1     | Windows | 71    | 67     | 0      | 0      | 4       | ✔️     |
 | **4.5**.5 LTS | Windows | 71    | 67     | 0      | 0      | 4       | ✔️     |

@@ -156,7 +156,7 @@ class BlenderInstallation:
         if not ver_main:
             return None
         remaining_name = name[len(ver_main_match) :]
-        pattern = re.compile(r"[.]?(?P<ver_minor>[a-zA-Z0-9]+)?" r"(?:[.-](?P<platform>[a-zA-Z0-9\-]+))?" r"(?:[.](?P<file_extension>[a-zA-Z0-9]+))?$")
+        pattern = re.compile(r"[.]?(?P<ver_minor>[a-zA-Z0-9]+)?" r"(?:[.-](?P<platform>[a-zA-Z0-9\-]+))?" r"(?:[.](?P<file_extension>[a-zA-Z0-9.]+))?$")
 
         match = pattern.search(remaining_name)
         if not match:
@@ -237,6 +237,21 @@ class BlenderInstallator:
             max_minor = max(group, key=lambda x: (x.ver[1], x.ver[2]))
             bis_filtered.append(max_minor)
         return bis_filtered
+
+    def versions_for_download(self, min_major: int = 5) -> list[BlenderInstallation]:
+        mvs = [mv for mv in self.list_available_main_versions() if mv.ver[0] >= min_major]
+        bis: list[BlenderInstallation] = []
+        for bv in self.list_all_available_versions(mvs):
+            if not bv.platform_str or "linux" not in bv.platform_str or "x64" not in bv.platform_str:
+                continue
+            if bv.file_ext != "tar.xz":
+                continue
+            if not bv.ver_minor_str.isdigit():
+                continue
+            bis.append(bv)
+        if not bis:
+            return []
+        return [max(bis, key=lambda x: x.ver)]
 
     def installation_path(self, bi: BlenderInstallation) -> Path:
         return self.install_root / f"blender-{bi.ver_str}-{bi.platform_str}"
@@ -522,6 +537,12 @@ if __name__ == "__main__":
     # setup.install_and_run()
 
     bi = BlenderInstallator()
+
+    # Download & cache the latest Linux x64 tarball (Blender 5+)
+    for bv in bi.versions_for_download():
+        path = bv.download_blender_install_file_path()
+        print(f"Cached {bv.ver_str} {bv.platform_str} -> {path}")
+
     l = bi.versions_for_test()
     l.reverse()
     results_table: list[list[str]] = []

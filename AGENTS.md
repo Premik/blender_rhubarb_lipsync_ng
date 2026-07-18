@@ -1,0 +1,16 @@
+## General code rules:
+- Use mypy type hints where they cannot be automatically derived.
+- Write modular code with very few nested blocks.
+- Prefer dataclasses, smaller functions, and properties.
+- Only add comments or documentation for very tricky parts of the code.
+- Do not use try/catch blocks just for logging; let exceptions bubble up.
+- Always exit early (return/continue/break) when checking multiple conditions, especially in functions or loops, to handle trivial cases first.
+- Prefer using `@cached_property` over `field(init)` or post-init methods where it makes sense.
+- Prefer `pathlib.Path` over strings for file paths.
+- Prefer `for` loops over `while` loops, unless a `for` loop would be cumbersome.
+- If an established library, class, or function exists for a task, use it instead of reinventing your own. Assume any required library is already installed.
+- Do not prefix symbols with an underscore (`_`), even for helper or internal code.
+- Ignore mypy warnings and errors unless explicitly asked to address them.
+- Don't try to fix existing imports, especially relative, assume they work fine.
+- Prefer neat, elegant, and compact solutions over more performant ones.
+- Ask user to confirm when ambigous, including when naming things and more names are  plausable, when you see a better or multiple possible approaches, a flaw in design.
