@@ -1,0 +1,7 @@
+
+
+---
+
+Following is extract of python classes. Try to relly on them as much as possible to keep context small.
+
+---

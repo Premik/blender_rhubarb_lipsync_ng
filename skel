@@ -1,0 +1,29 @@
+#!/bin/zsh
+
+# Function to do post-processing of the generated skel
+post_process_skel() {
+    local file="$1"
+    # Using sed to remove lines matching the patterns
+    sed -i '/^from /d' "$file"
+    sed -i '/^import /d' "$file"
+    sed -i '/^if TYPE_CHECKING/d' "$file"
+    sed -i '/^[[:space:]]*pass\b/d' "$file"
+}
+
+# Function to prepend skel_intro.txt and then run the skel command
+generate_summary() {
+    echo "Generating $1"
+    local output_file="$1"
+    shift
+    local temp_file=$(mktemp)
+    # Using zsh arrays directly
+    ~/bin/skel "$@" -o "$temp_file"
+    cat skel_intro.txt "$temp_file" > "$output_file"
+    rm "$temp_file"
+    post_process_skel "$output_file"
+}
+
+# Generate summaries
+generate_summary "summary-backend.py.txt" -i 'rhubarb/.*\.py' &
+generate_summary "summary-blender.py.txt" -i 'blender/.*\.py' &
+generate_summary "summary-test.py.txt" -i 'tests/.*\.py'
