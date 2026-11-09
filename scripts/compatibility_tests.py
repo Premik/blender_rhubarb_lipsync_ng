@@ -1,3 +1,4 @@
+import argparse
 import hashlib
 import json
 import os
@@ -14,6 +15,17 @@ from typing import Optional
 
 import requests
 from bs4 import BeautifulSoup
+
+from config import project_cfg
+
+RED = "\033[91m"
+RESET = "\033[0m"
+
+ANSI_ESCAPE_RX = re.compile(r"\x1B[@-_][0-?]*[ -/]*[@-~]")
+
+
+def strip_ansi(text: str) -> str:
+    return ANSI_ESCAPE_RX.sub("", text)
 
 
 def to_wine_path(path: Path) -> str:
@@ -45,7 +57,7 @@ class UrlCache:
         return filename
 
     def get_file_path(self, filename: str) -> Path:
-        return UrlCache.cache_folder / filename
+        return self.cache_folder / filename
 
     def get_file(self, url: str, ext: str = "") -> Path:
         filename = self.url_to_filename(url, ext)
@@ -62,6 +74,12 @@ class UrlCache:
                 file.write(content)
 
         return filepath
+
+    def invalidate(self, url: str, ext: str = "") -> None:
+        self.get_file_path(self.url_to_filename(url, ext)).unlink(missing_ok=True)
+
+    def invalidate_text(self, url: str) -> None:
+        self.invalidate(url, ".html")
 
     def get_text(self, url: str) -> str:
         filepath = self.get_file(url, ".html")
@@ -84,6 +102,8 @@ class HtmlPage:
     html: str
     url: str = ""
 
+    RELEASES_URL = "https://download.blender.org/release"
+
     @cached_property
     def soup(self) -> BeautifulSoup:
         # soup = BeautifulSoup(html_en, "html.parser")
@@ -103,7 +123,7 @@ class HtmlPage:
 
     @staticmethod
     def releases_list_page() -> 'HtmlPage':
-        return HtmlPage.of_url("https://download.blender.org/release")
+        return HtmlPage.of_url(HtmlPage.RELEASES_URL)
 
 
 @dataclass
@@ -175,12 +195,9 @@ class BlenderInstallation:
 
 @dataclass
 class BlenderInstallator:
-    cache_folder: Path = Path("/extra/temp/blenderInstall/")
-    # install_root: Path = Path("/var/wine/64loc/drive_c/blender")
     install_root: Path = Path("/tmp/work/blender")
 
     def __post_init__(self) -> None:
-        self.cache_folder.mkdir(parents=True, exist_ok=True)
         self.install_root.mkdir(parents=True, exist_ok=True)
 
     def list_available_main_versions(self) -> list[BlenderInstallation]:
@@ -216,42 +233,36 @@ class BlenderInstallator:
                     ret.append(installation)
         return ret
 
-    def versions_for_test(self) -> list[BlenderInstallation]:
-        bis: list[BlenderInstallation] = []
-        for bv in bi.list_all_available_versions(bi.list_available_main_versions()):
-            if "win" not in bv.platform_str:
-                continue
-            if "arm" in bv.platform_str:
-                continue
-            if bv.file_ext != "zip":
-                continue
-            v = bv.ver
-            if v[0] < 3:
-                continue
-            bis.append(bv)
+    def available_versions(self, min_major: int = 3) -> list[BlenderInstallation]:
+        mvs = [mv for mv in self.list_available_main_versions() if mv.ver[0] >= min_major]
+        return self.list_all_available_versions(mvs)
 
-        bis.sort(key=lambda x: (x.ver[0], x.ver[1], x.ver[2]))
-        bis_filtered = []
-        for _, group in groupby(bis, key=lambda x: (x.ver[0], x.ver[1])):
-            # Latest minor version in each major.main ver
-            max_minor = max(group, key=lambda x: (x.ver[1], x.ver[2]))
-            bis_filtered.append(max_minor)
-        return bis_filtered
+    def versions_for_test(self, min_major: int = 3) -> list[BlenderInstallation]:
+        bis = [
+            bv
+            for bv in self.available_versions(min_major)
+            if bv.platform_str and "win" in bv.platform_str and "arm" not in bv.platform_str and bv.file_ext == "zip"
+        ]
+        bis.sort(key=lambda bv: bv.ver)
+        # Latest minor version in each major.main ver
+        return [max(group, key=lambda bv: bv.ver) for _, group in groupby(bis, key=lambda bv: bv.ver[:2])]
 
     def versions_for_download(self, min_major: int = 5) -> list[BlenderInstallation]:
-        mvs = [mv for mv in self.list_available_main_versions() if mv.ver[0] >= min_major]
-        bis: list[BlenderInstallation] = []
-        for bv in self.list_all_available_versions(mvs):
-            if not bv.platform_str or "linux" not in bv.platform_str or "x64" not in bv.platform_str:
-                continue
-            if bv.file_ext != "tar.xz":
-                continue
-            if not bv.ver_minor_str.isdigit():
-                continue
-            bis.append(bv)
+        bis = [
+            bv
+            for bv in self.available_versions(min_major)
+            if bv.platform_str and "linux" in bv.platform_str and "x64" in bv.platform_str and bv.file_ext == "tar.xz" and bv.ver_minor_str.isdigit()
+        ]
         if not bis:
             return []
-        return [max(bis, key=lambda x: x.ver)]
+        return [max(bis, key=lambda bv: bv.ver)]
+
+    def refresh_cache(self, min_major: int = 4) -> None:
+        """Drop cached release pages for Blender majors >= min_major so new releases become visible."""
+        url_cache.invalidate_text(HtmlPage.RELEASES_URL)
+        for mv in self.list_available_main_versions():
+            if mv.ver[0] >= min_major:
+                url_cache.invalidate_text(mv.url)
 
     def installation_path(self, bi: BlenderInstallation) -> Path:
         return self.install_root / f"blender-{bi.ver_str}-{bi.platform_str}"
@@ -300,31 +311,30 @@ class BlenderInstallator:
             self.install(bi)
         # v.installation_path = self.installation_path
 
+    def run_python(self, bi: BlenderInstallation, *args: str) -> subprocess.CompletedProcess:
+        cmd = [str(self.python_exe_path(bi)), *args]
+        print(" ".join(cmd))
+        return subprocess.run(cmd, check=True)
+
     def ensure_pip(self, bi: BlenderInstallation) -> None:
         python_exe = self.python_exe_path(bi)
         if not python_exe.exists():
             raise RuntimeError(f"No python found in the {python_exe}")
         self.ensure_executable(python_exe)
-        cmd = f'''{python_exe} -m ensurepip'''
-        print(cmd)
-        os.system(cmd)
+        self.run_python(bi, "-m", "ensurepip")
 
     def is_pytest_installed(self, bi: BlenderInstallation) -> bool:
-        python_exe = self.python_exe_path(bi)
-        cmd = f'''{python_exe} -m pip list'''
-        print(cmd)
-        result = os.popen(cmd).read()
-        return 'pytest' in result
+        cmd = [str(self.python_exe_path(bi)), "-m", "pip", "list"]
+        print(" ".join(cmd))
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        return "pytest" in result.stdout
 
     def ensure_pytest(self, bi: BlenderInstallation) -> None:
-        self.ensure_pip(bi)
         if self.is_pytest_installed(bi):
             print("pytest already installed")
             return
-        python_exe = self.python_exe_path(bi)
-        cmd = f'''{python_exe} -m pip install pytest'''
-        print(f"Installing pytest with: {cmd}")
-        os.system(cmd)
+        self.ensure_pip(bi)
+        self.run_python(bi, "-m", "pip", "install", "pytest")
         assert self.is_pytest_installed(bi)
 
 
@@ -360,23 +370,17 @@ class BlenderSetup:
     def test_script_path(self) -> Path:
         return self.addons_path / "run_within_blender.py"
 
-    def set_blender_user_data(self) -> None:
+    def blender_env(self) -> dict[str, str]:
+        """Env for the Blender run, with user data dirs isolated per version and platform."""
         if self.installation.is_windows:
-            self.set_blender_user_data_windows()
-        else:
-            self.set_blender_user_data_nix()
-
-    def set_blender_user_data_windows(self) -> None:
-        os.environ["BLENDER_USER_RESOURCES"] = to_wine_path(self.user_dir)
-        # Version <3.6 doesn't support BLENDER_USER_RESOURCES
-        os.environ["BLENDER_USER_CONFIG"] = to_wine_path(self.user_dir / "config")
-        os.environ["BLENDER_USER_SCRIPTS"] = to_wine_path(self.scripts_path)
-
-        # print(f"User dir: {windows_path}")
-
-    def set_blender_user_data_nix(self) -> None:
-        os.environ["XDG_CONFIG_HOME"] = str(self.config_root_path)
-        print(f"User dir: {self.config_root_path}")
+            return {
+                **os.environ,
+                "BLENDER_USER_RESOURCES": to_wine_path(self.user_dir),
+                # Version <3.6 doesn't support BLENDER_USER_RESOURCES
+                "BLENDER_USER_CONFIG": to_wine_path(self.user_dir / "config"),
+                "BLENDER_USER_SCRIPTS": to_wine_path(self.scripts_path),
+            }
+        return {**os.environ, "XDG_CONFIG_HOME": str(self.config_root_path)}
 
     def install_addon_symlink(self) -> None:
         self.addons_path.mkdir(parents=True, exist_ok=True)
@@ -384,21 +388,30 @@ class BlenderSetup:
         if not target.exists():
             os.symlink(self.addon_src / "rhubarb_lipsync", target)
 
+    @cached_property
+    def project_version(self) -> str:
+        return project_cfg["project"]["version"]
+
+    def current_dist_zip(self) -> Path:
+        """The dist zip of the current project version for this platform."""
+        dist = self.addon_src / 'dist'
+        platform_str = self.installation.platform_str.lower()[:5]
+        zip_files = [file for file in dist.glob("rhubarb_lipsync_ng-*.zip") if platform_str in file.name.lower()]
+        if not zip_files:
+            raise RuntimeError(f"No zip file found for platform {platform_str} in the {dist}")
+        current = [file for file in zip_files if f"-{self.project_version}.zip" in file.name.lower()]
+        if len(current) != 1:
+            raise RuntimeError(
+                f"Expected exactly 1 zip of the current project version {self.project_version} "
+                f"(platform {platform_str}), found: {[f.name for f in zip_files]}. "
+                f"Run scripts/package.py to build the current version."
+            )
+        return current[0]
+
     def install_addon(self) -> None:
         self.addons_path.mkdir(parents=True, exist_ok=True)
         target = self.addons_path / "rhubarb_lipsync"
-        dist = self.addon_src / 'dist'
-
-        platform_str = self.installation.platform_str.lower()[:5]
-        zip_files = [file for file in dist.glob("rhubarb_lipsync_ng-*.zip") if platform_str in file.name.lower()]
-
-        if len(zip_files) == 0:
-            raise RuntimeError(f"No zip file found for platform {platform_str} in the {dist}")
-        elif len(zip_files) > 1:
-            raise RuntimeError(f"Multiple zip files found for platform {platform_str}: {zip_files} in the {dist}.")
-
-        zip_file = zip_files[0]
-        with zipfile.ZipFile(zip_file, 'r') as zip_ref:
+        with zipfile.ZipFile(self.current_dist_zip(), 'r') as zip_ref:
             zip_ref.extractall(target.parent)
 
     def install_tests(self) -> None:
@@ -423,142 +436,257 @@ class BlenderSetup:
     def print_banner(self) -> None:
         print(" ---------------------------------------------  ")
 
-    def run_blender_win(self) -> None:
-        blender_exe_path = '"' + str(self.installator.exe_path(self.installation)) + '"'
-        script = to_wine_path(self.test_script_path)
-        # cmd = f'''wine {blender_exe_path} --background --python "{script}"'''
-        cmd = f'''{blender_exe_path} --background --python "{script}"'''
-        print(cmd)
-        self.print_banner()
-        os.system(cmd)
-        self.print_banner()
-
-    def run_blender_nix(self) -> None:
-        cmd = f'''{self.installator.exe_path(self.installation)} --background --python "{self.test_script_path}"'''
-        print(cmd)
-        self.print_banner()
-        os.system(cmd)
-        self.print_banner()
-
     def run_blender(self) -> None:
         if self.installation.is_windows:
-            self.run_blender_win()
+            script = to_wine_path(self.test_script_path)
         else:
-            self.run_blender_nix()
-
-    def add_result_header(self, results_table: list[list[str]]) -> None:
-        headers = ["Version", "System", "Total", "Passed", "Failed", "Errors", "Skipped", "Note"]
-        results_table.append(headers)
-
-    def collect_result(self, results_table: list[list[str]]) -> None:
-        RED = '\033[91m'
-        RESET = '\033[0m'
-
-        if not results_table:
-            self.add_result_header(results_table)
-
-        if not self.test_results_path.exists():
-            results_table.append(["N/A", "N/A", "N/A", "N/A", "N/A", "N/A", "N/A", f"{RED}No result{RESET}"])
-            return
-
-        with self.test_results_path.open('r') as file:
-            test_results = json.load(file)
-
-        blender_version = test_results.get("blender_version", "N/A")
-        system = test_results.get("system", "N/A")
-        total_tests = test_results.get("total_tests", "N/A")
-        total_passed = test_results.get("total_passed", "N/A")
-        total_failed = test_results.get("total_failed", "N/A")
-        total_errors = test_results.get("total_errors", "N/A")
-        total_skipped = test_results.get("total_skipped", "N/A")
-
-        if total_failed > 0:
-            failed = f"{RED}{total_failed}{RESET}"
-        else:
-            failed = "0"
-
-        if total_errors > 0:
-            errors = f"{RED}{total_errors}{RESET}"
-        else:
-            errors = "0"
-        results_table.append([blender_version, system, str(total_tests), str(total_passed), failed, errors, str(total_skipped), ""])
+            script = str(self.test_script_path)
+        cmd = [str(self.installator.exe_path(self.installation)), "--background", "--python", script]
+        print(" ".join(cmd))
+        self.print_banner()
+        subprocess.run(cmd, check=True, env=self.blender_env())
+        self.print_banner()
 
     def install_and_run(self) -> None:
         self.setup_config()
         self.install_addon()
         self.install_tests()
-        self.set_blender_user_data()
         if self.test_results_path.exists():
             self.test_results_path.unlink()
         self.run_blender()
 
 
-def strip_ansi_sequences(text: str) -> str:
-    ansi_escape = re.compile(r'\x1B[@-_][0-?]*[ -/]*[@-~]')
-    return ansi_escape.sub('', text)
+@dataclass
+class TestResult:
+    """Test outcome of one Blender version, as written by run_within_blender.py."""
+    blender_version: str
+    system: str = "N/A"
+    total_tests: Optional[int] = None
+    total_passed: Optional[int] = None
+    total_failed: Optional[int] = None
+    total_errors: Optional[int] = None
+    total_skipped: Optional[int] = None
+    note: str = ""
+
+    @classmethod
+    def from_file(cls, path: Path, blender_version: str) -> "TestResult":
+        if not path.exists():
+            return cls(blender_version=blender_version, note="No result")
+        return cls(**json.loads(path.read_text()))
+
+    @property
+    def ok(self) -> bool:
+        return self.total_tests is not None and not (self.total_failed or self.total_errors)
+
+    def fmt(self, count: Optional[int]) -> str:
+        return "N/A" if count is None else str(count)
+
+    def fmt_bad(self, count: Optional[int]) -> str:
+        return self.fmt(count) if not count else f"{RED}{count}{RESET}"
+
+    def to_row(self) -> list[str]:
+        return [
+            self.blender_version,
+            self.system,
+            self.fmt(self.total_tests),
+            self.fmt(self.total_passed),
+            self.fmt_bad(self.total_failed),
+            self.fmt_bad(self.total_errors),
+            self.fmt(self.total_skipped),
+            f"{RED}{self.note}{RESET}" if self.note else "",
+        ]
 
 
-def print_test_results_table(results_table: list[list[str]]) -> None:
-    if not results_table:
-        print("No results to display.")
-        return
+@dataclass
+class ResultsTable:
+    """Renders TestResults as an aligned table."""
+    headers = ["Version", "System", "Total", "Passed", "Failed", "Errors", "Skipped", "Note"]
 
-    # Calculate the width of each column, ignoring ANSI escape sequences
-    col_widths = [max(len(strip_ansi_sequences(str(item))) for item in col) for col in zip(*results_table)]
+    results: list[TestResult] = field(default_factory=list)
 
-    # Print the header separator
-    print("─" * (sum(col_widths) + 3 * (len(col_widths) - 1)))
+    def print(self) -> None:
+        if not self.results:
+            print("No results to display.")
+            return
 
-    # Print each row with proper formatting
-    for row_idx, row in enumerate(results_table):
-        padded_row = []
-        for col_idx, cell in enumerate(row):
-            stripped_cell = strip_ansi_sequences(cell)
-            padding = col_widths[col_idx] - len(stripped_cell)
-            padded_cell = f"{cell}{' ' * padding}"
-            padded_row.append(padded_cell)
+        table = [self.headers, *[r.to_row() for r in self.results]]
+        # Calculate the width of each column, ignoring ANSI escape sequences
+        col_widths = [max(len(strip_ansi(str(item))) for item in col) for col in zip(*table)]
+        separator = "─" * (sum(col_widths) + 3 * (len(col_widths) - 1))
 
-        # Print the row
-        print(" │ ".join(padded_row))
+        print(separator)
+        for row_idx, row in enumerate(table):
+            padded_row = []
+            for col_idx, cell in enumerate(row):
+                padding = col_widths[col_idx] - len(strip_ansi(str(cell)))
+                padded_row.append(f"{cell}{' ' * padding}")
+            print(" │ ".join(padded_row))
+            if row_idx == 0:
+                print(separator)
+        print(separator)
 
-        # Print a separator after the header row
-        if row_idx == 0:
-            print("─" * (sum(col_widths) + 3 * (len(col_widths) - 1)))
 
-    # Print the footer separator
-    print("─" * (sum(col_widths) + 3 * (len(col_widths) - 1)))
+README_PATH = Path(__file__).parents[1] / "README.md"
+
+README_TABLE_RX = re.compile(r"^\|\s*Version\b")
+README_VER_CELL_RX = re.compile(r"\*\*(?P<maj>\d+)\.(?P<min>\d+)\*\*\.(?P<patch>\d+)")
+
+
+def version_tuple(ver_str: str) -> tuple[int, int, int]:
+    parts = [int(p) for p in ver_str.split()[0].split(".")]
+    return parts[0], parts[1], parts[2]
+
+
+@dataclass
+class ReadmeRow:
+    ver: tuple[int, int, int]
+    cells: list[str]  # [Version, System, Total, Passed, Failed, Errors, Skipped, Status]
+
+    @classmethod
+    def parse(cls, line: str) -> Optional["ReadmeRow"]:
+        cells = [c.strip() for c in line.split("|")[1:-1]]
+        m = README_VER_CELL_RX.search(cells[0])
+        if not m:
+            return None
+        return cls((int(m["maj"]), int(m["min"]), int(m["patch"])), cells)
+
+    @classmethod
+    def of_result(cls, result: TestResult, old: Optional["ReadmeRow"]) -> "ReadmeRow":
+        ver = version_tuple(result.blender_version)
+        # Preserve the existing version cell verbatim (bold + LTS marker)
+        version_cell = old.cells[0] if old else f"**{ver[0]}.{ver[1]}**.{ver[2]}" + (" LTS" if "LTS" in result.blender_version else "")
+        return cls(
+            ver,
+            [
+                version_cell,
+                result.system,
+                result.fmt(result.total_tests),
+                result.fmt(result.total_passed),
+                result.fmt(result.total_failed),
+                result.fmt(result.total_errors),
+                result.fmt(result.total_skipped),
+                "✔️" if result.ok else "❌",
+            ],
+        )
+
+
+def update_readme_table(readme_path: Path, results: list[TestResult]) -> None:
+    """Refresh/add rows of the 'Supported Blender versions' table from actual test results."""
+    lines = readme_path.read_text().splitlines()
+    start = next((i for i, line in enumerate(lines) if README_TABLE_RX.match(line)), None)
+    if start is None:
+        raise RuntimeError(f"No version table found in {readme_path}")
+    end = start + 1
+    while end < len(lines) and lines[end].startswith("|"):
+        end += 1
+
+    rows = {r.ver: r for r in (ReadmeRow.parse(l) for l in lines[start + 2 : end]) if r}
+    for result in results:
+        ver = version_tuple(result.blender_version)
+        rows[ver] = ReadmeRow.of_result(result, rows.get(ver))
+    table_rows = sorted(rows.values(), key=lambda r: r.ver, reverse=True)
+
+    header = ["Version", "System", "Total", "Passed", "Failed", "Errors", "Skipped", "Status"]
+    table = [header, *[r.cells for r in table_rows]]
+    widths = [max(len(c) for c in col) for col in zip(*table)]
+    separator = "|" + "|".join("-" * (w + 2) for w in widths) + "|"
+
+    def fmt(cells: list[str]) -> str:
+        return "| " + " | ".join(c.ljust(w) for c, w in zip(cells, widths)) + " |"
+
+    new_table = [fmt(header), separator, *(fmt(r.cells) for r in table_rows)]
+    readme_path.write_text("\n".join([*lines[:start], *new_table, *lines[end:]]) + "\n")
+
+
+@dataclass
+class Cli:
+    count: Optional[int] = 2
+    refresh: Optional[int] = None
+    update_readme: bool = False
+    installator: BlenderInstallator = field(default_factory=BlenderInstallator)
+    results: ResultsTable = field(default_factory=ResultsTable)
+
+    @staticmethod
+    def parse_version_count(value: str) -> Optional[int]:
+        if value.strip().lower() in ("all", "-1"):
+            return None
+        count = int(value)
+        if count < 0:
+            raise argparse.ArgumentTypeError(f"Expected a non-negative count, 'all' or -1, got {value!r}")
+        return count
+
+    @classmethod
+    def parser(cls) -> argparse.ArgumentParser:
+        parser = argparse.ArgumentParser(description="Run the add-on unittest suite across Blender versions.")
+        parser.add_argument(
+            "-n",
+            "--count",
+            type=cls.parse_version_count,
+            default=2,
+            help="Number of newest Blender versions to test. Use 0 for none, 'all' or -1 for all. Default: 2",
+        )
+        parser.add_argument(
+            "-r",
+            "--refresh",
+            type=int,
+            nargs="?",
+            const=4,
+            default=None,
+            metavar="MIN_MAJOR",
+            help="Drop cached Blender release pages for majors >= MIN_MAJOR (default: 4) before running.",
+        )
+        parser.add_argument(
+            "-u",
+            "--update-readme",
+            action="store_true",
+            help="Update the 'Supported Blender versions' table in README.md from the actual test results.",
+        )
+        return parser
+
+    @classmethod
+    def from_args(cls, argv: Optional[list[str]] = None) -> 'Cli':
+        return cls(**vars(cls.parser().parse_args(argv)))
+
+    def selected_versions(self) -> list[BlenderInstallation]:
+        versions = list(reversed(self.installator.versions_for_test()))
+        if self.count is None:
+            return versions
+        return versions[: self.count]
+
+    def prefetch_linux_tarball(self) -> None:
+        # Download & cache the latest Linux x64 tarball (Blender 5+)
+        for bv in self.installator.versions_for_download():
+            path = bv.download_blender_install_file_path()
+            print(f"Cached {bv.ver_str} {bv.platform_str} -> {path}")
+
+    def run_test_version(self, installation: BlenderInstallation) -> None:
+        print(f"{installation.ver} {installation.platform_str} {installation.file_ext} {installation.install_file_name}")
+        self.installator.ensure_installed(installation)
+        self.installator.ensure_pytest(installation)
+        setup = BlenderSetup(self.installator, installation)
+        setup.install_and_run()
+        self.results.results.append(TestResult.from_file(setup.test_results_path, installation.ver_str))
+
+    def run(self) -> None:
+        if self.refresh is not None:
+            print(f"Refreshing cached release pages for Blender {self.refresh}+")
+            self.installator.refresh_cache(self.refresh)
+
+        versions = self.selected_versions()
+        if not versions:
+            print("No Blender versions selected for testing.")
+            return
+
+        self.prefetch_linux_tarball()
+
+        print(f"Testing {len(versions)} Blender version(s)")
+        for installation in versions:
+            self.run_test_version(installation)
+        self.results.print()
+        if self.update_readme:
+            update_readme_table(README_PATH, self.results.results)
+            print(f"Updated the Blender versions table in {README_PATH}")
 
 
 if __name__ == "__main__":
-    # setup = BlenderSetup(root_path=Path("/tmp/work/fresh2"), )
-    # setup = BlenderSetup(root_path=Path("/tmp/work/freshWin"), target_platform="Windows", blender_main_ver="3.5")
-    # setup = BlenderSetup(root_path=Path("/tmp/work/freshWin"), target_platform="Windows", blender_main_ver="3.0")
-    # setup = BlenderSetup(root_path=Path("/tmp/work/fresh"), target_platform="Linux", blender_ver="4.2")
-    # setup.install_and_run()
-
-    bi = BlenderInstallator()
-
-    # Download & cache the latest Linux x64 tarball (Blender 5+)
-    for bv in bi.versions_for_download():
-        path = bv.download_blender_install_file_path()
-        print(f"Cached {bv.ver_str} {bv.platform_str} -> {path}")
-
-    l = bi.versions_for_test()
-    l.reverse()
-    results_table: list[list[str]] = []
-    # Test the 2 most recent versions only
-    for i, v in enumerate(l):
-        print(f"{v.ver} {v.platform_str} {v.file_ext} {v.install_file_name}")
-        # if v.ver != (3, 3, 21):
-        #     continue
-
-        # print(v.download_blender_install_file_path())
-        # print(f"{v.ver} {bi.is_installed(v)} {bi.exe_path(v)}")
-        bi.ensure_installed(v)
-        bi.ensure_pytest(v)
-        bs = BlenderSetup(bi, v)
-        bs.install_and_run()
-        bs.collect_result(results_table)
-        if i == 1:  # Break after testing 2 versions
-            break
-    print_test_results_table(results_table)
+    Cli.from_args().run()

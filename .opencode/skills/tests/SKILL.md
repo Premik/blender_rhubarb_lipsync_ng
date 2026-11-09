@@ -38,22 +38,17 @@ versions, so it is slow and network-heavy. **Never run it by default; only when 
 user explicitly asks for compatibility tests.**
 
 When asked to run them without further qualifiers, use the defaults — the 2 newest
-Blender versions, no cache refresh:
+Blender versions, no cache refresh, and update the README table from the results:
 
 ```sh
-conda run -n rhubarb python scripts/compatibility_tests.py
+conda run -n rhubarb python scripts/compatibility_tests.py --update-readme
 ```
 
 - `-n/--count N` — how many newest versions to test; `all`/`-1` = all, `0` = none.
 - `-r/--refresh [MIN_MAJOR]` — drop cached Blender release pages for majors >=
   MIN_MAJOR (default 4) before running. Refresh **only** when the user explicitly
   asks for it, never as part of a default run.
-
-After a compatibility test run **has been executed** (and only then — not for
-`-n 0` or skipped runs), update the `### Supported Blender versions` table in
-`README.md` with the new results: refresh the point-release numbers, counts, and
-✔️/❌ status per tested version, and add rows for any newly discovered versions.
-Leave untested versions' rows as they are. Do **not** update this table from cache
-scraping or version listings alone — only from actual test results.
-
-$ARGUMENTS
+- `-u/--update-readme` — update the `### Supported Blender versions` table in
+  `README.md` from the actual test results of this run. Verify the diff afterwards.
+  Never edit that table by hand from cache scraping or version listings — only from
+  actual test results. Rows of versions not tested by this run are left untouched.

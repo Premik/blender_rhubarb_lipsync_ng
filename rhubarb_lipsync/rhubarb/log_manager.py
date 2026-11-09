@@ -1,61 +1,111 @@
 import logging
 import pathlib
 import sys
+from dataclasses import dataclass
 from functools import cached_property
 from types import ModuleType
-from typing import Optional
+from typing import Callable, Optional
 
 
-# https://stackoverflow.com/questions/2183233/how-to-add-a-custom-loglevel-to-pythons-logging-facility/35804945#35804945
-def addLoggingLevel(levelName, levelNum, methodName=None) -> None:
-    """
-    Comprehensively adds a new logging level to the `logging` module and the
-    currently configured logging class.
+@dataclass
+class CustomLogLevel:
+    """Registers a custom logging level, reusing and never clobbering existing definitions."""
 
-    `levelName` becomes an attribute of the `logging` module with the value
-    `levelNum`. `methodName` becomes a convenience method for both `logging`
-    itself and the class returned by `logging.getLoggerClass()` (usually just
-    `logging.Logger`). If `methodName` is not specified, `levelName.lower()` is
-    used.
+    name: str
+    default_level: int
 
-    To avoid accidental clobberings of existing attributes, this method will
-    raise an `AttributeError` if the level name is already an attribute of the
-    `logging` module or if the method name is already present
+    @property
+    def method_name(self) -> str:
+        return self.name.lower()
 
-    Example
-    -------
-    >>> addLoggingLevel('TRACE', logging.DEBUG - 5)
-    >>> logging.getLogger(__name__).setLevel("TRACE")
-    >>> logging.getLogger(__name__).trace('that worked')
-    >>> logging.trace('so did this')
-    >>> logging.TRACE
-    5
+    @property
+    def level(self) -> int:
+        return getattr(logging, self.name, self.default_level)
 
-    """
-    if not methodName:
-        methodName = levelName.lower()
+    @property
+    def logger_class(self) -> type[logging.Logger]:
+        return logging.getLoggerClass()
 
-    if hasattr(logging, levelName):
-        raise AttributeError('{} already defined in logging module'.format(levelName))
-    if hasattr(logging, methodName):
-        raise AttributeError('{} already defined in logging module'.format(methodName))
-    if hasattr(logging.getLoggerClass(), methodName):
-        raise AttributeError('{} already defined in logger class'.format(methodName))
+    @property
+    def logger_method(self) -> Optional[Callable]:
+        return getattr(self.logger_class, self.method_name, None)
 
-    # This method was inspired by the answers to Stack Overflow post
-    # http://stackoverflow.com/q/2183233/2988730, especially
-    # http://stackoverflow.com/a/13638084/2988730
-    def logForLevel(self, message, *args, **kwargs) -> None:
-        if self.isEnabledFor(levelNum):
-            self._log(levelNum, message, args, **kwargs)
+    @property
+    def module_method(self) -> Optional[Callable]:
+        return getattr(logging, self.method_name, None)
 
-    def logToRoot(message, *args, **kwargs) -> None:
-        logging.log(levelNum, message, *args, **kwargs)
+    @property
+    def is_our_registration(self) -> bool:
+        """Whether the level was already registered by this module, e.g. after a scripts reload."""
+        return self.is_our_code(self.module_method) and self.is_our_code(self.logger_method)
 
-    logging.addLevelName(levelNum, levelName)
-    setattr(logging, levelName, levelNum)
-    setattr(logging.getLoggerClass(), methodName, logForLevel)
-    setattr(logging, methodName, logToRoot)
+    @staticmethod
+    def describe_symbol(obj: object) -> str:
+        """Best-effort identification of where a class or function was defined."""
+        module = getattr(obj, '__module__', '?')
+        qualname = getattr(obj, '__qualname__', '?')
+        filename = getattr(getattr(obj, '__code__', None), 'co_filename', None)
+        if not filename:
+            return f"{module}.{qualname}"
+        return f"{module}.{qualname} (from {filename})"
+
+    @staticmethod
+    def is_our_code(obj: object) -> bool:
+        filename = getattr(getattr(obj, '__code__', None), 'co_filename', None)
+        if not filename:
+            return False
+        return pathlib.Path(filename).resolve() == pathlib.Path(__file__).resolve()
+
+    def make_logger_method(self, level: int) -> Callable:
+        def log_for_level(logger, message, *args, **kwargs) -> None:
+            if logger.isEnabledFor(level):
+                logger._log(level, message, args, **kwargs)
+
+        return log_for_level
+
+    def make_module_method(self, level: int) -> Callable:
+        def log_to_root(message, *args, **kwargs) -> None:
+            logging.log(level, message, *args, **kwargs)
+
+        return log_to_root
+
+    def register_missing(self) -> list[str]:
+        """Registers the missing pieces. Returns the names of the pre-existing ones."""
+        level = self.level
+        preexisting: list[str] = []
+
+        if hasattr(logging, self.name):
+            preexisting.append(self.name)
+        else:
+            logging.addLevelName(level, self.name)
+            setattr(logging, self.name, level)
+
+        if hasattr(logging, self.method_name):
+            preexisting.append(self.method_name)
+        else:
+            setattr(logging, self.method_name, self.make_module_method(level))
+
+        if hasattr(self.logger_class, self.method_name):
+            preexisting.append(f"{self.describe_symbol(self.logger_class)}.{self.method_name}")
+        else:
+            setattr(self.logger_class, self.method_name, self.make_logger_method(level))
+
+        return preexisting
+
+    def ensure(self) -> None:
+        own = self.is_our_registration
+        trace_before = self.logger_method
+        preexisting = self.register_missing()
+        if not preexisting or own:
+            return  # Fresh registration, or our own from before (e.g. after a Blender scripts reload)
+
+        print(
+            f"Warning: {self.name} logging was already (partially) defined before this addon loaded "
+            f"({', '.join(preexisting)}). Reusing the existing definitions."
+        )
+        print(f"{self.name} logger class: {self.describe_symbol(self.logger_class)}")
+        if trace_before is not None:
+            print(f"{self.name} logger method: {self.describe_symbol(trace_before)}")
 
 
 class LogManager:
@@ -69,10 +119,14 @@ class LogManager:
         self.log_file_path: Optional[pathlib.Path] = None
 
     def init(self, modules: list[ModuleType]) -> None:
+        if self.modules:  # Detach handlers while self.logs still refers to the previous logger set
+            self.remove_console_handler()
+            self.disable_log_file()
         self.modules = modules
 
-    @cached_property
+    @property
     def logs(self) -> list[logging.Logger]:
+        """Freshly derived from self.modules so re-init() can never serve stale loggers."""
         return [m.log for m in self.modules if hasattr(m, 'log')]
 
     @property
@@ -107,7 +161,7 @@ class LogManager:
             except Exception as e:
                 print(f"Failed to set log level for '{l}': \n{e}")
         try:
-            logManager.ensure_console_handler()
+            self.ensure_console_handler()
         except Exception as e:
             print(f"Failed enable console handlers: \n{e}")
 
@@ -115,7 +169,7 @@ class LogManager:
         self.set_level(logging.DEBUG)
 
     def set_trace(self) -> None:
-        self.set_level(LogManager.TRACE_LEVEL)
+        self.set_level(getattr(logging, 'TRACE', LogManager.TRACE_LEVEL))
 
     def validate_log_file(self) -> str:
         p = self.log_file_path
@@ -166,7 +220,7 @@ class LogManager:
     def log_file_status(self) -> str:
         if not self.log_file_path:
             return "DISABLED"
-        errors = logManager.validate_log_file()
+        errors = self.validate_log_file()
         if errors:
             return "ERROR"
         if self.file_handler is not None:
@@ -204,8 +258,7 @@ class LogManager:
 
     @staticmethod
     def ensure_trace() -> None:
-        if not hasattr(logging, 'TRACE'):
-            addLoggingLevel('TRACE', LogManager.TRACE_LEVEL)
+        CustomLogLevel('TRACE', LogManager.TRACE_LEVEL).ensure()
 
 
 logManager = LogManager()

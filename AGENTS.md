@@ -3,7 +3,7 @@
 - Write modular code with very few nested blocks.
 - Prefer dataclasses, smaller functions, and properties.
 - Only add comments or documentation for very tricky parts of the code.
-- Keep docstring very brief. Only describe high-leveland non-obvious things. 
+- Keep docstring very brief. Only describe high-level and non-obvious things.
 - Do not use try/catch blocks just for logging; let exceptions bubble up.
 - Always exit early (return/continue/break) when checking multiple conditions, especially in functions or loops, to handle trivial cases first.
 - Prefer using `@cached_property` over `field(init)` or post-init methods where it makes sense.

@@ -47,6 +47,11 @@ def init_loggers(prefs: Optional[RhubarbAddonPreferences]) -> None:
         if hasattr(prefs, 'log_level') and prefs.log_level != 0:  # 0 default level
             logManager.set_level(prefs.log_level)
 
+    if hasattr(prefs, 'log_file'):
+        # (Re-)apply the log file pref at startup; makes file logging survive re-registrations,
+        # as logManager.init() above detaches the handlers from the previous logger set.
+        prefs.log_file_updated(bpy.context)
+
 
 # print(f"FILE:  {__file__}")
 # if is_blender_in_debug():
