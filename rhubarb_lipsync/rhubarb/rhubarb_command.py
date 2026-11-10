@@ -207,7 +207,7 @@ class RhubarbCommandWrapper:
         self.close_process()
         args = self.build_version_args()
         self.open_process(args)
-        self.collect_output_sync(ignore_timeout_error=False)
+        self.collect_output_sync(ignore_timeout_error=False, timeout=5)
         return RhubarbParser.parse_version_info(self.stdout)
 
     def log_status_line(self, log_json: dict) -> None:
