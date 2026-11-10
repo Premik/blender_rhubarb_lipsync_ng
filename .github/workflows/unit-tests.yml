@@ -17,14 +17,14 @@ jobs:
         # , "3.11.3" - Only bpy 4.0.0 in pypi
         python-version: ["3.11"]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 1
       # - uses: awalsh128/cache-apt-pkgs-action@latest
       #   with:
       #     packages: libxxf86vm1 libxfixes3 libxi6 libxkbcommon0 libgl1-mesa-glx
       #     #version: 1.0
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
@@ -37,13 +37,13 @@ jobs:
         #   sudo apt-get install -y libgl1-mesa-glx
       - name: Install dependencies
         run: |
-          pip install pytest tomli
+          pip install pytest tomli Pillow markdown-it-py
           pip install bpy
           pip install -e .
 
       - name: Cache Downloads
         id: cache-download
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: download
           key: download-${{hashFiles('pyproject.toml')}}
@@ -57,7 +57,8 @@ jobs:
         run: pytest --junitxml=pytest_junit_results.xml --tb=long
 
       - name: Test Report # https://github.com/dorny/test-reporter/issues/244
-        uses: phoenix-actions/test-reporting@v8
+        id: test-report
+        uses: phoenix-actions/test-reporting@v16
         if: success() || failure()    # run this step even if previous step failed
         with:
           name: Pytest results ${{ matrix.os }}
