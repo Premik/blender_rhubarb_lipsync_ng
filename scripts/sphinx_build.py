@@ -8,8 +8,8 @@ from pathlib import Path
 from PIL import Image
 
 from config import project_cfg
+from dist_artifacts import DistArtifacts
 from markdown_helper import MarkdownLineEditor
-from package import PackagePlugin
 
 
 @dataclass
@@ -24,7 +24,11 @@ class SphinxBuilder:
 
     @cached_property
     def dist_dir(self) -> Path:
-        return self.project_dir / "dist"
+        return self.dist_artifacts.dist_dir
+
+    @cached_property
+    def dist_artifacts(self) -> DistArtifacts:
+        return DistArtifacts(project_dir=self.project_dir, version=project_cfg["project"]["version"])
 
     @cached_property
     def sphinx_dir(self) -> Path:
@@ -214,18 +218,16 @@ class SphinxBuilder:
         # self.resize_images(max_width=400)
         self.sphinx_build_pdf()
 
-    def get_doc_version(self) -> str:
-        pp = PackagePlugin(project_cfg)
-        t = pp.version_tuple
-        return f"{t[0]}.{t[1]}"
+    def doc_zip_base_path(self) -> Path:
+        return self.dist_dir / self.dist_artifacts.docs_zip_stem
+
+    def check_dist(self) -> None:
+        """Fail if dist/ contains a docs zip of another major.minor version."""
+        self.dist_artifacts.check_stale_docs_zips()
 
     def zip_docs(self) -> None:
-        version = self.get_doc_version()
-        zip_name = f"rhubarb-lipsync-docs-{version}"
-        zip_path = self.dist_dir / zip_name
-        stale = [z for z in self.dist_dir.glob("rhubarb-lipsync-docs-*.zip") if z != zip_path.with_suffix(".zip")]
-        if stale:
-            raise RuntimeError(f"Stale docs zip(s) in {self.dist_dir}: {[z.name for z in stale]}. Remove or move them away before packaging.")
+        self.check_dist()
+        zip_path = self.doc_zip_base_path()
         print(f"Creating documentation package '{zip_path}.zip'")
 
         # Create a temporary directory to assemble the files to be zipped
@@ -243,6 +245,7 @@ class SphinxBuilder:
 
         # Create the zip archive
         shutil.make_archive(str(zip_path), 'zip', root_dir=temp_dir)
+        self.dist_artifacts.check_missing_zips([self.dist_artifacts.docs_zip])
 
         # Clean up the temporary directory
         shutil.rmtree(temp_dir)
@@ -250,6 +253,7 @@ class SphinxBuilder:
 
 if __name__ == '__main__':
     builder = SphinxBuilder()
+    builder.check_dist()
     builder.clean_build()
     builder.build_html()
     builder.build_pdf()

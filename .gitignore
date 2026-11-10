@@ -22,3 +22,4 @@ sphinx/build
 .mypy_cache
 summary*.txt
 .ansible
+uv.lock

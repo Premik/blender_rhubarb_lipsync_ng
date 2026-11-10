@@ -79,13 +79,6 @@ Then run `Python: Select Interpreter` and select the one from conda env.
     }
 ```
 
-Already in `project.toml`. To add to the settings.json manually:
-```json
- "python.formatting.provider": "black",
- "python.formatting.blackArgs": ["--line-length", "160", "--skip-string-normalization"],
- "python.formatting.blackPath": "/bin/black",
-```
-
 ### bpy modules
 
 [Fake bpy modules](https://github.com/nutti/fake-bpy-module) (seems more complete)

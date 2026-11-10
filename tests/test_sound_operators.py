@@ -3,9 +3,9 @@ import unittest
 import bpy
 
 import rhubarb_lipsync.blender.ui_utils as ui_utils
-from rhubarb_lipsync.blender.sound_operators import find_sound_strips_by_sound
 import sample_project
 from helper import skip_no_aud
+from rhubarb_lipsync.blender.sound_operators import find_sound_strips_by_sound
 
 
 class SoundOperatorsTest(unittest.TestCase):

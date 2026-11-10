@@ -2,10 +2,13 @@ import platform
 import re
 import shutil
 import sys
+from contextlib import contextmanager
 from functools import cached_property
 from pathlib import Path
+from typing import Iterator, Optional
 
 from config import dist_zip_name, project_cfg, rhubarb_cfg
+from dist_artifacts import DistArtifacts
 from rhubarb_bin import RhubarbBinary
 
 
@@ -91,8 +94,12 @@ class PackagePlugin:
         return self.project_dir / "sphinx" / "conf.py"
 
     @cached_property
+    def dist_artifacts(self) -> DistArtifacts:
+        return DistArtifacts(project_dir=self.project_dir, version=self.version_str, cfg=rhubarb_cfg)
+
+    @cached_property
     def dist_dir(self) -> Path:
-        return self.project_dir / "dist"
+        return self.dist_artifacts.dist_dir
 
     def update_version_in_file(self, rx: re.Pattern[str], p: Path, new_ver: str) -> None:
         assert p.exists(), f"The {p} doesn't exist"
@@ -129,8 +136,13 @@ class PackagePlugin:
         d = clean_temp_files_at(self.project_dir)
         print(f"Deleted {d} temp/cache files/dirs from the {self.project_dir}")
 
-    def dist_zip_path(self, platform: str) -> Path:
+    def dist_zip_base_path(self, platform: str) -> Path:
+        """Zip path without the .zip suffix (shutil.make_archive appends it)."""
         return self.dist_dir / dist_zip_name(platform, self.version_str)
+
+    def dist_zip_path(self, platform: str) -> Path:
+        base = self.dist_zip_base_path(platform)
+        return base.with_name(base.name + ".zip")
 
     def github_release_url(self, platform: str) -> str:
         zip = self.dist_zip_path(platform).name
@@ -139,42 +151,76 @@ class PackagePlugin:
         return f"https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v{self.version_str}/{zip}"
 
     def clean_dist(self) -> None:
-        """Fail if dist/ contains stale addon zips of another project version."""
-        self.dist_dir.mkdir(parents=True, exist_ok=True)
-        stale = [z for z in self.dist_dir.glob(f"{PackagePlugin.main_package_name}_ng-*.zip") if not z.name.endswith(f"-{self.version_str}.zip")]
-        if stale:
-            raise RuntimeError(f"Stale addon zip(s) in {self.dist_dir}: {[z.name for z in stale]}. Remove or move them away before packaging.")
+        """Fail if dist/ contains addon zips that are not part of this release."""
+        self.dist_artifacts.check_stale_addon_zips()
 
     def zip_dist(self, b: RhubarbBinary) -> None:
-        """Creates the zip for distribution, ensuring the binary in bin/ matches the platform being packaged."""
+        """Creates the zip for distribution, ensuring the deployed binary and manifest match the platform being packaged."""
         if not b.is_deployed_to_bin():
             raise RuntimeError(f"The {b.platform_name} binary is not deployed to {b.bin_dir}. Run scripts/rhubarb_bin.py first.")
+        manifest_platforms = b.manifest_platforms()
+        if manifest_platforms != b.platform_blender_names:
+            raise RuntimeError(
+                f"The manifest {b.manifest_path} lists platforms {manifest_platforms}, "
+                f"expected {b.platform_blender_names} for {b.platform_name}. Run scripts/rhubarb_bin.py first."
+            )
         zip = self.dist_zip_path(b.platform_name)
         # https://stackoverflow.com/questions/1855095/how-to-create-a-zip-archive-of-a-directory#
         print(f"Creating {zip}.")
-        shutil.make_archive(str(zip), 'zip', self.project_dir, PackagePlugin.main_package_name)
+        shutil.make_archive(str(self.dist_zip_base_path(b.platform_name)), 'zip', self.project_dir, PackagePlugin.main_package_name)
+
+    def selected_platforms(self, name: str) -> list[RhubarbBinary]:
+        platforms = RhubarbBinary.platforms_by_name(name, rhubarb_cfg)
+        if platforms:
+            return platforms
+        available = [b.platform_name for b in RhubarbBinary.all_platforms(rhubarb_cfg)]
+        raise ValueError(f"No platform matches '{name}'. Available platforms: {available}")
+
+    def restore_candidate(self) -> Optional[RhubarbBinary]:
+        """Platform to redeploy after packaging: the currently deployed one, else the host's."""
+        current = RhubarbBinary.currently_deployed_platform(rhubarb_cfg)
+        if current is not None:
+            return current
+        return next((b for b in RhubarbBinary.all_platforms(rhubarb_cfg) if b.matches_platform(platform.system())), None)
+
+    def ensure_binaries(self, binaries: list[RhubarbBinary]) -> None:
+        for b in {b.platform_name: b for b in binaries}.values():
+            b.ensure_download()
+            b.verify_download_checksum()
+            b.ensure_unzipped()
+
+    @contextmanager
+    def deployed_platform(self, b: RhubarbBinary, restore: Optional[RhubarbBinary]) -> Iterator[None]:
+        """Deploy b for the block, restoring `restore` afterwards.
+
+        Always deploys, so the binary and manifest cannot be stale for the platform being zipped.
+        """
+        try:
+            b.deploy_to_bin()
+            yield
+        finally:
+            if restore is not None:
+                restore.deploy_to_bin()
+
+    def build(self, platform_name: str = "") -> None:
+        """Package the plugin for the selected platforms (all when no name is given)."""
+        platforms = self.selected_platforms(platform_name)
+        self.clean_dist()
+        self.update_version_files()
+        self.clean_temp_files()
+
+        restore = self.restore_candidate()
+        to_prepare = list(platforms)
+        if restore is not None:
+            to_prepare.append(restore)
+        self.ensure_binaries(to_prepare)
+
+        for b in platforms:
+            with self.deployed_platform(b, restore):
+                self.zip_dist(b)
+        self.dist_artifacts.check_missing_zips([self.dist_zip_path(b.platform_name).name for b in platforms])
 
 
 if __name__ == '__main__':
     platform_name = sys.argv[1] if len(sys.argv) > 1 else ""
-    pp = PackagePlugin(project_cfg)
-    pp.update_version_files()
-
-    pp.clean_temp_files()
-    pp.clean_dist()
-    platforms = RhubarbBinary.platforms_by_name(platform_name, rhubarb_cfg)
-    for b in platforms:
-        b.ensure_download()
-        b.verify_download_checksum()
-        b.ensure_unzipped()
-    current = RhubarbBinary.currently_deployed_platform(rhubarb_cfg)  # Keep the current platform bin
-    if current is None:
-        current = next((b for b in RhubarbBinary.all_platforms(rhubarb_cfg) if b.matches_platform(platform.system())), None)
-    try:
-        for b in platforms:
-            if not b.is_deployed_to_bin():
-                b.deploy_to_bin()  # Deploy the correct platform before zipping
-            pp.zip_dist(b)
-    finally:
-        if current:  # Recover the previously deployed platform, if any
-            current.deploy_to_bin()
+    PackagePlugin(project_cfg).build(platform_name)

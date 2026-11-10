@@ -22,6 +22,23 @@ jobs:
           python-version: '3.11'
           cache: 'pip'
 
+      - name: Verify tag matches pyproject.toml version
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          python - <<'PY'
+          import os
+          import pathlib
+          import sys
+          import tomllib
+
+          with pathlib.Path("pyproject.toml").open("rb") as f:
+              version = tomllib.load(f)["project"]["version"]
+          tag = os.environ["GITHUB_REF_NAME"]
+          if tag != f"v{version}":
+              sys.exit(f"Tag {tag!r} does not match pyproject.toml version {version!r}")
+          print(f"Tag {tag} matches pyproject.toml version {version}")
+          PY
+
       - name: Install dependencies
         run: |
           pip install tomli Pillow sphinx rinohtype myst-parser sphinx-book-theme
@@ -48,9 +65,15 @@ jobs:
           cd scripts
           python sphinx_build.py
 
+      - name: Verify release artifacts
+        run: |
+          cd scripts
+          python dist_artifacts.py
+
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
           draft: true
           files: |
-            dist/*.zip
+            dist/rhubarb_lipsync_ng-*.zip
+            dist/rhubarb-lipsync-docs-*.zip

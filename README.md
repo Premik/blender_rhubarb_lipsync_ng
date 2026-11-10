@@ -156,26 +156,25 @@ A new `Action` will be created and selected in the `Action Editor`. The two RLPS
 
 ### Supported Blender versions
 
-Any Blender version newer than **v3.2**. Test results:
+Supported: Blender **v3.3** and newer. Blender 3.2 and older are not supported; the 3.2 row is kept as evidence. Test results:
 
-| Version       | System  | Total | Passed | Failed | Errors | Skipped | Status |
-|---------------|---------|-------|--------|--------|--------|---------|--------|
-| **5.2**.3 LTS | Windows | 71    | 67     | 0      | 0      | 4       | ✔️     |
-| **5.1**.2     | Windows | 71    | 67     | 0      | 0      | 4       | ✔️     |
-| **5.0**.1     | Windows | 71    | 67     | 0      | 0      | 4       | ✔️     |
-| **4.5**.15 LTS| Windows | 71    | 67     | 0      | 0      | 4       | ✔️     |
-| **4.4**.3     | Windows | 71    | 67     | 0      | 0      | 4       | ✔️     |
-| **4.3**.2     | Windows | 71    | 67     | 0      | 0      | 4       | ✔️     |
-| **4.2**.23 LTS| Windows | 71    | 67     | 0      | 0      | 4       | ✔️     |
-| **4.1**.1     | Windows | 71    | 67     | 0      | 0      | 4       | ✔️     |
-| **4.0**.2     | Windows | 71    | 67     | 0      | 0      | 4       | ✔️     |
-| **3.6**.23    | Windows | 71    | 67     | 0      | 0      | 4       | ✔️     |
-| **3.5**.1     | Windows | 71    | 67     | 0      | 0      | 4       | ✔️     |
-| **3.4**.1     | Windows | 71    | 67     | 0      | 0      | 4       | ✔️     |
-| **3.3**.21    | Windows | 71    | 67     | 0      | 0      | 4       | ✔️     |
-| **3.2**.2     | Windows | 71    | 52     | 7      | 8      | 4       | ❌     |
-| **3.1**.2     | Windows | 71    | 52     | 7      | 8      | 4       | ❌     |
-| **3.0**.1     | Windows | N/A   | N/A    | N/A    | N/A    | N/A     | ❌     |
+| Version        | System  | Total | Passed | Failed | Errors | Skipped | Status |
+|----------------|---------|-------|--------|--------|--------|---------|--------|
+| **5.3**.0      | Windows | 140   | 136    | 0      | 0      | 4       | ✔️     |
+| **5.2**.4 LTS  | Windows | 140   | 136    | 0      | 0      | 4       | ✔️     |
+| **5.1**.2      | Windows | 140   | 136    | 0      | 0      | 4       | ✔️     |
+| **5.0**.1      | Windows | 140   | 136    | 0      | 0      | 4       | ✔️     |
+| **4.5**.16 LTS | Windows | 140   | 136    | 0      | 0      | 4       | ✔️     |
+| **4.4**.3      | Windows | 140   | 136    | 0      | 0      | 4       | ✔️     |
+| **4.3**.2      | Windows | 140   | 136    | 0      | 0      | 4       | ✔️     |
+| **4.2**.23 LTS | Windows | 140   | 136    | 0      | 0      | 4       | ✔️     |
+| **4.1**.1      | Windows | 140   | 136    | 0      | 0      | 4       | ✔️     |
+| **4.0**.2      | Windows | 140   | 136    | 0      | 0      | 4       | ✔️     |
+| **3.6**.23     | Windows | 140   | 136    | 0      | 0      | 4       | ✔️     |
+| **3.5**.1      | Windows | 140   | 136    | 0      | 0      | 4       | ✔️     |
+| **3.4**.1      | Windows | 140   | 136    | 0      | 0      | 4       | ✔️     |
+| **3.3**.21     | Windows | 140   | 136    | 0      | 0      | 4       | ✔️     |
+| **3.2**.2      | Windows | 140   | 121    | 15     | 0      | 4       | ❌      |
 
 
 

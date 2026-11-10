@@ -158,6 +158,10 @@ class BlenderInstallation:
     def is_windows(self) -> bool:
         return "indows" in self.platform_str
 
+    @property
+    def system_name(self) -> str:
+        return "Windows" if self.is_windows else "Linux"
+
     def download_blender_install_file_path(self) -> Path:
         return url_cache.get_file(self.url, f".{self.file_ext}")
 
@@ -237,11 +241,12 @@ class BlenderInstallator:
         mvs = [mv for mv in self.list_available_main_versions() if mv.ver[0] >= min_major]
         return self.list_all_available_versions(mvs)
 
-    def versions_for_test(self, min_major: int = 3) -> list[BlenderInstallation]:
+    def versions_for_test(self, min_version: tuple[int, int] = (3, 2)) -> list[BlenderInstallation]:
+        """Latest patch per major.minor, starting at min_version (3.2 is kept as unsupported evidence)."""
         bis = [
             bv
-            for bv in self.available_versions(min_major)
-            if bv.platform_str and "win" in bv.platform_str and "arm" not in bv.platform_str and bv.file_ext == "zip"
+            for bv in self.available_versions(min_version[0])
+            if bv.ver >= min_version and bv.platform_str and "win" in bv.platform_str and "arm" not in bv.platform_str and bv.file_ext == "zip"
         ]
         bis.sort(key=lambda bv: bv.ver)
         # Latest minor version in each major.main ver
@@ -324,7 +329,9 @@ class BlenderInstallator:
         self.run_python(bi, "-m", "ensurepip")
 
     def is_pytest_installed(self, bi: BlenderInstallation) -> bool:
-        cmd = [str(self.python_exe_path(bi)), "-m", "pip", "list"]
+        python_exe = self.python_exe_path(bi)
+        self.ensure_executable(python_exe)  # Zips don't preserve the exec bit
+        cmd = [str(python_exe), "-m", "pip", "list"]
         print(" ".join(cmd))
         result = subprocess.run(cmd, capture_output=True, text=True)
         return "pytest" in result.stdout
@@ -411,6 +418,10 @@ class BlenderSetup:
     def install_addon(self) -> None:
         self.addons_path.mkdir(parents=True, exist_ok=True)
         target = self.addons_path / "rhubarb_lipsync"
+        if target.is_symlink() or target.is_file():
+            target.unlink()
+        elif target.exists():
+            shutil.rmtree(target)
         with zipfile.ZipFile(self.current_dist_zip(), 'r') as zip_ref:
             zip_ref.extractall(target.parent)
 
@@ -469,9 +480,9 @@ class TestResult:
     note: str = ""
 
     @classmethod
-    def from_file(cls, path: Path, blender_version: str) -> "TestResult":
+    def from_file(cls, path: Path, blender_version: str, system: str) -> "TestResult":
         if not path.exists():
-            return cls(blender_version=blender_version, note="No result")
+            return cls(blender_version=blender_version, system=system, note="No result")
         return cls(**json.loads(path.read_text()))
 
     @property
@@ -551,10 +562,9 @@ class ReadmeRow:
         return cls((int(m["maj"]), int(m["min"]), int(m["patch"])), cells)
 
     @classmethod
-    def of_result(cls, result: TestResult, old: Optional["ReadmeRow"]) -> "ReadmeRow":
+    def of_result(cls, result: TestResult) -> "ReadmeRow":
         ver = version_tuple(result.blender_version)
-        # Preserve the existing version cell verbatim (bold + LTS marker)
-        version_cell = old.cells[0] if old else f"**{ver[0]}.{ver[1]}**.{ver[2]}" + (" LTS" if "LTS" in result.blender_version else "")
+        version_cell = f"**{ver[0]}.{ver[1]}**.{ver[2]}" + (" LTS" if "LTS" in result.blender_version else "")
         return cls(
             ver,
             [
@@ -580,10 +590,17 @@ def update_readme_table(readme_path: Path, results: list[TestResult]) -> None:
     while end < len(lines) and lines[end].startswith("|"):
         end += 1
 
-    rows = {r.ver: r for r in (ReadmeRow.parse(l) for l in lines[start + 2 : end]) if r}
+    # One row per major.minor series; a newer patch supersedes the older one
+    rows: dict[tuple[int, int], ReadmeRow] = {}
+    for row in (ReadmeRow.parse(l) for l in lines[start + 2 : end]):
+        if not row:
+            continue
+        key = row.ver[:2]
+        if key not in rows or row.ver > rows[key].ver:
+            rows[key] = row
     for result in results:
-        ver = version_tuple(result.blender_version)
-        rows[ver] = ReadmeRow.of_result(result, rows.get(ver))
+        key = version_tuple(result.blender_version)[:2]
+        rows[key] = ReadmeRow.of_result(result)
     table_rows = sorted(rows.values(), key=lambda r: r.ver, reverse=True)
 
     header = ["Version", "System", "Total", "Passed", "Failed", "Errors", "Skipped", "Status"]
@@ -653,6 +670,11 @@ class Cli:
             return versions
         return versions[: self.count]
 
+    def validate_dist_zips(self, versions: list[BlenderInstallation]) -> None:
+        """Fail before any Blender download if a selected version has no matching dist zip."""
+        for installation in versions:
+            BlenderSetup(self.installator, installation).current_dist_zip()
+
     def prefetch_linux_tarball(self) -> None:
         # Download & cache the latest Linux x64 tarball (Blender 5+)
         for bv in self.installator.versions_for_download():
@@ -665,7 +687,7 @@ class Cli:
         self.installator.ensure_pytest(installation)
         setup = BlenderSetup(self.installator, installation)
         setup.install_and_run()
-        self.results.results.append(TestResult.from_file(setup.test_results_path, installation.ver_str))
+        self.results.results.append(TestResult.from_file(setup.test_results_path, installation.ver_str, installation.system_name))
 
     def run(self) -> None:
         if self.refresh is not None:
@@ -677,6 +699,7 @@ class Cli:
             print("No Blender versions selected for testing.")
             return
 
+        self.validate_dist_zips(versions)
         self.prefetch_linux_tarball()
 
         print(f"Testing {len(versions)} Blender version(s)")

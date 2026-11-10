@@ -41,7 +41,7 @@ packages = ["rhubarb_lipsync"]
 #addopts = ["--import-mode=importlib", "--forked", "--numprocesses=auto"]
 #addopts = ["--import-mode=importlib", "--numprocesses=auto"]
 # https://stackoverflow.com/questions/10253826/path-issue-with-pytest-importerror-no-module-named-yadayadayada/50610630#answer-50610630
-pythonpath = [".", "tests"] 
+pythonpath = [".", "tests", "scripts"] 
 # https://docs.pytest.org/en/7.1.x/explanation/goodpractices.html
 
 # https://stackoverflow.com/questions/4673373/logging-within-pytest-tests
@@ -49,10 +49,6 @@ log_cli = true
 log_cli_level = "DEBUG"
 #log_cli_format = "%(asctime)s [%(levelname)8s] %(message)s (%(filename)s:%(lineno)s)"
 #log_cli_date_format = "%Y-%m-%d %H:%M:%S"
-
-[tool.black]
-line-length = 160
-skip-string-normalization = true
 
 [tool.isort]
 profile = "black"

@@ -16,7 +16,6 @@ dependencies:
   - debugpy
   - flask
   #- numpy
-  - black
   - ruff
   - bs4 # Only for compa. tests
   - html5lib # Only for compa. tests

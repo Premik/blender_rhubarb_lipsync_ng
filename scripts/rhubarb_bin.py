@@ -202,9 +202,17 @@ class RhubarbBinary:
 
     def is_deployed_to_bin(self) -> bool:
         """Whether is this RhubarbBinary platform currently deployed to the bin folder"""
-        if not self.executable_path.exists():
-            return False  # The bin/rhubar file don't even exists
+        if not self.executable_path.exists() or not self.executable_path_unzipped.exists():
+            return False  # The bin/rhubarb file or the unzipped binary doesn't exist
         return filecmp.cmp(self.executable_path, self.executable_path_unzipped)
+
+    def manifest_platforms(self) -> list[str]:
+        """The platforms currently listed in the Blender manifest."""
+        text = self.manifest_path.read_text(encoding='utf-8')
+        m = RhubarbBinary.manifest_platforms_rx.match(text)
+        if m is None:
+            raise ValueError(f"Failed to find the platforms array in {self.manifest_path}")
+        return re.findall(r'"([^"]+)"', m.group(2))
 
     def update_blender_manifest_platforms(self) -> None:
         print(f"Updating manifest platforms list to '{self.platform_blender_names}' in the {self.manifest_path}")
