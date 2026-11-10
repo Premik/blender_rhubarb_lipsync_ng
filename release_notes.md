@@ -1,5 +1,14 @@
 # Release Notes
 
+## v1.8.2
+
+**Date:** 2026-11-11
+
+- Made the custom `TRACE` log level registration more robust when another add-on has already defined a `TRACE` level. Clash diagnostics now identify the conflicting level and loggers.
+- The log file preference is re-applied when the addon is re-registered, and the file handler is closed on unregister. File logging now survives add-on reloads.
+- Fixed unregistering add-on classes that were never registered, for example after an aborted registration caused by a `bl_idname` collision.
+- Expanded the troubleshooting guide: extension vs legacy add-on install locations, `TRACE`/file logging setup, and starting Blender with a fresh profile on Windows using both `cmd` and PowerShell.
+
 ## v1.8.1
 
 **Date:** 2026-04-03
