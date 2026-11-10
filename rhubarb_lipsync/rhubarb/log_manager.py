@@ -1,15 +1,23 @@
 import logging
 import pathlib
 import sys
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from functools import cached_property
 from types import ModuleType
 from typing import Callable, Optional
 
 
 @dataclass
+class RegistrationReport:
+    """Which pieces of a custom log level were reused and which were force-fixed."""
+
+    preexisting: list[str] = field(default_factory=list)
+    replaced: list[str] = field(default_factory=list)
+
+
+@dataclass
 class CustomLogLevel:
-    """Registers a custom logging level, reusing and never clobbering existing definitions."""
+    """Registers a custom logging level, reusing valid existing definitions and fixing broken ones."""
 
     name: str
     default_level: int
@@ -19,8 +27,15 @@ class CustomLogLevel:
         return self.name.lower()
 
     @property
+    def existing_level(self) -> object:
+        """The raw pre-existing level attribute, without any validation."""
+        return getattr(logging, self.name, None)
+
+    @property
     def level(self) -> int:
-        return getattr(logging, self.name, self.default_level)
+        """The pre-existing level if it is a valid int, otherwise the default."""
+        raw = self.existing_level
+        return raw if type(raw) is int else self.default_level
 
     @property
     def logger_class(self) -> type[logging.Logger]:
@@ -69,43 +84,83 @@ class CustomLogLevel:
 
         return log_to_root
 
-    def register_missing(self) -> list[str]:
-        """Registers the missing pieces. Returns the names of the pre-existing ones."""
+    def register_missing(self) -> RegistrationReport:
+        """Registers missing pieces and replaces invalid ones."""
+        report = RegistrationReport()
+        self.ensure_level(report)
+        self.ensure_level_name(report)
+        self.ensure_module_method(report)
+        self.ensure_logger_method(report)
+        return report
+
+    def ensure_level(self, report: RegistrationReport) -> None:
+        if not hasattr(logging, self.name):
+            setattr(logging, self.name, self.default_level)
+            return
+        raw = self.existing_level
+        if type(raw) is int:
+            report.preexisting.append(f"{self.name}={raw}")
+            return
+        setattr(logging, self.name, self.default_level)
+        report.replaced.append(f"{self.name}={raw!r} ({type(raw).__name__}) -> {self.default_level}")
+
+    def ensure_level_name(self, report: RegistrationReport) -> None:
         level = self.level
-        preexisting: list[str] = []
+        forward = logging.getLevelName(level)  # level -> name
+        backward = logging.getLevelName(self.name)  # name -> level
+        if forward == self.name and backward == level:
+            return
+        if forward not in (f"Level {level}", self.name):
+            report.replaced.append(f"level {level} name={forward!r} -> {self.name!r}")
+        if backward not in (level, f"Level {self.name}"):
+            report.replaced.append(f"name {self.name!r} level={backward!r} -> {level}")
+        logging.addLevelName(level, self.name)
 
-        if hasattr(logging, self.name):
-            preexisting.append(self.name)
-        else:
-            logging.addLevelName(level, self.name)
-            setattr(logging, self.name, level)
+    def ensure_module_method(self, report: RegistrationReport) -> None:
+        if not hasattr(logging, self.method_name):
+            setattr(logging, self.method_name, self.make_module_method(self.level))
+            return
+        existing = self.module_method
+        if callable(existing):
+            report.preexisting.append(self.method_name)
+            return
+        setattr(logging, self.method_name, self.make_module_method(self.level))
+        report.replaced.append(f"logging.{self.method_name}={existing!r} (not callable) -> addon implementation")
 
-        if hasattr(logging, self.method_name):
-            preexisting.append(self.method_name)
-        else:
-            setattr(logging, self.method_name, self.make_module_method(level))
-
-        if hasattr(self.logger_class, self.method_name):
-            preexisting.append(f"{self.describe_symbol(self.logger_class)}.{self.method_name}")
-        else:
-            setattr(self.logger_class, self.method_name, self.make_logger_method(level))
-
-        return preexisting
+    def ensure_logger_method(self, report: RegistrationReport) -> None:
+        owner = self.logger_class
+        if not hasattr(owner, self.method_name):
+            setattr(owner, self.method_name, self.make_logger_method(self.level))
+            return
+        existing = self.logger_method
+        if callable(existing):
+            report.preexisting.append(f"{self.describe_symbol(owner)}.{self.method_name}")
+            return
+        setattr(owner, self.method_name, self.make_logger_method(self.level))
+        report.replaced.append(f"{self.describe_symbol(owner)}.{self.method_name}={existing!r} (not callable) -> addon implementation")
 
     def ensure(self) -> None:
         own = self.is_our_registration
         trace_before = self.logger_method
-        preexisting = self.register_missing()
-        if not preexisting or own:
-            return  # Fresh registration, or our own from before (e.g. after a Blender scripts reload)
+        report = self.register_missing()
 
-        print(
-            f"Warning: {self.name} logging was already (partially) defined before this addon loaded "
-            f"({', '.join(preexisting)}). Reusing the existing definitions."
-        )
-        print(f"{self.name} logger class: {self.describe_symbol(self.logger_class)}")
+        if report.replaced:
+            print(
+                f"RLPS: Warning: {self.name} logging had invalid definitions "
+                f"({', '.join(report.replaced)}). Overwritten with addon defaults."
+            )
+        reused = bool(report.preexisting) and not own
+        if reused:
+            print(
+                f"RLPS: Warning: {self.name} logging was already (partially) defined before this addon loaded "
+                f"({', '.join(report.preexisting)}). Reusing the existing definitions."
+            )
+        if not (report.replaced or reused):
+            return
+
+        print(f"RLPS: {self.name} logger class: {self.describe_symbol(self.logger_class)}")
         if trace_before is not None:
-            print(f"{self.name} logger method: {self.describe_symbol(trace_before)}")
+            print(f"RLPS: {self.name} logger method: {self.describe_symbol(trace_before)}")
 
 
 class LogManager:
@@ -169,7 +224,7 @@ class LogManager:
         self.set_level(logging.DEBUG)
 
     def set_trace(self) -> None:
-        self.set_level(getattr(logging, 'TRACE', LogManager.TRACE_LEVEL))
+        self.set_level(CustomLogLevel('TRACE', LogManager.TRACE_LEVEL).level)
 
     def validate_log_file(self) -> str:
         p = self.log_file_path

@@ -15,3 +15,7 @@
 - Don't try to fix existing imports, especially relative, assume they work fine.
 - Prefer neat, elegant, and compact solutions over more performant ones.
 - Ask user to confirm when ambigous, including when naming things and more names are  plausable, when you see a better or multiple possible approaches, a flaw in design.
+
+## References
+- `README.md` additional project overview. Always read it first, unless it is already in your context.
+- `troubleshooting.md` - user/env-specific instruction related to Blender+addon registration/installation issues.

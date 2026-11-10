@@ -1,4 +1,4 @@
-print("RLSP: enter __init__")
+print("RLPS: enter __init__")
 from typing import Optional
 
 import bpy
@@ -102,4 +102,4 @@ def unregister() -> None:
     del bpy.types.Object.rhubarb_lipsync_mapping
 
 
-print("RLSP: exit __init__")
+print("RLPS: exit __init__")

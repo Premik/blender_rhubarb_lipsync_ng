@@ -7,7 +7,12 @@ import tempfile
 import unittest
 from types import ModuleType, SimpleNamespace
 from typing import Any
+from unittest import mock
 
+import bpy
+
+import rhubarb_lipsync
+from rhubarb_lipsync import init_loggers
 from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences
 from rhubarb_lipsync.rhubarb.log_manager import LogManager, logManager
 
@@ -105,11 +110,110 @@ class EnsureTraceTest(unittest.TestCase):
         assert callable(logging.getLoggerClass().trace)
         assert 'already (partially) defined' in captured.getvalue()
 
+    def test_third_party_level_without_name_mapping(self) -> None:
+        # A third party set only the TRACE attribute, without calling addLevelName()
+        clear_trace()
+        logging.TRACE = 3
+
+        with contextlib.redirect_stdout(io.StringIO()) as captured:
+            LogManager.ensure_trace()
+
+        assert logging.TRACE == 3
+        assert logging.getLevelName(3) == 'TRACE'  # The name mapping got fixed
+        assert logging._nameToLevel['TRACE'] == 3
+        assert callable(logging.trace)
+        assert callable(logging.getLoggerClass().trace)
+        assert 'already (partially) defined' in captured.getvalue()
+
     def test_own_registration_is_silent(self) -> None:
         # Our import-time registration is in place, like after a Blender scripts reload
         with contextlib.redirect_stdout(io.StringIO()) as captured:
             LogManager.ensure_trace()
         assert captured.getvalue() == ''
+
+    def test_invalid_level_types_are_replaced(self) -> None:
+        # A non-int level attr would break isEnabledFor()/setLevel() downstream
+        for bad in ('TRACE', None, True, [], 15.0):
+            with self.subTest(bad=bad):
+                clear_trace()
+                logging.TRACE = bad
+                with contextlib.redirect_stdout(io.StringIO()) as captured:
+                    LogManager.ensure_trace()  # Must not raise
+                assert logging.TRACE == LogManager.TRACE_LEVEL
+                assert callable(logging.trace)
+                assert callable(logging.getLoggerClass().trace)
+                output = captured.getvalue()
+                assert 'RLPS: Warning' in output
+                assert 'invalid definitions' in output
+
+    def test_invalid_methods_are_replaced(self) -> None:
+        clear_trace()
+        logging.trace = 'not a function'
+        logging.getLoggerClass().trace = None
+
+        with contextlib.redirect_stdout(io.StringIO()) as captured:
+            LogManager.ensure_trace()
+
+        assert callable(logging.trace)
+        assert callable(logging.getLoggerClass().trace)
+        output = captured.getvalue()
+        assert 'invalid definitions' in output
+        assert 'not callable' in output
+
+    def test_callable_module_method_is_kept(self) -> None:
+        clear_trace()
+        third_party = make_third_party_trace()
+        logging.trace = third_party
+
+        with contextlib.redirect_stdout(io.StringIO()):
+            LogManager.ensure_trace()
+
+        assert logging.trace is third_party  # Working third-party method is not clobbered
+        assert callable(logging.getLoggerClass().trace)
+
+    def test_other_level_name_is_replaced(self) -> None:
+        clear_trace()
+        logging.addLevelName(15, 'VERBOSE')
+        logging.TRACE = 15
+
+        with contextlib.redirect_stdout(io.StringIO()) as captured:
+            LogManager.ensure_trace()
+
+        assert logging.getLevelName(15) == 'TRACE'
+        assert 'invalid definitions' in captured.getvalue()
+
+    def test_broken_reverse_level_mapping_is_fixed(self) -> None:
+        # The level->name direction can look fine while name->level points elsewhere
+        clear_trace()
+        logging.addLevelName(15, 'TRACE')
+        logging.addLevelName('BOGUS', 'TRACE')
+        logging.TRACE = 15
+
+        with contextlib.redirect_stdout(io.StringIO()) as captured:
+            LogManager.ensure_trace()
+
+        assert logging.getLevelName(15) == 'TRACE'
+        assert logging.getLevelName('TRACE') == 15
+        assert logging._nameToLevel['TRACE'] == 15
+        assert 'invalid definitions' in captured.getvalue()
+
+
+class SetTraceTest(unittest.TestCase):
+    """set_trace() must not propagate an invalid TRACE attribute into Logger.setLevel()."""
+
+    def test_set_trace_ignores_invalid_level_attr(self) -> None:
+        manager = LogManager()
+        modules = [make_module('set_trace')]
+        manager.init(modules)
+        self.addCleanup(manager.remove_console_handler)
+        saved = logging.TRACE
+        logging.TRACE = 'TRACE'
+        try:
+            with contextlib.redirect_stdout(io.StringIO()):
+                manager.set_trace()
+        finally:
+            logging.TRACE = saved
+        assert modules[0].log.level == LogManager.TRACE_LEVEL
 
 
 class ReInitTest(unittest.TestCase):
@@ -210,6 +314,35 @@ class LogFilePrefTest(unittest.TestCase):
         with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
             self.apply_pref(str(self.tmp))  # A directory, not a file
         assert logManager.file_handler is None  # register() must not fail on a broken saved pref
+
+
+class InitLoggersTest(unittest.TestCase):
+    """init_loggers() must (re-)apply the log_file pref after re-initializing the loggers."""
+
+    def test_log_file_pref_applied_after_logger_init(self) -> None:
+        modules = [make_module('initloggers_a')]
+        calls: list[Any] = []
+        manager = mock.MagicMock()
+        manager.init.side_effect = lambda mods: calls.append('init')
+        prefs = SimpleNamespace(log_file='/dev/null/rlps_test.log', log_file_updated=lambda ctx: calls.append(ctx))
+
+        saved_autoloader = getattr(rhubarb_lipsync, 'autoloader', ABSENT)
+        saved_manager = rhubarb_lipsync.logManager
+        rhubarb_lipsync.autoloader = SimpleNamespace(modules=modules)
+        rhubarb_lipsync.logManager = manager
+        try:
+            with contextlib.redirect_stdout(io.StringIO()):
+                init_loggers(prefs)
+        finally:
+            rhubarb_lipsync.logManager = saved_manager
+            if saved_autoloader is ABSENT:
+                del rhubarb_lipsync.autoloader
+            else:
+                rhubarb_lipsync.autoloader = saved_autoloader
+
+        manager.init.assert_called_once_with(modules)
+        assert calls[0] == 'init'  # The logger set is swapped before the pref is applied
+        assert calls[1] is bpy.context  # The real update callback receives the context
 
 
 if __name__ == '__main__':

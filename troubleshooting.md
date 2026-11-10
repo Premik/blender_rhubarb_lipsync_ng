@@ -148,7 +148,7 @@ addon_utils.disable: rhubarb_lipsync not disabled
 Modules Installed (rhubarb_lipsync) from 'C:\dist\rhubarb_lipsync_ng-Windows-1.3.1.zip' into 'C:\users\premik\AppData\Roaming\Blender Foundation\Blender\3.5\scripts\addons'
 ```
 
-There should be some entries with `RLSP:` in case the addon was installed successfully:
+There should be some entries with `RLPS:` in case the addon was installed successfully:
 
 ```sh
 RLPS: enter register()
@@ -160,7 +160,7 @@ RLPS: exit register()
 Warning: This script was written Blender version 4.0.2 and might not function (correctly), though it is enabled
 ```
 
-The RLSP: exit register() indicates the plugin has been successfully registered.
+The `RLPS: exit register()` indicates the plugin has been successfully registered.
 
 Example of a **useful** traceback/stack trace. The last line indicates the root cause:
 

@@ -70,6 +70,8 @@ class AutoLoader:
 
     def unregister(self) -> None:
         for cls in self.trace_items(reversed(self.ordered_classes), "class"):
+            if not getattr(cls, "is_registered", False):
+                continue  # Never registered, e.g. register() aborted midway on a bl_idname collision
             bpy.utils.unregister_class(cls)
 
         for module in self.trace_items(self.modules, "module"):
