@@ -19,3 +19,4 @@
 ## References
 - `README.md` additional project overview. Always read it first, unless it is already in your context.
 - `troubleshooting.md` - user/env-specific instruction related to Blender+addon registration/installation issues.
+- `release.md` - release, packaging and publishing procedure.

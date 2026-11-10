@@ -67,14 +67,6 @@ micromamba activate rhubarb
 r:\mambaPrefix\Scripts\activate
 ```
 
-## Release
-
-- Verify the rhubarb binary versions+hashes are the latest version available
-- `cd scripts`
-- `python rhubarb_bin.py` to download rhubar binaries and verify the checksums. It would also deploy the correct binary to the /bin folder based on the current platform (linux/mac/win).
-- `python package.py` to create zipped distributions for each platform.
-
-
 ## Vs Code
 Probably the easiest is to run the `code` or `code-oss` from within the activated conda env.
 Then run `Python: Select Interpreter` and select the one from conda env.
