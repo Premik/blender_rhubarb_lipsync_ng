@@ -223,6 +223,9 @@ class SphinxBuilder:
         version = self.get_doc_version()
         zip_name = f"rhubarb-lipsync-docs-{version}"
         zip_path = self.dist_dir / zip_name
+        stale = [z for z in self.dist_dir.glob("rhubarb-lipsync-docs-*.zip") if z != zip_path.with_suffix(".zip")]
+        if stale:
+            raise RuntimeError(f"Stale docs zip(s) in {self.dist_dir}: {[z.name for z in stale]}. Remove or move them away before packaging.")
         print(f"Creating documentation package '{zip_path}.zip'")
 
         # Create a temporary directory to assemble the files to be zipped

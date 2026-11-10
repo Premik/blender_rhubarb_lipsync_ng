@@ -1,7 +1,10 @@
 import contextlib
+import functools
+import inspect
 import io
 import logging
 import pathlib
+import re
 import shutil
 import tempfile
 import unittest
@@ -14,7 +17,7 @@ import bpy
 import rhubarb_lipsync
 from rhubarb_lipsync import init_loggers
 from rhubarb_lipsync.blender.preferences import RhubarbAddonPreferences
-from rhubarb_lipsync.rhubarb.log_manager import LogManager, logManager
+from rhubarb_lipsync.rhubarb.log_manager import CustomLogLevel, LogManager, logManager
 
 ABSENT = object()
 LOGGER_PREFIX = 'rlps_test_'
@@ -159,17 +162,159 @@ class EnsureTraceTest(unittest.TestCase):
         output = captured.getvalue()
         assert 'invalid definitions' in output
         assert 'not callable' in output
+        assert 'builtins.?' not in output  # Non-callables must not get a bogus symbol line
+        assert '?.?' not in output
 
     def test_callable_module_method_is_kept(self) -> None:
         clear_trace()
         third_party = make_third_party_trace()
         logging.trace = third_party
 
-        with contextlib.redirect_stdout(io.StringIO()):
+        with contextlib.redirect_stdout(io.StringIO()) as captured:
             LogManager.ensure_trace()
 
         assert logging.trace is third_party  # Working third-party method is not clobbered
         assert callable(logging.getLoggerClass().trace)
+        assert 'third_party_trace' in captured.getvalue()  # Culprit identification
+
+    def test_partial_third_party_overwrite_is_not_blamed_on_us(self) -> None:
+        # The addon registration is in place, then a third party overwrites only one of the two methods
+        for target in ('module', 'logger'):
+            with self.subTest(target=target):
+                self.snapshot.restore()
+                owner = logging if target == 'module' else logging.getLoggerClass()
+                owner.trace = make_third_party_trace()  # type: ignore
+
+                with contextlib.redirect_stdout(io.StringIO()) as captured:
+                    LogManager.ensure_trace()
+
+                output = captured.getvalue()
+                assert 'third_party_trace' in output
+                assert 'log_to_root' not in output  # Own pieces are not reported as clashes
+                assert 'log_for_level' not in output
+                assert 'TRACE=5' not in output
+
+    def test_preexisting_methods_are_described_with_source(self) -> None:
+        clear_trace()
+        logging.trace = make_third_party_trace()
+        logging.getLoggerClass().trace = make_third_party_trace()
+
+        with contextlib.redirect_stdout(io.StringIO()) as captured:
+            LogManager.ensure_trace()
+
+        output = captured.getvalue()
+        assert re.search(r'logging\.trace=\S*third_party_trace \(from .*test_log_manager\.py\)', output)
+        assert re.search(r'logging\.Logger\.trace=\S*third_party_trace \(from .*test_log_manager\.py\)', output)
+        assert 'logger class' not in output  # The standard logging.Logger is not worth reporting
+
+    def test_pathological_wrapped_attributes_do_not_block_registration(self) -> None:
+        class CyclicTrace:
+            def __call__(self, *args, **kwargs) -> None:
+                pass
+
+        class ExplodingTrace:
+            @property
+            def __wrapped__(self):
+                raise RuntimeError('boom')
+
+            def __call__(self, *args, **kwargs) -> None:
+                pass
+
+        class ExplodingCode:
+            @property
+            def __code__(self):
+                raise RuntimeError('boom')
+
+            def __call__(self, *args, **kwargs) -> None:
+                pass
+
+        cyclic = CyclicTrace()
+        cyclic.__wrapped__ = cyclic
+        self.assert_trace_survives(cyclic)
+        self.assert_trace_survives(ExplodingTrace())
+        self.assert_trace_survives(ExplodingCode())
+
+    def test_mixed_partial_and_wraps_cycle_does_not_hang(self) -> None:
+        def wrapped(*args, **kwargs) -> None:
+            pass
+
+        cyclic_partial = functools.partial(wrapped)
+        wrapped.__wrapped__ = cyclic_partial  # type: ignore
+
+        self.assert_trace_survives(cyclic_partial)
+
+    def assert_trace_survives(self, broken: object) -> None:
+        self.snapshot.restore()
+        clear_trace()
+        logging.trace = broken  # type: ignore
+        with contextlib.redirect_stdout(io.StringIO()) as captured:
+            LogManager.ensure_trace()  # Must not raise
+        assert callable(logging.getLoggerClass().trace)
+        assert type(broken).__name__ in captured.getvalue()
+
+    def test_foreign_wrapper_around_own_method_names_both_sources(self) -> None:
+        clear_trace()
+        own = CustomLogLevel('TRACE', LogManager.TRACE_LEVEL).make_module_method(LogManager.TRACE_LEVEL)
+
+        @functools.wraps(own)
+        def wrapper(*args, **kwargs) -> None:
+            pass
+
+        logging.trace = wrapper
+
+        with contextlib.redirect_stdout(io.StringIO()) as captured:
+            LogManager.ensure_trace()
+
+        output = captured.getvalue()
+        assert re.search(
+            r'logging\.trace=\S*log_to_root \(from .*test_log_manager\.py\) -> \S*log_to_root \(from .*log_manager\.py\)',
+            output,
+        )
+
+    def test_nonstandard_logger_class_is_named(self) -> None:
+        clear_trace()
+
+        class CustomLogger(logging.Logger):
+            pass
+
+        logging.setLoggerClass(CustomLogger)
+        self.addCleanup(logging.setLoggerClass, logging.Logger)
+        logging.trace = make_third_party_trace()
+
+        with contextlib.redirect_stdout(io.StringIO()) as captured:
+            LogManager.ensure_trace()
+
+        output = captured.getvalue()
+        assert 'logger class:' in output
+        assert 'CustomLogger' in output
+
+    def test_partial_overwrite_rebinds_own_surviving_method(self) -> None:
+        # A level change must reach whichever of the two methods the addon still defines
+        for target in ('module', 'logger'):
+            with self.subTest(target=target):
+                self.snapshot.restore()
+                foreign = make_third_party_trace()
+                owner = logging if target == 'module' else logging.getLoggerClass()
+                owner.trace = foreign  # type: ignore
+                logging.TRACE = 3
+
+                with contextlib.redirect_stdout(io.StringIO()):
+                    LogManager.ensure_trace()
+
+                assert owner.trace is foreign  # The foreign method is kept
+                surviving = logging.getLoggerClass().trace if target == 'module' else logging.trace
+                assert inspect.getclosurevars(surviving).nonlocals['level'] == 3
+
+    def test_own_methods_are_rebound_to_the_current_level(self) -> None:
+        with contextlib.redirect_stdout(io.StringIO()):
+            LogManager.ensure_trace()
+        logging.TRACE = 3  # A third party changed the level after the addon registration
+
+        with contextlib.redirect_stdout(io.StringIO()):
+            LogManager.ensure_trace()
+
+        assert inspect.getclosurevars(logging.trace).nonlocals['level'] == 3
+        assert inspect.getclosurevars(logging.getLoggerClass().trace).nonlocals['level'] == 3
 
     def test_other_level_name_is_replaced(self) -> None:
         clear_trace()
@@ -196,6 +341,61 @@ class EnsureTraceTest(unittest.TestCase):
         assert logging.getLevelName('TRACE') == 15
         assert logging._nameToLevel['TRACE'] == 15
         assert 'invalid definitions' in captured.getvalue()
+
+
+class DescribeSymbolTest(unittest.TestCase):
+    """describe_symbol() must point at the real implementation and survive odd callables."""
+
+    def test_functools_wraps_wrapper_points_at_the_wrapped_function(self) -> None:
+        namespace: dict[str, Any] = {'__name__': 'fake_third_party'}
+        code = compile('def third_party_trace(*args, **kwargs): pass', 'fake_third_party.py', 'exec')
+        exec(code, namespace)
+        wrapped = namespace['third_party_trace']
+
+        @functools.wraps(wrapped)
+        def wrapper(*args, **kwargs) -> None:
+            pass
+
+        symbol = CustomLogLevel.describe_symbol(wrapper)
+        assert symbol.startswith('fake_third_party.third_party_trace (from ')
+        assert 'test_log_manager.py' in symbol  # The outer wrapper is reported
+        assert symbol.endswith(' -> fake_third_party.third_party_trace (from fake_third_party.py)')
+
+    def test_partial_layers_point_at_the_wrapped_function(self) -> None:
+        def third_party_trace(*args, **kwargs) -> None:
+            pass
+
+        symbol = CustomLogLevel.describe_symbol(functools.partial(functools.partial(third_party_trace)))
+        assert symbol.startswith('functools.partial -> ')
+        assert '.third_party_trace (from ' in symbol
+
+    def test_callable_instance_falls_back_to_its_class(self) -> None:
+        class ThirdPartyTrace:
+            def __call__(self, *args, **kwargs) -> None:
+                pass
+
+        symbol = CustomLogLevel.describe_symbol(ThirdPartyTrace())
+        assert symbol == f'{__name__}.DescribeSymbolTest.test_callable_instance_falls_back_to_its_class.<locals>.ThirdPartyTrace'
+
+    def test_foreign_wrapper_of_own_code_is_still_foreign(self) -> None:
+        own = CustomLogLevel('TRACE', LogManager.TRACE_LEVEL).make_module_method(LogManager.TRACE_LEVEL)
+
+        @functools.wraps(own)
+        def wrapper(*args, **kwargs) -> None:
+            pass
+
+        assert CustomLogLevel.is_own_code(own)
+        assert not CustomLogLevel.is_own_code(wrapper)  # Display-only unwrapping must not blur ownership
+        symbol = CustomLogLevel.describe_symbol(wrapper)
+        assert 'test_log_manager.py' in symbol  # The foreign wrapper is named
+        assert 'log_manager.py' in symbol  # Alongside the own implementation it unwraps to
+
+    def test_malformed_filename_is_not_own_code(self) -> None:
+        class BadCode:
+            co_filename = '\0not-a-path'
+
+        broken = SimpleNamespace(__code__=BadCode())
+        assert not CustomLogLevel.is_own_code(broken)
 
 
 class SetTraceTest(unittest.TestCase):
@@ -229,7 +429,69 @@ class ReInitTest(unittest.TestCase):
     def cleanup(self) -> None:
         self.manager.remove_console_handler()
         self.manager.disable_log_file()
+        # A mocked failing removeHandler can leave a closed handler attached to a shared logger
+        for module in self.old_modules + self.new_modules:
+            for handler in list(module.log.handlers):
+                if isinstance(handler, logging.FileHandler):
+                    module.log.removeHandler(handler)
         shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def test_disable_log_file_closes_the_handler(self) -> None:
+        manager = self.manager
+        manager.init(self.old_modules)
+        manager.log_file_path = self.tmp / 'close.log'
+        manager.enable_log_file()
+        handler = manager.file_handler
+        assert handler is not None
+
+        manager.disable_log_file()
+
+        assert handler.stream is None  # Closed, so the fd and the Windows file lock are released
+
+    def test_failed_enable_detaches_and_closes_the_handler(self) -> None:
+        manager = self.manager
+        manager.init(self.old_modules)
+        manager.log_file_path = self.tmp / 'fail.log'
+        created: list[logging.FileHandler] = []
+        real_handler = logging.FileHandler
+
+        def make_handler(*args, **kwargs) -> logging.FileHandler:
+            handler = real_handler(*args, **kwargs)
+            created.append(handler)
+            return handler
+
+        with mock.patch(
+            'rhubarb_lipsync.rhubarb.log_manager.logging.FileHandler', side_effect=make_handler
+        ), mock.patch.object(self.old_modules[1].log, 'addHandler', side_effect=RuntimeError('boom')):
+            with contextlib.redirect_stdout(io.StringIO()), self.assertRaises(RuntimeError):
+                manager.enable_log_file()
+
+        assert manager.file_handler is None
+        assert created[0].stream is None  # Closed instead of leaked on the failure path
+        for module in self.old_modules:
+            assert not any(isinstance(h, logging.FileHandler) for h in module.log.handlers)
+
+    def test_failed_enable_closes_handler_even_if_detaching_fails(self) -> None:
+        manager = self.manager
+        manager.init(self.old_modules)
+        manager.log_file_path = self.tmp / 'fail_detach.log'
+        created: list[logging.FileHandler] = []
+        real_handler = logging.FileHandler
+
+        def make_handler(*args, **kwargs) -> logging.FileHandler:
+            handler = real_handler(*args, **kwargs)
+            created.append(handler)
+            return handler
+
+        with mock.patch(
+            'rhubarb_lipsync.rhubarb.log_manager.logging.FileHandler', side_effect=make_handler
+        ), mock.patch.object(self.old_modules[1].log, 'addHandler', side_effect=RuntimeError('boom')), mock.patch.object(
+            self.old_modules[0].log, 'removeHandler', side_effect=RuntimeError('detach boom')
+        ), contextlib.redirect_stdout(io.StringIO()), self.assertRaises(RuntimeError):
+            manager.enable_log_file()
+
+        assert manager.file_handler is None
+        assert created[0].stream is None  # A failing detach must not skip the close
 
     def test_first_init_is_silent(self) -> None:
         with contextlib.redirect_stdout(io.StringIO()) as captured:
@@ -253,6 +515,7 @@ class ReInitTest(unittest.TestCase):
         assert 'Removed console handler from 2 loggers' in captured.getvalue()
 
         assert manager.file_handler is None
+        assert old_file_handler.stream is None  # Closed after being detached, so no fd is leaked
         assert all(manager.console_handler not in log.handlers for log in old_logs)
         assert all(old_file_handler not in log.handlers for log in old_logs)
 
@@ -260,6 +523,27 @@ class ReInitTest(unittest.TestCase):
         new_logs = [m.log for m in self.new_modules]
         assert all(manager.console_handler in log.handlers for log in new_logs)
         assert all(manager.console_handler not in log.handlers for log in old_logs)
+
+
+class UnregisterTest(unittest.TestCase):
+    """unregister() must release the log file handler too, not only the console one."""
+
+    def test_unregister_disables_file_logging(self) -> None:
+        manager = mock.MagicMock()
+        patches = mock.patch.multiple(
+            rhubarb_lipsync,
+            IconsManager=mock.MagicMock(),
+            autoloader=mock.MagicMock(),
+            DepsgraphHandler=mock.MagicMock(),
+            logManager=manager,
+            bpy=SimpleNamespace(types=SimpleNamespace(Scene=mock.MagicMock(), Object=mock.MagicMock())),
+            create=True,
+        )
+        with patches, contextlib.redirect_stdout(io.StringIO()):
+            rhubarb_lipsync.unregister()  # Must not raise
+
+        manager.remove_console_handler.assert_called_once_with()
+        manager.disable_log_file.assert_called_once_with()
 
 
 class LogFilePrefTest(unittest.TestCase):
@@ -301,6 +585,17 @@ class LogFilePrefTest(unittest.TestCase):
         assert file_handler is not first_handler  # A new handler for the new set
         assert all(m.log.handlers.count(file_handler) == 1 for m in self.modules)  # Attached exactly once
         assert all(file_handler not in m.log.handlers for m in self.first_modules)  # Old loggers unaffected
+
+    def test_switching_log_file_closes_the_previous_handler(self) -> None:
+        logManager.init(self.modules)
+        self.apply_pref(str(self.tmp / 'a.log'))
+        first_handler = logManager.file_handler
+        assert first_handler is not None
+
+        self.apply_pref(str(self.tmp / 'b.log'))
+
+        assert first_handler.stream is None
+        assert all(first_handler not in m.log.handlers for m in self.modules)
 
     def test_empty_pref_disables_file_logging(self) -> None:
         logManager.init(self.modules)

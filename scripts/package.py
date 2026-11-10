@@ -1,3 +1,4 @@
+import platform
 import re
 import shutil
 import sys
@@ -137,9 +138,18 @@ class PackagePlugin:
 
         return f"https://github.com/Premik/blender_rhubarb_lipsync_ng/releases/download/v{self.version_str}/{zip}"
 
-    def zip_dist(self, platform: str) -> None:
-        """Creates the zip for distribution. Assumes the correct binaries are already deployed in the bin_dir subfolder"""
-        zip = self.dist_zip_path(platform)
+    def clean_dist(self) -> None:
+        """Fail if dist/ contains stale addon zips of another project version."""
+        self.dist_dir.mkdir(parents=True, exist_ok=True)
+        stale = [z for z in self.dist_dir.glob(f"{PackagePlugin.main_package_name}_ng-*.zip") if not z.name.endswith(f"-{self.version_str}.zip")]
+        if stale:
+            raise RuntimeError(f"Stale addon zip(s) in {self.dist_dir}: {[z.name for z in stale]}. Remove or move them away before packaging.")
+
+    def zip_dist(self, b: RhubarbBinary) -> None:
+        """Creates the zip for distribution, ensuring the binary in bin/ matches the platform being packaged."""
+        if not b.is_deployed_to_bin():
+            raise RuntimeError(f"The {b.platform_name} binary is not deployed to {b.bin_dir}. Run scripts/rhubarb_bin.py first.")
+        zip = self.dist_zip_path(b.platform_name)
         # https://stackoverflow.com/questions/1855095/how-to-create-a-zip-archive-of-a-directory#
         print(f"Creating {zip}.")
         shutil.make_archive(str(zip), 'zip', self.project_dir, PackagePlugin.main_package_name)
@@ -151,11 +161,20 @@ if __name__ == '__main__':
     pp.update_version_files()
 
     pp.clean_temp_files()
+    pp.clean_dist()
+    platforms = RhubarbBinary.platforms_by_name(platform_name, rhubarb_cfg)
+    for b in platforms:
+        b.ensure_download()
+        b.verify_download_checksum()
+        b.ensure_unzipped()
     current = RhubarbBinary.currently_deployed_platform(rhubarb_cfg)  # Keep the current platform bin
-    for b in RhubarbBinary.platforms_by_name(platform_name, rhubarb_cfg):
-        if not b.is_deployed_to_bin():
-            b.deploy_to_bin()  # Deploy the correct platform before zipping
-        pp.zip_dist(b.platform_name)
-
-    if current:  # Recover the previously deployed platform, if any
-        current.deploy_to_bin()
+    if current is None:
+        current = next((b for b in RhubarbBinary.all_platforms(rhubarb_cfg) if b.matches_platform(platform.system())), None)
+    try:
+        for b in platforms:
+            if not b.is_deployed_to_bin():
+                b.deploy_to_bin()  # Deploy the correct platform before zipping
+            pp.zip_dist(b)
+    finally:
+        if current:  # Recover the previously deployed platform, if any
+            current.deploy_to_bin()

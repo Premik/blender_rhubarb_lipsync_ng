@@ -62,6 +62,9 @@ Collecting log messages before an issue happens is very useful for further troub
 
 1. [Start Blender with the debug flag from shell/console](#collecting-debug-messages-for-console). This is the only option if the plugin won't install/register.
 1. Set the log verbosity and log file in the addon preferences:
+   - Go to `Main menu/Edit/Preferences/Add-ons`, search for `rh`, and expand the addon preferences.
+   - Set `Log level` to `TRACE` (or `DEBUG`) to get detailed messages. Optionally set a `Log File` path to also write the messages to a file.
+   - File logging is set up while the addon registers. Errors that occur before file logging is successfully set up—including import-time and early registration failures—only appear in the console, so use the console option above for those.
 
 
 
@@ -81,8 +84,9 @@ Sometimes Blender fails to properly remove the addon files when the plugin is un
 To recover, try the following steps:
 - First, make sure the addon is removed and doesn't show up in the addon list in the preferences.
 - Stop Blender.
-- Navigate to the [Blender's user folder](https://docs.blender.org/manual/en/latest/advanced/blender_directory_layout.html) inside your home folder. Then go to the `scripts/addons` subfolder.
-- Inspect the `addons` folder content. If you see any  `rhubarb_lipsync` folder or files, **remove them** completly.
+- Navigate to the [Blender's user folder](https://docs.blender.org/manual/en/latest/advanced/blender_directory_layout.html) inside your home folder.
+- For Blender `4.2`+ extensions, inspect the `extensions` subfolder, typically `extensions/user_default/rhubarb_lipsync`. For legacy addons, inspect `scripts/addons/rhubarb_lipsync`.
+- If you see any `rhubarb_lipsync` folder in either location, **remove it completely**. Do not keep a legacy addon and an extension installation side by side; when both are present, the duplicate copies can clash.
 - You can also easily find the path in the addon preferences page in the `File:` label:
 
 ![Check installed](doc/img/addonPath.png)
@@ -96,18 +100,31 @@ If still no luck, follow the next section and run Blender with a fresh profile.
 
 In some rare circumstances, there could be interference with other add-ons or Blender customizations that might be causing troubles. To rule this possibility out, start Blender with factory settings. This can be done by setting some environment variables to a temporary folder so your original profile can be left intact.
 
-On Windows (Blender newer > `3.5`):
+On Windows (Blender newer than `3.5`), in **Command Prompt (cmd.exe)**:
 
 ```sh
-set BLENDER_USER_RESOURCES=%TEMP%
+set BLENDER_USER_RESOURCES=%TEMP%\blenderFresh
 blender --debug
+```
+
+In **PowerShell**, `set` does not set an environment variable. Use this instead:
+
+```powershell
+$env:BLENDER_USER_RESOURCES="$env:TEMP\blenderFresh"
+& "C:\Program Files\Blender Foundation\Blender 5.2\blender.exe" --debug
+```
+
+Blender must be started from the same console window where the variable was set. Starting it from the Start menu or a desktop shortcut uses your normal profile instead. To verify the fresh profile is active, run this in Blender's Python console and check the path points into the temp folder:
+
+```python
+import bpy; print(bpy.utils.user_resource('CONFIG'))
 ```
 
 On Windows (Blender < `3.6`):
 
 ```sh
-set BLENDER_USER_CONFIG=%TEMP%
-set BLENDER_USER_SCRIPTS=%TEMP%
+set BLENDER_USER_CONFIG=%TEMP%\blenderFresh
+set BLENDER_USER_SCRIPTS=%TEMP%\blenderFresh
 blender --debug
 ```
 
@@ -117,14 +134,14 @@ On Linux/Mac:
 XDG_CONFIG_HOME="/tmp/blenderFresh" blender --debug
 ```
 
-Note you can use any other folder instead of the `TEMP` or `/tmp`.
+Note you can use any other folder instead of `%TEMP%\blenderFresh` or `/tmp/blenderFresh`. Prefer a subfolder as shown above rather than the temp folder itself.
 
 Then install the plugin as usual.
 
 ## Reinstall Blender
 
 This is a last resort if the addon still fails to install/register. There are several other addons which install additional python libraries directly into Blender's python installation using the `pip` command. In some unfortunate situations this could break things to the point where a factory reset won't help and then the easiest remedy is to restore the Blender python installation.
-Note this issue is pretty rare and applies mostly to legacy addons. The new Blender (`v.4.2`+) extension system addresses this issue with better addon isolation and these conflicts should not happen in theory. Note it is still possible to run legacy addons even in the newer Blender.
+The Blender `4.2`+ extension system reduces these conflicts by allowing extensions to bundle their Python dependencies, but extensions still run inside Blender's single Python interpreter. A badly behaving addon or extension can therefore still affect others, for example by modifying global modules such as `logging`. Note it is still possible to run legacy addons even in the newer Blender.
 
 
 ## Collecting Debug Messages for Console
@@ -151,16 +168,18 @@ Modules Installed (rhubarb_lipsync) from 'C:\dist\rhubarb_lipsync_ng-Windows-1.3
 There should be some entries with `RLPS:` in case the addon was installed successfully:
 
 ```sh
+RLPS: enter __init__
+RLPS: exit __init__
 RLPS: enter register()
 RLPS: enter init_loggers()
-Added console handler on 15 loggers.
-RLPS Set TRACE level for 16 loggers
+Added console handler on <N> loggers.
+RLPS Set TRACE level for <N> loggers
 Added console handler on 0 loggers.
 RLPS: exit register()
 Warning: This script was written Blender version 4.0.2 and might not function (correctly), though it is enabled
 ```
 
-The `RLPS: exit register()` indicates the plugin has been successfully registered.
+The exact logger counts depend on the addon version. The `RLPS: exit __init__` line means the addon module was imported, and `RLPS: exit register()` means it registered successfully.
 
 Example of a **useful** traceback/stack trace. The last line indicates the root cause:
 
