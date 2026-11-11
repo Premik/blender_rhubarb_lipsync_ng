@@ -1,5 +1,7 @@
 # Release
 
+Uses the `gh` CLI (authenticated) to watch workflow runs and publish the draft release.
+
 ## Bump the version
 
 - Set `[project].version` in `pyproject.toml`.
@@ -83,3 +85,7 @@ TBD: automate with playwright. Draft checklist:
 - Shop readme is in sync with `README.md`.
 - Release notes for the new version are added.
 - Brief documentation is updated.
+
+## TODO
+
+- Rebuild the docs zip with `scripts/sphinx_build.py` before any **manual** upload (e.g. Superhive/Blender Market). `dist_artifacts.py` only checks that the expected zip names exist; it does not verify that the `release_notes.md` inside is current.

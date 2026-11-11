@@ -57,14 +57,14 @@ jobs:
         run: pytest --junitxml=pytest_junit_results.xml --tb=long
 
       - name: Test Report # https://github.com/dorny/test-reporter/issues/244
-        id: test-report
         uses: phoenix-actions/test-reporting@v16
         if: success() || failure()    # run this step even if previous step failed
+        # step-summary skips the Checks API (no orphaned check runs on flaky 404s);
+        # the pytest step above already fails the job on real test failures.
+        continue-on-error: true
         with:
           name: Pytest results ${{ matrix.os }}
           path: pytest_junit_results.xml
           reporter: java-junit
-
-      - name: Read output variables
-        run: |
-          echo "url is ${{ steps.test-report.outputs.runHtmlUrl }}"
+          output-to: step-summary
+          fail-on-error: false
